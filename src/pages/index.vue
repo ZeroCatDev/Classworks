@@ -1,0 +1,346 @@
+<template>
+  {{ studentList }}<br /><br />{{ homeworkData }}<br /><br />{{ selectedSet }}
+  <v-container class="main-window" fluid>
+    <v-row>
+      <v-col cols="11">
+        <h1>
+          作业
+          <div>{{ dateString }}</div>
+        </h1>
+        <v-container fluid style="padding-left: 2px; padding-right: 2px">
+          <v-row v-for="subjects in homeworkArrange" :key="subjects.name">
+            <v-col
+              v-for="subject in subjects"
+              :key="subject"
+              cols="4"
+              style="padding: 2px !important"
+              @click="openDialog(subject)"
+            >
+              <v-card>
+                <v-card-title>{{ homeworkData[subject].name }}</v-card-title>
+                <v-card-text :style="contentStyle">
+                  <v-list>
+                    <v-list-item
+                      v-for="text in splitPoint(homeworkData[subject].content)"
+                      :key="text"
+                    >
+                      {{ text }}
+                    </v-list-item>
+                  </v-list>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+        <div />
+      </v-col>
+
+      <v-col
+        v-if="studentList.length"
+        class="attendance-area"
+        cols="1"
+        @click="setAttendanceArea"
+      >
+        <h1>出勤</h1>
+        <h2>应到:{{ studentList.length }}人</h2>
+        <h2>实到:{{ studentList.length - selectedSet.size }}人</h2>
+        <h2 style="margin-bottom: 5px">请假:{{ selectedSet.size }} 人</h2>
+        <h3 v-for="(i, index) in selectedSet" :key="index">
+          {{ `${index + 1}. ${studentList[i]}` }}
+        </h3>
+      </v-col>
+    </v-row>
+  </v-container>
+
+  <v-dialog v-model="dialogVisible" width="500" @click:outside="handleClose">
+    <v-card>
+      <v-card-title>{{ dialogTitle }}</v-card-title>
+      <v-card-text>
+        <v-textarea
+          ref="inputRef"
+          v-model="textarea"
+          auto-grow
+          placeholder="使用换行表示分条"
+          rows="5"
+        />
+      </v-card-text>
+    </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="attendDialogVisible" width="800">
+    <v-card>
+      <v-card-title>设置未到学生列表</v-card-title>
+      <v-card-text>
+        <v-container fluid>
+          <v-row>
+            <v-col
+              v-for="(name, i) in studentList"
+              :key="i"
+              cols="12"
+              sm="6"
+              md="4"
+            >
+              <v-card
+                :class="{ selected: selectedSet.has(i) }"
+                variant="outlined"
+                :color="selectedSet.has(i) ? 'primary' : ''"
+                @click="toggleStudent(i)"
+              >
+                <v-card-text>
+                  {{ `${i + 1}. ${name}` }}
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
+
+  <v-container class="upload">
+    <v-btn icon="mdi-plus" variant="text" @click="zoom('up')" />
+    <v-btn icon="mdi-minus" variant="text" @click="zoom('out')" />
+    <v-btn
+      v-if="!synced"
+      color="primary"
+      size="large"
+      :loading="downloadLoading"
+      @click="downloadData"
+    >
+      下载
+    </v-btn>
+    <v-btn
+      v-if="!synced"
+      color="error"
+      size="large"
+      :loading="uploadLoading"
+      class="ml-2"
+      @click="uploadData"
+    >
+      上传
+    </v-btn>
+    <v-btn v-else color="success" size="large" @click="showSyncMessage">
+      同步完成
+    </v-btn>
+  </v-container>
+</template>
+
+<script>
+import axios from "axios";
+import { useDisplay } from "vuetify";
+
+export default {
+  name: "HomeworkBoard",
+
+  data() {
+    return {
+      backurl: "http://localhost:3030",
+      currentEditSubject: null,
+      studentList: ["加载中"],
+      selectedSet: new Set(),
+      dialogVisible: false,
+      dialogTitle: "",
+      textarea: "",
+      dateString: "",
+      synced: false,
+      attendDialogVisible: false,
+      contentStyle: { "font-size": "28px" },
+      uploadLoading: false,
+      downloadLoading: false,
+      homeworkData: {},
+      homeworkArrange: [[], []],
+      snackbar: false,
+      snackbarText: "",
+      fontSize: 28,
+    };
+  },
+
+  computed: {
+    isMobile() {
+      return useDisplay().mobile.value;
+    },
+  },
+
+  async mounted() {
+    try {
+      await this.initializeData();
+    } catch (err) {
+      console.error("初始化失败:", err);
+      this.showError("初始化失败，请刷新页面重试");
+    }
+  },
+
+  methods: {
+    async initializeData() {
+      const res = await axios.get(this.backurl + "/config");
+      this.studentList = res.data.studentList;
+      this.homeworkArrange = res.data.homeworkArrange;
+
+      this.initializeHomeworkData();
+      this.setCurrentDate();
+      await this.downloadDataDirectly();
+    },
+
+    initializeHomeworkData() {
+      this.homeworkArrange.forEach((subjects) => {
+        subjects.forEach((subject) => {
+          this.homeworkData[subject] = {
+            name: subject,
+            content: "",
+          };
+        });
+      });
+    },
+
+    setCurrentDate() {
+      const today = new Date();
+      this.dateString = today.toISOString().split("T")[0];
+    },
+
+    handleClose() {
+      if (this.currentEditSubject) {
+        this.homeworkData[this.currentEditSubject].content = this.textarea;
+        this.synced = false;
+      }
+      this.dialogVisible = false;
+    },
+
+    showSyncMessage() {
+      this.snackbar = true;
+      this.snackbarText = "数据已完成与服务器同步";
+    },
+
+    showError(message) {
+      this.snackbar = true;
+      this.snackbarText = message;
+    },
+
+    openDialog(subject) {
+      this.currentEditSubject = subject;
+      this.dialogTitle = this.homeworkData[subject].name;
+      this.textarea = this.homeworkData[subject].content;
+      this.dialogVisible = true;
+
+      // 在下一个 tick 后聚焦输入框
+      this.$nextTick(() => {
+        if (this.$refs.inputRef) {
+          this.$refs.inputRef.focus();
+        }
+      });
+    },
+
+    splitPoint(content) {
+      return content.split("\n").filter((text) => text.trim());
+    },
+
+    setAttendanceArea() {
+      this.attendDialogVisible = true;
+    },
+
+    toggleStudent(index) {
+      if (this.selectedSet.has(index)) {
+        this.selectedSet.delete(index);
+      } else {
+        this.selectedSet.add(index);
+      }
+      this.synced = false;
+    },
+
+    zoom(direction) {
+      const step = 2;
+      if (direction === "up" && this.fontSize < 100) {
+        this.fontSize += step;
+      } else if (direction === "out" && this.fontSize > 16) {
+        this.fontSize -= step;
+      }
+      this.contentStyle = {
+        "font-size": `${this.fontSize}px`,
+      };
+    },
+
+    async uploadData() {
+      try {
+        this.uploadLoading = true;
+        await axios.post(this.backurl + "/upload", {
+          date: this.dateString,
+          data: this.homeworkData,
+          attendance: Array.from(this.selectedSet),
+        });
+        this.synced = true;
+        this.showSyncMessage();
+      } catch (err) {
+        console.error("上传失败:", err);
+        this.showError("上传失败，请重试");
+      } finally {
+        this.uploadLoading = false;
+      }
+    },
+
+    async downloadData() {
+      try {
+        this.downloadLoading = true;
+        await this.downloadDataDirectly();
+      } catch (err) {
+        console.error("下载失败:", err);
+        this.showError("下载失败，请重试");
+      } finally {
+        this.downloadLoading = false;
+      }
+    },
+
+    async downloadDataDirectly() {
+      const res = await axios.get(
+        this.backurl + "/download?date=" + this.dateString
+      );
+      this.homeworkData = res.data.data || this.homeworkData;
+
+      const subjectOrder = [
+        "语文",
+        "数学",
+        "英语",
+        "物理",
+        "化学",
+        "生物",
+        "政治",
+        "历史",
+        "地理",
+        "其他",
+      ];
+      // 1. 将对象转换成数组，方便排序
+      let sortedSubjects = Object.keys(this.homeworkData).map((key) => ({
+        key,
+        ...this.homeworkData[key],
+      }));
+
+      // 2. 按照指定的顺序排序
+      sortedSubjects.sort((a, b) => {
+        const indexA = subjectOrder.indexOf(a.key);
+        const indexB = subjectOrder.indexOf(b.key);
+
+        // 优先根据学科顺序排序
+        if (indexA !== indexB) {
+          return indexA - indexB;
+        }
+
+        return 0;
+      });
+
+      // 3. 进一步排序：将 content 为空的项移动到最后
+      sortedSubjects = [
+        // 先放置有 content 的项
+        ...sortedSubjects.filter((item) => item.content != ""),
+        // 再放置 content 为空的项
+        ...sortedSubjects.filter((item) => item.content == ""),
+      ];
+
+      // 4. 将排序后的数组转换回对象
+      this.homeworkData = sortedSubjects.reduce((acc, curr) => {
+        acc[curr.key] = { name: curr.name, content: curr.content };
+        return acc;
+      }, {});
+      this.selectedSet = new Set(res.data.attendance || []);
+      this.synced = true;
+    },
+  },
+};
+</script>
