@@ -1,5 +1,4 @@
 <template>
-  {{ studentList }}<br /><br />{{ homeworkData }}<br /><br />{{ selectedSet }}
   <v-container class="main-window" fluid>
     <v-row>
       <v-col cols="11">
@@ -134,7 +133,7 @@ export default {
 
   data() {
     return {
-      backurl: "http://localhost:3030",
+      backurl: import.meta.env.VITE_BACKURL,
       currentEditSubject: null,
       studentList: ["加载中"],
       selectedSet: new Set(),
@@ -193,8 +192,12 @@ export default {
     },
 
     setCurrentDate() {
-      const today = new Date();
-      this.dateString = today.toISOString().split("T")[0];
+      if (this.$route.query.date) {
+        this.dateString = this.$route.query.date;
+      } else {
+        const today = new Date();
+        this.dateString = today.toISOString().split("T")[0];
+      }
     },
 
     handleClose() {
