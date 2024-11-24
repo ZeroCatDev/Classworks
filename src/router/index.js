@@ -34,13 +34,3 @@ router.isReady().then(() => {
 })
 
 export default router
-
-import ServerSelection from '@/pages/ServerSelection.vue'
-
-const routes = [
-  {
-    path: '/server-selection',
-    name: 'ServerSelection',
-    component: ServerSelection,
-  },
-]
