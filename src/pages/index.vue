@@ -1,7 +1,7 @@
 <template>
   <v-app-bar>
     <template #prepend>
-      <v-app-bar-nav-icon icon="mdi-home"/>
+      <v-app-bar-nav-icon icon="mdi-home" />
     </template>
 
     <v-app-bar-title>
@@ -28,7 +28,7 @@
               style="padding: 2px !important"
               @click="openDialog(subject)"
             >
-              <v-card>
+              <v-card border>
                 <v-card-title>{{ homeworkData[subject].name }}</v-card-title>
                 <v-card-text :style="contentStyle">
                   <v-list>
@@ -47,6 +47,7 @@
         <div />
       </v-col>
 
+
       <v-col
         v-if="studentList.length"
         class="attendance-area"
@@ -55,15 +56,21 @@
       >
         <h1>出勤</h1>
         <h2>应到:{{ studentList.length }}人</h2>
-        <h2>实到:{{ studentList.length - selectedSet.size }}人</h2>
-        <h2 style="margin-bottom: 5px">请假:{{ selectedSet.size }} 人</h2>
-        <h3 v-for="(i, index) in selectedSet" :key="index">
+        <h2>
+          实到:{{ studentList.length - selectedSet.size - lateSet.size }}人
+        </h2>
+        <h2>请假:{{ selectedSet.size }} 人</h2>
+        <h3 v-for="(i, index) in selectedSet" :key="'absent-' + index">
+          {{ `${index + 1}. ${studentList[i]}` }}
+        </h3>
+        <h2>迟到:{{ lateSet.size }} 人</h2>
+
+        <h3 v-for="(i, index) in lateSet" :key="'late-' + index">
           {{ `${index + 1}. ${studentList[i]}` }}
         </h3>
       </v-col>
     </v-row>
   </v-container>
-
   <v-container fluid>
     <v-btn icon="mdi-plus" variant="text" @click="zoom('up')" />
     <v-btn icon="mdi-minus" variant="text" @click="zoom('out')" />
@@ -91,8 +98,9 @@
     </v-btn>
   </v-container>
   <v-dialog v-model="dialogVisible" width="500" @click:outside="handleClose">
-    <v-card>
+    <v-card border>
       <v-card-title>{{ dialogTitle }}</v-card-title>
+      <v-card-subtitle>写完后点击上传谢谢喵</v-card-subtitle>
       <v-card-text>
         <v-textarea
           ref="inputRef"
@@ -107,8 +115,8 @@
 
   <v-dialog v-model="attendDialogVisible" width="800">
     <v-card>
-      <v-card-title>设置未到学生列表</v-card-title>
-      <v-card-text>
+      <v-card-title>设置学生出勤状态</v-card-title>
+      <v-card-text><v-btn @click="cleanstudentslist">全勤</v-btn>
         <v-container fluid>
           <v-row>
             <v-col
@@ -119,10 +127,16 @@
               md="4"
             >
               <v-card
-                :class="{ selected: selectedSet.has(i) }"
-                variant="outlined"
-                :color="selectedSet.has(i) ? 'primary' : ''"
-                @click="toggleStudent(i)"
+                border
+                :class="{ selected: selectedSet.has(i) || lateSet.has(i) }"
+                :color="
+                  selectedSet.has(i)
+                    ? 'primary'
+                    : lateSet.has(i)
+                    ? 'orange'
+                    : ''
+                "
+                @click="toggleStudentStatus(i)"
               >
                 <v-card-text>
                   {{ `${i + 1}. ${name}` }}
@@ -134,6 +148,7 @@
       </v-card-text>
     </v-card>
   </v-dialog>
+
   <v-dialog v-model="ServerSelectionDialog" width="500">
     <ServerSelection />
   </v-dialog>
@@ -147,6 +162,7 @@
 import axios from "axios";
 import { useDisplay } from "vuetify";
 import ServerSelection from "../components/ServerSelection.vue";
+
 export default {
   name: "HomeworkBoard",
   components: { ServerSelection },
@@ -155,7 +171,8 @@ export default {
       backurl: localStorage.getItem("backendServerUrl") || "",
       currentEditSubject: null,
       studentList: ["加载中"],
-      selectedSet: new Set(),
+      selectedSet: new Set(), // Absent students
+      lateSet: new Set(), // Late students
       dialogVisible: false,
       dialogTitle: "",
       textarea: "",
@@ -194,6 +211,7 @@ export default {
     async initializeData() {
       const res = await axios.get(this.backurl + "/config.json");
       this.studentList = res.data.studentList;
+      localStorage.setItem("studentList", res.data.studentList);
       this.homeworkArrange = res.data.homeworkArrange;
 
       this.initializeHomeworkData();
@@ -261,15 +279,24 @@ export default {
       this.attendDialogVisible = true;
     },
 
-    toggleStudent(index) {
+    toggleStudentStatus(index) {
       if (this.selectedSet.has(index)) {
         this.selectedSet.delete(index);
+        this.lateSet.add(index); // Toggle to late
+      } else if (this.lateSet.has(index)) {
+        this.lateSet.delete(index);
       } else {
-        this.selectedSet.add(index);
+        this.selectedSet.add(index); // Toggle to late
       }
       this.synced = false;
     },
+    cleanstudentslist()
+    {
+      this.selectedSet.clear();
+      this.lateSet.clear();
+      this.synced = false;
 
+    },
     zoom(direction) {
       const step = 2;
       if (direction === "up" && this.fontSize < 100) {
@@ -289,6 +316,7 @@ export default {
           date: this.dateString,
           data: this.homeworkData,
           attendance: Array.from(this.selectedSet),
+          late: Array.from(this.lateSet), // Upload late students as well
         });
         this.synced = true;
         this.showSyncMessage();
@@ -363,6 +391,7 @@ export default {
         return acc;
       }, {});
       this.selectedSet = new Set(res.data.attendance || []);
+      this.lateSet = new Set(res.data.late || []); // Initialize late set
       this.synced = true;
     },
 
