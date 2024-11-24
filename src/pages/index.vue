@@ -1,11 +1,24 @@
 <template>
+  <v-app-bar>
+    <template #prepend>
+      <v-app-bar-nav-icon icon="mdi-home"/>
+    </template>
+
+    <v-app-bar-title>
+      <strong>{{ dateString }}</strong> 作业
+    </v-app-bar-title>
+
+    <v-spacer />
+
+    <v-btn
+      icon="mdi-cog"
+      variant="text"
+      @click="ServerSelectionDialog = true"
+    />
+  </v-app-bar>
   <v-container class="main-window" fluid>
     <v-row>
       <v-col cols="11">
-        <h1>
-          作业
-          <div>{{ dateString }}</div>
-        </h1>
         <v-container fluid style="padding-left: 2px; padding-right: 2px">
           <v-row v-for="subjects in homeworkArrange" :key="subjects.name">
             <v-col
@@ -51,6 +64,32 @@
     </v-row>
   </v-container>
 
+  <v-container fluid>
+    <v-btn icon="mdi-plus" variant="text" @click="zoom('up')" />
+    <v-btn icon="mdi-minus" variant="text" @click="zoom('out')" />
+    <v-btn
+      v-if="!synced"
+      color="primary"
+      size="large"
+      :loading="downloadLoading"
+      @click="downloadData"
+    >
+      下载
+    </v-btn>
+    <v-btn
+      v-if="!synced"
+      color="error"
+      size="large"
+      :loading="uploadLoading"
+      class="ml-2"
+      @click="uploadData"
+    >
+      上传
+    </v-btn>
+    <v-btn v-else color="success" size="large" @click="showSyncMessage">
+      同步完成
+    </v-btn>
+  </v-container>
   <v-dialog v-model="dialogVisible" width="500" @click:outside="handleClose">
     <v-card>
       <v-card-title>{{ dialogTitle }}</v-card-title>
@@ -95,45 +134,25 @@
       </v-card-text>
     </v-card>
   </v-dialog>
+  <v-dialog v-model="ServerSelectionDialog" width="500">
+    <ServerSelection />
+  </v-dialog>
 
-  <v-container class="upload">
-    <v-btn icon="mdi-plus" variant="text" @click="zoom('up')" />
-    <v-btn icon="mdi-minus" variant="text" @click="zoom('out')" />
-    <v-btn
-      v-if="!synced"
-      color="primary"
-      size="large"
-      :loading="downloadLoading"
-      @click="downloadData"
-    >
-      下载
-    </v-btn>
-    <v-btn
-      v-if="!synced"
-      color="error"
-      size="large"
-      :loading="uploadLoading"
-      class="ml-2"
-      @click="uploadData"
-    >
-      上传
-    </v-btn>
-    <v-btn v-else color="success" size="large" @click="showSyncMessage">
-      同步完成
-    </v-btn>
-  </v-container>
+  <v-snackbar v-model="snackbar" :timeout="2000">
+    {{ snackbarText }}
+  </v-snackbar>
 </template>
 
 <script>
 import axios from "axios";
 import { useDisplay } from "vuetify";
-
+import ServerSelection from "../components/ServerSelection.vue";
 export default {
   name: "HomeworkBoard",
-
+  components: { ServerSelection },
   data() {
     return {
-      backurl: import.meta.env.VITE_BACKURL,
+      backurl: localStorage.getItem("backendServerUrl") || "",
       currentEditSubject: null,
       studentList: ["加载中"],
       selectedSet: new Set(),
@@ -151,6 +170,7 @@ export default {
       snackbar: false,
       snackbarText: "",
       fontSize: 28,
+      ServerSelectionDialog: false,
     };
   },
 
@@ -162,6 +182,7 @@ export default {
 
   async mounted() {
     try {
+      this.updateBackendUrl();
       await this.initializeData();
     } catch (err) {
       console.error("初始化失败:", err);
@@ -171,7 +192,7 @@ export default {
 
   methods: {
     async initializeData() {
-      const res = await axios.get(this.backurl + "/config");
+      const res = await axios.get(this.backurl + "/config.json");
       this.studentList = res.data.studentList;
       this.homeworkArrange = res.data.homeworkArrange;
 
@@ -343,6 +364,13 @@ export default {
       }, {});
       this.selectedSet = new Set(res.data.attendance || []);
       this.synced = true;
+    },
+
+    updateBackendUrl() {
+      const savedUrl = localStorage.getItem("backendServerUrl");
+      if (savedUrl) {
+        this.backurl = savedUrl;
+      }
     },
   },
 };
