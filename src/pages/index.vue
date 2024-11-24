@@ -16,11 +16,20 @@
       @click="ServerSelectionDialog = true"
     />
   </v-app-bar>
-  <v-container class="main-window" fluid>
+  <v-container
+    class="main-window"
+    fluid
+  >
     <v-row>
       <v-col cols="11">
-        <v-container fluid style="padding-left: 2px; padding-right: 2px">
-          <v-row v-for="subjects in homeworkArrange" :key="subjects.name">
+        <v-container
+          fluid
+          style="padding-left: 2px; padding-right: 2px"
+        >
+          <v-row
+            v-for="subjects in homeworkArrange"
+            :key="subjects.name"
+          >
             <v-col
               v-for="subject in subjects"
               :key="subject"
@@ -60,20 +69,34 @@
           实到:{{ studentList.length - selectedSet.size - lateSet.size }}人
         </h2>
         <h2>请假:{{ selectedSet.size }} 人</h2>
-        <h3 v-for="(i, index) in selectedSet" :key="'absent-' + index">
+        <h3
+          v-for="(i, index) in selectedSet"
+          :key="'absent-' + index"
+        >
           {{ `${index + 1}. ${studentList[i]}` }}
         </h3>
         <h2>迟到:{{ lateSet.size }} 人</h2>
 
-        <h3 v-for="(i, index) in lateSet" :key="'late-' + index">
+        <h3
+          v-for="(i, index) in lateSet"
+          :key="'late-' + index"
+        >
           {{ `${index + 1}. ${studentList[i]}` }}
         </h3>
       </v-col>
     </v-row>
   </v-container>
   <v-container fluid>
-    <v-btn icon="mdi-plus" variant="text" @click="zoom('up')" />
-    <v-btn icon="mdi-minus" variant="text" @click="zoom('out')" />
+    <v-btn
+      icon="mdi-plus"
+      variant="text"
+      @click="zoom('up')"
+    />
+    <v-btn
+      icon="mdi-minus"
+      variant="text"
+      @click="zoom('out')"
+    />
     <v-btn
       v-if="!synced"
       color="primary"
@@ -93,11 +116,20 @@
     >
       上传
     </v-btn>
-    <v-btn v-else color="success" size="large" @click="showSyncMessage">
+    <v-btn
+      v-else
+      color="success"
+      size="large"
+      @click="showSyncMessage"
+    >
       同步完成
     </v-btn>
   </v-container>
-  <v-dialog v-model="dialogVisible" width="500" @click:outside="handleClose">
+  <v-dialog
+    v-model="dialogVisible"
+    width="500"
+    @click:outside="handleClose"
+  >
     <v-card border>
       <v-card-title>{{ dialogTitle }}</v-card-title>
       <v-card-subtitle>写完后点击上传谢谢喵</v-card-subtitle>
@@ -113,10 +145,16 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="attendDialogVisible" width="800">
+  <v-dialog
+    v-model="attendDialogVisible"
+    width="800"
+  >
     <v-card>
       <v-card-title>设置学生出勤状态</v-card-title>
-      <v-card-text><v-btn @click="cleanstudentslist">全勤</v-btn>
+      <v-card-text>
+        <v-btn @click="cleanstudentslist">
+          全勤
+        </v-btn>
         <v-container fluid>
           <v-row>
             <v-col
@@ -133,8 +171,8 @@
                   selectedSet.has(i)
                     ? 'primary'
                     : lateSet.has(i)
-                    ? 'orange'
-                    : ''
+                      ? 'orange'
+                      : ''
                 "
                 @click="toggleStudentStatus(i)"
               >
@@ -149,11 +187,17 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="ServerSelectionDialog" width="500">
+  <v-dialog
+    v-model="ServerSelectionDialog"
+    width="500"
+  >
     <ServerSelection />
   </v-dialog>
 
-  <v-snackbar v-model="snackbar" :timeout="2000">
+  <v-snackbar
+    v-model="snackbar"
+    :timeout="2000"
+  >
     {{ snackbarText }}
   </v-snackbar>
 </template>
