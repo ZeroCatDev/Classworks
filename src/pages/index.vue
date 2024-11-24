@@ -133,7 +133,7 @@ export default {
 
   data() {
     return {
-      backurl: import.meta.env.VITE_BACKURL,
+      backurl: localStorage.getItem('backendServerUrl') || '',
       currentEditSubject: null,
       studentList: ["加载中"],
       selectedSet: new Set(),
@@ -162,6 +162,7 @@ export default {
 
   async mounted() {
     try {
+      this.updateBackendUrl();
       await this.initializeData();
     } catch (err) {
       console.error("初始化失败:", err);
@@ -343,6 +344,13 @@ export default {
       }, {});
       this.selectedSet = new Set(res.data.attendance || []);
       this.synced = true;
+    },
+
+    updateBackendUrl() {
+      const savedUrl = localStorage.getItem('backendServerUrl');
+      if (savedUrl) {
+        this.backurl = savedUrl;
+      }
     },
   },
 };
