@@ -367,9 +367,6 @@ export default {
     },
 
     updateBackendUrl() {
-      if (!this.backurl) {
-       // localStorage.setItem("backendServerUrl", import.meta.env.VITE_BACKURL);
-      }
       const savedUrl = localStorage.getItem("backendServerUrl");
       if (savedUrl) {
         this.backurl = savedUrl;
