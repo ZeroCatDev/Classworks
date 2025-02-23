@@ -12,10 +12,34 @@
 
     <template #append>
       <v-btn
-        icon="mdi-calendar"
+        icon="mdi-format-font-size-decrease"
         variant="text"
-        @click="datePickerDialog = true"
+        @click="zoom('out')"
       />
+      <v-btn
+        icon="mdi-format-font-size-increase"
+        variant="text"
+        @click="zoom('up')"
+      />
+      <v-menu
+        v-model="datePickerDialog"
+        :close-on-content-click="false"
+
+      >
+        <template v-slot:activator="{ props }">
+          <v-btn
+            icon="mdi-calendar"
+            variant="text"
+            v-bind="props"
+          />
+        </template>
+
+        <v-date-picker
+          v-model="selectedDate"
+          color="primary"
+          @update:model-value="handleDateSelect"
+        />
+      </v-menu>
       <v-btn
         icon="mdi-refresh"
         variant="text"
@@ -101,25 +125,6 @@
   </v-container>
   <v-container fluid>
     <v-btn
-      icon="mdi-plus"
-      variant="text"
-      @click="zoom('up')"
-    />
-    <v-btn
-      icon="mdi-minus"
-      variant="text"
-      @click="zoom('out')"
-    />
-    <v-btn
-      v-if="!synced"
-      color="primary"
-      size="large"
-      :loading="downloadLoading"
-      @click="downloadData"
-    >
-      下载
-    </v-btn>
-    <v-btn
       v-if="!synced"
       color="error"
       size="large"
@@ -200,33 +205,12 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog
-    v-model="ServerSelectionDialog"
-    width="500"
-  >
-    <ServerSelection />
-  </v-dialog>
-
   <v-snackbar
     v-model="snackbar"
     :timeout="2000"
   >
     {{ snackbarText }}
   </v-snackbar>
-
-  <v-dialog v-model="datePickerDialog" width="auto">
-    <v-card>
-      <v-card-title>选择日期</v-card-title>
-      <v-card-text>
-        <v-date-picker v-model="selectedDate" />
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn color="primary" @click="goToDate">确定</v-btn>
-        <v-btn @click="datePickerDialog = false">取消</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
 </template>
 
 <script>
@@ -256,11 +240,12 @@ export default {
       homeworkArrange: [[], []],
       snackbar: false,
       snackbarText: "",
-      fontSize: 28,
-      ServerSelectionDialog: false,
+      fontSize: parseInt(localStorage.getItem('fontSize')) || 28,
       datePickerDialog: false,
       selectedDate: null,
       refreshInterval: null,
+      autoSave: false,
+      refreshBeforeEdit: false,
     };
   },
 
@@ -269,12 +254,19 @@ export default {
       return useDisplay().mobile.value;
     },
     titleText() {
-      const today = new Date().toISOString().split('T')[0];
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const today = `${year}-${month}-${day}`;
+
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayFormatted = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
       
       if (this.dateString === today) {
         return '今天的作业';
-      } else if (this.dateString === yesterday) {
+      } else if (this.dateString === yesterdayFormatted) {
         return '昨天的作业';
       } else {
         return `${this.dateString}的作业`;
@@ -287,6 +279,8 @@ export default {
       this.updateBackendUrl();
       await this.initializeData();
       this.setupAutoRefresh();
+      this.autoSave = localStorage.getItem('autoSave') === 'true';
+      this.refreshBeforeEdit = localStorage.getItem('refreshBeforeEdit') === 'true';
     } catch (err) {
       console.error("初始化失败:", err);
       this.showError("初始化失败，请刷新页面重试");
@@ -318,21 +312,30 @@ export default {
 
     setCurrentDate() {
       if (this.$route.query.date) {
-        // 验证并格式化路由中的日期
         try {
           const date = new Date(this.$route.query.date);
           if (isNaN(date.getTime())) {
             throw new Error('Invalid date');
           }
-          this.dateString = date.toISOString().split('T')[0];
+          // 使用本地时区格式化日期
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          this.dateString = `${year}-${month}-${day}`;
         } catch (e) {
           // 如果日期无效，使用今天的日期
           const today = new Date();
-          this.dateString = today.toISOString().split('T')[0];
+          const year = today.getFullYear();
+          const month = String(today.getMonth() + 1).padStart(2, '0');
+          const day = String(today.getDate()).padStart(2, '0');
+          this.dateString = `${year}-${month}-${day}`;
         }
       } else {
         const today = new Date();
-        this.dateString = today.toISOString().split('T')[0];
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        this.dateString = `${year}-${month}-${day}`;
       }
     },
 
@@ -340,6 +343,11 @@ export default {
       if (this.currentEditSubject) {
         this.homeworkData[this.currentEditSubject].content = this.textarea;
         this.synced = false;
+        
+        // 如果启用了自动保存，关闭对话框时自动上传
+        if (this.autoSave) {
+          this.uploadData();
+        }
       }
       this.dialogVisible = false;
     },
@@ -354,7 +362,16 @@ export default {
       this.snackbarText = message;
     },
 
-    openDialog(subject) {
+    async openDialog(subject) {
+      // 如果启用了编辑前刷新，先刷新数据
+      if (this.refreshBeforeEdit) {
+        try {
+          await this.downloadData();
+        } catch (err) {
+          this.showError("刷新数据失败，可能显示的不是最新数据");
+        }
+      }
+
       this.currentEditSubject = subject;
       this.dialogTitle = this.homeworkData[subject].name;
       this.textarea = this.homeworkData[subject].content;
@@ -379,13 +396,18 @@ export default {
     toggleStudentStatus(index) {
       if (this.selectedSet.has(index)) {
         this.selectedSet.delete(index);
-        this.lateSet.add(index); // Toggle to late
+        this.lateSet.add(index);
       } else if (this.lateSet.has(index)) {
         this.lateSet.delete(index);
       } else {
-        this.selectedSet.add(index); // Toggle to late
+        this.selectedSet.add(index);
       }
       this.synced = false;
+      
+      // 如果启用了自动保存，状态改变时自动上传
+      if (this.autoSave) {
+        this.uploadData();
+      }
     },
     cleanstudentslist()
     {
@@ -393,6 +415,10 @@ export default {
       this.lateSet.clear();
       this.synced = false;
 
+      // 如果启用了自动保存，清空后自动上传
+      if (this.autoSave) {
+        this.uploadData();
+      }
     },
     zoom(direction) {
       const step = 2;
@@ -404,9 +430,12 @@ export default {
       this.contentStyle = {
         "font-size": `${this.fontSize}px`,
       };
+      localStorage.setItem('fontSize', this.fontSize.toString());
     },
 
     async uploadData() {
+      if (this.uploadLoading) return; // 防止重复上传
+      
       try {
         this.uploadLoading = true;
         await axios.post(`${this.backurl}/homework`, {
@@ -514,12 +543,17 @@ export default {
       }
     },
 
-    goToDate() {
-      if (this.selectedDate) {
-        const formattedDate = new Date(this.selectedDate).toISOString().split('T')[0];
+    handleDateSelect(newDate) {
+      if (newDate) {
+        // 使用本地时区处理日期，避免时区偏移
+        const date = new Date(newDate);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
+        
         this.dateString = formattedDate;
         this.$router.push(`/?date=${formattedDate}`);
-        this.datePickerDialog = false;
         this.downloadData();
       }
     },
