@@ -103,7 +103,7 @@
         <h1>出勤</h1>
         <h2>应到:{{ studentList.length }}人</h2>
         <h2>
-          实到:{{ studentList.length - selectedSet.size - lateSet.size }}人
+          实到:{{ studentList.length - selectedSet.size }}人
         </h2>
         <h2>请假:{{ selectedSet.size }} 人</h2>
         <h3
