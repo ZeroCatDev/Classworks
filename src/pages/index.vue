@@ -5,16 +5,29 @@
     </template>
 
     <v-app-bar-title>
-      <strong>{{ dateString }}</strong> 作业
+      {{ classNumber }}班 - {{ titleText }}
     </v-app-bar-title>
 
     <v-spacer />
 
-    <v-btn
-      icon="mdi-cog"
-      variant="text"
-      @click="ServerSelectionDialog = true"
-    />
+    <template #append>
+      <v-btn
+        icon="mdi-calendar"
+        variant="text"
+        @click="datePickerDialog = true"
+      />
+      <v-btn
+        icon="mdi-refresh"
+        variant="text"
+        :loading="downloadLoading"
+        @click="downloadData"
+      />
+      <v-btn
+        icon="mdi-cog"
+        variant="text"
+        @click="$router.push('/settings')"
+      />
+    </template>
   </v-app-bar>
   <v-container
     class="main-window"
@@ -200,19 +213,32 @@
   >
     {{ snackbarText }}
   </v-snackbar>
+
+  <v-dialog v-model="datePickerDialog" width="auto">
+    <v-card>
+      <v-card-title>选择日期</v-card-title>
+      <v-card-text>
+        <v-date-picker v-model="selectedDate" />
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn color="primary" @click="goToDate">确定</v-btn>
+        <v-btn @click="datePickerDialog = false">取消</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
 import axios from "axios";
 import { useDisplay } from "vuetify";
-import ServerSelection from "../components/ServerSelection.vue";
 
 export default {
   name: "HomeworkBoard",
-  components: { ServerSelection },
   data() {
     return {
-      backurl: localStorage.getItem("backendServerUrl") || "",
+      backurl: '',
+      classNumber: '',
       currentEditSubject: null,
       studentList: ["加载中"],
       selectedSet: new Set(), // Absent students
@@ -232,6 +258,9 @@ export default {
       snackbarText: "",
       fontSize: 28,
       ServerSelectionDialog: false,
+      datePickerDialog: false,
+      selectedDate: null,
+      refreshInterval: null,
     };
   },
 
@@ -239,12 +268,25 @@ export default {
     isMobile() {
       return useDisplay().mobile.value;
     },
+    titleText() {
+      const today = new Date().toISOString().split('T')[0];
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      
+      if (this.dateString === today) {
+        return '今天的作业';
+      } else if (this.dateString === yesterday) {
+        return '昨天的作业';
+      } else {
+        return `${this.dateString}的作业`;
+      }
+    },
   },
 
   async mounted() {
     try {
       this.updateBackendUrl();
       await this.initializeData();
+      this.setupAutoRefresh();
     } catch (err) {
       console.error("初始化失败:", err);
       this.showError("初始化失败，请刷新页面重试");
@@ -253,7 +295,7 @@ export default {
 
   methods: {
     async initializeData() {
-      const res = await axios.get(this.backurl + "/config.json");
+      const res = await axios.get(`${this.backurl}/config`);
       this.studentList = res.data.studentList;
       localStorage.setItem("studentList", res.data.studentList);
       this.homeworkArrange = res.data.homeworkArrange;
@@ -276,10 +318,21 @@ export default {
 
     setCurrentDate() {
       if (this.$route.query.date) {
-        this.dateString = this.$route.query.date;
+        // 验证并格式化路由中的日期
+        try {
+          const date = new Date(this.$route.query.date);
+          if (isNaN(date.getTime())) {
+            throw new Error('Invalid date');
+          }
+          this.dateString = date.toISOString().split('T')[0];
+        } catch (e) {
+          // 如果日期无效，使用今天的日期
+          const today = new Date();
+          this.dateString = today.toISOString().split('T')[0];
+        }
       } else {
         const today = new Date();
-        this.dateString = today.toISOString().split("T")[0];
+        this.dateString = today.toISOString().split('T')[0];
       }
     },
 
@@ -356,11 +409,11 @@ export default {
     async uploadData() {
       try {
         this.uploadLoading = true;
-        await axios.post(this.backurl + "/upload", {
-          date: this.dateString,
+        await axios.post(`${this.backurl}/homework`, {
+          date: new Date(this.dateString).toISOString().split('T')[0],
           data: this.homeworkData,
           attendance: Array.from(this.selectedSet),
-          late: Array.from(this.lateSet), // Upload late students as well
+          late: Array.from(this.lateSet),
         });
         this.synced = true;
         this.showSyncMessage();
@@ -385,8 +438,9 @@ export default {
     },
 
     async downloadDataDirectly() {
+      const formattedDate = new Date(this.dateString).toISOString().split('T')[0];
       const res = await axios.get(
-        this.backurl + "/download?date=" + this.dateString
+        `${this.backurl}/homework?date=${formattedDate}`
       );
       this.homeworkData = res.data.data || this.homeworkData;
 
@@ -440,9 +494,39 @@ export default {
     },
 
     updateBackendUrl() {
-      const savedUrl = localStorage.getItem("backendServerUrl");
-      if (savedUrl) {
-        this.backurl = savedUrl;
+      const domain = localStorage.getItem('backendServerDomain');
+      const classNum = localStorage.getItem('classNumber');
+      
+      if (domain && classNum) {
+        this.backurl = `${domain}/${classNum}`;
+        this.classNumber = classNum;
+      }
+    },
+
+    setupAutoRefresh() {
+      const autoRefresh = localStorage.getItem('autoRefresh') === 'true';
+      const interval = parseInt(localStorage.getItem('refreshInterval')) || 300;
+      
+      if (autoRefresh) {
+        this.refreshInterval = setInterval(() => {
+          this.downloadData();
+        }, interval * 1000);
+      }
+    },
+
+    goToDate() {
+      if (this.selectedDate) {
+        const formattedDate = new Date(this.selectedDate).toISOString().split('T')[0];
+        this.dateString = formattedDate;
+        this.$router.push(`/?date=${formattedDate}`);
+        this.datePickerDialog = false;
+        this.downloadData();
+      }
+    },
+
+    beforeDestroy() {
+      if (this.refreshInterval) {
+        clearInterval(this.refreshInterval);
       }
     },
   },
