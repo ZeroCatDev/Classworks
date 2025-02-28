@@ -32,10 +32,99 @@
 
       <v-col cols="12">
         <v-card>
-          <v-card-title>云端学生列表设置</v-card-title>
+          <v-card-title class="d-flex align-center">
+            学生列表设置
+            <v-spacer />
+            <v-btn
+              variant="text"
+              prepend-icon="mdi-code-braces"
+              @click="showAdvancedEdit = !showAdvancedEdit"
+            >
+              {{ showAdvancedEdit ? '基础编辑' : '高级编辑' }}
+            </v-btn>
+          </v-card-title>
+
           <v-card-text>
-            <v-textarea v-model="students" label="学生列表" required />
-            <v-btn color="primary" @click="saveStudents">保存</v-btn>
+            <v-expand-transition>
+              <div v-if="!showAdvancedEdit">
+                <v-row class="mb-4">
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="newStudent"
+                      label="添加学生"
+                      placeholder="输入学生姓名"
+                      hide-details
+                      @keyup.enter="addStudent"
+                    >
+                      <template #append>
+                        <v-btn
+                          icon="mdi-plus"
+                          variant="text"
+                          :disabled="!newStudent.trim()"
+                          @click="addStudent"
+                        />
+                      </template>
+                    </v-text-field>
+                  </v-col>
+                </v-row>
+
+                <v-row>
+                  <v-col
+                    v-for="(student, index) in studentsList"
+                    :key="index"
+                    cols="12"
+                    sm="6"
+                    md="4"
+                    lg="3"
+                  >
+                    <v-card variant="outlined" class="student-card">
+                      <v-card-text class="d-flex align-center">
+                        <span class="mr-2">{{ index + 1 }}.</span>
+                        <span class="text-body-1 flex-grow-1">{{ student }}</span>
+                        <v-btn
+                          icon="mdi-delete"
+                          variant="text"
+                          color="error"
+                          size="small"
+                          @click="removeStudent(index)"
+                        />
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                </v-row>
+              </div>
+            </v-expand-transition>
+
+            <v-expand-transition>
+              <div v-if="showAdvancedEdit">
+                <v-textarea
+                  v-model="students"
+                  label="学生列表（每行一个名字）"
+                  hint="使用文本编辑模式批量编辑学生名单"
+                  persistent-hint
+                />
+              </div>
+            </v-expand-transition>
+
+            <v-row class="mt-4">
+              <v-col cols="12" class="d-flex gap-2">
+                <v-btn
+                  color="primary"
+                  prepend-icon="mdi-content-save"
+                  @click="saveStudents"
+                >
+                  保存
+                </v-btn>
+                <v-btn
+                  color="error"
+                  variant="outlined"
+                  prepend-icon="mdi-refresh"
+                  @click="reloadStudentList"
+                >
+                  重置
+                </v-btn>
+              </v-col>
+            </v-row>
           </v-card-text>
         </v-card>
       </v-col>
@@ -189,11 +278,28 @@ export default {
       fontSize: '28',
       autoSave: false,
       refreshBeforeEdit: false,
+      showAdvancedEdit: false,
+      newStudent: '',
     };
   },
   
   mounted() {
     this.loadSettings();
+  },
+
+  watch: {
+    students: {
+      handler(newVal) {
+        this.studentsList = newVal.split('\n').filter(s => s.trim());
+      },
+      immediate: true
+    },
+    studentsList: {
+      handler(newVal) {
+        this.students = newVal.join('\n');
+      },
+      deep: true
+    }
   },
 
   methods: {
@@ -210,6 +316,7 @@ export default {
 
       if (localStorage.getItem('studentList')) {
         this.students = localStorage.getItem('studentList').replace(/,/g, '\n');
+        this.studentsList = this.students.split('\n').filter(s => s.trim());
       }
 
       this.autoRefresh = localStorage.getItem('autoRefresh') === 'true';
@@ -252,16 +359,23 @@ export default {
 
     async saveStudents() {
       try {
-        this.studentsList = this.students.split('\n');
-        await axios.put(`${this.serverDomain}/students`, {
+        const domain = localStorage.getItem('backendServerDomain');
+        const classNum = localStorage.getItem('classNumber');
+        
+        if (!domain || !classNum) {
+          throw new Error('请先设置服务器域名和班号');
+        }
+
+        await axios.put(`${domain}/${classNum}/students`, {
           studentList: this.studentsList,
           id: 1,
         });
-        localStorage.setItem('studentList', this.students);
+        
+        localStorage.setItem('studentList', this.studentsList.join(','));
         this.showMessage('保存成功');
       } catch (error) {
         console.error(error);
-        this.showMessage('保存失败，请检查学生列表');
+        this.showMessage(error.message || '保存失败，请检查服务器设置和学生列表');
       }
     },
 
@@ -303,6 +417,28 @@ export default {
       );
     },
 
+    addStudent() {
+      const student = this.newStudent.trim();
+      if (student && !this.studentsList.includes(student)) {
+        this.studentsList.push(student);
+        this.newStudent = '';
+      }
+    },
+
+    removeStudent(index) {
+      this.studentsList.splice(index, 1);
+    },
+
+    reloadStudentList() {
+      const savedList = localStorage.getItem('studentList');
+      if (savedList) {
+        this.students = savedList.replace(/,/g, '\n');
+      } else {
+        this.students = '';
+        this.studentsList = [];
+      }
+    },
+
     showMessage(text) {
       this.snackbarText = text;
       this.snackbar = true;
@@ -312,6 +448,14 @@ export default {
 </script>
 
 <style scoped>
+.student-card {
+  transition: all 0.3s ease;
+}
+
+.student-card:hover {
+  background-color: rgba(var(--v-theme-primary), 0.05);
+}
+
 .gap-2 {
   gap: 8px;
 }
