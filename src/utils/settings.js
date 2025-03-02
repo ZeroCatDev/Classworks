@@ -72,12 +72,12 @@ const settingsDefinitions = {
   // 编辑设置
   'edit.autoSave': {
     type: 'boolean',
-    default: false,
+    default: true,
     description: '是否启用自动保存'
   },
   'edit.refreshBeforeEdit': {
     type: 'boolean',
-    default: false,
+    default: true,
     description: '编辑前是否自动刷新'
   }
 };

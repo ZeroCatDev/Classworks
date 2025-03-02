@@ -24,7 +24,6 @@
       <v-menu
         v-model="datePickerDialog"
         :close-on-content-click="false"
-
       >
         <template v-slot:activator="{ props }">
           <v-btn
@@ -60,150 +59,94 @@
       fluid
     >
       <div v-if="showNoDataMessage && !isToday" class="no-data-message">
-        <v-card class="text-center pa-4" variant="outlined">
-          <v-card-title class="text-h6">{{ noDataMessage }}</v-card-title>
+        <v-card class="text-center pa-4" >
+          <v-card-title class="text-h6">别看未来的作业了</v-card-title>
           <v-card-text>
-            <div class="text-body-1">该日期未上传作业数据</div>
+            <div class="text-body-1">{{ noDataMessage }}</div>
           </v-card-text>
         </v-card>
       </div>
 
       <template v-else>
-        <div v-if="showNoDataMessage && isToday" class="no-data-message">
-          <v-card class="text-center pa-4" variant="outlined">
-            <v-card-title class="text-h6">开始今天的作业</v-card-title>
-            <v-card-text>
-              <div class="text-body-1 mb-4">今天还没有上传作业哦～</div>
-              <v-btn
-                color="primary"
-                @click="initializeAndOpenDialog"
-              >
-                开始添加作业
-              </v-btn>
-            </v-card-text>
-          </v-card>
+        <div class="grid-masonry" ref="gridContainer">
+          <div
+            v-for="item in sortedItems"
+            :key="item.key"
+            class="grid-item"
+            :class="{ 
+              'empty-card': !item.content,
+              [`grid-row-${item.rowSpan}`]: true
+            }"
+            :style="{ 
+              'grid-row-end': `span ${item.rowSpan}`,
+              order: item.order,
+              cursor: uploadLoading || downloadLoading || isPastDate ? 'not-allowed' : 'pointer',
+              opacity: uploadLoading || downloadLoading ? '0.7' : '1'
+            }"
+            @click="!uploadLoading && !downloadLoading && !isPastDate && openDialog(item.key)"
+          >
+            <v-card border height="100%">
+              <v-card-title :class="{ 'text-subtitle-1': !item.content }">
+                {{ item.name }}
+              </v-card-title>
+              <v-card-text :style="item.content ? contentStyle : null">
+                <template v-if="item.content">
+                  <v-list>
+                    <v-list-item
+                      v-for="text in splitPoint(item.content)"
+                      :key="text"
+                    >
+                      {{ text }}
+                    </v-list-item>
+                  </v-list>
+                </template>
+                <template v-else>
+                  <div class="text-center pa-2">
+                    <v-icon size="small" color="grey">mdi-plus</v-icon>
+                    <div class="text-caption text-grey">点击添加作业</div>
+                  </div>
+                </template>
+              </v-card-text>
+            </v-card>
+          </div>
         </div>
 
-        <template v-else>
-          <div class="grid-masonry" ref="gridContainer">
-            <div
-              v-for="item in sortedItems"
-              :key="item.key"
-              class="grid-item"
-              :class="{ 
-                'empty-card': !item.content,
-                [`grid-row-${item.rowSpan}`]: true
-              }"
-              :style="{ 
-                'grid-row-end': `span ${item.rowSpan}`,
-                order: item.order,
-                cursor: uploadLoading || downloadLoading ? 'not-allowed' : 'pointer',
-                opacity: uploadLoading || downloadLoading ? '0.7' : '1'
-              }"
-              @click="!uploadLoading && !downloadLoading && openDialog(item.key)"
-            >
-              <v-card border height="100%">
-                <v-card-title :class="{ 'text-subtitle-1': !item.content }">
-                  {{ item.name }}
-                </v-card-title>
-                <v-card-text :style="item.content ? contentStyle : null">
-                  <template v-if="item.content">
-                    <v-list>
-                      <v-list-item
-                        v-for="text in splitPoint(item.content)"
-                        :key="text"
-                      >
-                        {{ text }}
-                      </v-list-item>
-                    </v-list>
-                  </template>
-                  <template v-else>
-                    <div class="text-center pa-2">
-                      <v-icon size="small" color="grey">mdi-plus</v-icon>
-                      <div class="text-caption text-grey">点击添加作业</div>
-                    </div>
-                  </template>
-                </v-card-text>
-              </v-card>
-            </div>
-          </div>
-
-          <!-- 空科目按钮组 -->
-          <div v-if="emptySubjectDisplay === 'button'" class="empty-subjects-container">
-            <v-btn
-              v-for="subject in emptySubjects"
-              :key="subject.key"
-              variant="outlined"
-              color="primary"
-              class="empty-subject-btn"
-              @click="!uploadLoading && !downloadLoading && openDialog(subject.key)"
-              :disabled="uploadLoading || downloadLoading"
-            >
-              <v-icon start>mdi-plus</v-icon>
-              {{ subject.name }}
-            </v-btn>
-          </div>
-        </template>
+        <!-- 空科目按钮组 -->
+        <v-btn-group v-if="emptySubjectDisplay === 'button'" class="empty-subjects-container">
+          <v-btn
+            v-for="subject in emptySubjects"
+            :key="subject.key"
+            variant="tonal"
+            color="primary"
+            @click="!uploadLoading && !downloadLoading && openDialog(subject.key)"
+            :disabled="uploadLoading || downloadLoading"
+          >
+            <v-icon start>mdi-plus</v-icon>
+            {{ subject.name }}
+          </v-btn>
+        </v-btn-group>
       </template>
     </v-container>
 
     <!-- 出勤统计区域 -->
-    <v-navigation-drawer
-      v-if="studentList.length > 1"
-      location="right"
-      permanent
-      width="300"
-      class="attendance-drawer"
+    <v-col
+      v-if="studentList.length"
+      class="attendance-area"
+      cols="1"
+      @click="!isPastDate ? setAttendanceArea() : null"
     >
-      <v-card
-        class="h-100 attendance-card"
-        flat
-      >
-        <v-card-text class="text-center">
-          <div class="attendance-numbers">
-            <div class="total-number mb-4">
-              <div class="text-h2 font-weight-bold">{{ studentList.length }}</div>
-              <div class="text-overline">应到</div>
-            </div>
-            
-            <div class="d-flex justify-space-around">
-              <div class="status-number text-success">
-                <div class="text-h3 font-weight-bold">
-                  {{ studentList.length - selectedSet.size - lateSet.size }}
-                </div>
-                <div class="text-overline">实到</div>
-              </div>
-              
-              <div class="status-number text-error">
-                <div class="text-h3 font-weight-bold">
-                  {{ selectedSet.size }}
-                </div>
-                <div class="text-overline">请假</div>
-              </div>
-              
-              <div class="status-number text-warning">
-                <div class="text-h3 font-weight-bold">
-                  {{ lateSet.size }}
-                </div>
-                <div class="text-overline">迟到</div>
-              </div>
-            </div>
-          </div>
-        </v-card-text>
-
-        <v-card-actions class="pa-4">
-          <v-btn
-            block
-            color="primary"
-            size="large"
-            prepend-icon="mdi-pencil"
-            @click="setAttendanceArea"
-          >
-            编辑出勤
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-navigation-drawer>
+      <h1>出勤</h1>
+      <h2>应到: {{ studentList.length }}人</h2>
+      <h2>实到: {{ studentList.length - selectedSet.size }}人</h2>
+      <h2>请假: {{ selectedSet.size }}人</h2>
+      <h3 v-for="(i, index) in selectedSet" :key="'absent-' + index">
+        {{ `${index + 1}. ${studentList[i]}` }}
+      </h3>
+      <h2>迟到: {{ lateSet.size }}人</h2>
+      <h3 v-for="(i, index) in lateSet" :key="'late-' + index">
+        {{ `${index + 1}. ${studentList[i]}` }}
+      </h3>
+    </v-col>
   </div>
   <v-container fluid>
     <v-btn
@@ -232,7 +175,9 @@
   >
     <v-card border>
       <v-card-title>{{ dialogTitle }}</v-card-title>
-      <v-card-subtitle>写完后点击上传谢谢喵</v-card-subtitle>
+      <v-card-subtitle>
+        {{ autoSave ? "喵？喵呜！" : "写完后点击上传谢谢喵" }}
+      </v-card-subtitle>
       <v-card-text>
         <v-textarea
           ref="inputRef"
@@ -420,13 +365,6 @@
 .empty-subjects-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.empty-subject-btn {
-  flex: 1;
-  min-width: 120px;
 }
 
 @media (max-width: 1199px) {
@@ -438,10 +376,6 @@
 @media (max-width: 799px) {
   .grid-masonry {
     grid-template-columns: 1fr;
-  }
-  
-  .empty-subject-btn {
-    min-width: 100px;
   }
   
   .empty-card {
@@ -635,12 +569,15 @@ export default {
           return true;
         });
 
-      // 根据排序模式选择不同的排序方法
-      if (this.dynamicSort) {
-        return this.optimizeGridLayout(items);
-      } else {
-        return this.fixedGridLayout(items);
-      }
+      // Sort items: prioritize non-empty content first
+      return items.sort((a, b) => {
+        // If one item has content and the other does not, prioritize the one with content
+        if (a.content && !b.content) return -1;
+        if (!a.content && b.content) return 1;
+
+        // If both have content or both are empty, sort by order
+        return a.order - b.order;
+      });
     },
     attendanceVisible() {
       return this.studentList.length > 0;
@@ -669,6 +606,14 @@ export default {
     },
     dynamicSort() {
       return getSetting('display.dynamicSort');
+    },
+    isPastDate() {
+      const selectedDate = new Date(this.dateString);
+      const today = new Date();
+      // 将时间部分归零以进行比较
+      selectedDate.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+      return selectedDate < today; // 如果选择的日期在今天之前，则返回 true
     },
   },
 
@@ -806,12 +751,29 @@ export default {
 
           this.synced = true;
         } else {
-          // Handle the error case
-          this.showNoDataMessage = true;
-          this.noDataMessage = res.data.msg || '未找到数据';
-          this.homeworkData = {};
-          this.selectedSet.clear();
-          this.lateSet.clear();
+          // Handle the error case for today's date
+          if (this.isToday && res.data.status == false) {
+            this.showNoDataMessage = false; // Ensure we show the empty data
+            this.homeworkData = {
+              "语文": { name: "语文", content: "" },
+              "数学": { name: "数学", content: "" },
+              "英语": { name: "英语", content: "" },
+              "物理": { name: "物理", content: "" },
+              "化学": { name: "化学", content: "" },
+              "生物": { name: "生物", content: "" },
+              "历史": { name: "历史", content: "" },
+              "地理": { name: "地理", content: "" },
+              "政治": { name: "政治", content: "" },
+            };
+            this.noDataMessage = ''; // Clear any previous message
+          } else {
+            // Handle other error cases
+            this.showNoDataMessage = true;
+            this.noDataMessage = res.data.msg || '未找到数据';
+            this.homeworkData = {};
+            this.selectedSet.clear();
+            this.lateSet.clear();
+          }
         }
       } catch (error) {
         console.error('下载数据失败:', error);
@@ -1074,24 +1036,6 @@ export default {
         // 固定布局时每个卡片占用相同的行高
         rowSpan: item.content ? 2 : 1
       }));
-    },
-
-    initializeAndOpenDialog() {
-      // 初始化作业数据
-      this.initializeHomeworkData();
-      this.showNoDataMessage = false;
-      this.synced = false; // 设置为未同步状态
-      
-      // 如果启用了自动保存，初始化后自动上传
-      if (this.autoSave) {
-        this.uploadData();
-      }
-      
-      // 打开第一个科目的对话框
-      const firstSubject = Object.keys(this.homeworkData)[0];
-      if (firstSubject) {
-        this.openDialog(firstSubject);
-      }
     },
 
     setAllPresent() {
