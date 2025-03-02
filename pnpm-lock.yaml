@@ -20,6 +20,12 @@ importers:
       vue:
         specifier: ^3.4.31
         version: 3.5.13
+      vue-masonry-wall:
+        specifier: ^0.3.2
+        version: 0.3.2(lodash@4.17.21)(vue@3.5.13)
+      vue-waterfall-plugin-next:
+        specifier: ^2.6.5
+        version: 2.6.5
       vuetify:
         specifier: ^3.6.14
         version: 3.7.4(vite-plugin-vuetify@2.0.4)(vue@3.5.13)
@@ -360,55 +366,46 @@ packages:
     resolution: {integrity: sha512-6npqOKEPRZkLrMcvyC/32OzJ2srdPzCylJjiTJT2c0bwwSGm7nz2F9mNQ1WrAqCBZROcQn91Fno+khFhVijmFA==}
     cpu: [arm]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-arm-musleabihf@4.27.2':
     resolution: {integrity: sha512-V9Xg6eXtgBtHq2jnuQwM/jr2mwe2EycnopO8cbOvpzFuySCGtKlPCI3Hj9xup/pJK5Q0388qfZZy2DqV2J8ftw==}
     cpu: [arm]
     os: [linux]
-    libc: [musl]
 
   '@rollup/rollup-linux-arm64-gnu@4.27.2':
     resolution: {integrity: sha512-uCFX9gtZJoQl2xDTpRdseYuNqyKkuMDtH6zSrBTA28yTfKyjN9hQ2B04N5ynR8ILCoSDOrG/Eg+J2TtJ1e/CSA==}
     cpu: [arm64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-arm64-musl@4.27.2':
     resolution: {integrity: sha512-/PU9P+7Rkz8JFYDHIi+xzHabOu9qEWR07L5nWLIUsvserrxegZExKCi2jhMZRd0ATdboKylu/K5yAXbp7fYFvA==}
     cpu: [arm64]
     os: [linux]
-    libc: [musl]
 
   '@rollup/rollup-linux-powerpc64le-gnu@4.27.2':
     resolution: {integrity: sha512-eCHmol/dT5odMYi/N0R0HC8V8QE40rEpkyje/ZAXJYNNoSfrObOvG/Mn+s1F/FJyB7co7UQZZf6FuWnN6a7f4g==}
     cpu: [ppc64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-riscv64-gnu@4.27.2':
     resolution: {integrity: sha512-DEP3Njr9/ADDln3kNi76PXonLMSSMiCir0VHXxmGSHxCxDfQ70oWjHcJGfiBugzaqmYdTC7Y+8Int6qbnxPBIQ==}
     cpu: [riscv64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-s390x-gnu@4.27.2':
     resolution: {integrity: sha512-NHGo5i6IE/PtEPh5m0yw5OmPMpesFnzMIS/lzvN5vknnC1sXM5Z/id5VgcNPgpD+wHmIcuYYgW+Q53v+9s96lQ==}
     cpu: [s390x]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-x64-gnu@4.27.2':
     resolution: {integrity: sha512-PaW2DY5Tan+IFvNJGHDmUrORadbe/Ceh8tQxi8cmdQVCCYsLoQo2cuaSj+AU+YRX8M4ivS2vJ9UGaxfuNN7gmg==}
     cpu: [x64]
     os: [linux]
-    libc: [glibc]
 
   '@rollup/rollup-linux-x64-musl@4.27.2':
     resolution: {integrity: sha512-dOlWEMg2gI91Qx5I/HYqOD6iqlJspxLcS4Zlg3vjk1srE67z5T2Uz91yg/qA8sY0XcwQrFzWWiZhMNERylLrpQ==}
     cpu: [x64]
     os: [linux]
-    libc: [musl]
 
   '@rollup/rollup-win32-arm64-msvc@4.27.2':
     resolution: {integrity: sha512-euMIv/4x5Y2/ImlbGl88mwKNXDsvzbWUlT7DFky76z2keajCtcbAsN9LUdmk31hAoVmJJYSThgdA0EsPeTr1+w==}
@@ -1727,10 +1724,23 @@ packages:
     peerDependencies:
       eslint: '>=6.0.0'
 
+  vue-masonry-wall@0.3.2:
+    resolution: {integrity: sha512-uy/tY9Lz6zVZCXmS78sv5u1yf70gAC+ElFXdV8miJfLiNnzXXt2i03I8sccx2YXDKk1IOZv6wDbKTUL8ethvfw==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      lodash: ^4.17.15
+      vue: ^2.6.10
+
+  vue-observe-visibility@0.4.6:
+    resolution: {integrity: sha512-xo0CEVdkjSjhJoDdLSvoZoQrw/H2BlzB5jrCBKGZNXN2zdZgMuZ9BKrxXDjNP2AxlcCoKc8OahI3F3r3JGLv2Q==}
+
   vue-router@4.4.5:
     resolution: {integrity: sha512-4fKZygS8cH1yCyuabAXGUAsyi1b2/o/OKgu/RUb+znIYOxPRxdkytJEx+0wGcpBE1pX6vUgh5jwWOKRGvuA/7Q==}
     peerDependencies:
       vue: ^3.2.0
+
+  vue-waterfall-plugin-next@2.6.5:
+    resolution: {integrity: sha512-8ACGbdjoyKLiJfnKXB8h8f9eE14lhyzfI1N1nrfVAIRczSpNY1KRwGOnVXN5OHqheLl3V1C0uVVRPtjTJkHkhw==}
 
   vue@3.5.13:
     resolution: {integrity: sha512-wmeiSMxkZCSc+PM2w2VRsOYAZC8GdipNFRTsLSfodVqI9mbejKeXEGr8SckuLnrQPGe3oJN5c3K0vpoU9q/wCQ==}
@@ -2088,7 +2098,7 @@ snapshots:
 
   '@vue/shared@3.5.13': {}
 
-  '@vuetify/loader-shared@2.0.3(vue@3.5.13)(vuetify@3.7.4(vite-plugin-vuetify@2.0.4)(vue@3.5.13))':
+  '@vuetify/loader-shared@2.0.3(vue@3.5.13)(vuetify@3.7.4)':
     dependencies:
       upath: 2.0.1
       vue: 3.5.13
@@ -3443,7 +3453,7 @@ snapshots:
 
   vite-plugin-vuetify@2.0.4(vite@5.4.11(sass-embedded@1.81.0)(sass@1.77.8))(vue@3.5.13)(vuetify@3.7.4):
     dependencies:
-      '@vuetify/loader-shared': 2.0.3(vue@3.5.13)(vuetify@3.7.4(vite-plugin-vuetify@2.0.4)(vue@3.5.13))
+      '@vuetify/loader-shared': 2.0.3(vue@3.5.13)(vuetify@3.7.4)
       debug: 4.3.7
       upath: 2.0.1
       vite: 5.4.11(sass-embedded@1.81.0)(sass@1.77.8)
@@ -3479,10 +3489,20 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  vue-masonry-wall@0.3.2(lodash@4.17.21)(vue@3.5.13):
+    dependencies:
+      lodash: 4.17.21
+      vue: 3.5.13
+      vue-observe-visibility: 0.4.6
+
+  vue-observe-visibility@0.4.6: {}
+
   vue-router@4.4.5(vue@3.5.13):
     dependencies:
       '@vue/devtools-api': 6.6.4
       vue: 3.5.13
+
+  vue-waterfall-plugin-next@2.6.5: {}
 
   vue@3.5.13:
     dependencies:

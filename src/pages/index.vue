@@ -58,46 +58,68 @@
     fluid
   >
     <v-row>
-      <v-col cols="11">
-        <v-container
-          fluid
-          style="padding-left: 2px; padding-right: 2px"
-        >
-          <v-row
-            v-for="subjects in homeworkArrange"
-            :key="subjects.name"
+      <v-col :cols="attendanceVisible ? 11 : 12">
+        <div class="grid-masonry" ref="gridContainer">
+          <div
+            v-for="item in sortedItems"
+            :key="item.key"
+            class="grid-item"
+            :class="{ 
+              'empty-card': !item.content,
+              [`grid-row-${item.rowSpan}`]: true
+            }"
+            :style="{ 
+              'grid-row-end': `span ${item.rowSpan}`,
+              order: item.order
+            }"
+            @click="openDialog(item.key)"
           >
-            <v-col
-              v-for="subject in subjects"
-              :key="subject"
-              cols="4"
-              style="padding: 2px !important"
-              @click="openDialog(subject)"
-            >
-              <v-card border>
-                <v-card-title>{{ homeworkData[subject].name }}</v-card-title>
-                <v-card-text :style="contentStyle">
+            <v-card border height="100%">
+              <v-card-title :class="{ 'text-subtitle-1': !item.content }">
+                {{ item.name }}
+              </v-card-title>
+              <v-card-text :style="item.content ? contentStyle : null">
+                <template v-if="item.content">
                   <v-list>
                     <v-list-item
-                      v-for="text in splitPoint(homeworkData[subject].content)"
+                      v-for="text in splitPoint(item.content)"
                       :key="text"
                     >
                       {{ text }}
                     </v-list-item>
                   </v-list>
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
-        <div />
-      </v-col>
+                </template>
+                <template v-else>
+                  <div class="text-center pa-2">
+                    <v-icon size="small" color="grey">mdi-plus</v-icon>
+                    <div class="text-caption text-grey">点击添加作业</div>
+                  </div>
+                </template>
+              </v-card-text>
+            </v-card>
+          </div>
+        </div>
 
+        <!-- 空科目按钮组 -->
+        <div v-if="emptySubjectDisplay === 'button'" class="empty-subjects-container">
+          <v-btn
+            v-for="subject in emptySubjects"
+            :key="subject.key"
+            variant="outlined"
+            color="primary"
+            class="empty-subject-btn"
+            @click="openDialog(subject.key)"
+          >
+            <v-icon start>mdi-plus</v-icon>
+            {{ subject.name }}
+          </v-btn>
+        </div>
+      </v-col>
 
       <v-col
         v-if="studentList.length"
         class="attendance-area"
-        cols="1"
+        :cols="1"
         @click="setAttendanceArea"
       >
         <h1>出勤</h1>
@@ -120,6 +142,22 @@
         >
           {{ `${index + 1}. ${studentList[i]}` }}
         </h3>
+
+        <!-- 空科目按钮显示区域 -->
+        <template v-if="showEmptySubjects && emptySubjectDisplay === 'button'">
+          <v-divider class="my-4" />
+          <h2>未填写作业</h2>
+          <v-btn
+            v-for="subject in emptySubjects"
+            :key="subject.key"
+            block
+            variant="outlined"
+            class="mb-2"
+            @click.stop="openDialog(subject.key)"
+          >
+            {{ subject.name }}
+          </v-btn>
+        </template>
       </v-col>
     </v-row>
   </v-container>
@@ -213,6 +251,88 @@
   </v-snackbar>
 </template>
 
+<style scoped>
+.grid-masonry {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 8px;
+  grid-auto-flow: dense;
+}
+
+.grid-item {
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.empty-card {
+  transform: scale(0.9);
+  opacity: 0.8;
+  grid-row-end: span 1 !important;
+}
+
+.empty-card:hover {
+  transform: scale(0.95);
+  opacity: 1;
+}
+
+.empty-subjects-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.empty-subject-btn {
+  flex: 1;
+  min-width: 120px;
+}
+
+@media (max-width: 1199px) {
+  .grid-masonry {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 799px) {
+  .grid-masonry {
+    grid-template-columns: 1fr;
+  }
+  
+  .empty-subject-btn {
+    min-width: 100px;
+  }
+  
+  .empty-card {
+    transform: scale(0.95);
+  }
+}
+
+/* 确保容器高度不超过视口 */
+.main-window {
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+}
+
+/* 优化滚动条样式 */
+.main-window::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-window::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.main-window::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.main-window::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+</style>
+
 <script>
 import axios from "axios";
 import { useDisplay } from "vuetify";
@@ -246,6 +366,12 @@ export default {
       refreshInterval: null,
       autoSave: false,
       refreshBeforeEdit: false,
+      showEmptySubjects: localStorage.getItem('showEmptySubjects') === 'true',
+      emptySubjectDisplay: localStorage.getItem('emptySubjectDisplay') || 'card',
+      subjectOrder: [
+        "语文", "数学", "英语", "物理", "化学", 
+        "生物", "政治", "历史", "地理", "其他"
+      ],
     };
   },
 
@@ -271,6 +397,43 @@ export default {
       } else {
         return `${this.dateString}的作业`;
       }
+    },
+    sortedItems() {
+      const items = Object.entries(this.homeworkData)
+        .map(([key, value]) => ({
+          key,
+          name: value.name,
+          content: value.content,
+          order: this.subjectOrder.indexOf(key),
+          // 计算每个卡片的行数
+          rowSpan: value.content ? 
+            Math.ceil((value.content.split('\n').filter(line => line.trim()).length + 1) * 0.8) : 1
+        }))
+        .filter(item => {
+          if (this.emptySubjectDisplay === 'button') {
+            return item.content;
+          }
+          return true;
+        });
+
+      // 对项目进行排序和优化布局
+      return this.optimizeGridLayout(items);
+    },
+    attendanceVisible() {
+      return this.studentList.length > 0;
+    },
+    emptySubjects() {
+      if (this.emptySubjectDisplay !== 'button') return [];
+      
+      return Object.entries(this.homeworkData)
+        .map(([key, value]) => ({
+          key,
+          name: value.name,
+          content: value.content,
+          order: this.subjectOrder.indexOf(key)
+        }))
+        .filter(subject => !subject.content)
+        .sort((a, b) => a.order - b.order);
     },
   },
 
@@ -563,6 +726,65 @@ export default {
         clearInterval(this.refreshInterval);
       }
     },
+
+    optimizeGridLayout(items) {
+      // 首先按内容长度和科目顺序排序
+      const sortedItems = items.sort((a, b) => {
+        // 有内容的排在前面
+        if (a.content && !b.content) return -1;
+        if (!a.content && b.content) return 1;
+        
+        // 内容较长的优先
+        if (a.content && b.content) {
+          const lengthDiff = b.rowSpan - a.rowSpan;
+          if (lengthDiff !== 0) return lengthDiff;
+        }
+        
+        // 最后按科目顺序
+        return a.order - b.order;
+      });
+
+      // 计算每列的当前高度
+      const columnHeights = [0, 0, 0];
+      const columnItems = [[], [], []];
+      
+      // 分配项目到最短的列
+      sortedItems.forEach(item => {
+        const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
+        columnHeights[shortestColumn] += item.rowSpan;
+        columnItems[shortestColumn].push(item);
+      });
+
+      // 将所有列的项目合并，并设置显示顺序
+      return columnItems.flat().map((item, index) => ({
+        ...item,
+        order: index
+      }));
+    }
   },
+
+  watch: {
+    homeworkData: {
+      handler() {
+        this.$nextTick(() => {
+          if (this.$refs.waterfall) {
+            this.$refs.waterfall.reflow();
+          }
+        });
+      },
+      deep: true
+    },
+    // 监听窗口大小变化
+    '$vuetify.display.width': {
+      handler() {
+        this.$nextTick(() => {
+          if (this.$refs.gridContainer) {
+            // 触发重新布局
+            this.optimizeGridLayout(this.sortedItems);
+          }
+        });
+      }
+    }
+  }
 };
 </script>

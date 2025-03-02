@@ -484,6 +484,86 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <v-switch
+      v-model="showEmptySubjects"
+      label="显示空作业科目"
+      hint="是否在主界面显示没有作业内容的科目"
+      persistent-hint
+      @change="saveSettings"
+    />
+    
+    <v-col cols="12" md="6">
+      <v-card elevation="2" class="rounded-lg">
+        <v-card-item>
+          <template v-slot:prepend>
+            <v-icon icon="mdi-card-outline" size="large" class="mr-2" />
+          </template>
+          <v-card-title class="text-h6">空作业显示设置</v-card-title>
+        </v-card-item>
+        
+        <v-card-text>
+          <v-radio-group
+            v-model="emptySubjectDisplay"
+            label="空作业显示方式"
+          >
+            <v-radio
+              value="card"
+              label="显示为空卡片"
+            >
+              <template v-slot:label>
+                <div class="d-flex align-center">
+                  显示为空卡片
+                  <v-tooltip location="right">
+                    <template v-slot:activator="{ props }">
+                      <v-icon
+                        v-bind="props"
+                        icon="mdi-help-circle-outline"
+                        size="small"
+                        class="ml-2"
+                      />
+                    </template>
+                    在主界面中显示为可点击的空白卡片
+                  </v-tooltip>
+                </div>
+              </template>
+            </v-radio>
+            <v-radio
+              value="button"
+              label="显示为按钮组"
+            >
+              <template v-slot:label>
+                <div class="d-flex align-center">
+                  显示为按钮组
+                  <v-tooltip location="right">
+                    <template v-slot:activator="{ props }">
+                      <v-icon
+                        v-bind="props"
+                        icon="mdi-help-circle-outline"
+                        size="small"
+                        class="ml-2"
+                      />
+                    </template>
+                    在主界面底部显示为一组添加按钮
+                  </v-tooltip>
+                </div>
+              </template>
+            </v-radio>
+          </v-radio-group>
+        </v-card-text>
+
+        <v-card-actions class="px-4 pb-4">
+          <v-btn
+            color="primary"
+            prepend-icon="mdi-content-save"
+            block
+            @click="saveEmptySubjectSettings"
+          >
+            保存设置
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-col>
   </v-container>
 
   <v-snackbar v-model="snackbar">
@@ -575,6 +655,8 @@ export default {
       studentToMove: null,
       touchStartTime: 0,
       touchTimeout: null,
+      showEmptySubjects: localStorage.getItem('showEmptySubjects') === 'true',
+      emptySubjectDisplay: localStorage.getItem('emptySubjectDisplay') || 'card',
     };
   },
   
@@ -824,6 +906,16 @@ export default {
         }
       }
     },
+
+    saveSettings() {
+      localStorage.setItem('showEmptySubjects', this.showEmptySubjects.toString());
+      localStorage.setItem('emptySubjectDisplay', this.emptySubjectDisplay);
+    },
+
+    saveEmptySubjectSettings() {
+      this.saveSettings();
+      this.showMessage('保存成功');
+    }
   },
 };
 </script>
