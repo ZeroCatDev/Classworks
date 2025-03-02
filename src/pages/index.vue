@@ -508,7 +508,6 @@ export default {
       uploadLoading: false,
       downloadLoading: false,
       homeworkData: {},
-      homeworkArrange: [[], []],
       snackbar: false,
       snackbarText: "",
       fontSize: getSetting('font.size'),
@@ -729,6 +728,7 @@ export default {
             "历史": { name: "历史", content: "" },
             "地理": { name: "地理", content: "" },
             "政治": { name: "政治", content: "" },
+            "其他": { name: "其他", content: "" },
           };
 
           // Update homeworkData with existing data from the response
