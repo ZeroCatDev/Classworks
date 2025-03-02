@@ -24,7 +24,7 @@
           
           <v-card-text>
             <v-text-field
-              v-model="serverDomain"
+              v-model="settings.server.domain"
               label="服务器域名"
               placeholder="例如: http://example.com"
               prepend-inner-icon="mdi-web"
@@ -34,7 +34,7 @@
               required
             />
             <v-text-field
-              v-model="classNumber"
+              v-model="settings.server.classNumber"
               label="班号"
               placeholder="例如: 1 或 A"
               prepend-inner-icon="mdi-account-group"
@@ -50,7 +50,7 @@
               color="primary"
               prepend-icon="mdi-content-save"
               block
-              @click="saveServerSettings"
+              @click="saveSettings('server')"
             >
               保存设置
             </v-btn>
@@ -71,18 +71,18 @@
           
           <v-card-text>
             <v-switch
-              v-model="autoRefresh"
+              v-model="settings.refresh.auto"
               label="启用自动刷新"
               color="primary"
               hide-details
               class="mb-4"
             />
             <v-text-field
-              v-model="refreshInterval"
+              v-model="settings.refresh.interval"
               type="number"
               label="刷新间隔"
               suffix="秒"
-              :disabled="!autoRefresh"
+              :disabled="!settings.refresh.auto"
               variant="outlined"
               density="comfortable"
               :rules="[
@@ -97,7 +97,7 @@
               color="primary"
               prepend-icon="mdi-content-save"
               block
-              @click="saveRefreshSettings"
+              @click="saveSettings('refresh')"
             >
               保存设置
             </v-btn>
@@ -116,7 +116,7 @@
           
           <v-card-text>
             <v-text-field
-              v-model="fontSize"
+              v-model="settings.font.size"
               type="number"
               label="字体大小"
               suffix="px"
@@ -144,7 +144,7 @@
               color="primary"
               prepend-icon="mdi-content-save"
               class="flex-grow-1"
-              @click="saveFontSize"
+              @click="saveSettings('font')"
             >
               保存设置
             </v-btn>
@@ -163,7 +163,7 @@
           
           <v-card-text>
             <v-switch
-              v-model="autoSave"
+              v-model="settings.edit.autoSave"
               label="启用自动保存"
               color="primary"
               hide-details
@@ -185,7 +185,7 @@
             </v-switch>
 
             <v-switch
-              v-model="refreshBeforeEdit"
+              v-model="settings.edit.refreshBeforeEdit"
               label="编辑前自动刷新"
               color="primary"
               hide-details
@@ -211,13 +211,113 @@
               color="primary"
               prepend-icon="mdi-content-save"
               block
-              @click="saveEditSettings"
+              @click="saveSettings('edit')"
             >
               保存设置
             </v-btn>
           </v-card-actions>
         </v-card>
-      </v-col>
+      </v-col>  <v-col cols="12" md="6">
+      <v-card elevation="2" class="rounded-lg">
+        <v-card-item>
+          <template v-slot:prepend>
+            <v-icon icon="mdi-card-outline" size="large" class="mr-2" />
+          </template>
+          <v-card-title class="text-h6">显示设置</v-card-title>
+        </v-card-item>
+        
+        <v-card-text>
+          <v-switch
+            v-model="settings.display.dynamicSort"
+            label="启用动态排序"
+            hint="动态排序会根据内容长度自动调整卡片位置以优化显示效果"
+            persistent-hint
+            class="mb-4"
+            @change="saveSettings('display')"
+          >
+            <template v-slot:append>
+              <v-tooltip location="right">
+                <template v-slot:activator="{ props }">
+                  <v-icon
+                    v-bind="props"
+                    icon="mdi-help-circle-outline"
+                    size="small"
+                    class="ml-2"
+                  />
+                </template>
+                <div>
+                  <p>启用：根据内容长度动态调整位置</p>
+                  <p>关闭：按语数英/物化生/政史地固定排列</p>
+                </div>
+              </v-tooltip>
+            </template>
+          </v-switch>
+
+          <v-divider class="my-4" />
+
+          <v-radio-group
+            v-model="settings.display.emptySubjectDisplay"
+            label="空作业显示方式"
+            class="mt-4"
+            @change="saveSettings('display')"
+          >
+            <v-radio
+              value="card"
+              label="显示为空卡片"
+            >
+              <template v-slot:label>
+                <div class="d-flex align-center">
+                  显示为空卡片
+                  <v-tooltip location="right">
+                    <template v-slot:activator="{ props }">
+                      <v-icon
+                        v-bind="props"
+                        icon="mdi-help-circle-outline"
+                        size="small"
+                        class="ml-2"
+                      />
+                    </template>
+                    在主界面中显示为可点击的空白卡片
+                  </v-tooltip>
+                </div>
+              </template>
+            </v-radio>
+            <v-radio
+              value="button"
+              label="显示为按钮组"
+            >
+              <template v-slot:label>
+                <div class="d-flex align-center">
+                  显示为按钮组
+                  <v-tooltip location="right">
+                    <template v-slot:activator="{ props }">
+                      <v-icon
+                        v-bind="props"
+                        icon="mdi-help-circle-outline"
+                        size="small"
+                        class="ml-2"
+                      />
+                    </template>
+                    在主界面底部显示为一组添加按钮
+                  </v-tooltip>
+                </div>
+              </template>
+            </v-radio>
+          </v-radio-group>
+        </v-card-text>
+
+        <v-card-actions class="px-4 pb-4">
+          <v-btn
+            color="primary"
+            prepend-icon="mdi-content-save"
+            block
+            @click="saveSettings('display')"
+          >
+            保存设置
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-col>
       <v-col cols="12">
         <v-card elevation="2" class="rounded-lg">
           <v-card-item>
@@ -238,6 +338,23 @@
           </v-card-item>
 
           <v-card-text>
+            <v-progress-linear
+              v-if="studentsLoading"
+              indeterminate
+              color="primary"
+              class="mb-4"
+            />
+
+            <v-alert
+              v-if="studentsError"
+              type="error"
+              variant="tonal"
+              closable
+              class="mb-4"
+            >
+              {{ studentsError }}
+            </v-alert>
+
             <v-expand-transition>
               <div v-if="!showAdvancedEdit">
                 <v-row class="mb-6">
@@ -402,6 +519,8 @@
                   color="primary"
                   prepend-icon="mdi-content-save"
                   size="large"
+                  :loading="studentsLoading"
+                  :disabled="studentsLoading"
                   @click="saveStudents"
                 >
                   保存学生列表
@@ -411,6 +530,8 @@
                   variant="outlined"
                   prepend-icon="mdi-refresh"
                   size="large"
+                  :loading="studentsLoading"
+                  :disabled="studentsLoading"
                   @click="reloadStudentList"
                 >
                   重置列表
@@ -484,86 +605,6 @@
         </v-card>
       </v-col>
     </v-row>
-
-    <v-switch
-      v-model="showEmptySubjects"
-      label="显示空作业科目"
-      hint="是否在主界面显示没有作业内容的科目"
-      persistent-hint
-      @change="saveSettings"
-    />
-    
-    <v-col cols="12" md="6">
-      <v-card elevation="2" class="rounded-lg">
-        <v-card-item>
-          <template v-slot:prepend>
-            <v-icon icon="mdi-card-outline" size="large" class="mr-2" />
-          </template>
-          <v-card-title class="text-h6">空作业显示设置</v-card-title>
-        </v-card-item>
-        
-        <v-card-text>
-          <v-radio-group
-            v-model="emptySubjectDisplay"
-            label="空作业显示方式"
-          >
-            <v-radio
-              value="card"
-              label="显示为空卡片"
-            >
-              <template v-slot:label>
-                <div class="d-flex align-center">
-                  显示为空卡片
-                  <v-tooltip location="right">
-                    <template v-slot:activator="{ props }">
-                      <v-icon
-                        v-bind="props"
-                        icon="mdi-help-circle-outline"
-                        size="small"
-                        class="ml-2"
-                      />
-                    </template>
-                    在主界面中显示为可点击的空白卡片
-                  </v-tooltip>
-                </div>
-              </template>
-            </v-radio>
-            <v-radio
-              value="button"
-              label="显示为按钮组"
-            >
-              <template v-slot:label>
-                <div class="d-flex align-center">
-                  显示为按钮组
-                  <v-tooltip location="right">
-                    <template v-slot:activator="{ props }">
-                      <v-icon
-                        v-bind="props"
-                        icon="mdi-help-circle-outline"
-                        size="small"
-                        class="ml-2"
-                      />
-                    </template>
-                    在主界面底部显示为一组添加按钮
-                  </v-tooltip>
-                </div>
-              </template>
-            </v-radio>
-          </v-radio-group>
-        </v-card-text>
-
-        <v-card-actions class="px-4 pb-4">
-          <v-btn
-            color="primary"
-            prepend-icon="mdi-content-save"
-            block
-            @click="saveEmptySubjectSettings"
-          >
-            保存设置
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-col>
   </v-container>
 
   <v-snackbar v-model="snackbar">
@@ -624,6 +665,12 @@
 <script>
 import axios from 'axios';
 import { useDisplay } from 'vuetify';
+import { 
+  getSetting,
+  setSetting,
+  resetSetting,
+  watchSettings
+} from '@/utils/settings';
 
 export default {
   setup() {
@@ -633,17 +680,31 @@ export default {
 
   data() {
     return {
-      serverDomain: '',
-      classNumber: '',
+      settings: {
+        server: {
+          domain: getSetting('server.domain'),
+          classNumber: getSetting('server.classNumber'),
+        },
+        refresh: {
+          auto: getSetting('refresh.auto'),
+          interval: getSetting('refresh.interval'),
+        },
+        font: {
+          size: getSetting('font.size'),
+        },
+        edit: {
+          autoSave: getSetting('edit.autoSave'),
+          refreshBeforeEdit: getSetting('edit.refreshBeforeEdit'),
+        },
+        display: {
+          emptySubjectDisplay: getSetting('display.emptySubjectDisplay'),
+          dynamicSort: getSetting('display.dynamicSort'),
+        }
+      },
       students: '',
       studentsList: [],
       snackbar: false,
       snackbarText: '',
-      autoRefresh: false,
-      refreshInterval: 300,
-      fontSize: '28',
-      autoSave: false,
-      refreshBeforeEdit: false,
       showAdvancedEdit: false,
       newStudent: '',
       editingIndex: -1,
@@ -655,16 +716,58 @@ export default {
       studentToMove: null,
       touchStartTime: 0,
       touchTimeout: null,
-      showEmptySubjects: localStorage.getItem('showEmptySubjects') === 'true',
-      emptySubjectDisplay: localStorage.getItem('emptySubjectDisplay') || 'card',
+      studentsLoading: false,
+      studentsError: null,
     };
   },
   
   mounted() {
-    this.loadSettings();
+    this.loadAllSettings();
+    this.unwatchSettings = watchSettings(() => {
+      this.loadAllSettings();
+    });
+    this.loadStudentList();
+  },
+
+  beforeUnmount() {
+    if (this.unwatchSettings) {
+      this.unwatchSettings();
+    }
   },
 
   watch: {
+    'settings.server': {
+      handler(newVal, oldVal) {
+        if (newVal.domain !== oldVal?.domain || newVal.classNumber !== oldVal?.classNumber) {
+          this.loadStudentList();
+        }
+      },
+      deep: true
+    },
+    'settings.refresh': {
+      handler() {
+        this.saveSettings('refresh');
+      },
+      deep: true
+    },
+    'settings.font': {
+      handler() {
+        this.saveSettings('font');
+      },
+      deep: true
+    },
+    'settings.edit': {
+      handler() {
+        this.saveSettings('edit');
+      },
+      deep: true
+    },
+    'settings.display': {
+      handler() {
+        this.saveSettings('display');
+      },
+      deep: true
+    },
     students: {
       handler(newVal) {
         this.studentsList = newVal.split('\n').filter(s => s.trim());
@@ -680,64 +783,58 @@ export default {
   },
 
   methods: {
-    loadSettings() {
-      const savedDomain = localStorage.getItem('backendServerDomain');
-      const savedClass = localStorage.getItem('classNumber');
-      
-      if (savedDomain) {
-        this.serverDomain = savedDomain;
-      }
-      if (savedClass) {
-        this.classNumber = savedClass;
-      }
-
-      if (localStorage.getItem('studentList')) {
-        this.students = localStorage.getItem('studentList').replace(/,/g, '\n');
-        this.studentsList = this.students.split('\n').filter(s => s.trim());
-      }
-
-      this.autoRefresh = localStorage.getItem('autoRefresh') === 'true';
-      this.refreshInterval = parseInt(localStorage.getItem('refreshInterval')) || 300;
-
-      const savedFontSize = localStorage.getItem('fontSize');
-      if (savedFontSize) {
-        this.fontSize = savedFontSize;
-      }
-
-      this.autoSave = localStorage.getItem('autoSave') === 'true';
-      this.refreshBeforeEdit = localStorage.getItem('refreshBeforeEdit') === 'true';
+    loadAllSettings() {
+      Object.keys(this.settings).forEach(section => {
+        Object.keys(this.settings[section]).forEach(key => {
+          this.settings[section][key] = getSetting(`${section}.${key}`);
+        });
+      });
     },
 
-    saveServerSettings() {
+    saveSettings(section) {
       try {
-        if (this.serverDomain === '') {
-          localStorage.removeItem('backendServerDomain');
-          localStorage.removeItem('classNumber');
-          this.showMessage('删除成功');
-          return;
-        }
-
-        new URL(this.serverDomain);
-        
-        const cleanDomain = this.serverDomain.replace(/\/+$/, '');
-        
-        if (!this.classNumber || !/^[A-Za-z0-9]+$/.test(this.classNumber)) {
-          throw new Error('Invalid class number');
-        }
-
-        localStorage.setItem('backendServerDomain', cleanDomain);
-        localStorage.setItem('classNumber', this.classNumber);
-        this.showMessage('保存成功');
+        Object.keys(this.settings[section]).forEach(key => {
+          setSetting(`${section}.${key}`, this.settings[section][key]);
+        });
+        this.showMessage('设置已保存');
       } catch (error) {
-        console.error(error);
-        this.showMessage('保存失败，请检查服务器域名和班号');
+        console.error('保存设置失败:', error);
+        this.showMessage('保存设置失败，请检查输入');
+      }
+    },
+
+    async loadStudentList() {
+      try {
+        this.studentsLoading = true;
+        this.studentsError = null;
+
+        const domain = getSetting('server.domain');
+        const classNum = getSetting('server.classNumber');
+        
+        if (!domain || !classNum) {
+          throw new Error('请先设置服务器域名和班号');
+        }
+
+        const res = await axios.get(`${domain}/${classNum}/config`);
+        if (res.data && Array.isArray(res.data.studentList)) {
+          this.studentsList = res.data.studentList;
+          this.students = this.studentsList.join('\n');
+        } else {
+          throw new Error('获取学生列表失败');
+        }
+      } catch (error) {
+        console.error('加载学生列表失败:', error);
+        this.studentsError = error.message || '加载失败，请检查服务器设置';
+        this.showMessage(this.studentsError);
+      } finally {
+        this.studentsLoading = false;
       }
     },
 
     async saveStudents() {
       try {
-        const domain = localStorage.getItem('backendServerDomain');
-        const classNum = localStorage.getItem('classNumber');
+        const domain = getSetting('server.domain');
+        const classNum = getSetting('server.classNumber');
         
         if (!domain || !classNum) {
           throw new Error('请先设置服务器域名和班号');
@@ -747,78 +844,21 @@ export default {
           studentList: this.studentsList,
           id: 1,
         });
-        
+
         localStorage.setItem('studentList', this.studentsList.join(','));
         this.showMessage('保存成功');
       } catch (error) {
-        console.error(error);
+        console.error('保存学生列表失败:', error);
         this.showMessage(error.message || '保存失败，请检查服务器设置和学生列表');
       }
     },
 
-    saveRefreshSettings() {
-      localStorage.setItem('autoRefresh', this.autoRefresh);
-      localStorage.setItem('refreshInterval', this.refreshInterval);
-      this.showMessage('保存成功');
-    },
-
-    saveFontSize() {
+    async reloadStudentList() {
       try {
-        const size = parseInt(this.fontSize);
-        if (size >= 16 && size <= 100) {
-          localStorage.setItem('fontSize', size.toString());
-          this.showMessage('字体大小保存成功');
-        } else {
-          throw new Error('Invalid font size');
-        }
+        await this.loadStudentList();
+        this.showMessage('已重新加载学生列表');
       } catch (error) {
-        this.showMessage('保存失败，字体大小必须在16-100之间');
-      }
-    },
-
-    resetFontSize() {
-      localStorage.removeItem('fontSize');
-      this.fontSize = '28';
-      this.showMessage('字体大小已重置为默认值');
-    },
-
-    saveEditSettings() {
-      localStorage.setItem('autoSave', this.autoSave);
-      localStorage.setItem('refreshBeforeEdit', this.refreshBeforeEdit);
-      this.showMessage(
-        this.autoSave 
-          ? '已启用自动保存' 
-          : this.refreshBeforeEdit 
-            ? '已启用编辑前刷新' 
-            : '已更新编辑设置'
-      );
-    },
-
-    addStudent() {
-      const student = this.newStudent.trim();
-      if (student && !this.studentsList.includes(student)) {
-        this.studentsList.push(student);
-        this.newStudent = '';
-      }
-    },
-
-    removeStudent(index) {
-      if (index !== undefined) {
-        this.studentsList.splice(index, 1);
-        this.deleteDialog = false;
-        this.studentToDelete = null;
-        this.synced = false;
-        if (this.autoSave) this.saveStudents();
-      }
-    },
-
-    reloadStudentList() {
-      const savedList = localStorage.getItem('studentList');
-      if (savedList) {
-        this.students = savedList.replace(/,/g, '\n');
-      } else {
-        this.students = '';
-        this.studentsList = [];
+        this.showMessage('重新加载失败');
       }
     },
 
@@ -841,7 +881,7 @@ export default {
         const newName = this.editingName.trim();
         if (newName && newName !== this.studentsList[this.editingIndex]) {
           this.studentsList[this.editingIndex] = newName;
-          if (this.autoSave) {
+          if (this.settings.edit.autoSave) {
             this.saveStudents();
           }
         }
@@ -864,7 +904,7 @@ export default {
         [this.studentsList[index], this.studentsList[newIndex]] = 
         [this.studentsList[newIndex], this.studentsList[index]];
         
-        if (this.autoSave) {
+        if (this.settings.edit.autoSave) {
           this.saveStudents();
         }
       }
@@ -887,8 +927,7 @@ export default {
         const student = this.studentsList[this.studentToMove];
         this.studentsList.splice(this.studentToMove, 1);
         this.studentsList.splice(newPos, 0, student);
-        this.synced = false;
-        if (this.autoSave) this.saveStudents();
+        if (this.settings.edit.autoSave) this.saveStudents();
       }
       this.numberDialog = false;
       this.studentToMove = null;
@@ -901,21 +940,37 @@ export default {
         this.studentsList.splice(index, 1);
         this.studentsList.unshift(student);
         
-        if (this.autoSave) {
+        if (this.settings.edit.autoSave) {
           this.saveStudents();
         }
       }
     },
 
-    saveSettings() {
-      localStorage.setItem('showEmptySubjects', this.showEmptySubjects.toString());
-      localStorage.setItem('emptySubjectDisplay', this.emptySubjectDisplay);
+    addStudent() {
+      const student = this.newStudent.trim();
+      if (student && !this.studentsList.includes(student)) {
+        this.studentsList.push(student);
+        this.newStudent = '';
+        if (this.settings.edit.autoSave) {
+          this.saveStudents();
+        }
+      }
     },
 
-    saveEmptySubjectSettings() {
-      this.saveSettings();
-      this.showMessage('保存成功');
-    }
+    removeStudent(index) {
+      if (index !== undefined) {
+        this.studentsList.splice(index, 1);
+        this.deleteDialog = false;
+        this.studentToDelete = null;
+        if (this.settings.edit.autoSave) this.saveStudents();
+      }
+    },
+
+    resetFontSize() {
+      resetSetting('font.size');
+      this.settings.font.size = getSetting('font.size');
+      this.showMessage('字体大小已重置为默认值');
+    },
   },
 };
 </script>
