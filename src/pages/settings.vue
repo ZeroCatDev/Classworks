@@ -840,9 +840,9 @@ export default {
           throw new Error('请先设置服务器域名和班号');
         }
 
-        await axios.put(`${domain}/${classNum}/students`, {
+        await axios.put(`${domain}/${classNum}/config`, {
           studentList: this.studentsList,
-          id: 1,
+          timeSlots: [],
         });
 
         localStorage.setItem('studentList', this.studentsList.join(','));

@@ -156,91 +156,50 @@
       class="attendance-drawer"
     >
       <v-card
-        class="h-100"
+        class="h-100 attendance-card"
         flat
       >
-        <v-card-item>
-          <v-card-title class="text-h6">
-            <v-icon icon="mdi-account-multiple" class="mr-2" />
-            出勤统计
-          </v-card-title>
-        </v-card-item>
-
-        <v-card-text>
-          <div class="attendance-stats mb-4">
-            <div class="d-flex justify-space-between align-center mb-2">
-              <span class="text-subtitle-1">应到人数</span>
-              <span class="text-h6">{{ studentList.length }}人</span>
+        <v-card-text class="text-center">
+          <div class="attendance-numbers">
+            <div class="total-number mb-4">
+              <div class="text-h2 font-weight-bold">{{ studentList.length }}</div>
+              <div class="text-overline">应到</div>
             </div>
-            <div class="d-flex justify-space-between align-center mb-2">
-              <span class="text-subtitle-1">实到人数</span>
-              <span class="text-h6 text-success">
-                {{ studentList.length - selectedSet.size - lateSet.size }}人
-              </span>
-            </div>
-            <v-divider class="my-2" />
-            <div class="d-flex justify-space-between align-center mb-2">
-              <span class="text-subtitle-1">请假人数</span>
-              <span class="text-h6 text-error">{{ selectedSet.size }}人</span>
-            </div>
-            <div class="d-flex justify-space-between align-center">
-              <span class="text-subtitle-1">迟到人数</span>
-              <span class="text-h6 text-warning">{{ lateSet.size }}人</span>
+            
+            <div class="d-flex justify-space-around">
+              <div class="status-number text-success">
+                <div class="text-h3 font-weight-bold">
+                  {{ studentList.length - selectedSet.size - lateSet.size }}
+                </div>
+                <div class="text-overline">实到</div>
+              </div>
+              
+              <div class="status-number text-error">
+                <div class="text-h3 font-weight-bold">
+                  {{ selectedSet.size }}
+                </div>
+                <div class="text-overline">请假</div>
+              </div>
+              
+              <div class="status-number text-warning">
+                <div class="text-h3 font-weight-bold">
+                  {{ lateSet.size }}
+                </div>
+                <div class="text-overline">迟到</div>
+              </div>
             </div>
           </div>
-
-          <template v-if="selectedSet.size > 0">
-            <v-card
-              variant="outlined"
-              class="mb-4"
-            >
-              <v-card-title class="text-subtitle-1">
-                <v-icon icon="mdi-account-off" class="mr-2" color="error" />
-                请假名单
-              </v-card-title>
-              <v-card-text>
-                <v-list density="compact" nav>
-                  <v-list-item
-                    v-for="i in Array.from(selectedSet)"
-                    :key="'absent-' + i"
-                    :title="`${i + 1}. ${studentList[i]}`"
-                    prepend-icon="mdi-account"
-                  />
-                </v-list>
-              </v-card-text>
-            </v-card>
-          </template>
-
-          <template v-if="lateSet.size > 0">
-            <v-card
-              variant="outlined"
-            >
-              <v-card-title class="text-subtitle-1">
-                <v-icon icon="mdi-clock-alert" class="mr-2" color="warning" />
-                迟到名单
-              </v-card-title>
-              <v-card-text>
-                <v-list density="compact" nav>
-                  <v-list-item
-                    v-for="i in Array.from(lateSet)"
-                    :key="'late-' + i"
-                    :title="`${i + 1}. ${studentList[i]}`"
-                    prepend-icon="mdi-account-clock"
-                  />
-                </v-list>
-              </v-card-text>
-            </v-card>
-          </template>
         </v-card-text>
 
         <v-card-actions class="pa-4">
           <v-btn
             block
             color="primary"
+            size="large"
             prepend-icon="mdi-pencil"
             @click="setAttendanceArea"
           >
-            编辑出勤状态
+            编辑出勤
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -334,6 +293,103 @@
   >
     {{ snackbarText }}
   </v-snackbar>
+
+  <v-dialog
+    v-model="attendanceDialog"
+    max-width="600"
+  >
+    <v-card>
+      <v-card-title class="text-h6">
+        编辑出勤状态
+      </v-card-title>
+
+      <v-card-text>
+        <v-select
+          v-model="selectedTimeSlot"
+          :items="timeSlots"
+          item-title="name"
+          item-value="id"
+          label="选择时间段"
+          class="mb-4"
+        />
+
+        <v-expansion-panels>
+          <v-expansion-panel>
+            <v-expansion-panel-title>
+              批量操作
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <v-btn-group>
+                <v-btn
+                  color="success"
+                  prepend-icon="mdi-account-check"
+                  @click="setAllPresent"
+                >
+                  全部到齐
+                </v-btn>
+                <v-btn
+                  color="error"
+                  prepend-icon="mdi-account-off"
+                  @click="setAllAbsent"
+                >
+                  全部请假
+                </v-btn>
+                <v-btn
+                  color="warning"
+                  prepend-icon="mdi-clock-alert"
+                  @click="setAllLate"
+                >
+                  全部迟到
+                </v-btn>
+              </v-btn-group>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-list class="mt-4">
+          <v-list-subheader>学生列表</v-list-subheader>
+          <v-list-item
+            v-for="(student, index) in currentTimeSlotStudents"
+            :key="index"
+            :title="student"
+          >
+            <template v-slot:append>
+              <v-btn-group>
+                <v-btn
+                  :color="isPresent(index) ? 'success' : ''"
+                  icon="mdi-account-check"
+                  size="small"
+                  @click="setPresent(index)"
+                />
+                <v-btn
+                  :color="isAbsent(index) ? 'error' : ''"
+                  icon="mdi-account-off"
+                  size="small"
+                  @click="setAbsent(index)"
+                />
+                <v-btn
+                  :color="isLate(index) ? 'warning' : ''"
+                  icon="mdi-clock-alert"
+                  size="small"
+                  @click="setLate(index)"
+                />
+              </v-btn-group>
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+
+      <v-card-actions>
+        <v-spacer />
+        <v-btn
+          color="primary"
+          @click="saveAttendance"
+        >
+          保存
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>
@@ -469,6 +525,28 @@
 .text-warning {
   color: rgb(var(--v-theme-warning));
 }
+
+.attendance-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.attendance-numbers {
+  padding: 20px 0;
+}
+
+.total-number {
+  border-bottom: 1px solid rgba(0,0,0,0.12);
+  padding-bottom: 20px;
+}
+
+.status-number {
+  flex: 1;
+}
+
+.text-h2, .text-h3 {
+  line-height: 1.2;
+}
 </style>
 
 <script>
@@ -483,7 +561,7 @@ export default {
       backurl: '',
       classNumber: '',
       currentEditSubject: null,
-      studentList: ["加载中"],
+      studentList: [],
       selectedSet: new Set(), // Absent students
       lateSet: new Set(), // Late students
       dialogVisible: false,
@@ -510,6 +588,10 @@ export default {
       showNoDataMessage: false,
       noDataMessage: '',
       isToday: false,
+      attendanceDialog: false,
+      selectedTimeSlot: null,
+      timeSlots: [],
+      currentTimeSlotStudents: [],
     };
   },
 
@@ -617,67 +699,148 @@ export default {
 
   methods: {
     async initializeData() {
-      const res = await axios.get(`${this.backurl}/config`);
-      this.studentList = res.data.studentList;
-      localStorage.setItem("studentList", res.data.studentList);
-      this.homeworkArrange = res.data.homeworkArrange;
-
-      this.initializeHomeworkData();
-      this.setCurrentDate();
-      await this.downloadDataDirectly();
-    },
-
-    initializeHomeworkData() {
-      this.homeworkArrange.forEach((subjects) => {
-        subjects.forEach((subject) => {
-          this.homeworkData[subject] = {
-            name: subject,
-            content: "",
-          };
-        });
-      });
-    },
-
-    setCurrentDate() {
-      if (this.$route.query.date) {
-        try {
-          const date = new Date(this.$route.query.date);
-          if (isNaN(date.getTime())) {
-            throw new Error('Invalid date');
-          }
-          // 使用本地时区格式化日期
-          const year = date.getFullYear();
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          const day = String(date.getDate()).padStart(2, '0');
-          this.dateString = `${year}-${month}-${day}`;
-        } catch (e) {
-          // 如果日期无效，使用今天的日期
-          const today = new Date();
-          const year = today.getFullYear();
-          const month = String(today.getMonth() + 1).padStart(2, '0');
-          const day = String(today.getDate()).padStart(2, '0');
-          this.dateString = `${year}-${month}-${day}`;
-        }
-      } else {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        this.dateString = `${year}-${month}-${day}`;
-      }
-    },
-
-    handleClose() {
-      if (this.currentEditSubject) {
-        this.homeworkData[this.currentEditSubject].content = this.textarea;
-        this.synced = false;
+      try {
+        // 获取配置信息（包含学生列表和时间段）
+        await this.loadConfig();
         
-        // 如果启用了自动保存，关闭对话框时自动上传
-        if (this.autoSave) {
-          this.uploadData();
+        // 获取URL中的日期参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const dateParam = urlParams.get('date');
+        
+        if (dateParam) {
+          this.dateString = dateParam;
+        } else {
+          const now = new Date();
+          this.dateString = now.toISOString().split('T')[0];
         }
+
+        // 下载当天作业数据
+        await this.downloadData();
+      } catch (error) {
+        console.error('初始化失败:', error);
+        this.showError('初始化失败，请检查网络连接');
       }
-      this.dialogVisible = false;
+    },
+
+    async loadConfig() {
+      try {
+        const domain = getSetting('server.domain');
+        const classNum = getSetting('server.classNumber');
+        
+        if (!domain || !classNum) {
+          throw new Error('请先设置服务器域名和班号');
+        }
+
+        const res = await axios.get(`${domain}/${classNum}/config`);
+        // 直接使用返回的数据，不再需要 .data 层
+        this.studentList = res.data.studentList || [];
+        this.timeSlots = res.data.timeSlots || [];
+        
+        // 如果有时间段，默认选择第一个
+        if (this.timeSlots.length > 0) {
+          this.selectedTimeSlot = this.timeSlots[0].id;
+          this.updateCurrentTimeSlotStudents();
+        }
+      } catch (error) {
+        console.error('加载配置失败:', error);
+        throw error;
+      }
+    },
+
+    updateCurrentTimeSlotStudents() {
+      if (this.selectedTimeSlot) {
+        const slot = this.timeSlots.find(s => s.id === this.selectedTimeSlot);
+        this.currentTimeSlotStudents = slot ? slot.students : [];
+      } else {
+        this.currentTimeSlotStudents = this.studentList;
+      }
+    },
+
+    async downloadDataDirectly() {
+      try {
+        const formattedDate = new Date(this.dateString).toISOString().split('T')[0];
+        const res = await axios.get(
+          `${this.backurl}/homework?date=${formattedDate}`
+        );
+
+        const today = new Date();
+        this.isToday = today.toISOString().split('T')[0] === formattedDate;
+
+        // Check if the response indicates success
+        if (res.data && res.data.status !== false) {
+          this.showNoDataMessage = false;
+
+          // Process the new data structure
+          const { homework, attendance } = res.data;
+
+          // Initialize homeworkData with existing data or default empty subjects
+          this.homeworkData = {
+            "语文": { name: "语文", content: "" },
+            "数学": { name: "数学", content: "" },
+            "英语": { name: "英语", content: "" },
+            "物理": { name: "物理", content: "" },
+            "化学": { name: "化学", content: "" },
+            "生物": { name: "生物", content: "" },
+            "历史": { name: "历史", content: "" },
+            "地理": { name: "地理", content: "" },
+            "政治": { name: "政治", content: "" },
+          };
+
+          // Update homeworkData with existing data from the response
+          for (const subject in homework) {
+            if (homework.hasOwnProperty(subject)) {
+              this.homeworkData[subject] = homework[subject];
+            }
+          }
+
+          // Update attendance information if available
+          if (attendance) {
+            this.selectedTimeSlot = attendance.timeSlotId;
+            this.selectedSet = new Set(attendance.absent || []);
+            this.lateSet = new Set(attendance.late || []);
+            this.updateCurrentTimeSlotStudents();
+          } else {
+            this.selectedSet.clear();
+            this.lateSet.clear();
+          }
+
+          this.synced = true;
+        } else {
+          // Handle the error case
+          this.showNoDataMessage = true;
+          this.noDataMessage = res.data.msg || '未找到数据';
+          this.homeworkData = {};
+          this.selectedSet.clear();
+          this.lateSet.clear();
+        }
+      } catch (error) {
+        console.error('下载数据失败:', error);
+        this.showError('下载数据失败，请重试');
+      }
+    },
+
+    async uploadData() {
+      if (this.uploadLoading) return;
+      
+      try {
+        this.uploadLoading = true;
+        await axios.post(`${this.backurl}/homework`, {
+          date: new Date(this.dateString).toISOString().split('T')[0],
+          homework: this.homeworkData, // 修改键名为 homework
+          attendance: {
+            timeSlotId: this.selectedTimeSlot,
+            absent: Array.from(this.selectedSet),
+            late: Array.from(this.lateSet),
+          },
+        });
+        this.synced = true;
+        this.showSyncMessage();
+      } catch (err) {
+        console.error("上传失败:", err);
+        this.showError("上传失败，请重试");
+      } finally {
+        this.uploadLoading = false;
+      }
     },
 
     showSyncMessage() {
@@ -688,6 +851,23 @@ export default {
     showError(message) {
       this.snackbar = true;
       this.snackbarText = message;
+    },
+
+    handleClose() {
+      if (this.currentEditSubject) {
+        // Update only the specific subject being edited
+        const currentSubject = this.homeworkData[this.currentEditSubject];
+        if (currentSubject) {
+          currentSubject.content = this.textarea;
+        }
+        this.synced = false;
+        
+        // If auto-save is enabled, upload the data
+        if (this.autoSave) {
+          this.uploadData();
+        }
+      }
+      this.dialogVisible = false;
     },
 
     async openDialog(subject) {
@@ -759,73 +939,6 @@ export default {
         "font-size": `${this.fontSize}px`,
       };
       setSetting('font.size', this.fontSize);
-    },
-
-    async uploadData() {
-      if (this.uploadLoading) return; // 防止重复上传
-      
-      try {
-        this.uploadLoading = true;
-        await axios.post(`${this.backurl}/homework`, {
-          date: new Date(this.dateString).toISOString().split('T')[0],
-          data: this.homeworkData,
-          attendance: Array.from(this.selectedSet),
-          late: Array.from(this.lateSet),
-        });
-        this.synced = true;
-        this.showSyncMessage();
-      } catch (err) {
-        console.error("上传失败:", err);
-        this.showError("上传失败，请重试");
-      } finally {
-        this.uploadLoading = false;
-      }
-    },
-
-    async downloadData() {
-      try {
-        this.downloadLoading = true;
-        await this.downloadDataDirectly();
-      } catch (err) {
-        console.error("下载失败:", err);
-        this.showError("下载失败，请重试");
-      } finally {
-        this.downloadLoading = false;
-      }
-    },
-
-    async downloadDataDirectly() {
-      try {
-        const formattedDate = new Date(this.dateString).toISOString().split('T')[0];
-        const res = await axios.get(
-          `${this.backurl}/homework?date=${formattedDate}`
-        );
-
-        // 检查是否是今天的日期
-        const today = new Date();
-        const isToday = today.toISOString().split('T')[0] === formattedDate;
-        this.isToday = isToday;
-
-        if (!res.data.status) {
-          this.showNoDataMessage = true;
-          this.noDataMessage = res.data.msg || '未找到数据';
-          // 不再初始化作业数据，保持为空
-          this.homeworkData = {};
-          this.selectedSet.clear();
-          this.lateSet.clear();
-          return;
-        }
-
-        // 有数据的情况
-        this.showNoDataMessage = false;
-        this.homeworkData = res.data.data || {};
-        this.selectedSet = new Set(res.data.attendance || []);
-        this.lateSet = new Set(res.data.late || []);
-        this.synced = true;
-      } catch (error) {
-        console.error('下载数据失败:', error);
-        this.showError('下载数据失败，请重试');
-      }
     },
 
     updateBackendUrl() {
@@ -980,6 +1093,74 @@ export default {
         this.openDialog(firstSubject);
       }
     },
+
+    setAllPresent() {
+      this.selectedSet.clear();
+      this.lateSet.clear();
+    },
+
+    setAllAbsent() {
+      this.currentTimeSlotStudents.forEach((_, index) => {
+        this.setAbsent(index);
+      });
+    },
+
+    setAllLate() {
+      this.currentTimeSlotStudents.forEach((_, index) => {
+        this.setLate(index);
+      });
+    },
+
+    isPresent(index) {
+      return !this.selectedSet.has(index) && !this.lateSet.has(index);
+    },
+
+    isAbsent(index) {
+      return this.selectedSet.has(index);
+    },
+
+    isLate(index) {
+      return this.lateSet.has(index);
+    },
+
+    setPresent(index) {
+      this.selectedSet.delete(index);
+      this.lateSet.delete(index);
+    },
+
+    setAbsent(index) {
+      this.selectedSet.add(index);
+      this.lateSet.delete(index);
+    },
+
+    setLate(index) {
+      this.lateSet.add(index);
+      this.selectedSet.delete(index);
+    },
+
+    async saveAttendance() {
+      try {
+        await this.uploadData();
+        this.attendanceDialog = false;
+      } catch (error) {
+        console.error('保存出勤状态失败:', error);
+        this.showError('保存失败，请重试');
+      }
+    },
+
+    async downloadData() {
+      if (this.downloadLoading) return;
+      
+      try {
+        this.downloadLoading = true;
+        await this.downloadDataDirectly();
+      } catch (error) {
+        console.error('下载数据失败:', error);
+        this.showError('下载数据失败，请重试');
+      } finally {
+        this.downloadLoading = false;
+      }
+    },
   },
 
   watch: {
@@ -1003,6 +1184,9 @@ export default {
           }
         });
       }
+    },
+    selectedTimeSlot() {
+      this.updateCurrentTimeSlotStudents();
     }
   }
 };
