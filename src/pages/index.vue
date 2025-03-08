@@ -5,7 +5,7 @@
     </template>
 
     <v-app-bar-title>
-      {{ classNumber }}班 - {{ titleText }}
+      {{ state.classNumber }}班 - {{ titleText }}
     </v-app-bar-title>
 
     <v-spacer />
@@ -22,10 +22,10 @@
         @click="zoom('up')"
       />
       <v-menu
-        v-model="datePickerDialog"
+        v-model="state.datePickerDialog"
         :close-on-content-click="false"
       >
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <v-btn
             icon="mdi-calendar"
             variant="text"
@@ -34,7 +34,7 @@
         </template>
 
         <v-date-picker
-          v-model="selectedDate"
+          v-model="state.selectedDate"
           color="primary"
           @update:model-value="handleDateSelect"
         />
@@ -42,13 +42,20 @@
       <v-btn
         icon="mdi-refresh"
         variant="text"
-        :loading="downloadLoading"
+        :loading="loading.download"
         @click="downloadData"
       />
       <v-btn
         icon="mdi-cog"
         variant="text"
         @click="$router.push('/settings')"
+      />
+      <v-btn
+        icon="mdi-bell"
+        variant="text"
+        :badge="unreadCount || undefined"
+        :badge-color="unreadCount ? 'error' : undefined"
+        @click="$refs.messageLog.drawer = true"
       />
     </template>
   </v-app-bar>
@@ -58,102 +65,140 @@
       class="main-window flex-grow-1"
       fluid
     >
-      <div v-if="showNoDataMessage && !isToday" class="no-data-message">
-        <v-card class="text-center pa-4" >
-          <v-card-title class="text-h6">别看未来的作业了</v-card-title>
+      <div
+        v-if="state.showNoDataMessage && !state.isToday"
+        class="no-data-message"
+      >
+        <v-card class="text-center pa-4">
+          <v-card-title class="text-h6">
+            别看未来的作业了
+          </v-card-title>
           <v-card-text>
-            <div class="text-body-1">{{ noDataMessage }}</div>
+            <div class="text-body-1">
+              {{ state.noDataMessage }}
+            </div>
           </v-card-text>
         </v-card>
       </div>
 
       <template v-else>
-        <div class="grid-masonry" ref="gridContainer">
+        <!-- 有内容的科目卡片 -->
+        <div
+          ref="gridContainer"
+          class="grid-masonry"
+        >
           <div
             v-for="item in sortedItems"
             :key="item.key"
             class="grid-item"
-            :class="{ 
-              'empty-card': !item.content,
-              [`grid-row-${item.rowSpan}`]: true
-            }"
-            :style="{ 
+            :style="{
               'grid-row-end': `span ${item.rowSpan}`,
               order: item.order,
-              cursor: uploadLoading || downloadLoading || isPastDate ? 'not-allowed' : 'pointer',
-              opacity: uploadLoading || downloadLoading ? '0.7' : '1'
             }"
-            @click="!uploadLoading && !downloadLoading && !isPastDate && openDialog(item.key)"
+            @click="!isEditingDisabled && openDialog(item.key)"
           >
-            <v-card border height="100%">
-              <v-card-title :class="{ 'text-subtitle-1': !item.content }">
-                {{ item.name }}
-              </v-card-title>
-              <v-card-text :style="item.content ? contentStyle : null">
-                <template v-if="item.content">
-                  <v-list>
-                    <v-list-item
-                      v-for="text in splitPoint(item.content)"
-                      :key="text"
-                    >
-                      {{ text }}
-                    </v-list-item>
-                  </v-list>
-                </template>
-                <template v-else>
-                  <div class="text-center pa-2">
-                    <v-icon size="small" color="grey">mdi-plus</v-icon>
-                    <div class="text-caption text-grey">点击添加作业</div>
-                  </div>
-                </template>
+            <v-card
+              border
+              height="100%"
+            >
+              <v-card-title>{{ item.name }}</v-card-title>
+              <v-card-text :style="state.contentStyle">
+                <v-list>
+                  <v-list-item
+                    v-for="text in splitPoint(item.content)"
+                    :key="text"
+                  >
+                    {{ text }}
+                  </v-list-item>
+                </v-list>
               </v-card-text>
             </v-card>
           </div>
         </div>
 
-        <!-- 空科目按钮组 -->
-        <v-btn-group v-if="emptySubjectDisplay === 'button'" class="empty-subjects-container">
-          <v-btn
-            v-for="subject in emptySubjects"
-            :key="subject.key"
-            variant="tonal"
-            color="primary"
-            @click="!uploadLoading && !downloadLoading && openDialog(subject.key)"
-            :disabled="uploadLoading || downloadLoading"
+        <!-- 单独显示空科目 -->
+        <div class="empty-subjects mt-4">
+          <template v-if="emptySubjectDisplay === 'button'">
+            <v-btn-group class="gap-2 flex-wrap">
+              <v-btn
+                v-for="subject in unusedSubjects"
+                :key="subject.key"
+                variant="tonal"
+                color="primary"
+                :disabled="isEditingDisabled"
+                @click="openDialog(subject.key)"
+              >
+                <v-icon start>
+                  mdi-plus
+                </v-icon>
+                {{ subject.name }}
+              </v-btn>
+            </v-btn-group>
+          </template>
+          <div
+            v-else
+            class="empty-subjects-grid"
           >
-            <v-icon start>mdi-plus</v-icon>
-            {{ subject.name }}
-          </v-btn>
-        </v-btn-group>
+            <v-card
+              v-for="subject in unusedSubjects"
+              :key="subject.key"
+              border
+              class="empty-subject-card"
+              :disabled="isEditingDisabled"
+              @click="openDialog(subject.key)"
+            >
+              <v-card-title class="text-subtitle-1">
+                {{ subject.name }}
+              </v-card-title>
+              <v-card-text class="text-center">
+                <v-icon
+                  size="small"
+                  color="grey"
+                >
+                  mdi-plus
+                </v-icon>
+                <div class="text-caption text-grey">
+                  点击添加作业
+                </div>
+              </v-card-text>
+            </v-card>
+          </div>
+        </div>
       </template>
     </v-container>
 
     <!-- 出勤统计区域 -->
     <v-col
-      v-if="studentList.length"
+      v-if="state.studentList && state.studentList.length"
       class="attendance-area"
       cols="1"
       @click="!isPastDate ? setAttendanceArea() : null"
     >
       <h1>出勤</h1>
-      <h2>应到: {{ studentList.length }}人</h2>
-      <h2>实到: {{ studentList.length - selectedSet.size }}人</h2>
-      <h2>请假: {{ selectedSet.size }}人</h2>
-      <h3 v-for="(i, index) in selectedSet" :key="'absent-' + index">
-        {{ `${index + 1}. ${studentList[i]}` }}
+      <h2>应到: {{ state.studentList.length }}人</h2>
+      <h2>实到: {{ state.studentList.length - state.selectedSet.size }}人</h2>
+      <h2>请假: {{ state.selectedSet.size }}人</h2>
+      <h3
+        v-for="(i, index) in state.selectedSet"
+        :key="'absent-' + index"
+      >
+        {{ `${index + 1}. ${state.studentList[i]}` }}
       </h3>
-      <h2>迟到: {{ lateSet.size }}人</h2>
-      <h3 v-for="(i, index) in lateSet" :key="'late-' + index">
-        {{ `${index + 1}. ${studentList[i]}` }}
+      <h2>迟到: {{ state.lateSet.size }}人</h2>
+      <h3
+        v-for="(i, index) in state.lateSet"
+        :key="'late-' + index"
+      >
+        {{ `${index + 1}. ${state.studentList[i]}` }}
       </h3>
     </v-col>
   </div>
   <v-container fluid>
     <v-btn
-      v-if="!synced"
+      v-if="!state.synced"
       color="error"
       size="large"
-      :loading="uploadLoading"
+      :loading="loading.upload"
       class="ml-2"
       @click="uploadData"
     >
@@ -169,19 +214,19 @@
     </v-btn>
   </v-container>
   <v-dialog
-    v-model="dialogVisible"
+    v-model="state.dialogVisible"
     width="500"
     @click:outside="handleClose"
   >
     <v-card border>
-      <v-card-title>{{ dialogTitle }}</v-card-title>
+      <v-card-title>{{ state.dialogTitle }}</v-card-title>
       <v-card-subtitle>
         {{ autoSave ? "喵？喵呜！" : "写完后点击上传谢谢喵" }}
       </v-card-subtitle>
       <v-card-text>
         <v-textarea
           ref="inputRef"
-          v-model="textarea"
+          v-model="state.textarea"
           auto-grow
           placeholder="使用换行表示分条"
           rows="5"
@@ -191,7 +236,7 @@
   </v-dialog>
 
   <v-dialog
-    v-model="attendDialogVisible"
+    v-model="state.attendDialogVisible"
     width="800"
   >
     <v-card>
@@ -203,7 +248,7 @@
         <v-container fluid>
           <v-row>
             <v-col
-              v-for="(name, i) in studentList"
+              v-for="(name, i) in state.studentList"
               :key="i"
               cols="12"
               sm="6"
@@ -211,11 +256,13 @@
             >
               <v-card
                 border
-                :class="{ selected: selectedSet.has(i) || lateSet.has(i) }"
+                :class="{
+                  selected: state.selectedSet.has(i) || state.lateSet.has(i),
+                }"
                 :color="
-                  selectedSet.has(i)
+                  state.selectedSet.has(i)
                     ? 'primary'
-                    : lateSet.has(i)
+                    : state.lateSet.has(i)
                       ? 'orange'
                       : ''
                 "
@@ -233,14 +280,14 @@
   </v-dialog>
 
   <v-snackbar
-    v-model="snackbar"
+    v-model="state.snackbar"
     :timeout="2000"
   >
-    {{ snackbarText }}
+    {{ state.snackbarText }}
   </v-snackbar>
 
   <v-dialog
-    v-model="attendanceDialog"
+    v-model="state.attendanceDialog"
     max-width="600"
   >
     <v-card>
@@ -249,20 +296,9 @@
       </v-card-title>
 
       <v-card-text>
-        <v-select
-          v-model="selectedTimeSlot"
-          :items="timeSlots"
-          item-title="name"
-          item-value="id"
-          label="选择时间段"
-          class="mb-4"
-        />
-
         <v-expansion-panels>
           <v-expansion-panel>
-            <v-expansion-panel-title>
-              批量操作
-            </v-expansion-panel-title>
+            <v-expansion-panel-title> 批量操作 </v-expansion-panel-title>
             <v-expansion-panel-text>
               <v-btn-group>
                 <v-btn
@@ -294,11 +330,11 @@
         <v-list class="mt-4">
           <v-list-subheader>学生列表</v-list-subheader>
           <v-list-item
-            v-for="(student, index) in currentTimeSlotStudents"
+            v-for="(student, index) in state.studentList"
             :key="index"
             :title="student"
           >
-            <template v-slot:append>
+            <template #append>
               <v-btn-group>
                 <v-btn
                   :color="isPresent(index) ? 'success' : ''"
@@ -335,196 +371,88 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <message-log ref="messageLog" />
 </template>
 
-<style scoped>
-.grid-masonry {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  padding: 8px;
-  grid-auto-flow: dense;
-}
-
-.grid-item {
-  width: 100%;
-  transition: all 0.2s ease;
-}
-
-.empty-card {
-  transform: scale(0.9);
-  opacity: 0.8;
-  grid-row-end: span 1 !important;
-}
-
-.empty-card:hover {
-  transform: scale(0.95);
-  opacity: 1;
-}
-
-.empty-subjects-container {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-@media (max-width: 1199px) {
-  .grid-masonry {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 799px) {
-  .grid-masonry {
-    grid-template-columns: 1fr;
-  }
-  
-  .empty-card {
-    transform: scale(0.95);
-  }
-}
-
-/* 确保容器高度不超过视口 */
-.main-window {
-  max-height: calc(100vh - 180px);
-  overflow-y: auto;
-}
-
-/* 优化滚动条样式 */
-.main-window::-webkit-scrollbar {
-  width: 8px;
-}
-
-.main-window::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.main-window::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
-.main-window::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.3);
-}
-
-.no-data-message {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-  margin: 20px 0;
-}
-
-.attendance-drawer {
-  border-left: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-.attendance-drawer :deep(.v-navigation-drawer__content) {
-  overflow-y: auto;
-}
-
-/* 优化滚动条样式 */
-.attendance-drawer :deep(.v-navigation-drawer__content::-webkit-scrollbar) {
-  width: 8px;
-}
-
-.attendance-drawer :deep(.v-navigation-drawer__content::-webkit-scrollbar-track) {
-  background: transparent;
-}
-
-.attendance-drawer :deep(.v-navigation-drawer__content::-webkit-scrollbar-thumb) {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
-.attendance-drawer :deep(.v-navigation-drawer__content::-webkit-scrollbar-thumb:hover) {
-  background-color: rgba(0, 0, 0, 0.3);
-}
-
-/* 响应式调整 */
-@media (max-width: 960px) {
-  .attendance-drawer {
-    display: none;
-  }
-}
-
-.text-success {
-  color: rgb(var(--v-theme-success));
-}
-
-.text-error {
-  color: rgb(var(--v-theme-error));
-}
-
-.text-warning {
-  color: rgb(var(--v-theme-warning));
-}
-
-.attendance-card {
-  display: flex;
-  flex-direction: column;
-}
-
-.attendance-numbers {
-  padding: 20px 0;
-}
-
-.total-number {
-  border-bottom: 1px solid rgba(0,0,0,0.12);
-  padding-bottom: 20px;
-}
-
-.status-number {
-  flex: 1;
-}
-
-.text-h2, .text-h3 {
-  line-height: 1.2;
-}
-</style>
-
 <script>
-import axios from "axios";
+import MessageLog from '@/components/MessageLog.vue';
+import dataProvider from "@/utils/dataProvider";
+import { getSetting, watchSettings, setSetting } from "@/utils/settings";
 import { useDisplay } from "vuetify";
-import { getSetting, watchSettings } from '@/utils/settings';
+import "../styles/index.scss";
+import { debounce, throttle } from '@/utils/debounce';
 
 export default {
   name: "HomeworkBoard",
+  components: {
+    MessageLog
+  },
   data() {
     return {
-      backurl: '',
-      classNumber: '',
-      currentEditSubject: null,
-      studentList: [],
-      selectedSet: new Set(), // Absent students
-      lateSet: new Set(), // Late students
-      dialogVisible: false,
-      dialogTitle: "",
-      textarea: "",
-      dateString: "",
-      synced: false,
-      attendDialogVisible: false,
-      contentStyle: { "font-size": `${getSetting('font.size')}px` },
-      uploadLoading: false,
-      downloadLoading: false,
-      homeworkData: {},
-      snackbar: false,
-      snackbarText: "",
-      fontSize: getSetting('font.size'),
-      datePickerDialog: false,
-      selectedDate: null,
-      refreshInterval: null,
-      subjectOrder: [
-        "语文", "数学", "英语", "物理", "化学", 
-        "生物", "政治", "历史", "地理", "其他"
-      ],
-      showNoDataMessage: false,
-      noDataMessage: '',
-      isToday: false,
-      attendanceDialog: false,
-      selectedTimeSlot: null,
-      timeSlots: [],
-      currentTimeSlotStudents: [],
+      dataKey: "",
+      provider: "",
+      state: {
+        classNumber: "",
+        studentList: [],
+        selectedSet: new Set(),
+        lateSet: new Set(),
+        dialogVisible: false,
+        dialogTitle: "",
+        textarea: "",
+        dateString: "", // 从 state 内统一管理日期
+        synced: false,
+        attendDialogVisible: false,
+        contentStyle: { "font-size": `${getSetting("font.size")}px` },
+        uploadLoading: false,
+        downloadLoading: false,
+        homeworkData: {},
+        snackbar: false,
+        snackbarText: "",
+        fontSize: getSetting("font.size"),
+        datePickerDialog: false,
+        selectedDate: null,
+        refreshInterval: null,
+        subjectOrder: [
+          "语文",
+          "数学",
+          "英语",
+          "物理",
+          "化学",
+          "生物",
+          "政治",
+          "历史",
+          "地理",
+          "其他",
+        ],
+        showNoDataMessage: false,
+        noDataMessage: "",
+        isToday: false,
+        attendanceDialog: false,
+        availableSubjects: [
+          { key: "语文", name: "语文" },
+          { key: "数学", name: "数学" },
+          { key: "英语", name: "英语" },
+          { key: "物理", name: "物理" },
+          { key: "化学", name: "化学" },
+          { key: "生物", name: "生物" },
+          { key: "政治", name: "政治" },
+          { key: "历史", name: "历史" },
+          { key: "地理", name: "地理" },
+          { key: "其他", name: "其他" },
+        ],
+      },
+      loading: {
+        download: false,
+        upload: false,
+        students: false,
+      },
+      debouncedUpload: null,
+      throttledReflow: null,
+      _sortedItemsCache: {
+        key: '',
+        value: []
+      },
     };
   },
 
@@ -535,85 +463,113 @@ export default {
     titleText() {
       const now = new Date();
       const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
       const today = `${year}-${month}-${day}`;
 
       const yesterday = new Date(now);
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayFormatted = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-      
-      if (this.dateString === today) {
-        return '今天的作业';
-      } else if (this.dateString === yesterdayFormatted) {
-        return '昨天的作业';
+      const yesterdayFormatted = `${yesterday.getFullYear()}-${String(
+        yesterday.getMonth() + 1
+      ).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+
+      if (this.state.dateString === today) {
+        return "今天的作业";
+      } else if (this.state.dateString === yesterdayFormatted) {
+        return "昨天的作业";
       } else {
-        return `${this.dateString}的作业`;
+        return `${this.state.dateString}的作业`;
       }
     },
     sortedItems() {
-      const items = Object.entries(this.homeworkData)
+      const key = `${JSON.stringify(this.state.homeworkData)}_${this.state.subjectOrder.join()}_${this.dynamicSort}`;
+      if (this._sortedItemsCache.key === key) {
+        return this._sortedItemsCache.value;
+      }
+
+      const items = Object.entries(this.state.homeworkData)
+        .filter(([_, value]) => value.content?.trim())
         .map(([key, value]) => ({
           key,
           name: value.name,
           content: value.content,
-          order: this.subjectOrder.indexOf(key),
-          rowSpan: value.content ? 
-            Math.ceil((value.content.split('\n').filter(line => line.trim()).length + 1) * 0.8) : 1
-        }))
-        .filter(item => {
-          if (this.emptySubjectDisplay === 'button') {
-            return item.content;
-          }
-          return true;
-        });
+          order: this.state.subjectOrder.indexOf(key),
+          rowSpan: Math.ceil((value.content.split('\n').filter(line => line.trim()).length + 1) * 0.8)
+        }));
 
-      // Sort items: prioritize non-empty content first
-      return items.sort((a, b) => {
-        // If one item has content and the other does not, prioritize the one with content
-        if (a.content && !b.content) return -1;
-        if (!a.content && b.content) return 1;
+      const result = this.dynamicSort
+        ? this.optimizeGridLayout(items)
+        : items.sort((a, b) => a.order - b.order);
 
-        // If both have content or both are empty, sort by order
-        return a.order - b.order;
-      });
+      // 使用方法更新缓存
+      this.updateSortedItemsCache(key, result);
+
+      return result;
     },
-    attendanceVisible() {
-      return this.studentList.length > 0;
+    unusedSubjects() {
+      const usedKeys = Object.keys(this.state.homeworkData);
+      return this.state.availableSubjects.filter(
+        (subject) => !usedKeys.includes(subject.key)
+      );
     },
     emptySubjects() {
-      if (this.emptySubjectDisplay !== 'button') return [];
-      
-      return Object.entries(this.homeworkData)
-        .map(([key, value]) => ({
-          key,
-          name: value.name,
-          content: value.content,
-          order: this.subjectOrder.indexOf(key)
-        }))
-        .filter(subject => !subject.content)
-        .sort((a, b) => a.order - b.order);
+      if (this.emptySubjectDisplay !== "button") return [];
+      return this.unusedSubjects;
     },
     autoSave() {
-      return getSetting('edit.autoSave');
+      return getSetting("edit.autoSave");
     },
     refreshBeforeEdit() {
-      return getSetting('edit.refreshBeforeEdit');
+      return getSetting("edit.refreshBeforeEdit");
     },
     emptySubjectDisplay() {
-      return getSetting('display.emptySubjectDisplay');
+      return getSetting("display.emptySubjectDisplay");
     },
     dynamicSort() {
-      return getSetting('display.dynamicSort');
+      return getSetting("display.dynamicSort");
     },
     isPastDate() {
-      const selectedDate = new Date(this.dateString);
+      const selected = new Date(this.state.dateString);
       const today = new Date();
-      // 将时间部分归零以进行比较
-      selectedDate.setHours(0, 0, 0, 0);
+      selected.setHours(0, 0, 0, 0);
       today.setHours(0, 0, 0, 0);
-      return selectedDate < today; // 如果选择的日期在今天之前，则返回 true
+      return selected < today;
     },
+    isEditingDisabled() {
+      return this.state.uploadLoading || this.state.downloadLoading || this.isPastDate;
+    },
+    unreadCount() {
+      return this.$refs.messageLog?.unreadCount || 0;
+    }
+  },
+
+  watch: {
+    homeworkData: {
+      handler() {
+        this.$nextTick(() => {
+          if (this.$refs.waterfall) {
+            this.$refs.waterfall.reflow();
+          }
+        });
+      },
+      deep: true,
+    },
+    "$vuetify.display.width": {
+      handler() {
+        this.throttledReflow();
+      },
+    },
+  },
+
+  created() {
+    // 创建防抖的上传函数
+    this.debouncedUpload = debounce(this.uploadData, 2000);
+    // 创建节流的重排函数
+    this.throttledReflow = throttle(() => {
+      if (this.$refs.gridContainer) {
+        this.optimizeGridLayout(this.sortedItems);
+      }
+    }, 200);
   },
 
   async mounted() {
@@ -621,8 +577,6 @@ export default {
       this.updateBackendUrl();
       await this.initializeData();
       this.setupAutoRefresh();
-      
-      // 监听设置变化
       this.unwatchSettings = watchSettings(() => {
         this.updateSettings();
       });
@@ -636,218 +590,173 @@ export default {
     if (this.unwatchSettings) {
       this.unwatchSettings();
     }
-    if (this.refreshInterval) {
-      clearInterval(this.refreshInterval);
+    if (this.state.refreshInterval) {
+      // 注意刷新间隔存放在 state 内
+      clearInterval(this.state.refreshInterval);
     }
   },
 
   methods: {
     async initializeData() {
+      this.provider = getSetting("server.provider");
+      const domain = getSetting("server.domain");
+      const classNum = getSetting("server.classNumber");
+
+      this.dataKey = this.provider === 'server' ? `${domain}/${classNum}` : classNum;
+      this.state.classNumber = classNum;
+
+      const date = new URLSearchParams(window.location.search).get("date")
+        || new Date().toISOString().split("T")[0];
+      this.state.dateString = date;
+      this.state.isToday = date === new Date().toISOString().split("T")[0];
+
+      await Promise.all([
+        this.downloadData(),
+        this.loadConfig()
+      ]);
+    },
+
+    async downloadData() {
+      if (this.loading.download) return;
+
       try {
-        // 获取配置信息（包含学生列表和时间段）
-        await this.loadConfig();
-        
-        // 获取URL中的日期参数
-        const urlParams = new URLSearchParams(window.location.search);
-        const dateParam = urlParams.get('date');
-        
-        if (dateParam) {
-          this.dateString = dateParam;
+        this.loading.download = true;
+        const response = await dataProvider.loadData(
+          this.provider,
+          this.dataKey,
+          this.state.dateString
+        );
+
+        if (!response.success) {
+          // 处理错误情况
+          if (response.error.code === 'NOT_FOUND') {
+            this.state.showNoDataMessage = true;
+            this.state.noDataMessage = response.error.message;
+            this.state.homeworkData = {};
+            this.state.selectedSet = new Set();
+            this.state.lateSet = new Set();
+          } else {
+            throw new Error(response.error.message);
+          }
         } else {
-          const now = new Date();
-          this.dateString = now.toISOString().split('T')[0];
+          // 处理成功情况
+          const { homework = {}, attendance = {} } = response.data;
+          this.state.homeworkData = homework;
+          this.state.selectedSet = new Set(attendance.absent || []);
+          this.state.lateSet = new Set(attendance.late || []);
+          this.state.synced = true;
+          this.state.showNoDataMessage = false;
+          this.showMessage('下载成功', '数据已更新');
+        }
+      } catch (error) {
+        this.showError('下载失败', error.message);
+      } finally {
+        this.loading.download = false;
+      }
+    },
+
+    async uploadData() {
+      if (this.loading.upload) return;
+
+      try {
+        this.loading.upload = true;
+        const response = await dataProvider.saveData(
+          this.provider,
+          this.dataKey,
+          {
+            homework: this.state.homeworkData,
+            attendance: {
+              absent: Array.from(this.state.selectedSet),
+              late: Array.from(this.state.lateSet)
+            }
+          },
+          this.state.dateString
+        );
+
+        if (!response.success) {
+          throw new Error(response.error.message);
         }
 
-        // 下载当天作业数据
-        await this.downloadData();
+        this.state.synced = true;
+        this.showMessage(response.message || '保存成功');
       } catch (error) {
-        console.error('初始化失败:', error);
-        this.showError('初始化失败，请检查网络连接');
+        console.error('保存失败:', error);
+        this.showError('保存失败', error.message || '请重试');
+      } finally {
+        this.loading.upload = false;
       }
     },
 
     async loadConfig() {
       try {
-        const domain = getSetting('server.domain');
-        const classNum = getSetting('server.classNumber');
-        
-        if (!domain || !classNum) {
-          throw new Error('请先设置服务器域名和班号');
-        }
-
-        const res = await axios.get(`${domain}/${classNum}/config`);
-        // 直接使用返回的数据，不再需要 .data 层
-        this.studentList = res.data.studentList || [];
-        this.timeSlots = res.data.timeSlots || [];
-        
-        // 如果有时间段，默认选择第一个
-        if (this.timeSlots.length > 0) {
-          this.selectedTimeSlot = this.timeSlots[0].id;
-          this.updateCurrentTimeSlotStudents();
-        }
-      } catch (error) {
-        console.error('加载配置失败:', error);
-        throw error;
-      }
-    },
-
-    updateCurrentTimeSlotStudents() {
-      if (this.selectedTimeSlot) {
-        const slot = this.timeSlots.find(s => s.id === this.selectedTimeSlot);
-        this.currentTimeSlotStudents = slot ? slot.students : [];
-      } else {
-        this.currentTimeSlotStudents = this.studentList;
-      }
-    },
-
-    async downloadDataDirectly() {
-      try {
-        const formattedDate = new Date(this.dateString).toISOString().split('T')[0];
-        const res = await axios.get(
-          `${this.backurl}/homework?date=${formattedDate}`
+        const response = await dataProvider.loadConfig(
+          this.provider,
+          this.dataKey
         );
 
-        const today = new Date();
-        this.isToday = today.toISOString().split('T')[0] === formattedDate;
-
-        // Check if the response indicates success
-        if (res.data && res.data.status !== false) {
-          this.showNoDataMessage = false;
-
-          // Process the new data structure
-          const { homework, attendance } = res.data;
-
-          // Initialize homeworkData with existing data or default empty subjects
-          this.homeworkData = {
-            "语文": { name: "语文", content: "" },
-            "数学": { name: "数学", content: "" },
-            "英语": { name: "英语", content: "" },
-            "物理": { name: "物理", content: "" },
-            "化学": { name: "化学", content: "" },
-            "生物": { name: "生物", content: "" },
-            "历史": { name: "历史", content: "" },
-            "地理": { name: "地理", content: "" },
-            "政治": { name: "政治", content: "" },
-            "其他": { name: "其他", content: "" },
-          };
-
-          // Update homeworkData with existing data from the response
-          for (const subject in homework) {
-            if (homework.hasOwnProperty(subject)) {
-              this.homeworkData[subject] = homework[subject];
-            }
-          }
-
-          // Update attendance information if available
-          if (attendance) {
-            this.selectedTimeSlot = attendance.timeSlotId;
-            this.selectedSet = new Set(attendance.absent || []);
-            this.lateSet = new Set(attendance.late || []);
-            this.updateCurrentTimeSlotStudents();
-          } else {
-            this.selectedSet.clear();
-            this.lateSet.clear();
-          }
-
-          this.synced = true;
-        } else {
-          // Handle the error case for today's date
-          if (this.isToday && res.data.status == false) {
-            this.showNoDataMessage = false; // Ensure we show the empty data
-            this.homeworkData = {
-              "语文": { name: "语文", content: "" },
-              "数学": { name: "数学", content: "" },
-              "英语": { name: "英语", content: "" },
-              "物理": { name: "物理", content: "" },
-              "化学": { name: "化学", content: "" },
-              "生物": { name: "生物", content: "" },
-              "历史": { name: "历史", content: "" },
-              "地理": { name: "地理", content: "" },
-              "政治": { name: "政治", content: "" },
-            };
-            this.noDataMessage = ''; // Clear any previous message
-          } else {
-            // Handle other error cases
-            this.showNoDataMessage = true;
-            this.noDataMessage = res.data.msg || '未找到数据';
-            this.homeworkData = {};
-            this.selectedSet.clear();
-            this.lateSet.clear();
-          }
+        if (!response.success) {
+          throw new Error(response.error.message);
         }
+
+        this.state.studentList = response.data.studentList || [];
       } catch (error) {
-        console.error('下载数据失败:', error);
-        this.showError('下载数据失败，请重试');
+        console.error("加载配置失败:", error);
+        this.showError("加载配置失败", error.message);
       }
-    },
-
-    async uploadData() {
-      if (this.uploadLoading) return;
-      
-      try {
-        this.uploadLoading = true;
-        await axios.post(`${this.backurl}/homework`, {
-          date: new Date(this.dateString).toISOString().split('T')[0],
-          homework: this.homeworkData, // 修改键名为 homework
-          attendance: {
-            timeSlotId: this.selectedTimeSlot,
-            absent: Array.from(this.selectedSet),
-            late: Array.from(this.lateSet),
-          },
-        });
-        this.synced = true;
-        this.showSyncMessage();
-      } catch (err) {
-        console.error("上传失败:", err);
-        this.showError("上传失败，请重试");
-      } finally {
-        this.uploadLoading = false;
-      }
-    },
-
-    showSyncMessage() {
-      this.snackbar = true;
-      this.snackbarText = "数据已完成与服务器同步";
-    },
-
-    showError(message) {
-      this.snackbar = true;
-      this.snackbarText = message;
     },
 
     handleClose() {
-      if (this.currentEditSubject) {
-        // Update only the specific subject being edited
-        const currentSubject = this.homeworkData[this.currentEditSubject];
-        if (currentSubject) {
-          currentSubject.content = this.textarea;
-        }
-        this.synced = false;
-        
-        // If auto-save is enabled, upload the data
+      if (!this.currentEditSubject) return;
+
+      const content = this.state.textarea.trim();
+      if (content) {
+        this.state.homeworkData[this.currentEditSubject] = {
+          name: this.state.availableSubjects.find(s => s.key === this.currentEditSubject)?.name,
+          content
+        };
+        this.state.synced = false;
         if (this.autoSave) {
+          // 直接调用上传，移除防抖
           this.uploadData();
         }
+      } else {
+        delete this.state.homeworkData[this.currentEditSubject];
       }
-      this.dialogVisible = false;
+      this.state.dialogVisible = false;
+    },
+
+    showSyncMessage() {
+      this.state.snackbar = true;
+      this.state.snackbarText = "数据已完成与服务器同步";
+    },
+
+    showError(message) {
+      this.state.snackbar = true;
+      this.state.snackbarText = message;
     },
 
     async openDialog(subject) {
-      // 如果启用了编辑前刷新，先刷新数据
       if (this.refreshBeforeEdit) {
         try {
           await this.downloadData();
         } catch (err) {
+          console.error("刷新数据失败:", err);
           this.showError("刷新数据失败，可能显示的不是最新数据");
         }
       }
-
       this.currentEditSubject = subject;
-      this.dialogTitle = this.homeworkData[subject].name;
-      this.textarea = this.homeworkData[subject].content;
-      this.dialogVisible = true;
-
-      // 在下一个 tick 后聚焦输入框
+      // 如果是新科目，需要创建对应的数据结构
+      if (!this.state.homeworkData[subject]) {
+        this.state.homeworkData[subject] = {
+          name:
+            this.state.availableSubjects.find((s) => s.key === subject)?.name ||
+            subject,
+          content: "",
+        };
+      }
+      this.state.dialogTitle = this.state.homeworkData[subject].name;
+      this.state.textarea = this.state.homeworkData[subject].content;
+      this.state.dialogVisible = true;
       this.$nextTick(() => {
         if (this.$refs.inputRef) {
           this.$refs.inputRef.focus();
@@ -860,278 +769,218 @@ export default {
     },
 
     setAttendanceArea() {
-      this.attendDialogVisible = true;
+      this.state.attendDialogVisible = true;
     },
 
     toggleStudentStatus(index) {
-      if (this.selectedSet.has(index)) {
-        this.selectedSet.delete(index);
-        this.lateSet.add(index);
-      } else if (this.lateSet.has(index)) {
-        this.lateSet.delete(index);
+      if (this.state.selectedSet.has(index)) {
+        this.state.selectedSet.delete(index);
+        this.state.lateSet.add(index);
+      } else if (this.state.lateSet.has(index)) {
+        this.state.lateSet.delete(index);
       } else {
-        this.selectedSet.add(index);
+        this.state.selectedSet.add(index);
       }
-      this.synced = false;
-      
-      // 如果启用了自动保存，状态改变时自动上传
+      this.state.synced = false;
       if (this.autoSave) {
         this.uploadData();
       }
     },
-    cleanstudentslist()
-    {
-      this.selectedSet.clear();
-      this.lateSet.clear();
-      this.synced = false;
 
-      // 如果启用了自动保存，清空后自动上传
+    cleanstudentslist() {
+      this.state.selectedSet.clear();
+      this.state.lateSet.clear();
+      this.state.synced = false;
       if (this.autoSave) {
         this.uploadData();
       }
     },
+
     zoom(direction) {
       const step = 2;
-      if (direction === "up" && this.fontSize < 100) {
-        this.fontSize += step;
-      } else if (direction === "out" && this.fontSize > 16) {
-        this.fontSize -= step;
+      if (direction === "up" && this.state.fontSize < 100) {
+        this.state.fontSize += step;
+      } else if (direction === "out" && this.state.fontSize > 16) {
+        this.state.fontSize -= step;
       }
-      this.contentStyle = {
-        "font-size": `${this.fontSize}px`,
+      this.state.contentStyle = {
+        "font-size": `${this.state.fontSize}px`,
       };
-      setSetting('font.size', this.fontSize);
+      setSetting("font.size", this.state.fontSize);
     },
 
     updateBackendUrl() {
-      const domain = getSetting('server.domain');
-      const classNum = getSetting('server.classNumber');
-      
-      if (domain && classNum) {
-        this.backurl = `${domain}/${classNum}`;
-        this.classNumber = classNum;
-      }
+      const provider = getSetting("server.provider");
+      const domain = getSetting("server.domain");
+      const classNum = getSetting("server.classNumber");
+
+      this.provider = provider;
+      this.dataKey = provider === 'server' ? `${domain}/${classNum}` : classNum;
+      this.state.classNumber = classNum;
     },
 
     setupAutoRefresh() {
-      const autoRefresh = getSetting('refresh.auto');
-      const interval = getSetting('refresh.interval');
-      
-      if (this.refreshInterval) {
-        clearInterval(this.refreshInterval);
+      const autoRefresh = getSetting("refresh.auto");
+      const interval = getSetting("refresh.interval");
+      if (this.state.refreshInterval) {
+        clearInterval(this.state.refreshInterval);
       }
-      
       if (autoRefresh) {
-        this.refreshInterval = setInterval(() => {
+        this.state.refreshInterval = setInterval(() => {
           this.downloadData();
         }, interval * 1000);
       }
     },
 
     updateSettings() {
-      // 更新字体大小
-      this.fontSize = getSetting('font.size');
-      this.contentStyle = { "font-size": `${this.fontSize}px` };
-      
-      // 更新自动刷新
+      this.state.fontSize = getSetting("font.size");
+      this.state.contentStyle = { "font-size": `${this.state.fontSize}px` };
       this.setupAutoRefresh();
-      
-      // 更新服务器设置
       this.updateBackendUrl();
     },
 
     handleDateSelect(newDate) {
       if (newDate) {
-        // 使用本地时区处理日期，避免时区偏移
         const date = new Date(newDate);
         const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
         const formattedDate = `${year}-${month}-${day}`;
-        
-        this.dateString = formattedDate;
+        this.state.dateString = formattedDate;
         this.$router.push(`/?date=${formattedDate}`);
         this.downloadData();
       }
     },
 
     optimizeGridLayout(items) {
-      // 首先按内容长度和科目顺序排序
-      const sortedItems = items.sort((a, b) => {
-        // 有内容的排在前面
-        if (a.content && !b.content) return -1;
-        if (!a.content && b.content) return 1;
-        
-        // 内容较长的优先
-        if (a.content && b.content) {
-          const lengthDiff = b.rowSpan - a.rowSpan;
-          if (lengthDiff !== 0) return lengthDiff;
-        }
-        
-        // 最后按科目顺序
-        return a.order - b.order;
+      // 设置最大列数
+      const maxColumns = Math.min(3, Math.floor(window.innerWidth / 300));
+      if (maxColumns <= 1) return items;
+
+      // 使用贪心算法分配
+      const columns = Array.from({ length: maxColumns }, () => ({ height: 0, items: [] }));
+
+      items.forEach(item => {
+        const shortestColumn = columns.reduce(
+          (min, col, i) => col.height < columns[min].height ? i : min,
+          0
+        );
+        columns[shortestColumn].items.push(item);
+        columns[shortestColumn].height += item.rowSpan;
       });
 
-      // 计算每列的当前高度
-      const columnHeights = [0, 0, 0];
-      const columnItems = [[], [], []];
-      
-      // 分配项目到最短的列
-      sortedItems.forEach(item => {
-        const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
-        columnHeights[shortestColumn] += item.rowSpan;
-        columnItems[shortestColumn].push(item);
-      });
-
-      // 将所有列的项目合并，并设置显示顺序
-      return columnItems.flat().map((item, index) => ({
+      // 展平结果并添加顺序
+      return columns.flatMap(col => col.items).map((item, index) => ({
         ...item,
         order: index
       }));
     },
 
     fixedGridLayout(items) {
-      // 定义每行的科目顺序
       const rowSubjects = [
         ["语文", "数学", "英语"],
         ["物理", "化学", "生物"],
-        ["政治", "历史", "地理", "其他"]
+        ["政治", "历史", "地理", "其他"],
       ];
-
-      // 按照固定布局排序
-      return items.sort((a, b) => {
-        // 找出科目所在的行号
-        const getRowIndex = (subject) => {
-          for (let i = 0; i < rowSubjects.length; i++) {
-            if (rowSubjects[i].includes(subject)) {
-              return i;
+      return items
+        .sort((a, b) => {
+          const getRowIndex = (subject) => {
+            for (let i = 0; i < rowSubjects.length; i++) {
+              if (rowSubjects[i].includes(subject)) {
+                return i;
+              }
             }
+            return rowSubjects.length;
+          };
+          const getColumnIndex = (subject) => {
+            for (const row of rowSubjects) {
+              const index = row.indexOf(subject);
+              if (index !== -1) return index;
+            }
+            return 999;
+          };
+          const rowA = getRowIndex(a.key);
+          const rowB = getRowIndex(b.key);
+          if (rowA !== rowB) {
+            return rowA - rowB;
           }
-          return rowSubjects.length; // 其他科目放最后
-        };
-
-        // 获取科目在行内的位置
-        const getColumnIndex = (subject) => {
-          for (const row of rowSubjects) {
-            const index = row.indexOf(subject);
-            if (index !== -1) return index;
-          }
-          return 999; // 未知科目放最后
-        };
-
-        const rowA = getRowIndex(a.key);
-        const rowB = getRowIndex(b.key);
-
-        if (rowA !== rowB) {
-          return rowA - rowB;
-        }
-
-        // 同一行内按照预定义顺序排序
-        const colA = getColumnIndex(a.key);
-        const colB = getColumnIndex(b.key);
-        return colA - colB;
-      }).map((item, index) => ({
-        ...item,
-        order: index,
-        // 固定布局时每个卡片占用相同的行高
-        rowSpan: item.content ? 2 : 1
-      }));
+          const colA = getColumnIndex(a.key);
+          const colB = getColumnIndex(b.key);
+          return colA - colB;
+        })
+        .map((item, index) => ({
+          ...item,
+          order: index,
+          rowSpan: item.content ? 2 : 1,
+        }));
     },
 
     setAllPresent() {
-      this.selectedSet.clear();
-      this.lateSet.clear();
+      this.state.selectedSet.clear();
+      this.state.lateSet.clear();
     },
 
     setAllAbsent() {
-      this.currentTimeSlotStudents.forEach((_, index) => {
+      this.state.studentList.forEach((_, index) => {
         this.setAbsent(index);
       });
     },
 
     setAllLate() {
-      this.currentTimeSlotStudents.forEach((_, index) => {
+      this.state.studentList.forEach((_, index) => {
         this.setLate(index);
       });
     },
 
     isPresent(index) {
-      return !this.selectedSet.has(index) && !this.lateSet.has(index);
+      return (
+        !this.state.selectedSet.has(index) && !this.state.lateSet.has(index)
+      );
     },
 
     isAbsent(index) {
-      return this.selectedSet.has(index);
+      return this.state.selectedSet.has(index);
     },
 
     isLate(index) {
-      return this.lateSet.has(index);
+      return this.state.lateSet.has(index);
     },
 
     setPresent(index) {
-      this.selectedSet.delete(index);
-      this.lateSet.delete(index);
+      this.state.selectedSet.delete(index);
+      this.state.lateSet.delete(index);
     },
 
     setAbsent(index) {
-      this.selectedSet.add(index);
-      this.lateSet.delete(index);
+      this.state.selectedSet.add(index);
+      this.state.lateSet.delete(index);
     },
 
     setLate(index) {
-      this.lateSet.add(index);
-      this.selectedSet.delete(index);
+      this.state.lateSet.add(index);
+      this.state.selectedSet.delete(index);
     },
 
     async saveAttendance() {
       try {
         await this.uploadData();
-        this.attendanceDialog = false;
+        this.state.attendanceDialog = false;
       } catch (error) {
-        console.error('保存出勤状态失败:', error);
-        this.showError('保存失败，请重试');
+        console.error("保存出勤状态失败:", error);
+        this.showError("保存失败，请重试");
       }
     },
 
-    async downloadData() {
-      if (this.downloadLoading) return;
-      
-      try {
-        this.downloadLoading = true;
-        await this.downloadDataDirectly();
-      } catch (error) {
-        console.error('下载数据失败:', error);
-        this.showError('下载数据失败，请重试');
-      } finally {
-        this.downloadLoading = false;
-      }
+    showMessage(title, content = '', type = 'success') {
+      this.$message[type](title, content);
+    },
+
+    updateSortedItemsCache(key, value) {
+      this._sortedItemsCache = {
+        key,
+        value
+      };
     },
   },
-
-  watch: {
-    homeworkData: {
-      handler() {
-        this.$nextTick(() => {
-          if (this.$refs.waterfall) {
-            this.$refs.waterfall.reflow();
-          }
-        });
-      },
-      deep: true
-    },
-    // 监听窗口大小变化
-    '$vuetify.display.width': {
-      handler() {
-        this.$nextTick(() => {
-          if (this.$refs.gridContainer) {
-            // 触发重新布局
-            this.optimizeGridLayout(this.sortedItems);
-          }
-        });
-      }
-    },
-    selectedTimeSlot() {
-      this.updateCurrentTimeSlotStudents();
-    }
-  }
 };
 </script>

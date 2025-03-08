@@ -6,6 +6,7 @@
  * @property {Function} [validate] - 可选的验证函数
  * @property {string} [description] - 配置项描述
  * @property {string} [legacyKey] - 旧版本localStorage键名(用于迁移)
+ * @property {boolean} [requireDeveloper] - 是否需要开发者选项启用
  */
 
 // 存储所有设置的localStorage键名
@@ -17,14 +18,9 @@ const SETTINGS_STORAGE_KEY = 'homeworkpage_settings';
  */
 const settingsDefinitions = {
   // 显示设置
-  // 'display.showEmptySubjects': {
-  //   type: 'boolean',
-  //   default: true,
-  //   description: '是否在主界面显示没有作业内容的科目'
-  // },
   'display.emptySubjectDisplay': {
     type: 'string',
-    default: 'card',
+    default: 'button',  // 修改默认值为 'button'
     validate: value => ['card', 'button'].includes(value),
     description: '空科目的显示方式：卡片或按钮'
   },
@@ -33,8 +29,8 @@ const settingsDefinitions = {
     default: true,
     description: '是否启用动态排序以优化显示效果'
   },
-  
-  // 服务器设置
+
+  // 服务器设置（合并了数据提供者设置）
   'server.domain': {
     type: 'string',
     default: '',
@@ -45,7 +41,13 @@ const settingsDefinitions = {
     type: 'string',
     default: '',
     validate: value => /^[A-Za-z0-9]*$/.test(value),
-    description: '班级编号'
+    description: '班级编号(无论使用哪种存储方式都需要设置)'
+  },
+  'server.provider': {  // 新增项
+    type: 'string',
+    default: 'server',
+    validate: value => ['server', 'localStorage'].includes(value),
+    description: '数据提供者，用于决定数据存储方式'
   },
 
   // 刷新设置
@@ -79,6 +81,46 @@ const settingsDefinitions = {
     type: 'boolean',
     default: true,
     description: '编辑前是否自动刷新'
+  },
+
+  // 开发者选项
+  'developer.enabled': {
+    type: 'boolean',
+    default: false,
+    description: '是否启用开发者选项'
+  },
+  'developer.showDebugConfig': {
+    type: 'boolean',
+    default: false,
+    description: '是否显示调试配置'
+  },
+
+  // 消息设置
+  'message.showSidebar': {
+    type: 'boolean',
+    default: true,
+    description: '是否显示消息记录侧栏',
+    requireDeveloper: true  // 添加标记
+  },
+  'message.maxActiveMessages': {
+    type: 'number',
+    default: 5,
+    validate: value => value >= 1 && value <= 10,
+    description: '同时显示的最大消息数量',
+    requireDeveloper: true
+  },
+  'message.timeout': {
+    type: 'number',
+    default: 5000,
+    validate: value => value >= 1000 && value <= 30000,
+    description: '消息自动关闭时间(毫秒)',
+    requireDeveloper: true
+  },
+  'message.saveHistory': {
+    type: 'boolean',
+    default: true,
+    description: '是否保存消息历史记录',
+    requireDeveloper: true
   }
 };
 
@@ -102,14 +144,14 @@ function loadSettings() {
     console.error('加载设置失败:', error);
     settingsCache = {};
   }
-  
+
   // 确保所有设置项都有值（使用默认值填充）
   for (const [key, definition] of Object.entries(settingsDefinitions)) {
     if (!(key in settingsCache)) {
       settingsCache[key] = definition.default;
     }
   }
-  
+
   return settingsCache;
 }
 
@@ -175,15 +217,31 @@ function getSetting(key) {
   if (!settingsCache) {
     loadSettings();
   }
-  
+
   const definition = settingsDefinitions[key];
   if (!definition) {
     console.warn(`未定义的设置项: ${key}`);
     return null;
   }
 
+  // 添加对开发者选项依赖的检查
+  if (definition.requireDeveloper && !settingsCache['developer.enabled']) {
+    return definition.default;
+  }
+
   const value = settingsCache[key];
   return value !== undefined ? value : definition.default;
+}
+
+// 添加设置变更日志函数
+function logSettingsChange(key, oldValue, newValue) {
+  if (settingsCache['developer.enabled'] && settingsCache['developer.showDebugConfig']) {
+    console.log(`[Settings] ${key}:`, {
+      old: oldValue,
+      new: newValue,
+      time: new Date().toLocaleTimeString()
+    });
+  }
 }
 
 /**
@@ -199,7 +257,14 @@ function setSetting(key, value) {
     return false;
   }
 
+  // 添加对开发者选项依赖的检查
+  if (definition.requireDeveloper && !settingsCache['developer.enabled']) {
+    console.warn(`设置项 ${key} 需要启用开发者选项`);
+    return false;
+  }
+
   try {
+    const oldValue = settingsCache[key];
     // 类型转换
     if (typeof value !== definition.type) {
       value = definition.type === 'boolean' ? Boolean(value) :
@@ -218,6 +283,7 @@ function setSetting(key, value) {
 
     settingsCache[key] = value;
     saveSettings();
+    logSettingsChange(key, oldValue, value);
 
     // 为了保持向后兼容，同时更新旧的localStorage键
     const legacyKey = definition.legacyKey;
@@ -274,7 +340,7 @@ function watchSettings(callback) {
       callback(settingsCache);
     }
   };
-  
+
   window.addEventListener('storage', handler);
   return () => window.removeEventListener('storage', handler);
 }
@@ -289,4 +355,4 @@ export {
   resetSetting,
   resetAllSettings,
   watchSettings
-}; 
+};

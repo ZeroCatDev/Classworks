@@ -1,0 +1,176 @@
+
+.grid-masonry {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 8px;
+    grid-auto-flow: dense;
+  }
+
+  .grid-item {
+    width: 100%;
+    transition: all 0.2s ease;
+  }
+
+  .empty-card {
+    transform: scale(0.9);
+    opacity: 0.8;
+    grid-row-end: span 1 !important;
+  }
+
+  .empty-card:hover {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+
+  .empty-subjects-container {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 1199px) {
+    .grid-masonry {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 799px) {
+    .grid-masonry {
+      grid-template-columns: 1fr;
+    }
+
+    .empty-card {
+      transform: scale(0.95);
+    }
+  }
+
+  /* 确保容器高度不超过视口 */
+  .main-window {
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+  }
+
+  /* 优化滚动条样式 */
+  .main-window::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .main-window::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .main-window::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+
+  .main-window::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  .no-data-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    margin: 20px 0;
+  }
+
+  .attendance-drawer {
+    border-left: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  .attendance-drawer :deep(.v-navigation-drawer__content) {
+    overflow-y: auto;
+  }
+
+  /* 优化滚动条样式 */
+  .attendance-drawer :deep(.v-navigation-drawer__content::-webkit-scrollbar) {
+    width: 8px;
+  }
+
+  .attendance-drawer
+    :deep(.v-navigation-drawer__content::-webkit-scrollbar-track) {
+    background: transparent;
+  }
+
+  .attendance-drawer
+    :deep(.v-navigation-drawer__content::-webkit-scrollbar-thumb) {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+
+  .attendance-drawer
+    :deep(.v-navigation-drawer__content::-webkit-scrollbar-thumb:hover) {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 960px) {
+    .attendance-drawer {
+      display: none;
+    }
+  }
+
+  .text-success {
+    color: rgb(var(--v-theme-success));
+  }
+
+  .text-error {
+    color: rgb(var(--v-theme-error));
+  }
+
+  .text-warning {
+    color: rgb(var(--v-theme-warning));
+  }
+
+  .attendance-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .attendance-numbers {
+    padding: 20px 0;
+  }
+
+  .total-number {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    padding-bottom: 20px;
+  }
+
+  .status-number {
+    flex: 1;
+  }
+
+  .text-h2,
+  .text-h3 {
+    line-height: 1.2;
+  }
+
+  .empty-subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    padding: 8px;
+  }
+
+  .empty-subject-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.8;
+  }
+
+  .empty-subject-card:hover {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+
+  .empty-subjects {
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    padding-top: 1rem;
+  }
+
+  .empty-subject-card:not(:disabled):hover {
+    opacity: 1;
+    transform: scale(1.02);
+  }
