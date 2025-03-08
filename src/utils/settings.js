@@ -45,7 +45,7 @@ const settingsDefinitions = {
   },
   'server.provider': {  // 新增项
     type: 'string',
-    default: 'server',
+    default: 'localStorage',
     validate: value => ['server', 'localStorage'].includes(value),
     description: '数据提供者，用于决定数据存储方式'
   },
