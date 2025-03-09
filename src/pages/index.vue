@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar>
+  <v-app-bar class="no-select">
     <template #prepend>
       <v-app-bar-nav-icon icon="mdi-home" />
     </template>
@@ -50,7 +50,7 @@
   </v-app-bar>
   <div class="d-flex">
     <!-- 主要内容区域 -->
-    <v-container class="main-window flex-grow-1" fluid>
+    <v-container class="main-window flex-grow-1 no-select" fluid>
       <!-- 有内容的科目卡片 -->
       <div ref="gridContainer" class="grid-masonry">
         <TransitionGroup name="grid">
@@ -66,7 +66,10 @@
             <v-card
               border
               height="100%"
+              class="glow-track"
               @click="!isEditingDisabled && openDialog(item.key)"
+              @mousemove="handleMouseMove"
+              @touchmove="handleTouchMove"
             >
               <v-card-title>{{ item.name }}</v-card-title>
               <v-card-text :style="state.contentStyle">
@@ -125,7 +128,7 @@
     <!-- 出勤统计区域 -->
     <v-col
       v-if="state.studentList && state.studentList.length"
-      class="attendance-area"
+      class="attendance-area no-select"
       cols="1"
       @click="setAttendanceArea()"
     >
@@ -942,6 +945,27 @@ export default {
         key,
         value,
       };
+    },
+
+    handleMouseMove(e) {
+      const card = e.currentTarget;
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      card.style.setProperty('--x', `${x}%`);
+      card.style.setProperty('--y', `${y}%`);
+    },
+
+    handleTouchMove(e) {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        const card = e.currentTarget;
+        const rect = card.getBoundingClientRect();
+        const x = ((touch.clientX - rect.left) / rect.width) * 100;
+        const y = ((touch.clientY - rect.top) / rect.height) * 100;
+        card.style.setProperty('--x', `${x}%`);
+        card.style.setProperty('--y', `${y}%`);
+      }
     },
   },
 };

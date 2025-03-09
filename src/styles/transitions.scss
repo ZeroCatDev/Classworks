@@ -77,6 +77,23 @@ $standard-accelerate: cubic-bezier(0.3, 0.0, 1.0, 1.0);
   }
 }
 
+// 优化卡片触摸体验
+.v-card {
+  touch-action: manipulation;
+
+  &:active {
+    transform: scale(0.99);
+    transition-duration: 80ms;
+  }
+
+  @media (pointer: coarse) {
+    &::before {
+      // 增加触摸反馈区域
+      margin: -8px;
+    }
+  }
+}
+
 // 修改对话框过渡动画 - 移除点击波纹效果
 .v-dialog {
   &::before {
@@ -116,10 +133,32 @@ $standard-accelerate: cubic-bezier(0.3, 0.0, 1.0, 1.0);
 // 按钮状态变化动画
 .v-btn {
   transition: background-color 250ms $standard-easing,
-              transform 200ms $emphasized-decelerate;
+              transform 150ms $emphasized-decelerate;
+  touch-action: manipulation;
+  min-height: 40px;  // 确保触摸目标足够大
 
   &:active {
-    transform: scale(0.96);
-    transition-duration: 100ms;
+    transform: scale(0.98);
+    transition-duration: 80ms;
   }
+
+  @media (pointer: coarse) {
+    // 触摸设备上的特殊处理
+    padding: 8px 16px;
+    margin: 4px;
+
+    &::before {
+      // 增加触摸反馈区域
+      margin: -8px;
+    }
+  }
+}
+
+// 禁用文字选择
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
