@@ -53,33 +53,35 @@
     <v-container class="main-window flex-grow-1" fluid>
       <!-- 有内容的科目卡片 -->
       <div ref="gridContainer" class="grid-masonry">
-        <div
-          v-for="item in sortedItems"
-          :key="item.key"
-          class="grid-item"
-          :style="{
-            'grid-row-end': `span ${item.rowSpan}`,
-            order: item.order,
-          }"
-        >
-          <v-card
-            border
-            height="100%"
-            @click="!isEditingDisabled && openDialog(item.key)"
+        <TransitionGroup name="grid">
+          <div
+            v-for="item in sortedItems"
+            :key="item.key"
+            class="grid-item"
+            :style="{
+              'grid-row-end': `span ${item.rowSpan}`,
+              order: item.order,
+            }"
           >
-            <v-card-title>{{ item.name }}</v-card-title>
-            <v-card-text :style="state.contentStyle">
-              <v-list>
-                <v-list-item
-                  v-for="text in splitPoint(item.content)"
-                  :key="text"
-                >
-                  {{ text }}
-                </v-list-item>
-              </v-list>
-            </v-card-text>
-          </v-card>
-        </div>
+            <v-card
+              border
+              height="100%"
+              @click="!isEditingDisabled && openDialog(item.key)"
+            >
+              <v-card-title>{{ item.name }}</v-card-title>
+              <v-card-text :style="state.contentStyle">
+                <v-list>
+                  <v-list-item
+                    v-for="text in splitPoint(item.content)"
+                    :key="text"
+                  >
+                    {{ text }}
+                  </v-list-item>
+                </v-list>
+              </v-card-text>
+            </v-card>
+          </div>
+        </TransitionGroup>
       </div>
 
       <!-- 单独显示空科目 -->
@@ -98,22 +100,24 @@
           </v-btn-group>
         </template>
         <div v-else class="empty-subjects-grid">
-          <v-card
-            v-for="subject in unusedSubjects"
-            :key="subject.key"
-            border
-            class="empty-subject-card"
-            :disabled="isEditingDisabled"
-            @click="openDialog(subject.key)"
-          >
-            <v-card-title class="text-subtitle-1">
-              {{ subject.name }}
-            </v-card-title>
-            <v-card-text class="text-center">
-              <v-icon size="small" color="grey"> mdi-plus </v-icon>
-              <div class="text-caption text-grey">点击添加作业</div>
-            </v-card-text>
-          </v-card>
+          <TransitionGroup name="v-list">
+            <v-card
+              v-for="subject in unusedSubjects"
+              :key="subject.key"
+              border
+              class="empty-subject-card"
+              :disabled="isEditingDisabled"
+              @click="openDialog(subject.key)"
+            >
+              <v-card-title class="text-subtitle-1">
+                {{ subject.name }}
+              </v-card-title>
+              <v-card-text class="text-center">
+                <v-icon size="small" color="grey"> mdi-plus </v-icon>
+                <div class="text-caption text-grey">点击添加作业</div>
+              </v-card-text>
+            </v-card>
+          </TransitionGroup>
         </div>
       </div>
     </v-container>
@@ -292,6 +296,7 @@ import dataProvider from "@/utils/dataProvider";
 import { getSetting, watchSettings, setSetting } from "@/utils/settings";
 import { useDisplay } from "vuetify";
 import "../styles/index.scss";
+import "../styles/transitions.scss";  // 添加新的样式导入
 import { debounce, throttle } from "@/utils/debounce";
 
 export default {
