@@ -40,7 +40,7 @@ const providers = {
         return formatResponse(JSON.parse(rawData));
       } catch (error) {
 
-        return formatError('读取本地数据失败');
+        return formatError('读取本地数据失败：'+error);
       }
     },
 
@@ -57,7 +57,7 @@ const providers = {
         localStorage.setItem(storageKey, JSON.stringify(data));
         return formatResponse(null, '保存成功');
       } catch (error) {
-        return formatError('保存本地数据失败');
+        return formatError('保存本地数据失败:'+error);
       }
     },
 
@@ -80,7 +80,7 @@ const providers = {
 
         return formatResponse(JSON.parse(rawData));
       } catch (error) {
-        return formatError('读取本地配置失败');
+        return formatError('读取本地配置失败:'+error);
       }
     },
 
@@ -95,7 +95,7 @@ const providers = {
         localStorage.setItem(storageKey, JSON.stringify(config));
         return formatResponse(null, '保存成功');
       } catch (error) {
-        return formatError('保存本地配置失败');
+        return formatError('保存本地配置失败:'+error);
       }
     }
   },
@@ -145,7 +145,7 @@ const providers = {
 
     async saveConfig(key, config) {
       try {
-        const res = await axios.post(`${key}/config`, config);
+        const res = await axios.put(`${key}/config`, config);
         if (res.data?.status === false) {
           return formatError(res.data.msg || '保存失败', 'SAVE_ERROR');
         }

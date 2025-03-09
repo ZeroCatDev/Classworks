@@ -1,11 +1,23 @@
 <template>
-  <v-card border>
+  <v-card
+    border
+    :color="hasChanges ? 'warning-subtle' : undefined"
+    :class="{ 'unsaved-changes': hasChanges }"
+  >
     <v-card-item>
       <template #prepend>
         <v-icon icon="mdi-account-group" size="large" class="mr-2" />
       </template>
       <v-card-title class="text-h6">学生列表</v-card-title>
       <template #append>
+        <v-chip
+          v-if="hasChanges"
+          color="warning"
+          size="small"
+          class="mr-2"
+        >
+          未保存
+        </v-chip>
         <v-btn
           :color="modelValue.advanced ? 'primary' : undefined"
           variant="text"
@@ -163,7 +175,7 @@
         <!-- 高级编辑模式 -->
         <div v-else class="pt-2">
           <v-textarea
-            v-model="modelValue.text"
+            v-model="text"
             label="批量编辑学生列表"
             placeholder="每行输入一个学生姓名"
             hint="使用文本编辑模式批量编辑学生名单，保存时会自动去除空行"
@@ -182,8 +194,8 @@
             prepend-icon="mdi-content-save"
             size="large"
             :loading="loading"
-            :disabled="loading"
-            @click="$emit('save')"
+            :disabled="loading || !hasChanges"
+            @click="handleSave"
           >
             保存名单
           </v-btn>
@@ -193,7 +205,7 @@
             prepend-icon="mdi-refresh"
             size="large"
             :loading="loading"
-            :disabled="loading"
+            :disabled="loading || !hasChanges"
             @click="$emit('reload')"
           >
             重载名单
@@ -219,18 +231,59 @@ export default {
     },
     loading: Boolean,
     error: String,
-    isMobile: Boolean
+    isMobile: Boolean,
+    originalList: {
+      type: Array,
+      default: () => []
+    }
   },
 
   data() {
     return {
       newStudent: '',
       editingIndex: -1,
-      editingName: ''
+      editingName: '',
+      internalOriginalList: [] // 添加内部状态
+    }
+  },
+
+  created() {
+    // 初始化内部状态
+    this.internalOriginalList = [...this.originalList];
+  },
+
+  watch: {
+    originalList: {
+      handler(newList) {
+        this.internalOriginalList = [...newList];
+      },
+      immediate: true
     }
   },
 
   emits: ['update:modelValue', 'save', 'reload'],
+
+  computed: {
+    text: {
+      get() {
+        return this.modelValue.text;
+      },
+      set(value) {
+        this.handleTextInput(value);
+      }
+    },
+    hasChanges() {
+      const currentList = this.modelValue.list;
+      const originalList = this.internalOriginalList;
+
+      if (currentList.length !== originalList.length) {
+        return true;
+      }
+
+      // 使用 JSON 字符串比较来优化性能
+      return JSON.stringify(currentList) !== JSON.stringify(originalList);
+    }
+  },
 
   methods: {
     toggleAdvanced() {
@@ -321,6 +374,19 @@ export default {
       }
       this.editingIndex = -1;
       this.editingName = '';
+    },
+
+    handleClick(index, student) {
+      // 如果是移动端，点击即开始编辑
+      if (this.isMobile) {
+        this.startEdit(index, student);
+      }
+    },
+
+    async handleSave() {
+      await this.$emit('save');
+      // 保存成功后更新内部状态
+      this.internalOriginalList = [...this.modelValue.list];
     }
   }
 }
@@ -334,6 +400,17 @@ export default {
 .action-buttons {
   opacity: 0;
   transition: opacity 0.2s ease;
+}
+
+.unsaved-changes {
+  animation: subtle-pulse 2s infinite;
+  border: 2px solid rgb(var(--v-theme-warning));
+}
+
+@keyframes subtle-pulse {
+  0% { border-color: rgba(var(--v-theme-warning), 1); }
+  50% { border-color: rgba(var(--v-theme-warning), 0.5); }
+  100% { border-color: rgba(var(--v-theme-warning), 1); }
 }
 
 @media (max-width: 600px) {
