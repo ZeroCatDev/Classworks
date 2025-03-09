@@ -441,7 +441,7 @@ export default {
       },
       debouncedUpload: null,
       throttledReflow: null,
-      _sortedItemsCache: {
+      sortedItemsCache: {
         key: "",
         value: [],
       },
@@ -477,12 +477,12 @@ export default {
       const key = `${JSON.stringify(
         this.state.homeworkData
       )}_${this.state.subjectOrder.join()}_${this.dynamicSort}`;
-      if (this._sortedItemsCache.key === key) {
-        return this._sortedItemsCache.value;
+      if (this.sortedItemsCache.key === key) {
+        return this.sortedItemsCache.value;
       }
 
       const items = Object.entries(this.state.homeworkData)
-        .filter(([_, value]) => value.content?.trim())
+        .filter(([, value]) => value.content?.trim())
         .map(([key, value]) => ({
           key,
           name: value.name,
