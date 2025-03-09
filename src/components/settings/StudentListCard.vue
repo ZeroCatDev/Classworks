@@ -246,27 +246,42 @@ export default {
         index: -1,
         name: ''
       },
-      savedState: null // 初始为 null，用于判断是否已初始化
+      savedState: {  // 初始化为当前值而不是 null
+        list: [],
+        text: ''
+      }
     }
   },
 
   created() {
-    // 使用 modelValue 初始化保存状态
-    this.savedState = {
-      list: [...this.modelValue.list],
-      text: this.modelValue.text
-    }
+    // 移除这里的初始化，改为在 mounted 中处理
+  },
+
+  mounted() {
+    // 使用 nextTick 确保在 DOM 更新后初始化
+    this.$nextTick(() => {
+      this.savedState = {
+        list: [...this.modelValue.list],
+        text: this.modelValue.text
+      }
+    })
   },
 
   watch: {
     originalList: {
       handler(newList) {
-        // 仅在首次加载时更新保存状态
-        if (!this.savedState || this.savedState.list.length === 0) {
-          this.savedState = {
+        // 只在初始加载和空列表时更新
+        if (this.modelValue.list.length === 0) {
+          const newState = {
             list: [...newList],
             text: newList.join('\n')
-          }
+          };
+          // 同步更新两个状态
+          this.savedState = { ...newState };
+          this.updateModelValue({
+            ...this.modelValue,
+            ...newState
+          });
         }
       },
       immediate: true
@@ -285,14 +300,13 @@ export default {
       }
     },
     hasChanges() {
-      if (!this.savedState) return false;
-
       const currentState = JSON.stringify({
         list: this.modelValue.list,
         text: this.modelValue.text
       });
       const savedState = JSON.stringify(this.savedState);
-      return currentState !== savedState;
+      // 检查 savedState 是否为初始状态
+      return this.savedState.list.length > 0 && currentState !== savedState;
     }
   },
 
@@ -327,6 +341,14 @@ export default {
         ...this.modelValue,
         ...newData
       });
+    },
+
+    // 更新保存状态
+    updateSavedState() {
+      this.savedState = {
+        list: [...this.modelValue.list],
+        text: this.modelValue.text
+      };
     },
 
     // 学生管理方法
@@ -401,12 +423,12 @@ export default {
 
     // 保存和加载处理
     async handleSave() {
-      await this.$emit('save');
-      // 保存时更新状态
-      this.savedState = {
-        list: [...this.modelValue.list],
-        text: this.modelValue.text
-      };
+      try {
+        await this.$emit('save');
+        this.updateSavedState();
+      } catch (error) {
+        console.error('保存失败:', error);
+      }
     },
 
     handleTextInput(value) {
@@ -417,7 +439,7 @@ export default {
 
       this.updateModelValue({
         text: value,
-        list: list
+        list
       });
     }
   }

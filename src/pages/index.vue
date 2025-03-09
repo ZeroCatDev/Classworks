@@ -21,16 +21,9 @@
         variant="text"
         @click="zoom('up')"
       />
-      <v-menu
-        v-model="state.datePickerDialog"
-        :close-on-content-click="false"
-      >
+      <v-menu v-model="state.datePickerDialog" :close-on-content-click="false">
         <template #activator="{ props }">
-          <v-btn
-            icon="mdi-calendar"
-            variant="text"
-            v-bind="props"
-          />
+          <v-btn icon="mdi-calendar" variant="text" v-bind="props" />
         </template>
 
         <v-date-picker
@@ -45,11 +38,7 @@
         :loading="loading.download"
         @click="downloadData"
       />
-      <v-btn
-        icon="mdi-cog"
-        variant="text"
-        @click="$router.push('/settings')"
-      />
+      <v-btn icon="mdi-cog" variant="text" @click="$router.push('/settings')" />
       <v-btn
         icon="mdi-bell"
         variant="text"
@@ -61,15 +50,9 @@
   </v-app-bar>
   <div class="d-flex">
     <!-- 主要内容区域 -->
-    <v-container
-      class="main-window flex-grow-1"
-      fluid
-    >
+    <v-container class="main-window flex-grow-1" fluid>
       <!-- 有内容的科目卡片 -->
-      <div
-        ref="gridContainer"
-        class="grid-masonry"
-      >
+      <div ref="gridContainer" class="grid-masonry">
         <div
           v-for="item in sortedItems"
           :key="item.key"
@@ -80,10 +63,7 @@
           }"
           @click="!isEditingDisabled && openDialog(item.key)"
         >
-          <v-card
-            border
-            height="100%"
-          >
+          <v-card border height="100%">
             <v-card-title>{{ item.name }}</v-card-title>
             <v-card-text :style="state.contentStyle">
               <v-list>
@@ -102,26 +82,19 @@
       <!-- 单独显示空科目 -->
       <div class="empty-subjects mt-4">
         <template v-if="emptySubjectDisplay === 'button'">
-          <v-btn-group class="gap-2 flex-wrap">
+          <v-btn-group divided variant="outlined">
             <v-btn
               v-for="subject in unusedSubjects"
               :key="subject.key"
-              variant="tonal"
-              color="primary"
               :disabled="isEditingDisabled"
               @click="openDialog(subject.key)"
             >
-              <v-icon start>
-                mdi-plus
-              </v-icon>
+              <v-icon start> mdi-plus </v-icon>
               {{ subject.name }}
             </v-btn>
           </v-btn-group>
         </template>
-        <div
-          v-else
-          class="empty-subjects-grid"
-        >
+        <div v-else class="empty-subjects-grid">
           <v-card
             v-for="subject in unusedSubjects"
             :key="subject.key"
@@ -134,15 +107,8 @@
               {{ subject.name }}
             </v-card-title>
             <v-card-text class="text-center">
-              <v-icon
-                size="small"
-                color="grey"
-              >
-                mdi-plus
-              </v-icon>
-              <div class="text-caption text-grey">
-                点击添加作业
-              </div>
+              <v-icon size="small" color="grey"> mdi-plus </v-icon>
+              <div class="text-caption text-grey">点击添加作业</div>
             </v-card-text>
           </v-card>
         </div>
@@ -157,20 +123,26 @@
       @click="setAttendanceArea()"
     >
       <h1>出勤</h1>
-      <h2>应到: {{ state.studentList.length }}人</h2>
-      <h2>实到: {{ state.studentList.length - state.selectedSet.size }}人</h2>
+      <h2>应到: {{ state.studentList.length - state.excludeSet.size }}人</h2>
+      <h2>
+        实到:
+        {{
+          state.studentList.length -
+          state.selectedSet.size -
+          state.lateSet.size -
+          state.excludeSet.size
+        }}人
+      </h2>
       <h2>请假: {{ state.selectedSet.size }}人</h2>
-      <h3
-        v-for="(i, index) in state.selectedSet"
-        :key="'absent-' + index"
-      >
+      <h3 v-for="(i, index) in state.selectedSet" :key="'absent-' + index">
         {{ `${index + 1}. ${state.studentList[i]}` }}
       </h3>
       <h2>迟到: {{ state.lateSet.size }}人</h2>
-      <h3
-        v-for="(i, index) in state.lateSet"
-        :key="'late-' + index"
-      >
+      <h3 v-for="(i, index) in state.lateSet" :key="'late-' + index">
+        {{ `${index + 1}. ${state.studentList[i]}` }}
+      </h3>
+      <h2>不参与: {{ state.excludeSet.size }}人</h2>
+      <h3 v-for="(i, index) in state.excludeSet" :key="'exclude-' + index">
         {{ `${index + 1}. ${state.studentList[i]}` }}
       </h3>
     </v-col>
@@ -186,14 +158,9 @@
     >
       上传
     </v-btn>
-    <v-btn
-      v-else
-      color="success"
-      size="large"
-      @click="showSyncMessage"
-    >
-      同步完成
-    </v-btn><v-btn
+    <v-btn v-else color="success" size="large" @click="showSyncMessage">
+      同步完成 </v-btn
+    ><v-btn
       v-if="showRandomButton"
       color="yellow"
       prepend-icon="mdi-account-question"
@@ -227,65 +194,13 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog
-    v-model="state.attendDialogVisible"
-    width="800"
-  >
-    <v-card>
-      <v-card-title>设置学生出勤状态</v-card-title>
-      <v-card-text>
-        <v-btn @click="cleanstudentslist">
-          全勤
-        </v-btn>
-        <v-container fluid>
-          <v-row>
-            <v-col
-              v-for="(name, i) in state.studentList"
-              :key="i"
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <v-card
-                border
-                :class="{
-                  selected: state.selectedSet.has(i) || state.lateSet.has(i),
-                }"
-                :color="
-                  state.selectedSet.has(i)
-                    ? 'primary'
-                    : state.lateSet.has(i)
-                      ? 'orange'
-                      : ''
-                "
-                @click="toggleStudentStatus(i)"
-              >
-                <v-card-text>
-                  {{ `${i + 1}. ${name}` }}
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
-
-  <v-snackbar
-    v-model="state.snackbar"
-    :timeout="2000"
-  >
+  <v-snackbar v-model="state.snackbar" :timeout="2000">
     {{ state.snackbarText }}
   </v-snackbar>
 
-  <v-dialog
-    v-model="state.attendanceDialog"
-    max-width="600"
-  >
+  <v-dialog v-model="state.attendanceDialog" max-width="600">
     <v-card>
-      <v-card-title class="text-h6">
-        编辑出勤状态
-      </v-card-title>
+      <v-card-title class="text-h6"> 编辑出勤状态 </v-card-title>
 
       <v-card-text>
         <v-expansion-panels>
@@ -346,6 +261,12 @@
                   size="small"
                   @click="setLate(index)"
                 />
+                <v-btn
+                  :color="isExclude(index) ? 'grey' : ''"
+                  icon="mdi-account-cancel"
+                  size="small"
+                  @click="setExclude(index)"
+                />
               </v-btn-group>
             </template>
           </v-list-item>
@@ -354,12 +275,7 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="primary"
-          @click="saveAttendance"
-        >
-          保存
-        </v-btn>
+        <v-btn color="primary" @click="saveAttendance"> 保存 </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -389,6 +305,7 @@ export default {
         studentList: [],
         selectedSet: new Set(),
         lateSet: new Set(),
+        excludeSet: new Set(), // 新增不参与集合
         dialogVisible: false,
         dialogTitle: "",
         textarea: "",
@@ -630,6 +547,7 @@ export default {
             this.state.homeworkData = {};
             this.state.selectedSet = new Set();
             this.state.lateSet = new Set();
+            this.state.excludeSet = new Set(); // 添加不参与状态
           } else {
             throw new Error(response.error.message);
           }
@@ -639,6 +557,7 @@ export default {
           this.state.homeworkData = homework;
           this.state.selectedSet = new Set(attendance.absent || []);
           this.state.lateSet = new Set(attendance.late || []);
+          this.state.excludeSet = new Set(attendance.exclude || []); // 添加不参与状态
           this.state.synced = true;
           this.state.showNoDataMessage = false;
           this.showMessage("下载成功", "数据已更新");
@@ -663,6 +582,7 @@ export default {
             attendance: {
               absent: Array.from(this.state.selectedSet),
               late: Array.from(this.state.lateSet),
+              exclude: Array.from(this.state.excludeSet), // 添加不参与状态
             },
           },
           this.state.dateString
@@ -766,7 +686,7 @@ export default {
     },
 
     setAttendanceArea() {
-      this.state.attendDialogVisible = true;
+      this.state.attendanceDialog = true;
     },
 
     toggleStudentStatus(index) {
@@ -775,6 +695,9 @@ export default {
         this.state.lateSet.add(index);
       } else if (this.state.lateSet.has(index)) {
         this.state.lateSet.delete(index);
+        this.state.excludeSet.add(index);
+      } else if (this.state.excludeSet.has(index)) {
+        this.state.excludeSet.delete(index);
       } else {
         this.state.selectedSet.add(index);
       }
@@ -787,6 +710,7 @@ export default {
     cleanstudentslist() {
       this.state.selectedSet.clear();
       this.state.lateSet.clear();
+      this.state.excludeSet.clear();
       this.state.synced = false;
       if (this.autoSave) {
         this.uploadData();
@@ -932,6 +856,7 @@ export default {
     setAllPresent() {
       this.state.selectedSet.clear();
       this.state.lateSet.clear();
+      this.state.excludeSet.clear();
     },
 
     setAllAbsent() {
@@ -948,7 +873,9 @@ export default {
 
     isPresent(index) {
       return (
-        !this.state.selectedSet.has(index) && !this.state.lateSet.has(index)
+        !this.state.selectedSet.has(index) &&
+        !this.state.lateSet.has(index) &&
+        !this.state.excludeSet.has(index)
       );
     },
 
@@ -960,19 +887,32 @@ export default {
       return this.state.lateSet.has(index);
     },
 
+    isExclude(index) {
+      return this.state.excludeSet.has(index);
+    },
+
     setPresent(index) {
       this.state.selectedSet.delete(index);
       this.state.lateSet.delete(index);
+      this.state.excludeSet.delete(index);
     },
 
     setAbsent(index) {
       this.state.selectedSet.add(index);
       this.state.lateSet.delete(index);
+      this.state.excludeSet.delete(index);
     },
 
     setLate(index) {
       this.state.lateSet.add(index);
       this.state.selectedSet.delete(index);
+      this.state.excludeSet.delete(index);
+    },
+
+    setExclude(index) {
+      this.state.excludeSet.add(index);
+      this.state.selectedSet.delete(index);
+      this.state.lateSet.delete(index);
     },
 
     async saveAttendance() {
