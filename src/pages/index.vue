@@ -61,9 +61,12 @@
             'grid-row-end': `span ${item.rowSpan}`,
             order: item.order,
           }"
-          @click="!isEditingDisabled && openDialog(item.key)"
         >
-          <v-card border height="100%">
+          <v-card
+            border
+            height="100%"
+            @click="!isEditingDisabled && openDialog(item.key)"
+          >
             <v-card-title>{{ item.name }}</v-card-title>
             <v-card-text :style="state.contentStyle">
               <v-list>
