@@ -211,6 +211,16 @@
       @click="showSyncMessage"
     >
       同步完成
+    </v-btn><v-btn
+      v-if="showRandomButton"
+      color="yellow"
+      prepend-icon="mdi-account-question"
+      append-icon="mdi-dice-multiple"
+      size="large"
+      class="ml-2"
+      href="classisland://plugins/IslandCaller/Run"
+    >
+      随机点名
     </v-btn>
   </v-container>
   <v-dialog
@@ -540,6 +550,9 @@ export default {
     },
     unreadCount() {
       return this.$refs.messageLog?.unreadCount || 0;
+    },
+    showRandomButton() {
+      return getSetting('display.showRandomButton');
     }
   },
 
@@ -605,10 +618,13 @@ export default {
       this.dataKey = this.provider === 'server' ? `${domain}/${classNum}` : classNum;
       this.state.classNumber = classNum;
 
-      const date = new URLSearchParams(window.location.search).get("date")
-        || new Date().toISOString().split("T")[0];
-      this.state.dateString = date;
-      this.state.isToday = date === new Date().toISOString().split("T")[0];
+      // 从 URL 获取日期，如果没有则使用今天的日期
+      const urlParams = new URLSearchParams(window.location.search);
+      const dateFromUrl = urlParams.get("date");
+      const today = new Date().toISOString().split("T")[0];
+
+      this.state.dateString = dateFromUrl || today;
+      this.state.isToday = this.state.dateString === today;
 
       await Promise.all([
         this.downloadData(),
@@ -816,6 +832,7 @@ export default {
 
       this.provider = provider;
       this.dataKey = provider === 'server' ? `${domain}/${classNum}` : classNum;
+
       this.state.classNumber = classNum;
     },
 
@@ -846,9 +863,18 @@ export default {
         const month = String(date.getMonth() + 1).padStart(2, "0");
         const day = String(date.getDate()).padStart(2, "0");
         const formattedDate = `${year}-${month}-${day}`;
-        this.state.dateString = formattedDate;
-        this.$router.push(`/?date=${formattedDate}`);
-        this.downloadData();
+
+        // 只有当日期真正改变时才更新
+        if (this.state.dateString !== formattedDate) {
+          this.state.dateString = formattedDate;
+
+          // 使用 replace 而不是 push 来避免创建新的历史记录
+          this.$router.replace({
+            query: { date: formattedDate }
+          }).catch(() => {});
+
+          this.downloadData();
+        }
       }
     },
 

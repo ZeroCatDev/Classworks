@@ -29,6 +29,11 @@ const settingsDefinitions = {
     default: true,
     description: '是否启用动态排序以优化显示效果'
   },
+  'display.showRandomButton': {
+    type: 'boolean',
+    default: false,
+    description: '是否显示随机按钮'
+  },
 
   // 服务器设置（合并了数据提供者设置）
   'server.domain': {
@@ -46,7 +51,7 @@ const settingsDefinitions = {
   'server.provider': {  // 新增项
     type: 'string',
     default: 'localStorage',
-    validate: value => ['server', 'localStorage'].includes(value),
+    validate: value => ['server', 'localStorage', 'indexedDB'].includes(value),
     description: '数据提供者，用于决定数据存储方式'
   },
 

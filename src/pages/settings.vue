@@ -181,6 +181,23 @@
                   />
                 </template>
               </v-list-item>
+
+              <v-divider class="my-2" />
+
+              <v-list-item>
+                <template #prepend>
+                  <v-icon icon="mdi-dice-multiple" class="mr-3" />
+                </template>
+                <v-list-item-title>随机点名按钮</v-list-item-title>
+                <v-list-item-subtitle>指向IslandCaller的链接</v-list-item-subtitle>
+                <template #append>
+                  <v-switch
+                    v-model="settings.display.showRandomButton"
+                    density="comfortable"
+                    hide-details
+                  />
+                </template>
+              </v-list-item>
             </v-list>
           </settings-card>
         </v-col>
@@ -330,6 +347,7 @@ export default {
       display: {
         emptySubjectDisplay: getSetting('display.emptySubjectDisplay'),
         dynamicSort: getSetting('display.dynamicSort'),
+        showRandomButton: getSetting('display.showRandomButton')
       },
       developer: {
         enabled: getSetting('developer.enabled'),
@@ -346,7 +364,8 @@ export default {
       settings,
       dataProviders: [
         { title: '服务器', value: 'server' },
-        { title: '本地存储', value: 'localStorage' }
+        { title: '本地存储', value: 'localStorage' },
+        { title:'本地数据库',value:'indexedDB'}
       ],
       studentData: {
         list: [],

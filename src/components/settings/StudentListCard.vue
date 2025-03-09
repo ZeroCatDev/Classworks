@@ -53,7 +53,7 @@
           <v-row class="mb-6">
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="newStudent"
+                v-model="newStudentName"
                 label="添加学生"
                 placeholder="输入学生姓名后回车添加"
                 prepend-inner-icon="mdi-account-plus"
@@ -67,7 +67,7 @@
                     icon="mdi-plus"
                     variant="text"
                     color="primary"
-                    :disabled="!newStudent.trim()"
+                    :disabled="!newStudentName.trim()"
                     @click="addStudent"
                   />
                 </template>
@@ -131,8 +131,8 @@
                     </v-menu>
 
                     <v-text-field
-                      v-if="editingIndex === index"
-                      v-model="editingName"
+                      v-if="editState.index === index"
+                      v-model="editState.name"
                       density="compact"
                       variant="underlined"
                       hide-details
@@ -219,6 +219,7 @@
 <script>
 export default {
   name: 'StudentListCard',
+
   props: {
     modelValue: {
       type: Object,
@@ -240,22 +241,33 @@ export default {
 
   data() {
     return {
-      newStudent: '',
-      editingIndex: -1,
-      editingName: '',
-      internalOriginalList: [] // 添加内部状态
+      newStudentName: '', // 重命名以更清晰
+      editState: {
+        index: -1,
+        name: ''
+      },
+      savedState: null // 初始为 null，用于判断是否已初始化
     }
   },
 
   created() {
-    // 初始化内部状态
-    this.internalOriginalList = [...this.originalList];
+    // 使用 modelValue 初始化保存状态
+    this.savedState = {
+      list: [...this.modelValue.list],
+      text: this.modelValue.text
+    }
   },
 
   watch: {
     originalList: {
       handler(newList) {
-        this.internalOriginalList = [...newList];
+        // 仅在首次加载时更新保存状态
+        if (!this.savedState || this.savedState.list.length === 0) {
+          this.savedState = {
+            list: [...newList],
+            text: newList.join('\n')
+          }
+        }
       },
       immediate: true
     }
@@ -273,60 +285,66 @@ export default {
       }
     },
     hasChanges() {
-      const currentList = this.modelValue.list;
-      const originalList = this.internalOriginalList;
+      if (!this.savedState) return false;
 
-      if (currentList.length !== originalList.length) {
-        return true;
-      }
-
-      // 使用 JSON 字符串比较来优化性能
-      return JSON.stringify(currentList) !== JSON.stringify(originalList);
+      const currentState = JSON.stringify({
+        list: this.modelValue.list,
+        text: this.modelValue.text
+      });
+      const savedState = JSON.stringify(this.savedState);
+      return currentState !== savedState;
     }
   },
 
   methods: {
+    // 初始化方法
+    initializeSavedList() {
+      // 优先使用 modelValue 的当前值，否则使用 originalList
+      this.savedList = this.modelValue.list.length > 0
+        ? [...this.modelValue.list]
+        : [...this.originalList];
+    },
+
+    // 列表状态检查
+    isListChanged(current, original) {
+      if (current.length !== original.length) return true;
+      return JSON.stringify(current) !== JSON.stringify(original);
+    },
+
+    // 编辑模式切换
     toggleAdvanced() {
       const advanced = !this.modelValue.advanced;
-      const text = advanced ? this.modelValue.list.join('\n') : this.modelValue.text;
-
-      this.$emit('update:modelValue', {
-        ...this.modelValue,
+      this.updateModelValue({
         advanced,
-        text
+        text: advanced ? this.modelValue.list.join('\n') : this.modelValue.text,
+        list: this.modelValue.list
       });
     },
 
-    handleTextInput(value) {
-      const list = value
-        .split('\n')
-        .map(s => s.trim())
-        .filter(s => s);
-
+    // 更新数据方法
+    updateModelValue(newData) {
       this.$emit('update:modelValue', {
         ...this.modelValue,
-        text: value,
-        list
+        ...newData
       });
     },
 
+    // 学生管理方法
     addStudent() {
-      const name = this.newStudent.trim();
-      if (name && !this.modelValue.list.includes(name)) {
-        const newList = [...this.modelValue.list, name];
-        this.$emit('update:modelValue', {
-          ...this.modelValue,
-          list: newList,
-          text: newList.join('\n')
-        });
-        this.newStudent = '';
-      }
+      const name = this.newStudentName.trim();
+      if (!name || this.modelValue.list.includes(name)) return;
+
+      const newList = [...this.modelValue.list, name];
+      this.updateModelValue({
+        list: newList,
+        text: newList.join('\n')
+      });
+      this.newStudentName = '';
     },
 
     removeStudent(index) {
       const newList = this.modelValue.list.filter((_, i) => i !== index);
-      this.$emit('update:modelValue', {
-        ...this.modelValue,
+      this.updateModelValue({
         list: newList,
         text: newList.join('\n')
       });
@@ -348,32 +366,30 @@ export default {
         const [student] = newList.splice(index, 1);
         newList.splice(targetIndex, 0, student);
 
-        this.$emit('update:modelValue', {
-          ...this.modelValue,
+        this.updateModelValue({
           list: newList,
           text: newList.join('\n')
         });
       }
     },
 
+    // 编辑状态管理
     startEdit(index, name) {
-      this.editingIndex = index;
-      this.editingName = name;
+      this.editState = { index, name };
     },
 
     saveEdit() {
-      if (this.editingIndex !== -1 && this.editingName.trim()) {
-        const newList = [...this.modelValue.list];
-        newList[this.editingIndex] = this.editingName.trim();
+      const { index, name } = this.editState;
+      if (index === -1 || !name.trim()) return;
 
-        this.$emit('update:modelValue', {
-          ...this.modelValue,
-          list: newList,
-          text: newList.join('\n')
-        });
-      }
-      this.editingIndex = -1;
-      this.editingName = '';
+      const newList = [...this.modelValue.list];
+      newList[index] = name.trim();
+
+      this.updateModelValue({
+        list: newList,
+        text: newList.join('\n')
+      });
+      this.editState = { index: -1, name: '' };
     },
 
     handleClick(index, student) {
@@ -383,10 +399,26 @@ export default {
       }
     },
 
+    // 保存和加载处理
     async handleSave() {
       await this.$emit('save');
-      // 保存成功后更新内部状态
-      this.internalOriginalList = [...this.modelValue.list];
+      // 保存时更新状态
+      this.savedState = {
+        list: [...this.modelValue.list],
+        text: this.modelValue.text
+      };
+    },
+
+    handleTextInput(value) {
+      const list = value
+        .split('\n')
+        .map(s => s.trim())
+        .filter(s => s);
+
+      this.updateModelValue({
+        text: value,
+        list: list
+      });
     }
   }
 }
@@ -403,14 +435,13 @@ export default {
 }
 
 .unsaved-changes {
-  animation: subtle-pulse 2s infinite;
+  animation: pulse-warning 2s infinite; /* 更有意义的动画名称 */
   border: 2px solid rgb(var(--v-theme-warning));
 }
 
-@keyframes subtle-pulse {
-  0% { border-color: rgba(var(--v-theme-warning), 1); }
+@keyframes pulse-warning {
+  0%, 100% { border-color: rgba(var(--v-theme-warning), 1); }
   50% { border-color: rgba(var(--v-theme-warning), 0.5); }
-  100% { border-color: rgba(var(--v-theme-warning), 1); }
 }
 
 @media (max-width: 600px) {
