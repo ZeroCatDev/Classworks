@@ -48,9 +48,9 @@ const settingsDefinitions = {
     validate: value => /^[A-Za-z0-9]*$/.test(value),
     description: '班级编号(无论使用哪种存储方式都需要设置)'
   },
-  'server.provider': {  // 新增项
+  'server.provider': {
     type: 'string',
-    default: 'localStorage',
+    default: 'indexedDB',
     validate: value => ['server', 'localStorage', 'indexedDB'].includes(value),
     description: '数据提供者，用于决定数据存储方式'
   },

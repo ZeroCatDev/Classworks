@@ -65,106 +65,88 @@
       class="main-window flex-grow-1"
       fluid
     >
+      <!-- 有内容的科目卡片 -->
       <div
-        v-if="state.showNoDataMessage && !state.isToday"
-        class="no-data-message"
+        ref="gridContainer"
+        class="grid-masonry"
       >
-        <v-card class="text-center pa-4">
-          <v-card-title class="text-h6">
-            别看未来的作业了
-          </v-card-title>
-          <v-card-text>
-            <div class="text-body-1">
-              {{ state.noDataMessage }}
-            </div>
-          </v-card-text>
-        </v-card>
+        <div
+          v-for="item in sortedItems"
+          :key="item.key"
+          class="grid-item"
+          :style="{
+            'grid-row-end': `span ${item.rowSpan}`,
+            order: item.order,
+          }"
+          @click="!isEditingDisabled && openDialog(item.key)"
+        >
+          <v-card
+            border
+            height="100%"
+          >
+            <v-card-title>{{ item.name }}</v-card-title>
+            <v-card-text :style="state.contentStyle">
+              <v-list>
+                <v-list-item
+                  v-for="text in splitPoint(item.content)"
+                  :key="text"
+                >
+                  {{ text }}
+                </v-list-item>
+              </v-list>
+            </v-card-text>
+          </v-card>
+        </div>
       </div>
 
-      <template v-else>
-        <!-- 有内容的科目卡片 -->
-        <div
-          ref="gridContainer"
-          class="grid-masonry"
-        >
-          <div
-            v-for="item in sortedItems"
-            :key="item.key"
-            class="grid-item"
-            :style="{
-              'grid-row-end': `span ${item.rowSpan}`,
-              order: item.order,
-            }"
-            @click="!isEditingDisabled && openDialog(item.key)"
-          >
-            <v-card
-              border
-              height="100%"
-            >
-              <v-card-title>{{ item.name }}</v-card-title>
-              <v-card-text :style="state.contentStyle">
-                <v-list>
-                  <v-list-item
-                    v-for="text in splitPoint(item.content)"
-                    :key="text"
-                  >
-                    {{ text }}
-                  </v-list-item>
-                </v-list>
-              </v-card-text>
-            </v-card>
-          </div>
-        </div>
-
-        <!-- 单独显示空科目 -->
-        <div class="empty-subjects mt-4">
-          <template v-if="emptySubjectDisplay === 'button'">
-            <v-btn-group class="gap-2 flex-wrap">
-              <v-btn
-                v-for="subject in unusedSubjects"
-                :key="subject.key"
-                variant="tonal"
-                color="primary"
-                :disabled="isEditingDisabled"
-                @click="openDialog(subject.key)"
-              >
-                <v-icon start>
-                  mdi-plus
-                </v-icon>
-                {{ subject.name }}
-              </v-btn>
-            </v-btn-group>
-          </template>
-          <div
-            v-else
-            class="empty-subjects-grid"
-          >
-            <v-card
+      <!-- 单独显示空科目 -->
+      <div class="empty-subjects mt-4">
+        <template v-if="emptySubjectDisplay === 'button'">
+          <v-btn-group class="gap-2 flex-wrap">
+            <v-btn
               v-for="subject in unusedSubjects"
               :key="subject.key"
-              border
-              class="empty-subject-card"
+              variant="tonal"
+              color="primary"
               :disabled="isEditingDisabled"
               @click="openDialog(subject.key)"
             >
-              <v-card-title class="text-subtitle-1">
-                {{ subject.name }}
-              </v-card-title>
-              <v-card-text class="text-center">
-                <v-icon
-                  size="small"
-                  color="grey"
-                >
-                  mdi-plus
-                </v-icon>
-                <div class="text-caption text-grey">
-                  点击添加作业
-                </div>
-              </v-card-text>
-            </v-card>
-          </div>
+              <v-icon start>
+                mdi-plus
+              </v-icon>
+              {{ subject.name }}
+            </v-btn>
+          </v-btn-group>
+        </template>
+        <div
+          v-else
+          class="empty-subjects-grid"
+        >
+          <v-card
+            v-for="subject in unusedSubjects"
+            :key="subject.key"
+            border
+            class="empty-subject-card"
+            :disabled="isEditingDisabled"
+            @click="openDialog(subject.key)"
+          >
+            <v-card-title class="text-subtitle-1">
+              {{ subject.name }}
+            </v-card-title>
+            <v-card-text class="text-center">
+              <v-icon
+                size="small"
+                color="grey"
+              >
+                mdi-plus
+              </v-icon>
+              <div class="text-caption text-grey">
+                点击添加作业
+              </div>
+            </v-card-text>
+          </v-card>
         </div>
-      </template>
+      </div>
     </v-container>
 
     <!-- 出勤统计区域 -->
@@ -172,7 +154,7 @@
       v-if="state.studentList && state.studentList.length"
       class="attendance-area"
       cols="1"
-      @click="!isPastDate ? setAttendanceArea() : null"
+      @click="setAttendanceArea()"
     >
       <h1>出勤</h1>
       <h2>应到: {{ state.studentList.length }}人</h2>
@@ -386,17 +368,17 @@
 </template>
 
 <script>
-import MessageLog from '@/components/MessageLog.vue';
+import MessageLog from "@/components/MessageLog.vue";
 import dataProvider from "@/utils/dataProvider";
 import { getSetting, watchSettings, setSetting } from "@/utils/settings";
 import { useDisplay } from "vuetify";
 import "../styles/index.scss";
-import { debounce, throttle } from '@/utils/debounce';
+import { debounce, throttle } from "@/utils/debounce";
 
 export default {
   name: "HomeworkBoard",
   components: {
-    MessageLog
+    MessageLog,
   },
   data() {
     return {
@@ -460,8 +442,8 @@ export default {
       debouncedUpload: null,
       throttledReflow: null,
       _sortedItemsCache: {
-        key: '',
-        value: []
+        key: "",
+        value: [],
       },
     };
   },
@@ -492,7 +474,9 @@ export default {
       }
     },
     sortedItems() {
-      const key = `${JSON.stringify(this.state.homeworkData)}_${this.state.subjectOrder.join()}_${this.dynamicSort}`;
+      const key = `${JSON.stringify(
+        this.state.homeworkData
+      )}_${this.state.subjectOrder.join()}_${this.dynamicSort}`;
       if (this._sortedItemsCache.key === key) {
         return this._sortedItemsCache.value;
       }
@@ -504,7 +488,11 @@ export default {
           name: value.name,
           content: value.content,
           order: this.state.subjectOrder.indexOf(key),
-          rowSpan: Math.ceil((value.content.split('\n').filter(line => line.trim()).length + 1) * 0.8)
+          rowSpan: Math.ceil(
+            (value.content.split("\n").filter((line) => line.trim()).length +
+              1) *
+              0.8
+          ),
         }));
 
       const result = this.dynamicSort
@@ -538,22 +526,15 @@ export default {
     dynamicSort() {
       return getSetting("display.dynamicSort");
     },
-    isPastDate() {
-      const selected = new Date(this.state.dateString);
-      const today = new Date();
-      selected.setHours(0, 0, 0, 0);
-      today.setHours(0, 0, 0, 0);
-      return selected < today;
-    },
     isEditingDisabled() {
-      return this.state.uploadLoading || this.state.downloadLoading || this.isPastDate;
+      return this.state.uploadLoading || this.state.downloadLoading;
     },
     unreadCount() {
       return this.$refs.messageLog?.unreadCount || 0;
     },
     showRandomButton() {
-      return getSetting('display.showRandomButton');
-    }
+      return getSetting("display.showRandomButton");
+    },
   },
 
   watch: {
@@ -615,7 +596,8 @@ export default {
       const domain = getSetting("server.domain");
       const classNum = getSetting("server.classNumber");
 
-      this.dataKey = this.provider === 'server' ? `${domain}/${classNum}` : classNum;
+      this.dataKey =
+        this.provider === "server" ? `${domain}/${classNum}` : classNum;
       this.state.classNumber = classNum;
 
       // 从 URL 获取日期，如果没有则使用今天的日期
@@ -626,10 +608,7 @@ export default {
       this.state.dateString = dateFromUrl || today;
       this.state.isToday = this.state.dateString === today;
 
-      await Promise.all([
-        this.downloadData(),
-        this.loadConfig()
-      ]);
+      await Promise.all([this.downloadData(), this.loadConfig()]);
     },
 
     async downloadData() {
@@ -645,7 +624,7 @@ export default {
 
         if (!response.success) {
           // 处理错误情况
-          if (response.error.code === 'NOT_FOUND') {
+          if (response.error.code === "NOT_FOUND") {
             this.state.showNoDataMessage = true;
             this.state.noDataMessage = response.error.message;
             this.state.homeworkData = {};
@@ -662,10 +641,10 @@ export default {
           this.state.lateSet = new Set(attendance.late || []);
           this.state.synced = true;
           this.state.showNoDataMessage = false;
-          this.showMessage('下载成功', '数据已更新');
+          this.showMessage("下载成功", "数据已更新");
         }
       } catch (error) {
-        this.showError('下载失败', error.message);
+        this.showError("下载失败", error.message);
       } finally {
         this.loading.download = false;
       }
@@ -683,8 +662,8 @@ export default {
             homework: this.state.homeworkData,
             attendance: {
               absent: Array.from(this.state.selectedSet),
-              late: Array.from(this.state.lateSet)
-            }
+              late: Array.from(this.state.lateSet),
+            },
           },
           this.state.dateString
         );
@@ -694,10 +673,10 @@ export default {
         }
 
         this.state.synced = true;
-        this.showMessage(response.message || '保存成功');
+        this.showMessage(response.message || "保存成功");
       } catch (error) {
-        console.error('保存失败:', error);
-        this.showError('保存失败', error.message || '请重试');
+        console.error("保存失败:", error);
+        this.showError("保存失败", error.message || "请重试");
       } finally {
         this.loading.upload = false;
       }
@@ -727,8 +706,10 @@ export default {
       const content = this.state.textarea.trim();
       if (content) {
         this.state.homeworkData[this.currentEditSubject] = {
-          name: this.state.availableSubjects.find(s => s.key === this.currentEditSubject)?.name,
-          content
+          name: this.state.availableSubjects.find(
+            (s) => s.key === this.currentEditSubject
+          )?.name,
+          content,
         };
         this.state.synced = false;
         if (this.autoSave) {
@@ -831,7 +812,7 @@ export default {
       const classNum = getSetting("server.classNumber");
 
       this.provider = provider;
-      this.dataKey = provider === 'server' ? `${domain}/${classNum}` : classNum;
+      this.dataKey = provider === "server" ? `${domain}/${classNum}` : classNum;
 
       this.state.classNumber = classNum;
     },
@@ -869,9 +850,11 @@ export default {
           this.state.dateString = formattedDate;
 
           // 使用 replace 而不是 push 来避免创建新的历史记录
-          this.$router.replace({
-            query: { date: formattedDate }
-          }).catch(() => {});
+          this.$router
+            .replace({
+              query: { date: formattedDate },
+            })
+            .catch(() => {});
 
           this.downloadData();
         }
@@ -884,11 +867,14 @@ export default {
       if (maxColumns <= 1) return items;
 
       // 使用贪心算法分配
-      const columns = Array.from({ length: maxColumns }, () => ({ height: 0, items: [] }));
+      const columns = Array.from({ length: maxColumns }, () => ({
+        height: 0,
+        items: [],
+      }));
 
-      items.forEach(item => {
+      items.forEach((item) => {
         const shortestColumn = columns.reduce(
-          (min, col, i) => col.height < columns[min].height ? i : min,
+          (min, col, i) => (col.height < columns[min].height ? i : min),
           0
         );
         columns[shortestColumn].items.push(item);
@@ -896,10 +882,12 @@ export default {
       });
 
       // 展平结果并添加顺序
-      return columns.flatMap(col => col.items).map((item, index) => ({
-        ...item,
-        order: index
-      }));
+      return columns
+        .flatMap((col) => col.items)
+        .map((item, index) => ({
+          ...item,
+          order: index,
+        }));
     },
 
     fixedGridLayout(items) {
@@ -997,14 +985,14 @@ export default {
       }
     },
 
-    showMessage(title, content = '', type = 'success') {
+    showMessage(title, content = "", type = "success") {
       this.$message[type](title, content);
     },
 
     updateSortedItemsCache(key, value) {
       this._sortedItemsCache = {
         key,
-        value
+        value,
       };
     },
   },
