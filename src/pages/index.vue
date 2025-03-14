@@ -47,7 +47,7 @@
         @click="$refs.messageLog.drawer = true"
       />
     </template>
-  </v-app-bar>
+  </v-app-bar>{{ state.boardData }}
   <div class="d-flex">
     <!-- 主要内容区域 -->
     <v-container class="main-window flex-grow-1 no-select" fluid>
@@ -133,27 +133,27 @@
       @click="setAttendanceArea()"
     >
       <h1>出勤</h1>
-      <h2>应到: {{ state.studentList.length - state.excludeSet.size }}人</h2>
+      <h2>应到: {{ state.studentList.length - state.boardData.attendance.exclude.length }}人</h2>
       <h2>
         实到:
         {{
           state.studentList.length -
-          state.selectedSet.size -
-          state.lateSet.size -
-          state.excludeSet.size
+          state.boardData.attendance.absent.length -
+          state.boardData.attendance.late.length -
+          state.boardData.attendance.exclude.length
         }}人
       </h2>
-      <h2>请假: {{ state.selectedSet.size }}人</h2>
-      <h3 v-for="(i, index) in state.selectedSet" :key="'absent-' + index">
-        {{ `${index + 1}. ${state.studentList[i]}` }}
+      <h2>请假: {{ state.boardData.attendance.absent.length }}人</h2>
+      <h3 v-for="(name, index) in state.boardData.attendance.absent" :key="'absent-' + index">
+        {{ `${index + 1}. ${name}` }}
       </h3>
-      <h2>迟到: {{ state.lateSet.size }}人</h2>
-      <h3 v-for="(i, index) in state.lateSet" :key="'late-' + index">
-        {{ `${index + 1}. ${state.studentList[i]}` }}
+      <h2>迟到: {{ state.boardData.attendance.late.length }}人</h2>
+      <h3 v-for="(name, index) in state.boardData.attendance.late" :key="'late-' + index">
+        {{ `${index + 1}. ${name}` }}
       </h3>
-      <h2>不参与: {{ state.excludeSet.size }}人</h2>
-      <h3 v-for="(i, index) in state.excludeSet" :key="'exclude-' + index">
-        {{ `${index + 1}. ${state.studentList[i]}` }}
+      <h2>不参与: {{ state.boardData.attendance.exclude.length }}人</h2>
+      <h3 v-for="(name, index) in state.boardData.attendance.exclude" :key="'exclude-' + index">
+        {{ `${index + 1}. ${name}` }}
       </h3>
     </v-col>
   </div>
@@ -314,9 +314,14 @@ export default {
       state: {
         classNumber: "",
         studentList: [],
-        selectedSet: new Set(),
-        lateSet: new Set(),
-        excludeSet: new Set(), // 新增不参与集合
+        boardData: {
+          homework: {},
+          attendance: {
+            absent: [],
+            late: [],
+            exclude: []
+          }
+        },
         dialogVisible: false,
         dialogTitle: "",
         textarea: "",
@@ -326,7 +331,6 @@ export default {
         contentStyle: { "font-size": `${getSetting("font.size")}px` },
         uploadLoading: false,
         downloadLoading: false,
-        homeworkData: {},
         snackbar: false,
         snackbarText: "",
         fontSize: getSetting("font.size"),
@@ -403,13 +407,13 @@ export default {
     },
     sortedItems() {
       const key = `${JSON.stringify(
-        this.state.homeworkData
+        this.state.boardData.homework
       )}_${this.state.subjectOrder.join()}_${this.dynamicSort}`;
       if (this.sortedItemsCache.key === key) {
         return this.sortedItemsCache.value;
       }
 
-      const items = Object.entries(this.state.homeworkData)
+      const items = Object.entries(this.state.boardData.homework)
         .filter(([, value]) => value.content?.trim())
         .map(([key, value]) => ({
           key,
@@ -433,7 +437,7 @@ export default {
       return result;
     },
     unusedSubjects() {
-      const usedKeys = Object.keys(this.state.homeworkData);
+      const usedKeys = Object.keys(this.state.boardData.homework);
       return this.state.availableSubjects.filter(
         (subject) => !usedKeys.includes(subject.key)
       );
@@ -555,20 +559,16 @@ export default {
           if (response.error.code === "NOT_FOUND") {
             this.state.showNoDataMessage = true;
             this.state.noDataMessage = response.error.message;
-            this.state.homeworkData = {};
-            this.state.selectedSet = new Set();
-            this.state.lateSet = new Set();
-            this.state.excludeSet = new Set(); // 添加不参与状态
+            this.state.boardData = {
+              homework: {},
+              attendance: { absent: [], late: [], exclude: [] }
+            };
           } else {
             throw new Error(response.error.message);
           }
         } else {
           // 处理成功情况
-          const { homework = {}, attendance = {} } = response.data;
-          this.state.homeworkData = homework;
-          this.state.selectedSet = new Set(attendance.absent || []);
-          this.state.lateSet = new Set(attendance.late || []);
-          this.state.excludeSet = new Set(attendance.exclude || []); // 添加不参与状态
+          this.state.boardData = response.data;
           this.state.synced = true;
           this.state.showNoDataMessage = false;
           this.showMessage("下载成功", "数据已更新");
@@ -588,14 +588,7 @@ export default {
         const response = await dataProvider.saveData(
           this.provider,
           this.dataKey,
-          {
-            homework: this.state.homeworkData,
-            attendance: {
-              absent: Array.from(this.state.selectedSet),
-              late: Array.from(this.state.lateSet),
-              exclude: Array.from(this.state.excludeSet), // 添加不参与状态
-            },
-          },
+          this.state.boardData,
           this.state.dateString
         );
 
@@ -636,7 +629,7 @@ export default {
 
       const content = this.state.textarea.trim();
       if (content) {
-        this.state.homeworkData[this.currentEditSubject] = {
+        this.state.boardData.homework[this.currentEditSubject] = {
           name: this.state.availableSubjects.find(
             (s) => s.key === this.currentEditSubject
           )?.name,
@@ -648,7 +641,7 @@ export default {
           this.uploadData();
         }
       } else {
-        delete this.state.homeworkData[this.currentEditSubject];
+        delete this.state.boardData.homework[this.currentEditSubject];
       }
       this.state.dialogVisible = false;
     },
@@ -674,16 +667,16 @@ export default {
       }
       this.currentEditSubject = subject;
       // 如果是新科目，需要创建对应的数据结构
-      if (!this.state.homeworkData[subject]) {
-        this.state.homeworkData[subject] = {
+      if (!this.state.boardData.homework[subject]) {
+        this.state.boardData.homework[subject] = {
           name:
             this.state.availableSubjects.find((s) => s.key === subject)?.name ||
             subject,
           content: "",
         };
       }
-      this.state.dialogTitle = this.state.homeworkData[subject].name;
-      this.state.textarea = this.state.homeworkData[subject].content;
+      this.state.dialogTitle = this.state.boardData.homework[subject].name;
+      this.state.textarea = this.state.boardData.homework[subject].content;
       this.state.dialogVisible = true;
       this.$nextTick(() => {
         if (this.$refs.inputRef) {
@@ -701,16 +694,17 @@ export default {
     },
 
     toggleStudentStatus(index) {
-      if (this.state.selectedSet.has(index)) {
-        this.state.selectedSet.delete(index);
-        this.state.lateSet.add(index);
-      } else if (this.state.lateSet.has(index)) {
-        this.state.lateSet.delete(index);
-        this.state.excludeSet.add(index);
-      } else if (this.state.excludeSet.has(index)) {
-        this.state.excludeSet.delete(index);
+      const student = this.state.studentList[index];
+      if (this.state.boardData.attendance.absent.includes(student)) {
+        this.state.boardData.attendance.absent = this.state.boardData.attendance.absent.filter(name => name !== student);
+        this.state.boardData.attendance.late.push(student);
+      } else if (this.state.boardData.attendance.late.includes(student)) {
+        this.state.boardData.attendance.late = this.state.boardData.attendance.late.filter(name => name !== student);
+        this.state.boardData.attendance.exclude.push(student);
+      } else if (this.state.boardData.attendance.exclude.includes(student)) {
+        this.state.boardData.attendance.exclude = this.state.boardData.attendance.exclude.filter(name => name !== student);
       } else {
-        this.state.selectedSet.add(index);
+        this.state.boardData.attendance.absent.push(student);
       }
       this.state.synced = false;
       if (this.autoSave) {
@@ -719,9 +713,9 @@ export default {
     },
 
     cleanstudentslist() {
-      this.state.selectedSet.clear();
-      this.state.lateSet.clear();
-      this.state.excludeSet.clear();
+      this.state.boardData.attendance.absent = [];
+      this.state.boardData.attendance.late = [];
+      this.state.boardData.attendance.exclude = [];
       this.state.synced = false;
       if (this.autoSave) {
         this.uploadData();
@@ -865,65 +859,80 @@ export default {
     },
 
     setAllPresent() {
-      this.state.selectedSet.clear();
-      this.state.lateSet.clear();
-      this.state.excludeSet.clear();
+      this.state.boardData.attendance = {
+        absent: [],
+        late: [],
+        exclude: []
+      };
+      this.state.synced = false;
     },
 
     setAllAbsent() {
-      this.state.studentList.forEach((_, index) => {
-        this.setAbsent(index);
-      });
+      this.state.boardData.attendance.absent = [...this.state.studentList];
+      this.state.boardData.attendance.late = [];
+      this.state.boardData.attendance.exclude = [];
+      this.state.synced = false;
     },
 
     setAllLate() {
-      this.state.studentList.forEach((_, index) => {
-        this.setLate(index);
-      });
+      this.state.boardData.attendance.absent = [];
+      this.state.boardData.attendance.late = [...this.state.studentList];
+      this.state.boardData.attendance.exclude = [];
+      this.state.synced = false;
     },
 
     isPresent(index) {
-      return (
-        !this.state.selectedSet.has(index) &&
-        !this.state.lateSet.has(index) &&
-        !this.state.excludeSet.has(index)
-      );
+      const student = this.state.studentList[index];
+      const { absent, late, exclude } = this.state.boardData.attendance;
+      return !absent.includes(student) && !late.includes(student) && !exclude.includes(student);
     },
 
     isAbsent(index) {
-      return this.state.selectedSet.has(index);
+      return this.state.boardData.attendance.absent.includes(this.state.studentList[index]);
     },
 
     isLate(index) {
-      return this.state.lateSet.has(index);
+      return this.state.boardData.attendance.late.includes(this.state.studentList[index]);
     },
 
     isExclude(index) {
-      return this.state.excludeSet.has(index);
+      return this.state.boardData.attendance.exclude.includes(this.state.studentList[index]);
     },
 
     setPresent(index) {
-      this.state.selectedSet.delete(index);
-      this.state.lateSet.delete(index);
-      this.state.excludeSet.delete(index);
+      const student = this.state.studentList[index];
+      const { absent, late, exclude } = this.state.boardData.attendance;
+      this.state.boardData.attendance.absent = absent.filter(name => name !== student);
+      this.state.boardData.attendance.late = late.filter(name => name !== student);
+      this.state.boardData.attendance.exclude = exclude.filter(name => name !== student);
+      this.state.synced = false;
     },
 
     setAbsent(index) {
-      this.state.selectedSet.add(index);
-      this.state.lateSet.delete(index);
-      this.state.excludeSet.delete(index);
+      const student = this.state.studentList[index];
+      if (!this.state.boardData.attendance.absent.includes(student)) {
+        this.setPresent(index);
+        this.state.boardData.attendance.absent.push(student);
+        this.state.synced = false;
+      }
     },
 
     setLate(index) {
-      this.state.lateSet.add(index);
-      this.state.selectedSet.delete(index);
-      this.state.excludeSet.delete(index);
+      const student = this.state.studentList[index];
+      if (!this.state.boardData.attendance.late.includes(student)) {
+        this.setPresent(index);
+        this.state.boardData.attendance.late.push(student);
+        this.state.synced = false;
+      }
     },
 
     setExclude(index) {
-      this.state.excludeSet.add(index);
-      this.state.selectedSet.delete(index);
-      this.state.lateSet.delete(index);
+      const student = this.state.studentList[index];
+      if (!this.state.boardData.attendance.exclude.includes(student)) {
+        this.setPresent(index);
+        this.state.boardData.attendance.exclude.push(student);
+        this.state.synced = false;
+      }
     },
 
     async saveAttendance() {

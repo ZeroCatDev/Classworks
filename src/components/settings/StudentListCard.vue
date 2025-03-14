@@ -10,14 +10,10 @@
       </template>
       <v-card-title class="text-h6">学生列表</v-card-title>
       <template #append>
-        <v-chip
-          v-if="hasChanges"
-          color="warning"
-          size="small"
-          class="mr-2"
-        >
-          未保存
-        </v-chip>
+        <unsaved-warning
+          :show="hasChanges"
+          message="有未保存的更改"
+        />
         <v-btn
           :color="modelValue.advanced ? 'primary' : undefined"
           variant="text"
@@ -217,9 +213,14 @@
 </template>
 
 <script>
+import UnsavedWarning from '../common/UnsavedWarning.vue'
+import '@/styles/warnings.scss'
+
 export default {
   name: 'StudentListCard',
-
+  components: {
+    UnsavedWarning
+  },
   props: {
     modelValue: {
       type: Object,
@@ -246,15 +247,12 @@ export default {
         index: -1,
         name: ''
       },
-      savedState: {  // 初始化为当前值而不是 null
-        list: [],
-        text: ''
-      }
+      savedState: null  // 改为 null 初始值
     }
   },
 
   created() {
-    // 移除这里的初始化，改为在 mounted 中处理
+    this.initializeSavedState()
   },
 
   mounted() {
@@ -300,23 +298,17 @@ export default {
       }
     },
     hasChanges() {
-      const currentState = JSON.stringify({
-        list: this.modelValue.list,
-        text: this.modelValue.text
-      });
-      const savedState = JSON.stringify(this.savedState);
-      // 检查 savedState 是否为初始状态
-      return this.savedState.list.length > 0 && currentState !== savedState;
+      return this.savedState && this.isStateChanged();
     }
   },
 
   methods: {
     // 初始化方法
-    initializeSavedList() {
-      // 优先使用 modelValue 的当前值，否则使用 originalList
-      this.savedList = this.modelValue.list.length > 0
-        ? [...this.modelValue.list]
-        : [...this.originalList];
+    initializeSavedState() {
+      this.savedState = {
+        list: [...(this.modelValue.list.length ? this.modelValue.list : this.originalList)],
+        text: this.modelValue.text || (this.originalList || []).join('\n')
+      }
     },
 
     // 列表状态检查
@@ -349,6 +341,7 @@ export default {
         list: [...this.modelValue.list],
         text: this.modelValue.text
       };
+      this.$forceUpdate(); // 强制更新视图
     },
 
     // 学生管理方法
@@ -428,6 +421,7 @@ export default {
         this.updateSavedState();
       } catch (error) {
         console.error('保存失败:', error);
+        throw error;
       }
     },
 
@@ -441,6 +435,18 @@ export default {
         text: value,
         list
       });
+    },
+
+    // 重写变更检测逻辑
+    isStateChanged() {
+      if (!this.savedState) return false;
+
+      const currentState = {
+        list: this.modelValue.list,
+        text: this.modelValue.text
+      };
+
+      return JSON.stringify(currentState) !== JSON.stringify(this.savedState);
     }
   }
 }
@@ -456,16 +462,22 @@ export default {
   transition: opacity 0.2s ease;
 }
 
-.unsaved-changes {
-  animation: pulse-warning 2s infinite; /* 更有意义的动画名称 */
-  border: 2px solid rgb(var(--v-theme-warning));
+/* 修改警告样式的选择器和实现 */
+.v-card.unsaved-changes {
+  animation: pulse-warning 2s infinite;
+  border: 2px solid rgb(var(--v-theme-warning)) !important;
 }
 
 @keyframes pulse-warning {
-  0%, 100% { border-color: rgba(var(--v-theme-warning), 1); }
-  50% { border-color: rgba(var(--v-theme-warning), 0.5); }
+  0%, 100% {
+    border-color: rgba(var(--v-theme-warning), 1) !important;
+  }
+  50% {
+    border-color: rgba(var(--v-theme-warning), 0.5) !important;
+  }
 }
 
+/* 移动端样式 */
 @media (max-width: 600px) {
   .action-buttons {
     opacity: 1;

@@ -1,0 +1,26 @@
+@mixin warning-card {
+  &.warning {
+    animation: pulse-warning 2s infinite;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border: 2px solid rgb(var(--v-theme-warning));
+      border-radius: inherit;
+      animation: pulse-border 2s infinite;
+      pointer-events: none;
+    }
+  }
+}
+
+@keyframes pulse-warning {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.002); }
+}
+
+@keyframes pulse-border {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
