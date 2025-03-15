@@ -2,9 +2,7 @@
   <v-navigation-drawer v-model="drawer" location="right" temporary width="400">
     <v-toolbar color="primary">
       <v-toolbar-title>消息记录</v-toolbar-title>
-      <template #append>
-        <v-btn icon="mdi-delete" variant="text" @click="clearMessages" />
-      </template>
+
     </v-toolbar>
 
     <v-list>
@@ -21,14 +19,7 @@
           {{ new Date(msg.timestamp).toLocaleTimeString() }}
         </span>
 
-        <template #append>
-          <v-btn
-            icon="mdi-delete"
-            variant="text"
-            size="small"
-            @click="deleteMessage(msg.id)"
-          />
-        </template>
+
       </v-list-item>
 
       <v-list-item v-if="!messages.length">

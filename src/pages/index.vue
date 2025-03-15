@@ -627,6 +627,7 @@ export default {
           if (response.error.code === "NOT_FOUND") {
             this.state.showNoDataMessage = true;
             this.state.noDataMessage = response.error.message;
+            // 确保数据结构完整
             this.state.boardData = {
               homework: {},
               attendance: { absent: [], late: [], exclude: [] },
@@ -635,12 +636,25 @@ export default {
             throw new Error(response.error.message);
           }
         } else {
-          this.state.boardData = response.data;
+          // 确保数据结构完整
+          this.state.boardData = {
+            homework: response.data.homework || {},
+            attendance: {
+              absent: response.data.attendance?.absent || [],
+              late: response.data.attendance?.late || [],
+              exclude: response.data.attendance?.exclude || [],
+            },
+          };
           this.state.synced = true;
           this.state.showNoDataMessage = false;
           this.$message.success("下载成功", "数据已更新");
         }
       } catch (error) {
+        // 发生错误时也要确保数据结构完整
+        this.state.boardData = {
+          homework: {},
+          attendance: { absent: [], late: [], exclude: [] },
+        };
         this.$message.error("下载失败", error.message);
       } finally {
         this.loading.download = false;

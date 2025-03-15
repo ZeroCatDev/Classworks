@@ -15,26 +15,32 @@
       <v-row>
         <v-col cols="12" md="6">
           <server-settings-card
+          border
             :loading="loading.server"
             @saved="onSettingsSaved"
           />
         </v-col>
 
         <v-col cols="12" md="6">
-          <edit-settings-card @saved="onSettingsSaved" />
+          <data-provider-settings-card border />
         </v-col>
 
         <v-col cols="12" md="6">
-          <refresh-settings-card @saved="onSettingsSaved" />
+          <edit-settings-card @saved="onSettingsSaved" border/>
         </v-col>
 
         <v-col cols="12" md="6">
-          <display-settings-card @saved="onSettingsSaved" />
+          <refresh-settings-card @saved="onSettingsSaved" border/>
+        </v-col>
+
+        <v-col cols="12" md="6">
+          <display-settings-card @saved="onSettingsSaved" border/>
         </v-col>
 
         <!-- 开发者选项卡片 -->
         <v-col :cols="12" :md="settings.developer.enabled ? 12 : 6">
           <settings-card
+          border
             title="开发者选项"
             icon="mdi-developer-board"
           >
@@ -139,6 +145,7 @@ import ServerSettingsCard from '@/components/settings/cards/ServerSettingsCard.v
 import EditSettingsCard from '@/components/settings/cards/EditSettingsCard.vue';
 import RefreshSettingsCard from '@/components/settings/cards/RefreshSettingsCard.vue';
 import DisplaySettingsCard from '@/components/settings/cards/DisplaySettingsCard.vue';
+import DataProviderSettingsCard from '@/components/settings/cards/DataProviderSettingsCard.vue';
 import {
   getSetting,
   setSetting,
@@ -162,7 +169,8 @@ export default {
     MessageLog,
     SettingsCard,
     StudentListCard,
-    AboutCard
+    AboutCard,
+    DataProviderSettingsCard
   },
   setup() {
     const { mobile } = useDisplay();
