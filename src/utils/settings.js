@@ -14,27 +14,40 @@ async function requestNotificationPermission() {
     return false;
   }
 }
-// 请求持久性存储权限
+
+/**
+ * 请求持久性存储权限
+ * @returns {Promise<boolean>} 是否成功启用持久性存储
+ */
 async function requestPersistentStorage() {
-  if (navigator.storage && navigator.storage.persist) {
-    const isPersisted = await navigator.storage.persist();
-    if (isPersisted) {
-      console.log("持久性存储已启用");
-    } else {
-      console.warn("持久性存储请求被拒绝");
+  if (!getSetting("storage.persistentStorage")) {
+    return false;
+  }
+
+  try {
+    if (navigator.storage?.persist) {
+      return await navigator.storage.persist();
     }
-  } else {
-    console.warn("浏览器不支持持久性存储");
+    return false;
+  } catch (error) {
+    console.warn("请求持久性存储失败:", error);
+    return false;
   }
 }
 
-// 在页面加载时请求通知权限和持久性存储
-window.addEventListener("load", async () => {
+/**
+ * 初始化存储权限
+ */
+async function initializeStorage() {
   const notificationGranted = await requestNotificationPermission();
-  if (notificationGranted) {
-    await requestPersistentStorage();
+  if (notificationGranted && getSetting("storage.persistOnLoad")) {
+    const persisted = await requestPersistentStorage();
+    console.log(`持久性存储状态: ${persisted ? "已启用" : "未启用"}`);
   }
-});
+}
+
+// 在页面加载时初始化
+window.addEventListener("load", initializeStorage);
 
 /**
  * 配置项定义
@@ -55,6 +68,18 @@ const SETTINGS_STORAGE_KEY = "classworks_settings";
  * @type {Object.<string, SettingDefinition>}
  */
 const settingsDefinitions = {
+  // 存储设置
+  "storage.persistentStorage": {
+    type: "boolean",
+    default: true,
+    description: "是否启用持久性存储",
+  },
+  "storage.persistOnLoad": {
+    type: "boolean",
+    default: true,
+    description: "是否在页面加载时自动请求持久性存储",
+  },
+
   // 显示设置
   "display.emptySubjectDisplay": {
     type: "string",

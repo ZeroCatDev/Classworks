@@ -28,7 +28,9 @@
 
         <v-date-picker
           v-model="state.selectedDate"
+          :model-value="state.selectedDate"
           color="primary"
+          width="300"
           @update:model-value="handleDateSelect"
         />
       </v-menu>
@@ -370,7 +372,7 @@ export default {
         snackbarText: "",
         fontSize: getSetting("font.size"),
         datePickerDialog: false,
-        selectedDate: null,
+        selectedDate: new Date().toISOString().split("T")[0], // 确保初始值正确
         refreshInterval: null,
         subjectOrder: [
           "语文",
@@ -606,7 +608,9 @@ export default {
       const dateFromUrl = urlParams.get("date");
       const today = new Date().toISOString().split("T")[0];
 
+      // 确保日期格式正确
       this.state.dateString = dateFromUrl || today;
+      this.state.selectedDate = this.state.dateString; // 添加这行，设置默认选中日期
       this.state.isToday = this.state.dateString === today;
 
       await Promise.all([this.downloadData(), this.loadConfig()]);
@@ -697,22 +701,26 @@ export default {
       if (!this.currentEditSubject) return;
 
       const content = this.state.textarea.trim();
-      if (content) {
-        // 更新内容
-        this.state.boardData.homework[this.currentEditSubject] = {
-          name: this.state.availableSubjects.find(
-            (s) => s.key === this.currentEditSubject
-          )?.name,
-          content,
-        };
+      const originalContent = this.state.boardData.homework[this.currentEditSubject]?.content || '';
+
+      // 如果内容发生变化(包括清空)，就视为修改
+      if (content !== originalContent.trim()) {
+        if (content) {
+          this.state.boardData.homework[this.currentEditSubject] = {
+            name: this.state.availableSubjects.find(
+              (s) => s.key === this.currentEditSubject
+            )?.name,
+            content,
+          };
+        } else {
+          delete this.state.boardData.homework[this.currentEditSubject];
+        }
         this.state.synced = false;
 
         // 处理自动保存
         if (this.autoSave) {
           await this.trySave(true);
         }
-      } else {
-        delete this.state.boardData.homework[this.currentEditSubject];
       }
 
       this.state.dialogVisible = false;
@@ -883,8 +891,16 @@ export default {
     },
 
     handleDateSelect(newDate) {
-      if (newDate) {
-        const date = new Date(newDate);
+      if (!newDate) return;
+
+      try {
+        // 确保日期格式正确
+        const date = typeof newDate === 'string' ? new Date(newDate) : newDate;
+        if (!(date instanceof Date) || isNaN(date.getTime())) {
+          console.error('Invalid date:', newDate);
+          return;
+        }
+
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0");
         const day = String(date.getDate()).padStart(2, "0");
@@ -893,6 +909,7 @@ export default {
         // 只有当日期真正改变时才更新
         if (this.state.dateString !== formattedDate) {
           this.state.dateString = formattedDate;
+          this.state.selectedDate = formattedDate;
           // 使用 replace 而不是 push 来避免创建新的历史记录
           this.$router
             .replace({
@@ -901,6 +918,9 @@ export default {
             .catch(() => {});
           this.downloadData();
         }
+      } catch (error) {
+        console.error('Date processing error:', error);
+        this.$message.error('日期处理错误', '请重新选择日期');
       }
     },
 
