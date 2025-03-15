@@ -1,8 +1,8 @@
 <template>
   <v-card
     border
-    :color="hasChanges ? 'warning-subtle' : undefined"
-    :class="{ 'unsaved-changes': hasChanges }"
+    :color="unsavedChanges ? 'warning-subtle' : undefined"
+    :class="{ 'unsaved-changes': unsavedChanges }"
   >
     <v-card-item>
       <template #prepend>
@@ -11,7 +11,7 @@
       <v-card-title class="text-h6">学生列表</v-card-title>
       <template #append>
         <unsaved-warning
-          :show="hasChanges"
+          :show="unsavedChanges"
           message="有未保存的更改"
         />
         <v-btn
@@ -190,8 +190,8 @@
             prepend-icon="mdi-content-save"
             size="large"
             :loading="loading"
-            :disabled="loading || !hasChanges"
-            @click="handleSave"
+            :disabled="loading || !unsavedChanges"
+            @click="$emit('save')"
           >
             保存名单
           </v-btn>
@@ -201,7 +201,7 @@
             prepend-icon="mdi-refresh"
             size="large"
             :loading="loading"
-            :disabled="loading || !hasChanges"
+            :disabled="loading || !unsavedChanges"
             @click="$emit('reload')"
           >
             重载名单
@@ -234,51 +234,16 @@ export default {
     loading: Boolean,
     error: String,
     isMobile: Boolean,
-    originalList: {
-      type: Array,
-      default: () => []
-    }
+    unsavedChanges: Boolean
   },
 
   data() {
     return {
-      newStudentName: '', // 重命名以更清晰
+      newStudentName: '',
       editState: {
         index: -1,
         name: ''
-      },
-      savedState: null  // 改为 null 初始值
-    }
-  },
-
-  created() {
-    this.initializeSavedState()
-  },
-
-  mounted() {
-    this.$nextTick(() => {
-      this.initializeSavedState()
-    })
-  },
-
-  watch: {
-    originalList: {
-      handler(newList) {
-        // 只在初始加载和空列表时更新
-        if (this.modelValue.list.length === 0) {
-          const newState = {
-            list: [...newList],
-            text: newList.join('\n')
-          };
-          // 同步更新两个状态
-          this.savedState = { ...newState };
-          this.updateModelValue({
-            ...this.modelValue,
-            ...newState
-          });
-        }
-      },
-      immediate: true
+      }
     }
   },
 
@@ -292,29 +257,11 @@ export default {
       set(value) {
         this.handleTextInput(value);
       }
-    },
-    hasChanges() {
-      return this.savedState && this.isStateChanged();
     }
   },
 
   methods: {
-    // 初始化方法
-    initializeSavedState() {
-      const currentList = this.modelValue.list || []
-      this.savedState = {
-        list: [...currentList],
-        text: currentList.join('\n')
-      }
-    },
-
-    // 列表状态检查
-    isListChanged(current, original) {
-      if (current.length !== original.length) return true;
-      return JSON.stringify(current) !== JSON.stringify(original);
-    },
-
-    // 编辑模式切换
+    // UI 相关方法
     toggleAdvanced() {
       const advanced = !this.modelValue.advanced;
       this.updateModelValue({
@@ -324,7 +271,6 @@ export default {
       });
     },
 
-    // 更新数据方法
     updateModelValue(newData) {
       this.$emit('update:modelValue', {
         ...this.modelValue,
@@ -332,16 +278,7 @@ export default {
       });
     },
 
-    // 更新保存状态
-    updateSavedState() {
-      const currentList = this.modelValue.list || []
-      this.savedState = {
-        list: [...currentList],
-        text: currentList.join('\n')
-      }
-    },
-
-    // 学生管理方法
+    // 基础编辑操作
     addStudent() {
       const name = this.newStudentName.trim();
       if (!name || this.modelValue.list.includes(name)) return;
@@ -385,7 +322,7 @@ export default {
       }
     },
 
-    // 编辑状态管理
+    // 文本编辑操作
     startEdit(index, name) {
       this.editState = { index, name };
     },
@@ -405,20 +342,8 @@ export default {
     },
 
     handleClick(index, student) {
-      // 如果是移动端，点击即开始编辑
       if (this.isMobile) {
         this.startEdit(index, student);
-      }
-    },
-
-    // 保存和加载处理
-    async handleSave() {
-      try {
-        await this.$emit('save')
-        this.updateSavedState()
-      } catch (error) {
-        console.error('保存失败:', error);
-        throw error;
       }
     },
 
@@ -432,31 +357,6 @@ export default {
         text: value,
         list
       });
-    },
-
-    // 重写变更检测逻辑
-    isStateChanged() {
-      if (!this.savedState) return false
-
-      const currentList = this.modelValue.list || []
-      const savedList = this.savedState.list || []
-
-      // 比较列表长度
-      if (currentList.length !== savedList.length) return true
-
-      // 逐个比较列表项
-      for (let i = 0; i < currentList.length; i++) {
-        if (currentList[i] !== savedList[i]) return true
-      }
-
-      // 如果在高级模式下，还需要比较文本
-      if (this.modelValue.advanced) {
-        const currentText = this.modelValue.text || ''
-        const savedText = this.savedState.text || ''
-        if (currentText !== savedText) return true
-      }
-
-      return false
     }
   }
 }

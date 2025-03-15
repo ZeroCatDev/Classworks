@@ -313,8 +313,10 @@
             :loading="loading.students"
             :error="studentsError"
             :is-mobile="isMobile"
+            :unsaved-changes="hasUnsavedChanges"
             @save="saveStudents"
             @reload="loadStudentList"
+            @update:modelValue="handleStudentDataChange"
           />
         </v-col>
 
@@ -420,12 +422,13 @@ export default {
       loading: {
         server: false,
         students: false
-      }
+      },
+      hasUnsavedChanges: false,
+      lastSavedData: null
     }
   },
 
   watch: {
-    // 添加深度监听所有设置
     'settings': {
       handler(newSettings) {
         this.handleSettingsChange(newSettings);
@@ -434,10 +437,12 @@ export default {
     },
     'studentData': {
       handler(newData) {
-        // 防止递归更新
-        if (JSON.stringify(newData.list) !== JSON.stringify(this.studentData.list)) {
-          this.studentData.text = newData.list.join('\n');
+        // 只检查是否有未保存的更改
+        if (this.lastSavedData) {
+          this.hasUnsavedChanges = JSON.stringify(newData.list) !== JSON.stringify(this.lastSavedData);
         }
+        // 更新文本显示
+        this.studentData.text = newData.list.join('\n');
       },
       deep: true
     }
@@ -531,6 +536,8 @@ export default {
         if (res.data && Array.isArray(res.data.studentList)) {
           this.studentData.list = res.data.studentList;
           this.studentData.text = res.data.studentList.join('\n');
+          this.lastSavedData = [...res.data.studentList];
+          this.hasUnsavedChanges = false;
         }
       } catch (error) {
         console.error('加载学生列表失败:', error);
@@ -554,17 +561,27 @@ export default {
         const key = provider === 'server' ? `${domain}/${classNum}` : classNum;
         const res = await dataProvider.saveConfig(provider, key, {
           studentList: this.studentData.list,
-          // 可以在这里添加其他需要同步的配置
         });
 
         if (!res.success) {
           throw new Error(res.error.message);
         }
 
+        // 更新保存状态
+        this.lastSavedData = [...this.studentData.list];
+        this.hasUnsavedChanges = false;
         this.showMessage('保存成功', '学生列表已更新');
       } catch (error) {
         console.error('保存学生列表失败:', error);
         this.showError('保存失败', error.message || '请重试');
+      }
+    },
+
+    handleStudentDataChange(newData) {
+      // 仅在列表实际发生变化时更新
+      if (JSON.stringify(newData.list) !== JSON.stringify(this.studentData.list)) {
+        this.studentData = { ...newData };
+        this.hasUnsavedChanges = true;
       }
     },
 
@@ -573,9 +590,6 @@ export default {
         const newName = this.editingName.trim();
         if (newName && newName !== this.studentData.list[this.editingIndex]) {
           this.studentData.list[this.editingIndex] = newName;
-          if (this.settings.edit.autoSave) {
-            this.saveStudents();
-          }
         }
         this.editingIndex = -1;
         this.editingName = '';
@@ -599,9 +613,6 @@ export default {
       const newIndex = direction === 'up' ? index - 1 : index + 1;
       if (newIndex >= 0 && newIndex < this.studentData.list.length) {
         [this.studentData.list[index], this.studentData.list[newIndex]] = [this.studentData.list[newIndex], this.studentData.list[index]];
-        if (this.settings.edit.autoSave) {
-          this.saveStudents();
-        }
       }
     },
 
@@ -622,7 +633,6 @@ export default {
         const student = this.studentData.list[this.studentToMove];
         this.studentData.list.splice(this.studentToMove, 1);
         this.studentData.list.splice(newPos, 0, student);
-        if (this.settings.edit.autoSave) this.saveStudents();
       }
       this.numberDialog = false;
       this.studentToMove = null;
@@ -634,9 +644,6 @@ export default {
         const student = this.studentData.list[index];
         this.studentData.list.splice(index, 1);
         this.studentData.list.unshift(student);
-        if (this.settings.edit.autoSave) {
-          this.saveStudents();
-        }
       }
     },
 
@@ -645,9 +652,6 @@ export default {
       if (student && !this.studentData.list.includes(student)) {
         this.studentData.list.push(student);
         this.newStudent = '';
-        if (this.settings.edit.autoSave) {
-          this.saveStudents();
-        }
       }
     },
 
@@ -656,7 +660,6 @@ export default {
         this.studentData.list.splice(index, 1);
         this.deleteDialog = false;
         this.studentToDelete = null;
-        if (this.settings.edit.autoSave) this.saveStudents();
       }
     },
 
