@@ -459,7 +459,7 @@ export default {
         .filter(([, value]) => value.content?.trim())
         .map(([key, value]) => ({
           key,
-          name: value.name,
+          name: this.state.availableSubjects.find((s) => s.key === key)?.name || key,
           content: value.content,
           order: this.state.subjectOrder.indexOf(key),
           rowSpan: Math.ceil(
@@ -473,7 +473,6 @@ export default {
         ? this.optimizeGridLayout(items)
         : items.sort((a, b) => a.order - b.order);
 
-      // 使用方法更新缓存
       this.updateSortedItemsCache(key, result);
 
       return result;
@@ -706,10 +705,8 @@ export default {
       // 如果内容发生变化(包括清空)，就视为修改
       if (content !== originalContent.trim()) {
         if (content) {
+          // 使用精简的数据结构
           this.state.boardData.homework[this.currentEditSubject] = {
-            name: this.state.availableSubjects.find(
-              (s) => s.key === this.currentEditSubject
-            )?.name,
             content,
           };
         } else {
@@ -782,16 +779,15 @@ export default {
       }
 
       this.currentEditSubject = subject;
-      // 如果是新科目，需要创建对应的数据结构
+      // 如果是新科目，需要创建对应的精简数据结构
       if (!this.state.boardData.homework[subject]) {
         this.state.boardData.homework[subject] = {
-          name:
-            this.state.availableSubjects.find((s) => s.key === subject)?.name ||
-            subject,
           content: "",
         };
       }
-      this.state.dialogTitle = this.state.boardData.homework[subject].name;
+      this.state.dialogTitle = this.state.availableSubjects.find(
+        (s) => s.key === subject
+      )?.name || subject;
       this.state.textarea = this.state.boardData.homework[subject].content;
       this.state.dialogVisible = true;
       this.$nextTick(() => {
