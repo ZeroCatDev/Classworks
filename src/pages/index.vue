@@ -164,7 +164,7 @@
       size="large"
       :loading="loading.upload"
       class="ml-2"
-      @click="uploadData"
+      @click="manualUpload"
     >
       上传
     </v-btn>
@@ -303,10 +303,10 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="grey" variant="text" @click="confirmDialog.show = false">
+        <v-btn color="grey" variant="text" @click="confirmDialog.reject">
           取消
         </v-btn>
-        <v-btn color="primary" @click="confirmSave">
+        <v-btn color="primary" @click="confirmDialog.resolve">
           确认保存
         </v-btn>
       </v-card-actions>
@@ -483,11 +483,16 @@ export default {
       return this.state.dateString === today;
     },
     canAutoSave() {
-      // 修改自动保存逻辑
-      if (!this.autoSave) return false;
-      // 只有在同时启用了自动保存和禁止非当天自动保存时才检查日期
-      if (this.blockNonTodayAutoSave && !this.isToday) return false;
-      return true;
+      // 只考虑自动保存开关和非当天限制
+      return this.autoSave && (!this.blockNonTodayAutoSave || this.isToday);
+    },
+    needConfirmSave() {
+      // 只在非今天且开启了确认选项时需要确认
+      return !this.isToday && this.confirmNonTodaySave;
+    },
+    shouldShowBlockedMessage() {
+      // 只在非今天且开启了自动保存和禁止非当天自动保存时提示
+      return !this.isToday && this.autoSave && this.blockNonTodayAutoSave;
     },
     refreshBeforeEdit() {
       return getSetting("edit.refreshBeforeEdit");
@@ -514,7 +519,6 @@ export default {
       return !this.isToday && this.confirmNonTodaySave;
     },
     shouldBlockAutoSave() {
-      // 修改阻止自动保存的判断条件
       return !this.isToday && this.autoSave && this.blockNonTodayAutoSave;
     },
   },
@@ -534,6 +538,7 @@ export default {
       handler() {
         this.throttledReflow();
       },
+      deep: true,
     },
   },
 
@@ -630,18 +635,32 @@ export default {
       }
     },
 
-    async handleSave() {
-      // 检查是否需要确认对话框
-      if (this.shouldShowSaveConfirm) {
+    async trySave(isAutoSave = false) {
+      // 如果是自动保存但不满足自动保存条件
+      if (isAutoSave && !this.canAutoSave) {
+        if (this.shouldShowBlockedMessage) {
+          this.showMessage('需要手动保存', '已禁止自动保存非当天数据', 'warning');
+        }
+        return false;
+      }
+
+      // 如果需要确认且不是自动保存
+      if (!isAutoSave && this.needConfirmSave) {
         try {
           await this.showConfirmDialog();
         } catch {
-          // 用户取消保存
-          return;
+          return false;
         }
       }
 
-      await this.uploadData();
+      // 尝试保存
+      try {
+        await this.uploadData();
+        return true;
+      } catch (error) {
+        this.showError('保存失败', error.message || '请重试');
+        return false;
+      }
     },
 
     async handleClose() {
@@ -649,21 +668,16 @@ export default {
 
       const content = this.state.textarea.trim();
       if (content) {
+        // 更新内容
         this.state.boardData.homework[this.currentEditSubject] = {
-          name: this.state.availableSubjects.find(
-            (s) => s.key === this.currentEditSubject
-          )?.name,
+          name: this.state.availableSubjects.find(s => s.key === this.currentEditSubject)?.name,
           content,
         };
         this.state.synced = false;
 
-        // 处理保存逻辑
-        if (this.canAutoSave) {
-          // 如果可以自动保存，执行自动保存
-          await this.handleSave();
-        } else if (this.shouldBlockAutoSave) {
-          // 仅当确实被阻止自动保存时才显示提示
-          this.showMessage('需要手动保存', '已禁止自动保存非当天数据', 'warning');
+        // 处理自动保存
+        if (this.autoSave) {
+          await this.trySave(true);
         }
       } else {
         delete this.state.boardData.homework[this.currentEditSubject];
@@ -690,10 +704,6 @@ export default {
 
         this.state.synced = true;
         this.showMessage(response.message || "保存成功");
-      } catch (error) {
-        console.error("保存失败:", error);
-        this.showError("保存失败", error.message || "请重试");
-        throw error; // 抛出错误以便调用者处理
       } finally {
         this.loading.upload = false;
       }
@@ -736,6 +746,7 @@ export default {
           this.showError("刷新数据失败，可能显示的不是最新数据");
         }
       }
+
       this.currentEditSubject = subject;
       // 如果是新科目，需要创建对应的数据结构
       if (!this.state.boardData.homework[subject]) {
@@ -813,7 +824,6 @@ export default {
 
       this.provider = provider;
       this.dataKey = provider === "server" ? `${domain}/${classNum}` : classNum;
-
       this.state.classNumber = classNum;
     },
 
@@ -848,14 +858,12 @@ export default {
         // 只有当日期真正改变时才更新
         if (this.state.dateString !== formattedDate) {
           this.state.dateString = formattedDate;
-
           // 使用 replace 而不是 push 来避免创建新的历史记录
           this.$router
             .replace({
               query: { date: formattedDate },
             })
             .catch(() => {});
-
           this.downloadData();
         }
       }
@@ -1052,8 +1060,14 @@ export default {
       return new Promise((resolve, reject) => {
         this.confirmDialog = {
           show: true,
-          resolve,
-          reject,
+          resolve: () => {
+            this.confirmDialog.show = false;
+            resolve();
+          },
+          reject: () => {
+            this.confirmDialog.show = false;
+            reject(new Error('用户取消保存'));
+          }
         };
       });
     },
@@ -1070,6 +1084,11 @@ export default {
       if (this.confirmDialog.reject) {
         this.confirmDialog.reject(new Error('用户取消保存'));
       }
+    },
+
+    // 点击上传按钮时调用
+    async manualUpload() {
+      return this.trySave(false);
     },
   },
 };
