@@ -23,11 +23,11 @@
       —
       <a
         class="text-decoration-none on-surface"
-        href="https://github.com/sunwuyuan/homeworkpage-frontend"
+        href="https://github.com/sunwuyuan/classworks-frontend"
         rel="noopener noreferrer"
         target="_blank"
       >
-        HomeworkPage
+        ClassworkS
       </a>
     </div>
   </v-footer>
@@ -48,7 +48,7 @@
     {
       title: 'GitHub',
       icon: 'mdi-github',
-      href: 'https://github.com/sunwuyuan/homeworkpage-frontend',
+      href: 'https://github.com/sunwuyuan/classworks-frontend',
     }
   ]
 </script>

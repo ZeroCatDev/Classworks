@@ -589,7 +589,7 @@ export default {
           this.provider,
           this.dataKey,
           this.state.boardData,
-          this.state.dateString
+          this.state.dateString // 添加dateString参数
         );
 
         if (!response.success) {
@@ -937,7 +937,7 @@ export default {
 
     async saveAttendance() {
       try {
-        await this.uploadData();
+        await this.uploadData(); // 现在会自动使用当前选中的日期
         this.state.attendanceDialog = false;
       } catch (error) {
         console.error("保存出勤状态失败:", error);

@@ -17,7 +17,7 @@
             />
           </v-avatar>
 
-          <h2 class="text-h5 mb-2">HomeworkPage</h2>
+          <h2 class="text-h5 mb-2">ClassworkS</h2>
           <p class="text-body-1 mb-4">
             由 <a
               href="https://github.com/sunwuyuan"
@@ -30,7 +30,7 @@
             <v-btn
               color="primary"
               variant="outlined"
-              href="https://github.com/SunWuyuan/homeworkpage-frontend"
+              href="https://github.com/SunWuyuan/classworks-frontend"
               target="_blank"
               prepend-icon="mdi-github"
             >
@@ -39,7 +39,7 @@
             <v-btn
               color="primary"
               variant="outlined"
-              href="https://github.com/SunWuyuan/homeworkpage-backend"
+              href="https://github.com/SunWuyuan/classworks-backend"
               target="_blank"
               prepend-icon="mdi-github"
             >
@@ -48,7 +48,7 @@
             <v-btn
               color="primary"
               variant="outlined"
-              href="https://github.com/SunWuyuan/homeworkpage-backend/issues"
+              href="https://github.com/SunWuyuan/classworks-backend/issues"
               target="_blank"
               prepend-icon="mdi-bug"
             >

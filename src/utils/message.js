@@ -15,7 +15,7 @@ const defaultOptions = {
   addToLog: true
 };
 
-const STORAGE_KEY = 'homeworkpage_messages';
+const STORAGE_KEY = 'classworks_messages';
 const MAX_MESSAGES = 100; // 最大消息数量
 const MAX_STORAGE_SIZE = 1024 * 1024; // 1MB 存储限制
 

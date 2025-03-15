@@ -10,7 +10,7 @@
  */
 
 // 存储所有设置的localStorage键名
-const SETTINGS_STORAGE_KEY = 'homeworkpage_settings';
+const SETTINGS_STORAGE_KEY = "classworks_settings";
 
 /**
  * 所有配置项的定义
@@ -18,115 +18,116 @@ const SETTINGS_STORAGE_KEY = 'homeworkpage_settings';
  */
 const settingsDefinitions = {
   // 显示设置
-  'display.emptySubjectDisplay': {
-    type: 'string',
-    default: 'button',  // 修改默认值为 'button'
-    validate: value => ['card', 'button'].includes(value),
-    description: '空科目的显示方式：卡片或按钮'
+  "display.emptySubjectDisplay": {
+    type: "string",
+    default: "button", // 修改默认值为 'button'
+    validate: (value) => ["card", "button"].includes(value),
+    description: "空科目的显示方式：卡片或按钮",
   },
-  'display.dynamicSort': {
-    type: 'boolean',
+  "display.dynamicSort": {
+    type: "boolean",
     default: true,
-    description: '是否启用动态排序以优化显示效果'
+    description: "是否启用动态排序以优化显示效果",
   },
-  'display.showRandomButton': {
-    type: 'boolean',
+  "display.showRandomButton": {
+    type: "boolean",
     default: false,
-    description: '是否显示随机按钮'
+    description: "是否显示随机按钮",
   },
 
   // 服务器设置（合并了数据提供者设置）
-  'server.domain': {
-    type: 'string',
-    default: '',
-    validate: value => !value || /^https?:\/\//.test(value),
-    description: '后端服务器域名'
+  "server.domain": {
+    type: "string",
+    default: "",
+    validate: (value) => !value || /^https?:\/\//.test(value),
+    description: "后端服务器域名",
   },
-  'server.classNumber': {
-    type: 'string',
-    default: '',
-    validate: value => /^[A-Za-z0-9]*$/.test(value),
-    description: '班级编号(无论使用哪种存储方式都需要设置)'
+  "server.classNumber": {
+    type: "string",
+    default: "",
+    validate: (value) => /^[A-Za-z0-9]*$/.test(value),
+    description: "班级编号(无论使用哪种存储方式都需要设置)",
   },
-  'server.provider': {
-    type: 'string',
-    default: 'indexedDB',
-    validate: value => ['server', 'localStorage', 'indexedDB'].includes(value),
-    description: '数据提供者，用于决定数据存储方式'
+  "server.provider": {
+    type: "string",
+    default: "indexedDB",
+    validate: (value) =>
+      ["server", "localStorage", "indexedDB"].includes(value),
+    description: "数据提供者，用于决定数据存储方式",
   },
 
   // 刷新设置
-  'refresh.auto': {
-    type: 'boolean',
+  "refresh.auto": {
+    type: "boolean",
     default: false,
-    description: '是否启用自动刷新'
+    description: "是否启用自动刷新",
   },
-  'refresh.interval': {
-    type: 'number',
+  "refresh.interval": {
+    type: "number",
     default: 300,
-    validate: value => value >= 10 && value <= 3600,
-    description: '自动刷新间隔（秒）'
+    validate: (value) => value >= 10 && value <= 3600,
+    description: "自动刷新间隔（秒）",
   },
 
   // 字体设置
-  'font.size': {
-    type: 'number',
+  "font.size": {
+    type: "number",
     default: 28,
-    validate: value => value >= 16 && value <= 100,
-    description: '字体大小（像素）'
+    validate: (value) => value >= 16 && value <= 100,
+    description: "字体大小（像素）",
   },
 
   // 编辑设置
-  'edit.autoSave': {
-    type: 'boolean',
+  "edit.autoSave": {
+    type: "boolean",
     default: true,
-    description: '是否启用自动保存'
+    description: "是否启用自动保存",
   },
-  'edit.refreshBeforeEdit': {
-    type: 'boolean',
+  "edit.refreshBeforeEdit": {
+    type: "boolean",
     default: true,
-    description: '编辑前是否自动刷新'
+    description: "编辑前是否自动刷新",
   },
 
   // 开发者选项
-  'developer.enabled': {
-    type: 'boolean',
+  "developer.enabled": {
+    type: "boolean",
     default: false,
-    description: '是否启用开发者选项'
+    description: "是否启用开发者选项",
   },
-  'developer.showDebugConfig': {
-    type: 'boolean',
+  "developer.showDebugConfig": {
+    type: "boolean",
     default: false,
-    description: '是否显示调试配置'
+    description: "是否显示调试配置",
   },
 
   // 消息设置
-  'message.showSidebar': {
-    type: 'boolean',
+  "message.showSidebar": {
+    type: "boolean",
     default: true,
-    description: '是否显示消息记录侧栏',
-    requireDeveloper: true  // 添加标记
+    description: "是否显示消息记录侧栏",
+    requireDeveloper: true, // 添加标记
   },
-  'message.maxActiveMessages': {
-    type: 'number',
+  "message.maxActiveMessages": {
+    type: "number",
     default: 5,
-    validate: value => value >= 1 && value <= 10,
-    description: '同时显示的最大消息数量',
-    requireDeveloper: true
+    validate: (value) => value >= 1 && value <= 10,
+    description: "同时显示的最大消息数量",
+    requireDeveloper: true,
   },
-  'message.timeout': {
-    type: 'number',
+  "message.timeout": {
+    type: "number",
     default: 5000,
-    validate: value => value >= 1000 && value <= 30000,
-    description: '消息自动关闭时间(毫秒)',
-    requireDeveloper: true
+    validate: (value) => value >= 1000 && value <= 30000,
+    description: "消息自动关闭时间(毫秒)",
+    requireDeveloper: true,
   },
-  'message.saveHistory': {
-    type: 'boolean',
+  "message.saveHistory": {
+    type: "boolean",
     default: true,
-    description: '是否保存消息历史记录',
-    requireDeveloper: true
-  }
+    description: "是否保存消息历史记录",
+    requireDeveloper: true,
+  },
 };
 
 // 内存中缓存的设置值
@@ -146,7 +147,7 @@ function loadSettings() {
       settingsCache = migrateFromLegacy();
     }
   } catch (error) {
-    console.error('加载设置失败:', error);
+    console.error("加载设置失败:", error);
     settingsCache = {};
   }
 
@@ -164,42 +165,38 @@ function loadSettings() {
  * 从旧版本的localStorage迁移数据
  */
 function migrateFromLegacy() {
-  const settings = {};
-  const legacyKeyMap = {
-    'server.domain': 'backendServerDomain',
-    'server.classNumber': 'classNumber',
-    'refresh.auto': 'autoRefresh',
-    'refresh.interval': 'refreshInterval',
-    'font.size': 'fontSize',
-    'edit.autoSave': 'autoSave',
-    'edit.refreshBeforeEdit': 'refreshBeforeEdit',
-    'display.emptySubjectDisplay': 'emptySubjectDisplay',
-    'display.dynamicSort': 'dynamicSort'
-  };
+  const LEGACY_SETTINGS_KEY = "homeworkpage_settings";
+  const LEGACY_MESSAGE_KEY = "homeworkpage_messages";
 
-  // 迁移旧数据
-  for (const [newKey, oldKey] of Object.entries(legacyKeyMap)) {
-    const oldValue = localStorage.getItem(oldKey);
-    if (oldValue !== null) {
-      const definition = settingsDefinitions[newKey];
-      switch (definition.type) {
-        case 'boolean':
-          settings[newKey] = oldValue === 'true';
-          break;
-        case 'number':
-          settings[newKey] = Number(oldValue);
-          break;
-        default:
-          settings[newKey] = oldValue;
-      }
-      // 可选：删除旧的localStorage项
-      // localStorage.removeItem(oldKey);
+  // 尝试从旧版本的设置中迁移
+  const legacySettings = localStorage.getItem(LEGACY_SETTINGS_KEY);
+  if (legacySettings) {
+    try {
+      const settings = JSON.parse(legacySettings);
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+      // 可选：删除旧的设置
+      localStorage.removeItem(LEGACY_SETTINGS_KEY);
+      return settings;
+    } catch (error) {
+      console.error("迁移旧设置失败:", error);
+    }
+  }
+  // 尝试从旧版本的message中迁移
+  const legacyMessages = localStorage.getItem(LEGACY_MESSAGE_KEY);
+  if (legacyMessages) {
+    try {
+      const messages = JSON.parse(legacyMessages);
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(messages));
+      // 可选：删除旧的message
+      localStorage.removeItem(LEGACY_MESSAGE_KEY);
+      return messages; // 返回迁移后的消息
+    } catch (error) {
+      console.error("迁移旧消息失败:", error);
     }
   }
 
-  // 保存迁移后的数据
-  localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
-  return settings;
+  // 如果没有旧设置或迁移失败，返回空对象
+  return {};
 }
 
 /**
@@ -209,7 +206,7 @@ function saveSettings() {
   try {
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settingsCache));
   } catch (error) {
-    console.error('保存设置失败:', error);
+    console.error("保存设置失败:", error);
   }
 }
 
@@ -230,7 +227,7 @@ function getSetting(key) {
   }
 
   // 添加对开发者选项依赖的检查
-  if (definition.requireDeveloper && !settingsCache['developer.enabled']) {
+  if (definition.requireDeveloper && !settingsCache["developer.enabled"]) {
     return definition.default;
   }
 
@@ -240,11 +237,14 @@ function getSetting(key) {
 
 // 添加设置变更日志函数
 function logSettingsChange(key, oldValue, newValue) {
-  if (settingsCache['developer.enabled'] && settingsCache['developer.showDebugConfig']) {
+  if (
+    settingsCache["developer.enabled"] &&
+    settingsCache["developer.showDebugConfig"]
+  ) {
     console.log(`[Settings] ${key}:`, {
       old: oldValue,
       new: newValue,
-      time: new Date().toLocaleTimeString()
+      time: new Date().toLocaleTimeString(),
     });
   }
 }
@@ -263,7 +263,7 @@ function setSetting(key, value) {
   }
 
   // 添加对开发者选项依赖的检查
-  if (definition.requireDeveloper && !settingsCache['developer.enabled']) {
+  if (definition.requireDeveloper && !settingsCache["developer.enabled"]) {
     console.warn(`设置项 ${key} 需要启用开发者选项`);
     return false;
   }
@@ -272,8 +272,12 @@ function setSetting(key, value) {
     const oldValue = settingsCache[key];
     // 类型转换
     if (typeof value !== definition.type) {
-      value = definition.type === 'boolean' ? Boolean(value) :
-              definition.type === 'number' ? Number(value) : String(value);
+      value =
+        definition.type === "boolean"
+          ? Boolean(value)
+          : definition.type === "number"
+          ? Number(value)
+          : String(value);
     }
 
     // 验证
@@ -346,8 +350,8 @@ function watchSettings(callback) {
     }
   };
 
-  window.addEventListener('storage', handler);
-  return () => window.removeEventListener('storage', handler);
+  window.addEventListener("storage", handler);
+  return () => window.removeEventListener("storage", handler);
 }
 
 // 初始化设置
@@ -359,5 +363,5 @@ export {
   setSetting,
   resetSetting,
   resetAllSettings,
-  watchSettings
+  watchSettings,
 };
