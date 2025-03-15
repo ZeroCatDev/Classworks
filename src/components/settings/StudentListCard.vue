@@ -256,12 +256,8 @@ export default {
   },
 
   mounted() {
-    // 使用 nextTick 确保在 DOM 更新后初始化
     this.$nextTick(() => {
-      this.savedState = {
-        list: [...this.modelValue.list],
-        text: this.modelValue.text
-      }
+      this.initializeSavedState()
     })
   },
 
@@ -305,9 +301,10 @@ export default {
   methods: {
     // 初始化方法
     initializeSavedState() {
+      const currentList = this.modelValue.list || []
       this.savedState = {
-        list: [...(this.modelValue.list.length ? this.modelValue.list : this.originalList)],
-        text: this.modelValue.text || (this.originalList || []).join('\n')
+        list: [...currentList],
+        text: currentList.join('\n')
       }
     },
 
@@ -337,11 +334,11 @@ export default {
 
     // 更新保存状态
     updateSavedState() {
+      const currentList = this.modelValue.list || []
       this.savedState = {
-        list: [...this.modelValue.list],
-        text: this.modelValue.text
-      };
-      this.$forceUpdate(); // 强制更新视图
+        list: [...currentList],
+        text: currentList.join('\n')
+      }
     },
 
     // 学生管理方法
@@ -417,8 +414,8 @@ export default {
     // 保存和加载处理
     async handleSave() {
       try {
-        await this.$emit('save');
-        this.updateSavedState();
+        await this.$emit('save')
+        this.updateSavedState()
       } catch (error) {
         console.error('保存失败:', error);
         throw error;
@@ -439,14 +436,27 @@ export default {
 
     // 重写变更检测逻辑
     isStateChanged() {
-      if (!this.savedState) return false;
+      if (!this.savedState) return false
 
-      const currentState = {
-        list: this.modelValue.list,
-        text: this.modelValue.text
-      };
+      const currentList = this.modelValue.list || []
+      const savedList = this.savedState.list || []
 
-      return JSON.stringify(currentState) !== JSON.stringify(this.savedState);
+      // 比较列表长度
+      if (currentList.length !== savedList.length) return true
+
+      // 逐个比较列表项
+      for (let i = 0; i < currentList.length; i++) {
+        if (currentList[i] !== savedList[i]) return true
+      }
+
+      // 如果在高级模式下，还需要比较文本
+      if (this.modelValue.advanced) {
+        const currentText = this.modelValue.text || ''
+        const savedText = this.savedState.text || ''
+        if (currentText !== savedText) return true
+      }
+
+      return false
     }
   }
 }
