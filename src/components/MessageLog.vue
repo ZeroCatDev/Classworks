@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer v-model="drawer" location="right" temporary width="400">
+  <v-navigation-drawer v-model="drawer" location="right" temporary width="400" v-if="drawer">
     <v-toolbar color="primary">
       <v-toolbar-title>消息记录</v-toolbar-title>
 
