@@ -1,3 +1,41 @@
+// 请求通知权限
+async function requestNotificationPermission() {
+  if (Notification && Notification.requestPermission) {
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      console.log("通知权限已授予");
+      return true;
+    } else {
+      console.warn("通知权限被拒绝");
+      return false;
+    }
+  } else {
+    console.warn("浏览器不支持通知权限请求");
+    return false;
+  }
+}
+// 请求持久性存储权限
+async function requestPersistentStorage() {
+  if (navigator.storage && navigator.storage.persist) {
+    const isPersisted = await navigator.storage.persist();
+    if (isPersisted) {
+      console.log("持久性存储已启用");
+    } else {
+      console.warn("持久性存储请求被拒绝");
+    }
+  } else {
+    console.warn("浏览器不支持持久性存储");
+  }
+}
+
+// 在页面加载时请求通知权限和持久性存储
+window.addEventListener("load", async () => {
+  const notificationGranted = await requestNotificationPermission();
+  if (notificationGranted) {
+    await requestPersistentStorage();
+  }
+});
+
 /**
  * 配置项定义
  * @typedef {Object} SettingDefinition
@@ -20,7 +58,7 @@ const settingsDefinitions = {
   // 显示设置
   "display.emptySubjectDisplay": {
     type: "string",
-    default: "button", // 修改默认值为 'button'
+    default: "card", // 修改默认值为 'button'
     validate: (value) => ["card", "button"].includes(value),
     description: "空科目的显示方式：卡片或按钮",
   },
@@ -83,7 +121,8 @@ const settingsDefinitions = {
     default: true,
     description: "是否启用自动保存",
   },
-  "edit.blockNonTodayAutoSave": {  // 添加新选项
+  "edit.blockNonTodayAutoSave": {
+    // 添加新选项
     type: "boolean",
     default: true,
     description: "禁止自动保存非当天数据",
@@ -93,7 +132,8 @@ const settingsDefinitions = {
     default: true,
     description: "编辑前是否自动刷新",
   },
-  "edit.confirmNonTodaySave": {  // 添加新选项
+  "edit.confirmNonTodaySave": {
+    // 添加新选项
     type: "boolean",
     default: true,
     description: "保存非当天数据时显示确认对话框，禁用则允许直接保存",
@@ -110,7 +150,8 @@ const settingsDefinitions = {
     default: false,
     description: "是否显示调试配置",
   },
-  "developer.disableMessageLog": {  // 添加新的设置项
+  "developer.disableMessageLog": {
+    // 添加新的设置项
     type: "boolean",
     default: false,
     description: "禁用消息日志记录",
@@ -244,7 +285,7 @@ function getSetting(key) {
 
   // 确保开发者相关设置正确处理
   if (definition.requireDeveloper) {
-    const devEnabled = settingsCache['developer.enabled'];
+    const devEnabled = settingsCache["developer.enabled"];
     if (!devEnabled) {
       return definition.default;
     }
@@ -262,14 +303,14 @@ function logSettingsChange(key, oldValue, newValue) {
   }
 
   const shouldLog =
-    settingsCache['developer.enabled'] &&
-    settingsCache['developer.showDebugConfig'];
+    settingsCache["developer.enabled"] &&
+    settingsCache["developer.showDebugConfig"];
 
   if (shouldLog) {
     console.log(`[Settings] ${key}:`, {
       old: oldValue,
       new: newValue,
-      time: new Date().toLocaleTimeString()
+      time: new Date().toLocaleTimeString(),
     });
   }
 }
