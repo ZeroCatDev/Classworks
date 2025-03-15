@@ -4,8 +4,8 @@
     :color="colors[message?.type] || colors.info"
     :timeout="2000"
     location="bottom"
-    class="global-snackbar"
     multi-line
+    variant="tonal"
   >
     <div class="d-flex align-center">
       <v-icon :icon="icons[message?.type] || icons.info" class="mr-2" />
@@ -62,8 +62,5 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.global-snackbar {
-  max-width: 400px;
-  margin: 0 auto;
-}
+
 </style>

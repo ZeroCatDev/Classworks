@@ -133,7 +133,12 @@
       @click="setAttendanceArea()"
     >
       <h1>出勤</h1>
-      <h2>应到: {{ state.studentList.length - state.boardData.attendance.exclude.length }}人</h2>
+      <h2>
+        应到:
+        {{
+          state.studentList.length - state.boardData.attendance.exclude.length
+        }}人
+      </h2>
       <h2>
         实到:
         {{
@@ -144,15 +149,24 @@
         }}人
       </h2>
       <h2>请假: {{ state.boardData.attendance.absent.length }}人</h2>
-      <h3 v-for="(name, index) in state.boardData.attendance.absent" :key="'absent-' + index">
+      <h3
+        v-for="(name, index) in state.boardData.attendance.absent"
+        :key="'absent-' + index"
+      >
         {{ `${index + 1}. ${name}` }}
       </h3>
       <h2>迟到: {{ state.boardData.attendance.late.length }}人</h2>
-      <h3 v-for="(name, index) in state.boardData.attendance.late" :key="'late-' + index">
+      <h3
+        v-for="(name, index) in state.boardData.attendance.late"
+        :key="'late-' + index"
+      >
         {{ `${index + 1}. ${name}` }}
       </h3>
       <h2>不参与: {{ state.boardData.attendance.exclude.length }}人</h2>
-      <h3 v-for="(name, index) in state.boardData.attendance.exclude" :key="'exclude-' + index">
+      <h3
+        v-for="(name, index) in state.boardData.attendance.exclude"
+        :key="'exclude-' + index"
+      >
         {{ `${index + 1}. ${name}` }}
       </h3>
     </v-col>
@@ -208,7 +222,11 @@
     {{ state.snackbarText }}
   </v-snackbar>
 
-  <v-dialog v-model="state.attendanceDialog" max-width="600">
+  <v-dialog
+    v-model="state.attendanceDialog"
+    max-width="600"
+    @update:model-value="handleAttendanceDialogClose"
+  >
     <v-card>
       <v-card-title class="text-h6"> 编辑出勤状态 </v-card-title>
 
@@ -295,9 +313,7 @@
   <!-- 添加确认对话框 -->
   <v-dialog v-model="confirmDialog.show" max-width="400">
     <v-card>
-      <v-card-title class="text-h6">
-        确认保存
-      </v-card-title>
+      <v-card-title class="text-h6"> 确认保存 </v-card-title>
       <v-card-text>
         您正在修改 {{ state.dateString }} 的数据，确定要保存吗？
       </v-card-text>
@@ -306,9 +322,7 @@
         <v-btn color="grey" variant="text" @click="confirmDialog.reject">
           取消
         </v-btn>
-        <v-btn color="primary" @click="confirmDialog.resolve">
-          确认保存
-        </v-btn>
+        <v-btn color="primary" @click="confirmDialog.resolve"> 确认保存 </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -320,7 +334,7 @@ import dataProvider from "@/utils/dataProvider";
 import { getSetting, watchSettings, setSetting } from "@/utils/settings";
 import { useDisplay } from "vuetify";
 import "../styles/index.scss";
-import "../styles/transitions.scss";  // 添加新的样式导入
+import "../styles/transitions.scss"; // 添加新的样式导入
 import { debounce, throttle } from "@/utils/debounce";
 
 export default {
@@ -340,8 +354,8 @@ export default {
           attendance: {
             absent: [],
             late: [],
-            exclude: []
-          }
+            exclude: [],
+          },
         },
         dialogVisible: false,
         dialogTitle: "",
@@ -615,7 +629,7 @@ export default {
             this.state.noDataMessage = response.error.message;
             this.state.boardData = {
               homework: {},
-              attendance: { absent: [], late: [], exclude: [] }
+              attendance: { absent: [], late: [], exclude: [] },
             };
           } else {
             throw new Error(response.error.message);
@@ -637,7 +651,11 @@ export default {
       // 如果是自动保存但不满足自动保存条件
       if (isAutoSave && !this.canAutoSave) {
         if (this.shouldShowBlockedMessage) {
-          this.showMessage('需要手动保存', '已禁止自动保存非当天数据', 'warning');
+          this.showMessage(
+            "需要手动保存",
+            "已禁止自动保存非当天数据",
+            "warning"
+          );
         }
         return false;
       }
@@ -656,7 +674,7 @@ export default {
         await this.uploadData();
         return true;
       } catch (error) {
-        this.$message.error('保存失败', error.message || '请重试');
+        this.$message.error("保存失败", error.message || "请重试");
         return false;
       }
     },
@@ -668,7 +686,9 @@ export default {
       if (content) {
         // 更新内容
         this.state.boardData.homework[this.currentEditSubject] = {
-          name: this.state.availableSubjects.find(s => s.key === this.currentEditSubject)?.name,
+          name: this.state.availableSubjects.find(
+            (s) => s.key === this.currentEditSubject
+          )?.name,
           content,
         };
         this.state.synced = false;
@@ -770,13 +790,22 @@ export default {
     toggleStudentStatus(index) {
       const student = this.state.studentList[index];
       if (this.state.boardData.attendance.absent.includes(student)) {
-        this.state.boardData.attendance.absent = this.state.boardData.attendance.absent.filter(name => name !== student);
+        this.state.boardData.attendance.absent =
+          this.state.boardData.attendance.absent.filter(
+            (name) => name !== student
+          );
         this.state.boardData.attendance.late.push(student);
       } else if (this.state.boardData.attendance.late.includes(student)) {
-        this.state.boardData.attendance.late = this.state.boardData.attendance.late.filter(name => name !== student);
+        this.state.boardData.attendance.late =
+          this.state.boardData.attendance.late.filter(
+            (name) => name !== student
+          );
         this.state.boardData.attendance.exclude.push(student);
       } else if (this.state.boardData.attendance.exclude.includes(student)) {
-        this.state.boardData.attendance.exclude = this.state.boardData.attendance.exclude.filter(name => name !== student);
+        this.state.boardData.attendance.exclude =
+          this.state.boardData.attendance.exclude.filter(
+            (name) => name !== student
+          );
       } else {
         this.state.boardData.attendance.absent.push(student);
       }
@@ -933,7 +962,7 @@ export default {
       this.state.boardData.attendance = {
         absent: [],
         late: [],
-        exclude: []
+        exclude: [],
       };
       this.state.synced = false;
     },
@@ -955,27 +984,43 @@ export default {
     isPresent(index) {
       const student = this.state.studentList[index];
       const { absent, late, exclude } = this.state.boardData.attendance;
-      return !absent.includes(student) && !late.includes(student) && !exclude.includes(student);
+      return (
+        !absent.includes(student) &&
+        !late.includes(student) &&
+        !exclude.includes(student)
+      );
     },
 
     isAbsent(index) {
-      return this.state.boardData.attendance.absent.includes(this.state.studentList[index]);
+      return this.state.boardData.attendance.absent.includes(
+        this.state.studentList[index]
+      );
     },
 
     isLate(index) {
-      return this.state.boardData.attendance.late.includes(this.state.studentList[index]);
+      return this.state.boardData.attendance.late.includes(
+        this.state.studentList[index]
+      );
     },
 
     isExclude(index) {
-      return this.state.boardData.attendance.exclude.includes(this.state.studentList[index]);
+      return this.state.boardData.attendance.exclude.includes(
+        this.state.studentList[index]
+      );
     },
 
     setPresent(index) {
       const student = this.state.studentList[index];
       const { absent, late, exclude } = this.state.boardData.attendance;
-      this.state.boardData.attendance.absent = absent.filter(name => name !== student);
-      this.state.boardData.attendance.late = late.filter(name => name !== student);
-      this.state.boardData.attendance.exclude = exclude.filter(name => name !== student);
+      this.state.boardData.attendance.absent = absent.filter(
+        (name) => name !== student
+      );
+      this.state.boardData.attendance.late = late.filter(
+        (name) => name !== student
+      );
+      this.state.boardData.attendance.exclude = exclude.filter(
+        (name) => name !== student
+      );
       this.state.synced = false;
     },
 
@@ -1008,7 +1053,7 @@ export default {
 
     async saveAttendance() {
       try {
-        await this.uploadData(); // 现在会自动使用当前选中的日期
+        await this.trySave(true);
         this.state.attendanceDialog = false;
       } catch (error) {
         console.error("保存出勤状态失败:", error);
@@ -1032,8 +1077,8 @@ export default {
       const rect = card.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 100;
       const y = ((e.clientY - rect.top) / rect.height) * 100;
-      card.style.setProperty('--x', `${x}%`);
-      card.style.setProperty('--y', `${y}%`);
+      card.style.setProperty("--x", `${x}%`);
+      card.style.setProperty("--y", `${y}%`);
     },
 
     handleTouchMove(e) {
@@ -1043,8 +1088,8 @@ export default {
         const rect = card.getBoundingClientRect();
         const x = ((touch.clientX - rect.left) / rect.width) * 100;
         const y = ((touch.clientY - rect.top) / rect.height) * 100;
-        card.style.setProperty('--x', `${x}%`);
-        card.style.setProperty('--y', `${y}%`);
+        card.style.setProperty("--x", `${x}%`);
+        card.style.setProperty("--y", `${y}%`);
       }
     },
 
@@ -1058,8 +1103,8 @@ export default {
           },
           reject: () => {
             this.confirmDialog.show = false;
-            reject(new Error('用户取消保存'));
-          }
+            reject(new Error("用户取消保存"));
+          },
         };
       });
     },
@@ -1074,13 +1119,20 @@ export default {
     cancelSave() {
       this.confirmDialog.show = false;
       if (this.confirmDialog.reject) {
-        this.confirmDialog.reject(new Error('用户取消保存'));
+        this.confirmDialog.reject(new Error("用户取消保存"));
       }
     },
 
     // 点击上传按钮时调用
     async manualUpload() {
       return this.trySave(false);
+    },
+
+    async handleAttendanceDialogClose(newValue) {
+      if (!newValue && !this.state.synced) {
+        // 对话框关闭且数据未同步时尝试保存
+        await this.trySave(true);
+      }
     },
   },
 };

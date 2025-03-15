@@ -1,7 +1,11 @@
 <template>
   <v-app>
-    <router-view />
-    <global-message />
+    <router-view v-slot="{ Component, route }">
+        <transition name="md3" mode="out-in">
+          <component :is="Component" :key="route.path" />
+        </transition>
+      </router-view>
+          <global-message />
   </v-app>
 </template>
 
