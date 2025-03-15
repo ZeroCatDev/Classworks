@@ -83,10 +83,20 @@ const settingsDefinitions = {
     default: true,
     description: "是否启用自动保存",
   },
+  "edit.blockNonTodayAutoSave": {  // 添加新选项
+    type: "boolean",
+    default: true,
+    description: "禁止自动保存非当天数据",
+  },
   "edit.refreshBeforeEdit": {
     type: "boolean",
     default: true,
     description: "编辑前是否自动刷新",
+  },
+  "edit.confirmNonTodaySave": {  // 添加新选项
+    type: "boolean",
+    default: true,
+    description: "保存非当天数据时显示确认对话框，禁用则允许直接保存",
   },
 
   // 开发者选项

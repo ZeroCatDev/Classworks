@@ -70,9 +70,39 @@
                 </template>
               </v-list-item>
 
+              <v-divider v-if="settings.edit.autoSave" class="my-2" />
+
+              <v-list-item v-if="settings.edit.autoSave">
+                <template #prepend>
+                  <v-icon icon="mdi-calendar-lock" class="mr-3" />
+                </template>
+                <v-list-item-title>禁止自动保存非当天数据</v-list-item-title>
+                <v-list-item-subtitle>仅允许自动保存当天的数据，避免误修改历史记录</v-list-item-subtitle>
+                <template #append>
+                  <v-switch
+                    v-model="settings.edit.blockNonTodayAutoSave"
+                    density="comfortable"
+                    hide-details
+                  />
+                </template>
+              </v-list-item>
+
               <v-divider class="my-2" />
 
               <v-list-item>
+                <template #prepend>
+                  <v-icon icon="mdi-calendar-alert" class="mr-3" />
+                </template>
+                <v-list-item-title>确认保存历史数据</v-list-item-title>
+                <v-list-item-subtitle>保存非当天数据时显示确认对话框</v-list-item-subtitle>
+                <template #append>
+                  <v-switch
+                    v-model="settings.edit.confirmNonTodaySave"
+                    density="comfortable"
+                    hide-details
+                  />
+                </template>
+              </v-list-item> <v-divider class="my-2" /><v-list-item>
                 <template #prepend>
                   <v-icon icon="mdi-refresh" class="mr-3" />
                 </template>
@@ -342,6 +372,8 @@ export default {
       },
       edit: {
         autoSave: getSetting('edit.autoSave'),
+        blockNonTodayAutoSave: getSetting('edit.blockNonTodayAutoSave'),
+        confirmNonTodaySave: getSetting('edit.confirmNonTodaySave'),
         refreshBeforeEdit: getSetting('edit.refreshBeforeEdit'),
       },
       display: {

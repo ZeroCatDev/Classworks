@@ -291,6 +291,27 @@
   </v-dialog>
 
   <message-log ref="messageLog" />
+
+  <!-- 添加确认对话框 -->
+  <v-dialog v-model="confirmDialog.show" max-width="400">
+    <v-card>
+      <v-card-title class="text-h6">
+        确认保存
+      </v-card-title>
+      <v-card-text>
+        您正在修改 {{ state.dateString }} 的数据，确定要保存吗？
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn color="grey" variant="text" @click="confirmDialog.show = false">
+          取消
+        </v-btn>
+        <v-btn color="primary" @click="confirmSave">
+          确认保存
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
@@ -377,6 +398,11 @@ export default {
         key: "",
         value: [],
       },
+      confirmDialog: {
+        show: false,
+        resolve: null,
+        reject: null,
+      },
     };
   },
 
@@ -449,6 +475,20 @@ export default {
     autoSave() {
       return getSetting("edit.autoSave");
     },
+    blockNonTodayAutoSave() {
+      return getSetting("edit.blockNonTodayAutoSave");
+    },
+    isToday() {
+      const today = new Date().toISOString().split("T")[0];
+      return this.state.dateString === today;
+    },
+    canAutoSave() {
+      // 修改自动保存逻辑
+      if (!this.autoSave) return false;
+      // 只有在同时启用了自动保存和禁止非当天自动保存时才检查日期
+      if (this.blockNonTodayAutoSave && !this.isToday) return false;
+      return true;
+    },
     refreshBeforeEdit() {
       return getSetting("edit.refreshBeforeEdit");
     },
@@ -466,6 +506,16 @@ export default {
     },
     showRandomButton() {
       return getSetting("display.showRandomButton");
+    },
+    confirmNonTodaySave() {
+      return getSetting("edit.confirmNonTodaySave");
+    },
+    shouldShowSaveConfirm() {
+      return !this.isToday && this.confirmNonTodaySave;
+    },
+    shouldBlockAutoSave() {
+      // 修改阻止自动保存的判断条件
+      return !this.isToday && this.autoSave && this.blockNonTodayAutoSave;
     },
   },
 
@@ -580,6 +630,48 @@ export default {
       }
     },
 
+    async handleSave() {
+      // 检查是否需要确认对话框
+      if (this.shouldShowSaveConfirm) {
+        try {
+          await this.showConfirmDialog();
+        } catch {
+          // 用户取消保存
+          return;
+        }
+      }
+
+      await this.uploadData();
+    },
+
+    async handleClose() {
+      if (!this.currentEditSubject) return;
+
+      const content = this.state.textarea.trim();
+      if (content) {
+        this.state.boardData.homework[this.currentEditSubject] = {
+          name: this.state.availableSubjects.find(
+            (s) => s.key === this.currentEditSubject
+          )?.name,
+          content,
+        };
+        this.state.synced = false;
+
+        // 处理保存逻辑
+        if (this.canAutoSave) {
+          // 如果可以自动保存，执行自动保存
+          await this.handleSave();
+        } else if (this.shouldBlockAutoSave) {
+          // 仅当确实被阻止自动保存时才显示提示
+          this.showMessage('需要手动保存', '已禁止自动保存非当天数据', 'warning');
+        }
+      } else {
+        delete this.state.boardData.homework[this.currentEditSubject];
+      }
+
+      this.state.dialogVisible = false;
+    },
+
     async uploadData() {
       if (this.loading.upload) return;
 
@@ -601,6 +693,7 @@ export default {
       } catch (error) {
         console.error("保存失败:", error);
         this.showError("保存失败", error.message || "请重试");
+        throw error; // 抛出错误以便调用者处理
       } finally {
         this.loading.upload = false;
       }
@@ -622,28 +715,6 @@ export default {
         console.error("加载配置失败:", error);
         this.showError("加载配置失败", error.message);
       }
-    },
-
-    handleClose() {
-      if (!this.currentEditSubject) return;
-
-      const content = this.state.textarea.trim();
-      if (content) {
-        this.state.boardData.homework[this.currentEditSubject] = {
-          name: this.state.availableSubjects.find(
-            (s) => s.key === this.currentEditSubject
-          )?.name,
-          content,
-        };
-        this.state.synced = false;
-        if (this.autoSave) {
-          // 直接调用上传，移除防抖
-          this.uploadData();
-        }
-      } else {
-        delete this.state.boardData.homework[this.currentEditSubject];
-      }
-      this.state.dialogVisible = false;
     },
 
     showSyncMessage() {
@@ -707,7 +778,7 @@ export default {
         this.state.boardData.attendance.absent.push(student);
       }
       this.state.synced = false;
-      if (this.autoSave) {
+      if (this.canAutoSave) {
         this.uploadData();
       }
     },
@@ -717,7 +788,7 @@ export default {
       this.state.boardData.attendance.late = [];
       this.state.boardData.attendance.exclude = [];
       this.state.synced = false;
-      if (this.autoSave) {
+      if (this.canAutoSave) {
         this.uploadData();
       }
     },
@@ -974,6 +1045,30 @@ export default {
         const y = ((touch.clientY - rect.top) / rect.height) * 100;
         card.style.setProperty('--x', `${x}%`);
         card.style.setProperty('--y', `${y}%`);
+      }
+    },
+
+    showConfirmDialog() {
+      return new Promise((resolve, reject) => {
+        this.confirmDialog = {
+          show: true,
+          resolve,
+          reject,
+        };
+      });
+    },
+
+    confirmSave() {
+      this.confirmDialog.show = false;
+      if (this.confirmDialog.resolve) {
+        this.confirmDialog.resolve(true);
+      }
+    },
+
+    cancelSave() {
+      this.confirmDialog.show = false;
+      if (this.confirmDialog.reject) {
+        this.confirmDialog.reject(new Error('用户取消保存'));
       }
     },
   },
