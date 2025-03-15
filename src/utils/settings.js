@@ -110,11 +110,11 @@ const settingsDefinitions = {
     default: false,
     description: "是否显示调试配置",
   },
-  // 新增的配置项：禁止将消息日志记录到localStorage
-  "developer.disableMessageLog": {
+  "developer.disableMessageLog": {  // 添加新的设置项
     type: "boolean",
     default: false,
-    description: "是否禁用将消息日志记录到localStorage",
+    description: "禁用消息日志记录",
+    requireDeveloper: true,
   },
 
   // 消息设置
@@ -263,8 +263,7 @@ function logSettingsChange(key, oldValue, newValue) {
 
   const shouldLog =
     settingsCache['developer.enabled'] &&
-    settingsCache['developer.showDebugConfig'] &&
-    !settingsCache['developer.disableMessageLog'];
+    settingsCache['developer.showDebugConfig'];
 
   if (shouldLog) {
     console.log(`[Settings] ${key}:`, {

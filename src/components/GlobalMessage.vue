@@ -2,7 +2,7 @@
   <v-snackbar
     v-model="snackbar"
     :color="colors[message?.type] || colors.info"
-    :timeout="4000"
+    :timeout="2000"
     location="bottom"
     class="global-snackbar"
     multi-line
@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onBeforeUnmount } from 'vue';
+import { defineComponent, ref, onBeforeUnmount, nextTick } from 'vue';
 import messageService from '@/utils/message';
 
 export default defineComponent({
@@ -44,8 +44,12 @@ export default defineComponent({
       info: 'info'
     };
 
-    const unsubscribe = messageService?.onSnackbar?.((msg) => {
+    const unsubscribe = messageService?.onSnackbar?.(async (msg) => {
       if (!msg) return;
+      if (snackbar.value) {
+        snackbar.value = false;
+        await nextTick();
+      }
       message.value = msg;
       snackbar.value = true;
     });

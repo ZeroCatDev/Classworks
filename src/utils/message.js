@@ -1,3 +1,6 @@
+import logDB from './db';
+import { getSetting } from './settings';
+
 const messages = [];
 let snackbarCallback = null;
 let logCallback = null;
@@ -15,79 +18,27 @@ const defaultOptions = {
   addToLog: true
 };
 
-const STORAGE_KEY = 'classworks_messages';
-const MAX_MESSAGES = 100; // 最大消息数量
-const MAX_STORAGE_SIZE = 1024 * 1024; // 1MB 存储限制
-
-// 加载保存的消息
-function loadStoredMessages() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      messages.push(...JSON.parse(stored));
-    }
-  } catch (error) {
-    console.error('加载消息历史失败:', error);
-  }
-}
-
-// 清理旧消息
-function cleanOldMessages() {
-  if (messages.length > MAX_MESSAGES) {
-    messages.splice(MAX_MESSAGES);
-  }
-}
-
-// 检查存储大小
-function checkStorageSize(data) {
-  try {
-    const size = new Blob([data]).size;
-    return size <= MAX_STORAGE_SIZE;
-  } catch (error) {
-    console.error('检查存储大小失败:', error);
-    return false;
-  }
-}
-
-// 保存消息到localStorage
-function saveMessages() {
-  try {
-    cleanOldMessages();
-    const data = JSON.stringify(messages);
-
-    if (!checkStorageSize(data)) {
-      // 如果数据太大，删除一半的旧消息
-      messages.splice(Math.floor(messages.length / 2));
-      return saveMessages();
-    }
-
-    localStorage.setItem(STORAGE_KEY, data);
-  } catch (error) {
-    if (error.name === 'QuotaExceededError') {
-      // 如果存储空间不足，清理一些旧消息再试
-      messages.splice(Math.floor(messages.length / 2));
-      return saveMessages();
-    }
-    console.error('保存消息历史失败:', error);
-  }
-}
-
-function createMessage(type, title, content = '', options = {}) {
+async function createMessage(type, title, content = '', options = {}) {
   const msgOptions = { ...defaultOptions, ...options };
   const message = {
     id: Date.now() + Math.random(),
     type,
     title,
-    content: content.substring(0, 500), // 限制内容长度
-    timestamp: new Date(),
-    read: false
+    content: content.substring(0, 500),
+    timestamp: new Date()
   };
 
   if (msgOptions.addToLog) {
-    messages.unshift(message); // 新消息添加到开头
-    cleanOldMessages();
-    saveMessages();
-    logCallback?.(messages);
+    try {
+      await logDB.addLog(message);
+      messages.unshift(message);
+      while (messages.length > getSetting('message.maxActiveMessages')) {
+        messages.pop();
+      }
+      logCallback?.(messages);
+    } catch (error) {
+      console.error('保存日志失败:', error);
+    }
   }
 
   if (msgOptions.showSnackbar) {
@@ -97,7 +48,6 @@ function createMessage(type, title, content = '', options = {}) {
   return message;
 }
 
-// 添加防抖函数实现
 function debounce(fn, delay) {
   let timer = null;
   return function (...args) {
@@ -119,35 +69,37 @@ export default {
   },
   onSnackbar: (callback) => { snackbarCallback = callback; },
   onLog: (callback) => { logCallback = callback; },
-  getMessages: () => [...messages],
-  clearMessages: () => {
-    messages.length = 0;
+  getMessages: async () => {
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      return await logDB.getLogs();
     } catch (error) {
-      console.error('清除消息历史失败:', error);
+      console.error('获取日志失败:', error);
+      return [...messages];
+    }
+  },
+  clearMessages: async () => {
+    try {
+      await logDB.clearLogs();
+      messages.length = 0;
+      logCallback?.(messages);
+    } catch (error) {
+      console.error('清除日志失败:', error);
     }
   },
   MessageType,
-  markAsRead: (messageId) => {
-    const message = messages.find(m => m.id === messageId);
-    if (message) {
-      message.read = true;
-      saveMessages();
+  markAsRead: () => {}, // 移除标记已读功能
+  deleteMessage: async (messageId) => {
+    try {
+      await logDB.deleteLog(messageId);
+      const index = messages.findIndex(m => m.id === messageId);
+      if (index !== -1) {
+        messages.splice(index, 1);
+      }
       logCallback?.(messages);
+    } catch (error) {
+      console.error('删除消息失败:', error);
     }
   },
-  deleteMessage: (messageId) => {
-    const index = messages.findIndex(m => m.id === messageId);
-    if (index !== -1) {
-      messages.splice(index, 1);
-      saveMessages();
-      logCallback?.(messages);
-    }
-  },
-  getUnreadCount: () => messages.filter(m => !m.read).length,
-  initialize: () => {
-    loadStoredMessages();
-  },
-  debounce,  // 导出防抖函数
+  getUnreadCount: () => 0, // 移除未读计数
+  debounce,
 };
