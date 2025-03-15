@@ -1,5 +1,25 @@
-import logDB from './db';
 import { getSetting } from './settings';
+
+class LogDB {
+  constructor() {
+    this.logs = [];
+  }
+
+  async addLog(message) {
+    this.logs.push(message);
+    // 只保留最近100条消息
+    if (this.logs.length > 100) {
+      this.logs.shift();
+    }
+    return true;
+  }
+
+  async getLogs(limit = 20) {
+    return this.logs.slice(-limit).reverse();
+  }
+}
+
+const logDB = new LogDB();
 
 const messages = [];
 let snackbarCallback = null;

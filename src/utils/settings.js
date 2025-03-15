@@ -90,7 +90,7 @@ const settingsDefinitions = {
     type: "string",
     default: "indexedDB",
     validate: (value) =>
-      ["server", "localStorage", "indexedDB"].includes(value),
+      ["server", "indexedDB"].includes(value),
     description: "数据提供者，用于决定数据存储方式",
   },
 

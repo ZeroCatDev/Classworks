@@ -190,7 +190,7 @@
             prepend-icon="mdi-content-save"
             size="large"
             :loading="loading"
-            :disabled="loading || !unsavedChanges"
+            :disabled="loading"
             @click="$emit('save')"
           >
             保存名单
@@ -201,7 +201,7 @@
             prepend-icon="mdi-refresh"
             size="large"
             :loading="loading"
-            :disabled="loading || !unsavedChanges"
+            :disabled="loading"
             @click="$emit('reload')"
           >
             重载名单

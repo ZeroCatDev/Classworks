@@ -338,7 +338,7 @@ import "../styles/transitions.scss"; // 添加新的样式导入
 import { debounce, throttle } from "@/utils/debounce";
 
 export default {
-  name: "HomeworkBoard",
+  name: "Classworks作业板",
   components: {
     MessageLog,
   },

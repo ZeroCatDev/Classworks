@@ -13,223 +13,23 @@
 
     <v-container class="py-4">
       <v-row>
-        <!-- 数据源设置卡片 -->
         <v-col cols="12" md="6">
-          <settings-card
-            title="数据源设置"
-            icon="mdi-database"
+          <server-settings-card
             :loading="loading.server"
-          >
-            <v-select
-              v-model="settings.server.provider"
-              :items="dataProviders"
-              label="数据提供者"
-              class="mb-4"
-            />
-            <v-expand-transition>
-              <div v-if="settings.server.provider === 'server'">
-                <v-text-field
-                  v-model="settings.server.domain"
-                  label="服务器域名"
-                  placeholder="例如: http://example.com"
-                  prepend-inner-icon="mdi-web"
-                />
-              </div>
-            </v-expand-transition>
-
-            <v-text-field
-              v-model="settings.server.classNumber"
-              label="班号"
-              placeholder="例如: 1 或 A"
-              prepend-inner-icon="mdi-account-group"
-              :hint="settings.server.provider === 'localStorage' ? '使用本地存储时也需要设置班号' : ''"
-              persistent-hint
-            />
-          </settings-card>
+            @saved="onSettingsSaved"
+          />
         </v-col>
 
-        <!-- 编辑设置卡片 -->
         <v-col cols="12" md="6">
-          <settings-card
-            title="编辑设置"
-            icon="mdi-pencil-cog"
-          >
-            <v-list>
-              <v-list-item>
-                <template #prepend>
-                  <v-icon icon="mdi-content-save" class="mr-3" />
-                </template>
-                <v-list-item-title>自动保存</v-list-item-title>
-                <v-list-item-subtitle>在编辑完成后自动保存到服务器</v-list-item-subtitle>
-                <template #append>
-                  <v-switch
-                    v-model="settings.edit.autoSave"
-                    density="comfortable"
-                    hide-details
-                  />
-                </template>
-              </v-list-item>
-
-              <v-divider v-if="settings.edit.autoSave" class="my-2" />
-
-              <v-list-item v-if="settings.edit.autoSave">
-                <template #prepend>
-                  <v-icon icon="mdi-calendar-lock" class="mr-3" />
-                </template>
-                <v-list-item-title>禁止自动保存非当天数据</v-list-item-title>
-                <v-list-item-subtitle>仅允许自动保存当天的数据，避免误修改历史记录</v-list-item-subtitle>
-                <template #append>
-                  <v-switch
-                    v-model="settings.edit.blockNonTodayAutoSave"
-                    density="comfortable"
-                    hide-details
-                  />
-                </template>
-              </v-list-item>
-
-              <v-divider class="my-2" />
-
-              <v-list-item>
-                <template #prepend>
-                  <v-icon icon="mdi-calendar-alert" class="mr-3" />
-                </template>
-                <v-list-item-title>确认保存历史数据</v-list-item-title>
-                <v-list-item-subtitle>保存非当天数据时显示确认对话框</v-list-item-subtitle>
-                <template #append>
-                  <v-switch
-                    v-model="settings.edit.confirmNonTodaySave"
-                    density="comfortable"
-                    hide-details
-                  />
-                </template>
-              </v-list-item> <v-divider class="my-2" /><v-list-item>
-                <template #prepend>
-                  <v-icon icon="mdi-refresh" class="mr-3" />
-                </template>
-                <v-list-item-title>编辑前刷新</v-list-item-title>
-                <v-list-item-subtitle>在打开编辑框前从服务器获取最新数据</v-list-item-subtitle>
-                <template #append>
-                  <v-switch
-                    v-model="settings.edit.refreshBeforeEdit"
-                    density="comfortable"
-                    hide-details
-                  />
-                </template>
-              </v-list-item>
-            </v-list>
-          </settings-card>
+          <edit-settings-card @saved="onSettingsSaved" />
         </v-col>
 
-        <!-- 刷新设置卡片 -->
         <v-col cols="12" md="6">
-          <settings-card
-            title="刷新设置"
-            icon="mdi-refresh-circle"
-          >
-            <v-list>
-              <v-list-item>
-                <template #prepend>
-                  <v-icon icon="mdi-refresh" class="mr-3" />
-                </template>
-                <v-list-item-title>自动刷新</v-list-item-title>
-                <v-list-item-subtitle>在后台自动刷新数据</v-list-item-subtitle>
-                <template #append>
-                  <v-switch
-                    v-model="settings.refresh.auto"
-                    density="comfortable"
-                    hide-details
-                  />
-                </template>
-              </v-list-item>
-
-              <v-divider class="my-2" />
-
-              <v-list-item>
-                <template #prepend>
-                  <v-icon icon="mdi-timer" class="mr-3" />
-                </template>
-                <v-list-item-title>刷新间隔</v-list-item-title>
-                <v-list-item-subtitle>设置自动刷新的时间间隔（分钟）</v-list-item-subtitle>
-                <template #append>
-                  <v-text-field
-                    v-model="settings.refresh.interval"
-                    type="number"
-                    min="1"
-                    max="60"
-                    density="comfortable"
-                    hide-details
-                  />
-                </template>
-              </v-list-item>
-            </v-list>
-          </settings-card>
+          <refresh-settings-card @saved="onSettingsSaved" />
         </v-col>
 
-        <!-- 显示设置卡片 -->
         <v-col cols="12" md="6">
-          <settings-card
-            title="显示设置"
-            icon="mdi-monitor-dashboard"
-          >
-            <v-list>
-              <v-list-item>
-                <template #prepend>
-                  <v-icon icon="mdi-eye" class="mr-3" />
-                </template>
-                <v-list-item-title>空科目显示</v-list-item-title>
-                <v-list-item-subtitle>选择空科目的显示方式</v-list-item-subtitle>
-                <template #append>
-                  <v-btn-toggle
-                    v-model="settings.display.emptySubjectDisplay"
-                    density="comfortable"
-                    color="primary"
-                  >
-                    <v-btn value="button" :ripple="false">
-                      按钮
-                    </v-btn>
-                    <v-btn value="card" :ripple="false">
-                      卡片
-                    </v-btn>
-                  </v-btn-toggle>
-                </template>
-              </v-list-item>
-
-              <v-divider class="my-2" />
-
-              <v-list-item>
-                <template #prepend>
-                  <v-icon icon="mdi-sort" class="mr-3" />
-                </template>
-                <v-list-item-title>动态排序</v-list-item-title>
-                <v-list-item-subtitle>根据科目动态排序</v-list-item-subtitle>
-                <template #append>
-                  <v-switch
-                    disabled
-                    v-model="settings.display.dynamicSort"
-                    density="comfortable"
-                    hide-details
-                  />
-                </template>
-              </v-list-item>
-
-              <v-divider class="my-2" />
-
-              <v-list-item>
-                <template #prepend>
-                  <v-icon icon="mdi-dice-multiple" class="mr-3" />
-                </template>
-                <v-list-item-title>随机点名按钮</v-list-item-title>
-                <v-list-item-subtitle>指向IslandCaller的链接</v-list-item-subtitle>
-                <template #append>
-                  <v-switch
-                    v-model="settings.display.showRandomButton"
-                    density="comfortable"
-                    hide-details
-                  />
-                </template>
-              </v-list-item>
-            </v-list>
-          </settings-card>
+          <display-settings-card @saved="onSettingsSaved" />
         </v-col>
 
         <!-- 开发者选项卡片 -->
@@ -335,6 +135,10 @@
 
 <script>
 import { useDisplay } from 'vuetify';
+import ServerSettingsCard from '@/components/settings/cards/ServerSettingsCard.vue';
+import EditSettingsCard from '@/components/settings/cards/EditSettingsCard.vue';
+import RefreshSettingsCard from '@/components/settings/cards/RefreshSettingsCard.vue';
+import DisplaySettingsCard from '@/components/settings/cards/DisplaySettingsCard.vue';
 import {
   getSetting,
   setSetting,
@@ -351,6 +155,10 @@ import dataProvider from '@/utils/dataProvider';
 export default {
   name: 'Settings',
   components: {
+    ServerSettingsCard,
+    EditSettingsCard,
+    RefreshSettingsCard,
+    DisplaySettingsCard,
     MessageLog,
     SettingsCard,
     StudentListCard,
@@ -730,6 +538,11 @@ export default {
         this.settings.font.size = size - step;
       }
       this.handleSettingsChange(this.settings);
+    },
+
+    onSettingsSaved() {
+      this.showMessage('设置已更新', '您的设置已成功保存');
+      // 如果需要，可以在这里重新加载相关数据
     }
   }
 }
