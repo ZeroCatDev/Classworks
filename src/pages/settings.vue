@@ -273,6 +273,25 @@
                   </template>
                 </v-list-item>
 
+                <v-divider class="my-2" />
+
+                <v-list-item>
+                  <template #prepend>
+                    <v-icon icon="mdi-database" class="mr-3" />
+                  </template>
+                  <v-list-item-title>禁用消息日志记录</v-list-item-title>
+                  <v-list-item-subtitle>关闭保存消息到本地存储的功能</v-list-item-subtitle>
+                  <template #append>
+                    <v-switch
+                      v-model="settings.developer.disableMessageLog"
+                      density="comfortable"
+                      hide-details
+                    />
+                  </template>
+                </v-list-item>
+
+                <v-divider class="my-2" />
+
                 <v-expand-transition>
                   <div v-if="settings.developer.showDebugConfig">
                     <v-divider class="my-2" />
@@ -385,7 +404,8 @@ export default {
       },
       developer: {
         enabled: getSetting('developer.enabled'),
-        showDebugConfig: getSetting('developer.showDebugConfig')
+        showDebugConfig: getSetting('developer.showDebugConfig'),
+        disableMessageLog: getSetting('developer.disableMessageLog')
       },
       message: {
         showSidebar: getSetting('message.showSidebar'),

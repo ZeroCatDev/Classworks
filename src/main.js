@@ -9,6 +9,7 @@ import { registerPlugins } from '@/plugins'
 
 // Components
 import App from './App.vue'
+import GlobalMessage from '@/components/GlobalMessage.vue'
 
 // Composables
 import { createApp } from 'vue'
@@ -20,5 +21,7 @@ const app = createApp(App)
 registerPlugins(app)
 
 app.use(messageService);
+
+app.component('GlobalMessage', GlobalMessage)
 
 app.mount('#app')

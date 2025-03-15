@@ -1,12 +1,7 @@
 <template>
   <v-app>
-    <v-main>
-      <router-view v-slot="{ Component, route }">
-        <transition name="md3" mode="out-in">
-          <component :is="Component" :key="route.path" />
-        </transition>
-      </router-view>
-    </v-main>
+    <router-view />
+    <global-message />
   </v-app>
 </template>
 

@@ -110,6 +110,12 @@ const settingsDefinitions = {
     default: false,
     description: "是否显示调试配置",
   },
+  // 新增的配置项：禁止将消息日志记录到localStorage
+  "developer.disableMessageLog": {
+    type: "boolean",
+    default: false,
+    description: "是否禁用将消息日志记录到localStorage",
+  },
 
   // 消息设置
   "message.showSidebar": {
@@ -236,25 +242,35 @@ function getSetting(key) {
     return null;
   }
 
-  // 添加对开发者选项依赖的检查
-  if (definition.requireDeveloper && !settingsCache["developer.enabled"]) {
-    return definition.default;
+  // 确保开发者相关设置正确处理
+  if (definition.requireDeveloper) {
+    const devEnabled = settingsCache['developer.enabled'];
+    if (!devEnabled) {
+      return definition.default;
+    }
   }
 
   const value = settingsCache[key];
   return value !== undefined ? value : definition.default;
 }
 
-// 添加设置变更日志函数
+// 修改 logSettingsChange 函数，优化检查逻辑
 function logSettingsChange(key, oldValue, newValue) {
-  if (
-    settingsCache["developer.enabled"] &&
-    settingsCache["developer.showDebugConfig"]
-  ) {
+  // 确保设置已加载
+  if (!settingsCache) {
+    loadSettings();
+  }
+
+  const shouldLog =
+    settingsCache['developer.enabled'] &&
+    settingsCache['developer.showDebugConfig'] &&
+    !settingsCache['developer.disableMessageLog'];
+
+  if (shouldLog) {
     console.log(`[Settings] ${key}:`, {
       old: oldValue,
       new: newValue,
-      time: new Date().toLocaleTimeString(),
+      time: new Date().toLocaleTimeString()
     });
   }
 }

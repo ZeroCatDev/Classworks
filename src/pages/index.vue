@@ -47,7 +47,7 @@
         @click="$refs.messageLog.drawer = true"
       />
     </template>
-  </v-app-bar>{{ state.boardData }}
+  </v-app-bar>
   <div class="d-flex">
     <!-- 主要内容区域 -->
     <v-container class="main-window flex-grow-1 no-select" fluid>
@@ -610,7 +610,6 @@ export default {
         );
 
         if (!response.success) {
-          // 处理错误情况
           if (response.error.code === "NOT_FOUND") {
             this.state.showNoDataMessage = true;
             this.state.noDataMessage = response.error.message;
@@ -622,14 +621,13 @@ export default {
             throw new Error(response.error.message);
           }
         } else {
-          // 处理成功情况
           this.state.boardData = response.data;
           this.state.synced = true;
           this.state.showNoDataMessage = false;
-          this.showMessage("下载成功", "数据已更新");
+          this.$message.success("下载成功", "数据已更新");
         }
       } catch (error) {
-        this.showError("下载失败", error.message);
+        this.$message.error("下载失败", error.message);
       } finally {
         this.loading.download = false;
       }
@@ -658,7 +656,7 @@ export default {
         await this.uploadData();
         return true;
       } catch (error) {
-        this.showError('保存失败', error.message || '请重试');
+        this.$message.error('保存失败', error.message || '请重试');
         return false;
       }
     },
@@ -703,7 +701,7 @@ export default {
         }
 
         this.state.synced = true;
-        this.showMessage(response.message || "保存成功");
+        this.$message.success(response.message || "保存成功");
       } finally {
         this.loading.upload = false;
       }
@@ -723,18 +721,12 @@ export default {
         this.state.studentList = response.data.studentList || [];
       } catch (error) {
         console.error("加载配置失败:", error);
-        this.showError("加载配置失败", error.message);
+        this.$message.error("加载配置失败", error.message);
       }
     },
 
     showSyncMessage() {
-      this.state.snackbar = true;
-      this.state.snackbarText = "数据已完成与服务器同步";
-    },
-
-    showError(message) {
-      this.state.snackbar = true;
-      this.state.snackbarText = message;
+      this.$message.success("数据已同步", "数据已完成与服务器同步");
     },
 
     async openDialog(subject) {
@@ -743,7 +735,7 @@ export default {
           await this.downloadData();
         } catch (err) {
           console.error("刷新数据失败:", err);
-          this.showError("刷新数据失败，可能显示的不是最新数据");
+          this.$message.error("刷新数据失败，可能显示的不是最新数据");
         }
       }
 
@@ -1020,7 +1012,7 @@ export default {
         this.state.attendanceDialog = false;
       } catch (error) {
         console.error("保存出勤状态失败:", error);
-        this.showError("保存失败，请重试");
+        this.$message.error("保存失败", "请重试");
       }
     },
 
