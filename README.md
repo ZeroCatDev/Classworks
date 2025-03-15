@@ -1,50 +1,70 @@
 # Classworks
 
-Classworks的前端代码
+基于 Vue 3 + Vuetify 的现代化作业管理系统前端项目
 
-## 📦 安装和运行
+## ✨ 特性
 
-1. 克隆项目
+- 🎯 TypeScript 支持
+- 🎨 基于 Vuetify 3 的精美 UI
+- 📱 响应式设计，完美适配多端
+- ⚡️ Vite 提供的极速开发体验
+- 🔑 完善的权限管理系统
+- 🎉 丰富的组件和功能模块
+
+## 📦 快速开始
+
+### 环境准备
+
+- Node.js 16+
+- pnpm 7+
+
+### 安装步骤
 
 ```bash
+# 克隆项目
 git clone https://github.com:ClassworksDev/Classworks.git
 cd Classworks
-```
 
-2. 安装依赖
-
-```bash
+# 安装依赖
 pnpm install
-```
 
-3. 运行开发服务器
-
-```bash
+# 启动开发服务器
 pnpm run dev
-```
 
-4. 构建生产版本
-
-```bash
+# 构建生产版本
 pnpm run build
 ```
 
-## 交流
+## 📂 项目结构
 
-QQ：964979747
+```
+Classworks/
+├── src/           # 源代码
+├── public/        # 静态资源
+├── components/    # 通用组件
+├── views/         # 页面
+├── store/         # 状态管理
+└── utils/         # 工具函数
+```
 
-## 开发者
+## 🤝 参与贡献
 
-[@SunWuyuan](https://github.com/sunwuyuan)
+我们非常欢迎社区的贡献！如果你想参与项目开发，请：
 
-## 如何贡献
+1. 阅读[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md)
+2. [提交 Issue](https://github.com/ZeroCatDev/ZeroCat/issues/new) 或 Pull Request
+3. 遵循 [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/) 行为规范
 
-- [ZeroCat](https://zerocat.houlangs.com)
-非常欢迎你的加入！[提一个 Issue](https://github.com/ZeroCatDev/ZeroCat/issues/new) 或者提交一个 Pull Request。对于小白问题，最好在 [qq 群](#交流)里问，我们会尽量回答。
+## 👥 联系我们
 
-ZeroCat 的项目 遵循 [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/) 行为规范
-<br/>孙悟元 希望你遵循 [提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md)
+- QQ交流群：964979747
+- 开发者：[@SunWuyuan](https://github.com/sunwuyuan)
+- 官网：[ZeroCat](https://zerocat.houlangs.com)
 
-### 贡献者
+## 🙏 致谢
 
-感谢所有参与项目的人，他们的信息可以在右侧看到，这是实时的且便于查看
+感谢所有为项目做出贡献的开发者！
+
+## 📄 开源协议
+
+本项目采用 MIT 许可证
