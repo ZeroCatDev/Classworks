@@ -61,7 +61,7 @@ window.addEventListener("load", initializeStorage);
  */
 
 // 存储所有设置的localStorage键名
-const SETTINGS_STORAGE_KEY = "classworks_settings";
+const SETTINGS_STORAGE_KEY = "Classworks_settings";
 
 /**
  * 所有配置项的定义
@@ -107,9 +107,11 @@ const settingsDefinitions = {
   },
   "server.classNumber": {
     type: "string",
-    default: "",
-    validate: (value) => /^[A-Za-z0-9]*$/.test(value),
-    description: "班级编号(无论使用哪种存储方式都需要设置)",
+    default: "高三八班",
+    //validate: (value) => /^[A-Za-z0-9]*$/.test(value),
+    validate: (value) => /.*/.test(value),
+
+    description: "班级编号",
   },
   "server.provider": {
     type: "string",

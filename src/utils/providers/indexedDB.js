@@ -1,5 +1,6 @@
 import { openDB } from 'idb';
 import { formatResponse, formatError } from '../dataProvider';
+import { defaultConfig, defaultHomework } from '../defaults/defaultData';
 
 const DB_NAME = "HomeworkDB";
 const DB_VERSION = 1;
@@ -32,10 +33,7 @@ export const indexedDBProvider = {
             if (!data) {
                 const today = new Date().toISOString().split("T")[0];
                 if (date === today) {
-                    return formatResponse({
-                        homework: {},
-                        attendance: { absent: [], late: [] },
-                    });
+                    return formatResponse(defaultHomework);
                 }
                 return formatError("数据不存在", "NOT_FOUND");
             }
@@ -74,10 +72,7 @@ export const indexedDBProvider = {
             const config = await db.get("config", storageKey);
 
             if (!config) {
-                return formatResponse({
-                    studentList: [],
-                    displayOptions: {},
-                });
+                return formatResponse(defaultConfig);
             }
 
             return formatResponse(JSON.parse(config));

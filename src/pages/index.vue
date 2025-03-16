@@ -5,7 +5,7 @@
     </template>
 
     <v-app-bar-title>
-      {{ state.classNumber }}班 - {{ titleText }}
+      {{ state.classNumber }} - {{ titleText }}
     </v-app-bar-title>
 
     <v-spacer />
@@ -25,14 +25,13 @@
         <template #activator="{ props }">
           <v-btn icon="mdi-calendar" variant="text" v-bind="props" />
         </template>
-
-        <v-date-picker
-          v-model="state.selectedDate"
-          :model-value="state.selectedDate"
-          color="primary"
-          width="300"
-          @update:model-value="handleDateSelect"
-        />
+        <v-card border>
+          <v-date-picker
+            v-model="state.selectedDateObj"
+            :model-value="state.selectedDateObj"
+            color="primary"
+            @update:model-value="handleDateSelect"
+        /></v-card>
       </v-menu>
       <v-btn
         icon="mdi-refresh"
@@ -372,7 +371,8 @@ export default {
         snackbarText: "",
         fontSize: getSetting("font.size"),
         datePickerDialog: false,
-        selectedDate: new Date().toISOString().split("T")[0], // 确保初始值正确
+        selectedDate: new Date().toISOString().split("T")[0],
+        selectedDateObj: new Date(this.selectedDate),
         refreshInterval: null,
         subjectOrder: [
           "语文",
@@ -427,24 +427,20 @@ export default {
       return useDisplay().mobile.value;
     },
     titleText() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-      const today = `${year}-${month}-${day}`;
-
-      const yesterday = new Date(now);
+      const today = this.getToday();
+      const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayFormatted = `${yesterday.getFullYear()}-${String(
-        yesterday.getMonth() + 1
-      ).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
 
-      if (this.state.dateString === today) {
+      const currentDateStr = this.state.dateString;
+      const todayStr = this.formatDate(today);
+      const yesterdayStr = this.formatDate(yesterday);
+
+      if (currentDateStr === todayStr) {
         return "今天的作业";
-      } else if (this.state.dateString === yesterdayFormatted) {
+      } else if (currentDateStr === yesterdayStr) {
         return "昨天的作业";
       } else {
-        return `${this.state.dateString}的作业`;
+        return `${currentDateStr}的作业`;
       }
     },
     sortedItems() {
@@ -459,7 +455,9 @@ export default {
         .filter(([, value]) => value.content?.trim())
         .map(([key, value]) => ({
           key,
-          name: this.state.availableSubjects.find((s) => s.key === key)?.name || key,
+          name:
+            this.state.availableSubjects.find((s) => s.key === key)?.name ||
+            key,
           content: value.content,
           order: this.state.subjectOrder.indexOf(key),
           rowSpan: Math.ceil(
@@ -593,6 +591,32 @@ export default {
   },
 
   methods: {
+    // 添加新的日期辅助方法
+    ensureDate(dateInput) {
+      if (dateInput instanceof Date) {
+        return dateInput;
+      }
+      if (typeof dateInput === "string") {
+        const date = new Date(dateInput);
+        if (!isNaN(date.getTime())) {
+          return date;
+        }
+      }
+      return new Date(); // 如果无法解析，返回当前日期
+    },
+
+    formatDate(dateInput) {
+      const date = this.ensureDate(dateInput);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    },
+
+    getToday() {
+      return new Date();
+    },
+
     async initializeData() {
       this.provider = getSetting("server.provider");
       const domain = getSetting("server.domain");
@@ -605,12 +629,14 @@ export default {
       // 从 URL 获取日期，如果没有则使用今天的日期
       const urlParams = new URLSearchParams(window.location.search);
       const dateFromUrl = urlParams.get("date");
-      const today = new Date().toISOString().split("T")[0];
+      const today = this.getToday();
 
       // 确保日期格式正确
-      this.state.dateString = dateFromUrl || today;
-      this.state.selectedDate = this.state.dateString; // 添加这行，设置默认选中日期
-      this.state.isToday = this.state.dateString === today;
+      const currentDate = dateFromUrl ? new Date(dateFromUrl) : today;
+      this.state.dateString = this.formatDate(currentDate);
+      this.state.selectedDate = this.state.dateString;
+      this.state.isToday =
+        this.formatDate(currentDate) === this.formatDate(today);
 
       await Promise.all([this.downloadData(), this.loadConfig()]);
     },
@@ -700,7 +726,8 @@ export default {
       if (!this.currentEditSubject) return;
 
       const content = this.state.textarea.trim();
-      const originalContent = this.state.boardData.homework[this.currentEditSubject]?.content || '';
+      const originalContent =
+        this.state.boardData.homework[this.currentEditSubject]?.content || "";
 
       // 如果内容发生变化(包括清空)，就视为修改
       if (content !== originalContent.trim()) {
@@ -785,9 +812,9 @@ export default {
           content: "",
         };
       }
-      this.state.dialogTitle = this.state.availableSubjects.find(
-        (s) => s.key === subject
-      )?.name || subject;
+      this.state.dialogTitle =
+        this.state.availableSubjects.find((s) => s.key === subject)?.name ||
+        subject;
       this.state.textarea = this.state.boardData.homework[subject].content;
       this.state.dialogVisible = true;
       this.$nextTick(() => {
@@ -890,22 +917,16 @@ export default {
       if (!newDate) return;
 
       try {
-        // 确保日期格式正确
-        const date = typeof newDate === 'string' ? new Date(newDate) : newDate;
-        if (!(date instanceof Date) || isNaN(date.getTime())) {
-          console.error('Invalid date:', newDate);
-          return;
-        }
-
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        const formattedDate = `${year}-${month}-${day}`;
+        const selectedDate = this.ensureDate(newDate);
+        const formattedDate = this.formatDate(selectedDate);
 
         // 只有当日期真正改变时才更新
         if (this.state.dateString !== formattedDate) {
           this.state.dateString = formattedDate;
           this.state.selectedDate = formattedDate;
+          this.state.isToday =
+            formattedDate === this.formatDate(this.getToday());
+
           // 使用 replace 而不是 push 来避免创建新的历史记录
           this.$router
             .replace({
@@ -915,8 +936,8 @@ export default {
           this.downloadData();
         }
       } catch (error) {
-        console.error('Date processing error:', error);
-        this.$message.error('日期处理错误', '请重新选择日期');
+        console.error("Date processing error:", error);
+        this.$message.error("日期处理错误", "请重新选择日期");
       }
     },
 

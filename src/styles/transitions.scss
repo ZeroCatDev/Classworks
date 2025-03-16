@@ -136,6 +136,7 @@ $standard-accelerate: cubic-bezier(0.3, 0.0, 1.0, 1.0);
               transform 150ms $emphasized-decelerate;
   touch-action: manipulation;
   min-height: 40px;  // 确保触摸目标足够大
+  min-width: 40px;
 
   &:active {
     transform: scale(0.98);
