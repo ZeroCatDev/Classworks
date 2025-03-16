@@ -365,8 +365,8 @@ export default {
 
     sortStudentsByPinyin() {
       const newList = [...this.modelValue.list].sort((a, b) => {
-        const pinyinA = pinyin(a, { toneType: "none" });
-        const pinyinB = pinyin(b, { toneType: "none" });
+        const pinyinA = pinyin(a, { toneType: "none" ,mode: 'surname'});
+        const pinyinB = pinyin(b, { toneType: "none",mode: 'surname' });
         return pinyinA.localeCompare(pinyinB);
       });
 
