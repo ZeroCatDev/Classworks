@@ -30,7 +30,7 @@
             <v-btn
               color="primary"
               variant="outlined"
-              href="https://github.com/SunWuyuan/classworks-frontend"
+              href="https://github.com/ClassworksDev/Classworks"
               target="_blank"
               prepend-icon="mdi-github"
             >
@@ -39,7 +39,7 @@
             <v-btn
               color="primary"
               variant="outlined"
-              href="https://github.com/SunWuyuan/classworks-backend"
+              href="https://github.com/ClassworksDev/ClassworksServer"
               target="_blank"
               prepend-icon="mdi-github"
             >
@@ -48,7 +48,7 @@
             <v-btn
               color="primary"
               variant="outlined"
-              href="https://github.com/SunWuyuan/classworks-backend/issues"
+              href="https://github.com/ClassworksDev/Classworks/issues"
               target="_blank"
               prepend-icon="mdi-bug"
             >

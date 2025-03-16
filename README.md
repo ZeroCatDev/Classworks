@@ -1,5 +1,11 @@
 # Classworks
 
+![GitHub](https://img.shields.io/github/license/ClassworksDev/Classworks?style=flat-square)
+![GitHub stars](https://img.shields.io/github/stars/ClassworksDev/Classworks?style=flat-square)
+![GitHub forks](https://img.shields.io/github/forks/ClassworksDev/Classworks?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/ClassworksDev/Classworks?style=flat-square)
+![Classworks](./images/banner.png)
+
 基于 Vue 3 + Vuetify 的现代化作业管理系统前端项目
 
 ## ✨ 特性
