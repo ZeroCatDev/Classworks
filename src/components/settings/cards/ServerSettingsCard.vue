@@ -79,13 +79,39 @@ export default {
     },
   },
   methods: {
-    save() {
-      Object.entries(this.localSettings).forEach(([key, value]) => {
-        setSetting(`server.${key}`, value);
-      });
-      this.originalSettings = { ...this.localSettings };
-      this.$emit("saved");
-      window.location.reload();
+    async save() {
+      try {
+        // 先保存设置
+        Object.entries(this.localSettings).forEach(([key, value]) => {
+          const success = setSetting(`server.${key}`, value);
+          if (!success) {
+            throw new Error(`保存设置 ${key} 失败`);
+          }
+        });
+
+        // 如果切换到服务器模式，验证服务器连接
+        if (this.localSettings.provider === 'server' && this.localSettings.domain) {
+          const testUrl = `${this.localSettings.domain.replace(/\/$/, '')}/api/test`;
+          try {
+            const response = await fetch(testUrl);
+            if (!response.ok) {
+              throw new Error('服务器连接测试失败');
+            }
+          } catch (error) {
+            throw new Error('无法连接到服务器，请检查域名设置');
+          }
+        }
+
+        this.originalSettings = { ...this.localSettings };
+        this.$emit('saved');
+
+        // 延迟刷新页面，让用户看到保存成功的提示
+        setTimeout(() => {
+          //window.location.reload();
+        }, 1000);
+      } catch (error) {
+        this.$message?.error('保存失败', error.message);
+      }
     },
     reset() {
       this.localSettings = { ...this.originalSettings };

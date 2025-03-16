@@ -13,6 +13,7 @@
     "@mdi/font": "7.4.47",
     "axios": "^1.7.7",
     "idb": "^8.0.2",
+    "pinyin-pro": "^3.26.0",
     "roboto-fontface": "*",
     "vue": "^3.4.31",
     "vue-masonry-wall": "^0.3.2",

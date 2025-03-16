@@ -17,6 +17,9 @@ importers:
       idb:
         specifier: ^8.0.2
         version: 8.0.2
+      pinyin-pro:
+        specifier: ^3.26.0
+        version: 3.26.0
       roboto-fontface:
         specifier: '*'
         version: 0.10.0
@@ -1278,6 +1281,9 @@ packages:
         optional: true
       typescript:
         optional: true
+
+  pinyin-pro@3.26.0:
+    resolution: {integrity: sha512-HcBZZb0pvm0/JkPhZHWA5Hqp2cWHXrrW/WrV+OtaYYM+kf35ffvZppIUuGmyuQ7gDr1JDJKMkbEE+GN0wfMoGg==}
 
   pkg-types@1.2.1:
     resolution: {integrity: sha512-sQoqa8alT3nHjGuTjuKgOnvjo4cljkufdtLMnO2LBP/wRwuDlo1tkaEdMxCRhyGRPacv/ztlZgDPm2b7FAmEvw==}
@@ -3018,6 +3024,8 @@ snapshots:
       '@vue/devtools-api': 6.6.4
       vue: 3.5.13
       vue-demi: 0.14.10(vue@3.5.13)
+
+  pinyin-pro@3.26.0: {}
 
   pkg-types@1.2.1:
     dependencies:

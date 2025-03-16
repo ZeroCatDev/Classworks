@@ -102,7 +102,18 @@ const settingsDefinitions = {
   "server.domain": {
     type: "string",
     default: "",
-    validate: (value) => !value || /^https?:\/\//.test(value),
+    validate: value => {
+      // 如果不是服务器模式或值为空，直接通过
+      if (!value) return true;
+      // 验证URL格式
+      try {
+        new URL(value);
+        return true;
+      } catch (e) {
+        console.error('域名格式无效:', e);
+        return false;
+      }
+    },
     description: "后端服务器域名",
   },
   "server.classNumber": {
@@ -116,8 +127,7 @@ const settingsDefinitions = {
   "server.provider": {
     type: "string",
     default: "indexedDB",
-    validate: (value) =>
-      ["server", "indexedDB"].includes(value),
+    validate: (value) => ["server", "indexedDB"].includes(value),
     description: "数据提供者，用于决定数据存储方式",
   },
 

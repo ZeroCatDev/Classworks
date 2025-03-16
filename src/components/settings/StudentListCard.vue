@@ -10,17 +10,23 @@
       </template>
       <v-card-title class="text-h6">学生列表</v-card-title>
       <template #append>
-        <unsaved-warning
-          :show="unsavedChanges"
-          message="有未保存的更改"
-        />
+        <unsaved-warning :show="unsavedChanges" message="有未保存的更改" />
+        <v-btn
+          prepend-icon="mdi-sort-alphabetical-variant"
+          variant="text"
+          class="mr-2"
+          @click="sortStudentsByPinyin"
+          :disabled="modelValue.list.length === 0"
+        >
+          按姓名首字母排序
+        </v-btn>
         <v-btn
           :color="modelValue.advanced ? 'primary' : undefined"
           variant="text"
           prepend-icon="mdi-code-braces"
           @click="toggleAdvanced"
         >
-          {{ modelValue.advanced ? '返回基础编辑' : '高级编辑' }}
+          {{ modelValue.advanced ? "返回基础编辑" : "高级编辑" }}
         </v-btn>
       </template>
     </v-card-item>
@@ -33,13 +39,7 @@
         class="mb-4"
       />
 
-      <v-alert
-        v-if="error"
-        type="error"
-        variant="tonal"
-        closable
-        class="mb-4"
-      >
+      <v-alert v-if="error" type="error" variant="tonal" closable class="mb-4">
         {{ error }}
       </v-alert>
 
@@ -83,7 +83,7 @@
               <v-hover v-slot="{ isHovering, props }">
                 <v-card
                   v-bind="props"
-                  :elevation="isMobile ? 1 : (isHovering ? 4 : 1)"
+                  :elevation="isMobile ? 1 : isHovering ? 4 : 1"
                   class="student-card"
                   border
                 >
@@ -145,7 +145,10 @@
                       {{ student }}
                     </span>
 
-                    <div class="d-flex gap-1 action-buttons" :class="{ 'opacity-100': isHovering || isMobile }">
+                    <div
+                      class="d-flex gap-1 action-buttons"
+                      :class="{ 'opacity-100': isHovering || isMobile }"
+                    >
                       <v-btn
                         icon="mdi-pencil"
                         variant="text"
@@ -213,13 +216,14 @@
 </template>
 
 <script>
-import UnsavedWarning from '../common/UnsavedWarning.vue'
-import '@/styles/warnings.scss'
+import UnsavedWarning from "../common/UnsavedWarning.vue";
+import "@/styles/warnings.scss";
+import { pinyin } from "pinyin-pro";
 
 export default {
-  name: 'StudentListCard',
+  name: "StudentListCard",
   components: {
-    UnsavedWarning
+    UnsavedWarning,
   },
   props: {
     modelValue: {
@@ -227,27 +231,27 @@ export default {
       required: true,
       default: () => ({
         list: [],
-        text: '',
-        advanced: false
-      })
+        text: "",
+        advanced: false,
+      }),
     },
     loading: Boolean,
     error: String,
     isMobile: Boolean,
-    unsavedChanges: Boolean
+    unsavedChanges: Boolean,
   },
 
   data() {
     return {
-      newStudentName: '',
+      newStudentName: "",
       editState: {
         index: -1,
-        name: ''
-      }
-    }
+        name: "",
+      },
+    };
   },
 
-  emits: ['update:modelValue', 'save', 'reload'],
+  emits: ["update:modelValue", "save", "reload"],
 
   computed: {
     text: {
@@ -256,8 +260,8 @@ export default {
       },
       set(value) {
         this.handleTextInput(value);
-      }
-    }
+      },
+    },
   },
 
   methods: {
@@ -266,15 +270,15 @@ export default {
       const advanced = !this.modelValue.advanced;
       this.updateModelValue({
         advanced,
-        text: advanced ? this.modelValue.list.join('\n') : this.modelValue.text,
-        list: this.modelValue.list
+        text: advanced ? this.modelValue.list.join("\n") : this.modelValue.text,
+        list: this.modelValue.list,
       });
     },
 
     updateModelValue(newData) {
-      this.$emit('update:modelValue', {
+      this.$emit("update:modelValue", {
         ...this.modelValue,
-        ...newData
+        ...newData,
       });
     },
 
@@ -286,16 +290,16 @@ export default {
       const newList = [...this.modelValue.list, name];
       this.updateModelValue({
         list: newList,
-        text: newList.join('\n')
+        text: newList.join("\n"),
       });
-      this.newStudentName = '';
+      this.newStudentName = "";
     },
 
     removeStudent(index) {
       const newList = this.modelValue.list.filter((_, i) => i !== index);
       this.updateModelValue({
         list: newList,
-        text: newList.join('\n')
+        text: newList.join("\n"),
       });
     },
 
@@ -303,9 +307,9 @@ export default {
       const newList = [...this.modelValue.list];
       let targetIndex;
 
-      if (direction === 'top') {
+      if (direction === "top") {
         targetIndex = 0;
-      } else if (direction === 'up') {
+      } else if (direction === "up") {
         targetIndex = index - 1;
       } else {
         targetIndex = index + 1;
@@ -317,7 +321,7 @@ export default {
 
         this.updateModelValue({
           list: newList,
-          text: newList.join('\n')
+          text: newList.join("\n"),
         });
       }
     },
@@ -336,9 +340,9 @@ export default {
 
       this.updateModelValue({
         list: newList,
-        text: newList.join('\n')
+        text: newList.join("\n"),
       });
-      this.editState = { index: -1, name: '' };
+      this.editState = { index: -1, name: "" };
     },
 
     handleClick(index, student) {
@@ -349,17 +353,30 @@ export default {
 
     handleTextInput(value) {
       const list = value
-        .split('\n')
-        .map(s => s.trim())
-        .filter(s => s);
+        .split("\n")
+        .map((s) => s.trim())
+        .filter((s) => s);
 
       this.updateModelValue({
         text: value,
-        list
+        list,
       });
-    }
-  }
-}
+    },
+
+    sortStudentsByPinyin() {
+      const newList = [...this.modelValue.list].sort((a, b) => {
+        const pinyinA = pinyin(a, { toneType: "none" });
+        const pinyinB = pinyin(b, { toneType: "none" });
+        return pinyinA.localeCompare(pinyinB);
+      });
+
+      this.updateModelValue({
+        list: newList,
+        text: newList.join("\n"),
+      });
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -379,7 +396,8 @@ export default {
 }
 
 @keyframes pulse-warning {
-  0%, 100% {
+  0%,
+  100% {
     border-color: rgba(var(--v-theme-warning), 1) !important;
   }
   50% {

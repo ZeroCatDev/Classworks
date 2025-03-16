@@ -216,7 +216,6 @@ export default {
       settings,
       dataProviders: [
         { title: '服务器', value: 'server' },
-        { title: '本地存储', value: 'localStorage' },
         { title:'本地数据库',value:'indexedDB'}
       ],
       studentData: {
