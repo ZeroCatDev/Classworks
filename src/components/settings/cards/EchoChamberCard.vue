@@ -59,14 +59,14 @@ export default {
       // 主文本打字机
       this.typewriter = new Typewriter(this.$refs.typewriter, {
         delay: 50,
-        deleteSpeed: 30,
+        deleteSpeed: 100,
         loop: false,
       });
 
       // 来源文本打字机
       this.sourceWriter = new Typewriter(this.$refs.sourceWriter, {
-        delay: 30,
-        deleteSpeed: 20,
+        delay: 10,
+        deleteSpeed: 10,
         loop: false,
         cursor: "",
       });
