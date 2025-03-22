@@ -102,7 +102,7 @@ const settingsDefinitions = {
   "server.domain": {
     type: "string",
     default: "",
-    validate: value => {
+    validate: (value) => {
       // 如果不是服务器模式或值为空，直接通过
       if (!value) return true;
       // 验证URL格式
@@ -110,7 +110,7 @@ const settingsDefinitions = {
         new URL(value);
         return true;
       } catch (e) {
-        console.error('域名格式无效:', e);
+        console.error("域名格式无效:", e);
         return false;
       }
     },
@@ -221,6 +221,14 @@ const settingsDefinitions = {
     default: true,
     description: "是否保存消息历史记录",
     requireDeveloper: true,
+  },
+
+  // 主题设置
+  "theme.mode": {
+    type: "string",
+    default: "dark",
+    validate: (value) => ["light", "dark"].includes(value),
+    description: "主题模式",
   },
 };
 

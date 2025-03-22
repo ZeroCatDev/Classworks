@@ -10,7 +10,17 @@
 </template>
 
 <script setup>
-  //
+import { onMounted } from 'vue';
+import { useTheme } from 'vuetify';
+import { getSetting } from '@/utils/settings';
+
+const theme = useTheme();
+
+onMounted(() => {
+  // 应用保存的主题设置
+  const savedTheme = getSetting('theme.mode');
+  theme.global.name.value = savedTheme;
+});
 </script>
 <style>
 

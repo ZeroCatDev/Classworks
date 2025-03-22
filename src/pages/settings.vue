@@ -37,6 +37,11 @@
           <display-settings-card @saved="onSettingsSaved" border/>
         </v-col>
 
+        <!-- 添加主题设置卡片 -->
+        <v-col cols="12" md="6">
+          <theme-settings-card border />
+        </v-col>
+
         <!-- 开发者选项卡片 -->
         <v-col :cols="12" :md="settings.developer.enabled ? 12 : 6">
           <settings-card
@@ -146,6 +151,7 @@ import EditSettingsCard from '@/components/settings/cards/EditSettingsCard.vue';
 import RefreshSettingsCard from '@/components/settings/cards/RefreshSettingsCard.vue';
 import DisplaySettingsCard from '@/components/settings/cards/DisplaySettingsCard.vue';
 import DataProviderSettingsCard from '@/components/settings/cards/DataProviderSettingsCard.vue';
+import ThemeSettingsCard from '@/components/settings/cards/ThemeSettingsCard.vue';
 import {
   getSetting,
   setSetting,
@@ -170,7 +176,8 @@ export default {
     SettingsCard,
     StudentListCard,
     AboutCard,
-    DataProviderSettingsCard
+    DataProviderSettingsCard,
+    ThemeSettingsCard
   },
   setup() {
     const { mobile } = useDisplay();
