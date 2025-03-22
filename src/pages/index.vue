@@ -31,7 +31,8 @@
             :model-value="state.selectedDateObj"
             color="primary"
             @update:model-value="handleDateSelect"
-        /></v-card>
+          />
+        </v-card>
       </v-menu>
       <v-btn
         icon="mdi-refresh"
@@ -123,29 +124,30 @@
             </v-card>
           </TransitionGroup>
         </div>
-      </div><v-btn
-      v-if="!state.synced"
-      color="error"
-      size="large"
-      :loading="loading.upload"
-      class="ml-2"
-      @click="manualUpload"
-    >
-      上传
-    </v-btn>
-    <v-btn v-else color="success" size="large" @click="showSyncMessage">
-      同步完成 </v-btn
-    ><v-btn
-      v-if="showRandomButton"
-      color="yellow"
-      prepend-icon="mdi-account-question"
-      append-icon="mdi-dice-multiple"
-      size="large"
-      class="ml-2"
-      href="classisland://plugins/IslandCaller/Run"
-    >
-      随机点名
-    </v-btn>
+      </div>
+      <v-btn
+        v-if="!state.synced"
+        color="error"
+        size="large"
+        :loading="loading.upload"
+        class="ml-2"
+        @click="manualUpload"
+      >
+        上传
+      </v-btn>
+      <v-btn v-else color="success" size="large" @click="showSyncMessage">
+        同步完成 </v-btn
+      ><v-btn
+        v-if="showRandomButton"
+        color="yellow"
+        prepend-icon="mdi-account-question"
+        append-icon="mdi-dice-multiple"
+        size="large"
+        class="ml-2"
+        href="classisland://plugins/IslandCaller/Run"
+      >
+        随机点名
+      </v-btn>
     </v-container>
 
     <!-- 出勤统计区域 -->
@@ -157,35 +159,55 @@
     >
       <h1>出勤</h1>
       <h2>
-        应到:
-        {{
-          state.studentList.length - state.boardData.attendance.exclude.length
-        }}人
+        <snap style="white-space: nowrap"> 应到 </snap>:
+        <snap style="white-space: nowrap">
+          {{
+            state.studentList.length -
+            state.boardData.attendance.exclude.length
+          }}人
+        </snap>
       </h2>
       <h2>
-        实到:
-        {{
-          state.studentList.length -
-          state.boardData.attendance.absent.length -
-          state.boardData.attendance.late.length -
-          state.boardData.attendance.exclude.length
-        }}人
+        <snap style="white-space: nowrap"> 实到 </snap>:
+        <snap style="white-space: nowrap">
+          {{
+            state.studentList.length -
+            state.boardData.attendance.absent.length -
+            state.boardData.attendance.late.length -
+            state.boardData.attendance.exclude.length
+          }}人
+        </snap>
       </h2>
-      <h2>请假: {{ state.boardData.attendance.absent.length }}人</h2>
+      <h2>
+        <snap style="white-space: nowrap"> 请假 </snap>:
+        <snap style="white-space: nowrap">
+          {{ state.boardData.attendance.absent.length }}人
+        </snap>
+      </h2>
       <h3
         v-for="(name, index) in state.boardData.attendance.absent"
         :key="'absent-' + index"
       >
         {{ `${index + 1}. ${name}` }}
       </h3>
-      <h2>迟到: {{ state.boardData.attendance.late.length }}<snap>人</snap></h2>
+      <h2>
+        <snap style="white-space: nowrap"> 迟到 </snap>:
+        <snap style="white-space: nowrap">
+          {{ state.boardData.attendance.late.length }}人
+        </snap>
+      </h2>
       <h3
         v-for="(name, index) in state.boardData.attendance.late"
         :key="'late-' + index"
       >
         {{ `${index + 1}. ${name}` }}
       </h3>
-      <h2>不参与: {{ state.boardData.attendance.exclude.length }}人</h2>
+      <h2>
+        <snap style="white-space: nowrap">不参与</snap>:
+        <snap style="white-space: nowrap">
+          {{ state.boardData.attendance.exclude.length }}人
+        </snap>
+      </h2>
       <h3
         v-for="(name, index) in state.boardData.attendance.exclude"
         :key="'exclude-' + index"
