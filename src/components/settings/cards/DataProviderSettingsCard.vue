@@ -12,7 +12,6 @@
             <v-btn
               :loading="loading"
               variant="tonal"
-              size="small"
               @click="checkServerConnection"
             >
               测试连接
@@ -32,12 +31,7 @@
             >这将清除所有IndexedDB中的数据</v-list-item-subtitle
           >
           <template #append>
-            <v-btn
-              color="error"
-              variant="tonal"
-              size="small"
-              @click="confirmClearIndexedDB"
-            >
+            <v-btn color="error" variant="tonal" @click="confirmClearIndexedDB">
               清除
             </v-btn>
           </template>
@@ -48,9 +42,7 @@
           </template>
           <v-list-item-title>导出数据库</v-list-item-title>
           <template #append>
-            <v-btn variant="tonal" size="small" @click="exportData">
-              导出
-            </v-btn>
+            <v-btn variant="tonal" @click="exportData"> 导出 </v-btn>
           </template>
         </v-list-item>
       </template>

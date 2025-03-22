@@ -39,15 +39,15 @@
         variant="text"
         :loading="loading.download"
         @click="downloadData"
-      />
-      <v-btn icon="mdi-cog" variant="text" @click="$router.push('/settings')" />
-      <v-btn
+      /> <v-btn
         icon="mdi-bell"
         variant="text"
         :badge="unreadCount || undefined"
         :badge-color="unreadCount ? 'error' : undefined"
         @click="$refs.messageLog.drawer = true"
       />
+      <v-btn icon="mdi-cog" variant="text" @click="$router.push('/settings')" />
+
     </template>
   </v-app-bar>
   <div class="d-flex">
