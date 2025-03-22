@@ -13,7 +13,7 @@
           <div class="d-flex flex-column align-start">
             <v-avatar size="120" class="mb-4">
               <v-img
-                src="https://github.com/Sunwuyuan.png"
+                src="https://github.com/SunWuyuan.png"
                 alt="Sunwuyuan"
               />
             </v-avatar>
