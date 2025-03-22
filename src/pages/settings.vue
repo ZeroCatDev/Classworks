@@ -42,6 +42,7 @@
           <theme-settings-card border />
         </v-col>
 
+
         <!-- 开发者选项卡片 -->
         <v-col :cols="12" :md="settings.developer.enabled ? 12 : 6">
           <settings-card
@@ -133,6 +134,10 @@
           />
         </v-col>
 
+        <!-- 添加回声洞卡片 -->
+        <v-col cols="12">
+          <echo-chamber-card border />
+        </v-col>
         <!-- 关于卡片 -->
         <v-col cols="12">
           <about-card />
@@ -152,6 +157,7 @@ import RefreshSettingsCard from '@/components/settings/cards/RefreshSettingsCard
 import DisplaySettingsCard from '@/components/settings/cards/DisplaySettingsCard.vue';
 import DataProviderSettingsCard from '@/components/settings/cards/DataProviderSettingsCard.vue';
 import ThemeSettingsCard from '@/components/settings/cards/ThemeSettingsCard.vue';
+import EchoChamberCard from '@/components/settings/cards/EchoChamberCard.vue';
 import {
   getSetting,
   setSetting,
@@ -177,7 +183,8 @@ export default {
     StudentListCard,
     AboutCard,
     DataProviderSettingsCard,
-    ThemeSettingsCard
+    ThemeSettingsCard,
+    EchoChamberCard
   },
   setup() {
     const { mobile } = useDisplay();
