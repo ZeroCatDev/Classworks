@@ -185,22 +185,26 @@
         </snap>
       </h2>
       <h3
+        class="gray-text"
         v-for="(name, index) in state.boardData.attendance.absent"
         :key="'absent-' + index"
       >
-        {{ `${index + 1}. ${name}` }}
+        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
+        ><span style="white-space: nowrap">{{ name }}</span>
       </h3>
       <h2>
-        <snap style="white-space: nowrap"> 迟到 </snap>:
+        <snap style="white-space: nowrap">迟到</snap>:
         <snap style="white-space: nowrap">
           {{ state.boardData.attendance.late.length }}人
         </snap>
       </h2>
       <h3
+        class="gray-text"
         v-for="(name, index) in state.boardData.attendance.late"
         :key="'late-' + index"
       >
-        {{ `${index + 1}. ${name}` }}
+        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
+        ><span style="white-space: nowrap">{{ name }}</span>
       </h3>
       <h2>
         <snap style="white-space: nowrap">不参与</snap>:
@@ -209,10 +213,12 @@
         </snap>
       </h2>
       <h3
+        class="gray-text"
         v-for="(name, index) in state.boardData.attendance.exclude"
         :key="'exclude-' + index"
       >
-        {{ `${index + 1}. ${name}` }}
+        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
+        ><span style="white-space: nowrap">{{ name }}</span>
       </h3>
     </v-col>
   </div>
@@ -367,6 +373,7 @@ export default {
     return {
       dataKey: "",
       provider: "",
+      useDisplay: useDisplay,
       state: {
         classNumber: "",
         studentList: [],
@@ -1208,3 +1215,8 @@ export default {
   },
 };
 </script>
+<style scoped>
+.gray-text {
+  opacity: 0.6;
+}
+</style>
