@@ -123,7 +123,29 @@
             </v-card>
           </TransitionGroup>
         </div>
-      </div>
+      </div><v-btn
+      v-if="!state.synced"
+      color="error"
+      size="large"
+      :loading="loading.upload"
+      class="ml-2"
+      @click="manualUpload"
+    >
+      上传
+    </v-btn>
+    <v-btn v-else color="success" size="large" @click="showSyncMessage">
+      同步完成 </v-btn
+    ><v-btn
+      v-if="showRandomButton"
+      color="yellow"
+      prepend-icon="mdi-account-question"
+      append-icon="mdi-dice-multiple"
+      size="large"
+      class="ml-2"
+      href="classisland://plugins/IslandCaller/Run"
+    >
+      随机点名
+    </v-btn>
     </v-container>
 
     <!-- 出勤统计区域 -->
@@ -156,7 +178,7 @@
       >
         {{ `${index + 1}. ${name}` }}
       </h3>
-      <h2>迟到: {{ state.boardData.attendance.late.length }}人</h2>
+      <h2>迟到: {{ state.boardData.attendance.late.length }}<snap>人</snap></h2>
       <h3
         v-for="(name, index) in state.boardData.attendance.late"
         :key="'late-' + index"
@@ -172,31 +194,7 @@
       </h3>
     </v-col>
   </div>
-  <v-container fluid>
-    <v-btn
-      v-if="!state.synced"
-      color="error"
-      size="large"
-      :loading="loading.upload"
-      class="ml-2"
-      @click="manualUpload"
-    >
-      上传
-    </v-btn>
-    <v-btn v-else color="success" size="large" @click="showSyncMessage">
-      同步完成 </v-btn
-    ><v-btn
-      v-if="showRandomButton"
-      color="yellow"
-      prepend-icon="mdi-account-question"
-      append-icon="mdi-dice-multiple"
-      size="large"
-      class="ml-2"
-      href="classisland://plugins/IslandCaller/Run"
-    >
-      随机点名
-    </v-btn>
-  </v-container>
+
   <v-dialog
     v-model="state.dialogVisible"
     width="500"

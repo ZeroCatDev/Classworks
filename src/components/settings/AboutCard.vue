@@ -13,11 +13,11 @@
           <v-avatar size="120" class="mb-4">
             <v-img
               src="https://avatars.githubusercontent.com/u/88357633?v=4"
-              alt="作者头像"
+              alt="Sunwuyuan"
             />
           </v-avatar>
 
-          <h2 class="text-h5 mb-2">ClassworkS</h2>
+          <h2 class="text-h5 mb-2">Classworks</h2>
           <p class="text-body-1 mb-4">
             由 <a
               href="https://github.com/sunwuyuan"

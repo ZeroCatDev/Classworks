@@ -46,7 +46,7 @@
 
   /* 确保容器高度不超过视口 */
   .main-window {
-    max-height: calc(100vh - 180px);
+    max-height: calc(100vh - 80px);
     overflow-y: auto;
   }
 

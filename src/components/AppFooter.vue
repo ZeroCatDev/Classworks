@@ -1,5 +1,5 @@
 <template>
-  <v-footer height="40" app>
+  <v-footer height="40" app v-if="mobile">
     <a
       v-for="item in items"
       :key="item.title"
@@ -9,17 +9,15 @@
       rel="noopener noreferrer"
       target="_blank"
     >
-      <v-icon
-        :icon="item.icon"
-        :size="item.icon === 'mdi-earth' ? 24 : 16"
-      />
+      <v-icon :icon="item.icon" :size="item.icon === 'mdi-earth' ? 24 : 16" />
     </a>
 
     <div
       class="text-caption text-disabled"
-      style="position: absolute; right: 16px;"
+      style="position: absolute; right: 16px"
     >
-      &copy; 2020-{{ (new Date()).getFullYear() }} <span class="d-none d-sm-inline-block">SunWuyuan</span>
+      &copy; 2020-{{ new Date().getFullYear() }}
+      <span class="d-none d-sm-inline-block">SunWuyuan</span>
       —
       <a
         class="text-decoration-none on-surface"
@@ -27,38 +25,41 @@
         rel="noopener noreferrer"
         target="_blank"
       >
-        ClassworkS
+        Classworks
       </a>
     </div>
   </v-footer>
 </template>
 
 <script setup>
-  const items = [
-    {
-      title: '孙悟远',
-      icon: `mdi-earth`,
-      href: 'https://wuyuan.dev',
-    },
-    {
-      title: 'ZeroCat',
-      icon: 'mdi-xml',
-      href: 'https://zerocat.houlangs.com',
-    },
-    {
-      title: 'GitHub',
-      icon: 'mdi-github',
-      href: 'https://github.com/sunwuyuan/classworks-frontend',
-    }
-  ]
+import { useDisplay } from "vuetify";
+const { mobile } = useDisplay();
+
+const items = [
+  {
+    title: "孙悟远",
+    icon: `mdi-earth`,
+    href: "https://wuyuan.dev",
+  },
+  {
+    title: "ZeroCat",
+    icon: "mdi-xml",
+    href: "https://zerocat.houlangs.com",
+  },
+  {
+    title: "GitHub",
+    icon: "mdi-github",
+    href: "https://github.com/sunwuyuan/classworks-frontend",
+  },
+];
 </script>
 
 <style scoped lang="sass">
-  .social-link :deep(.v-icon)
-    color: rgba(var(--v-theme-on-background), var(--v-disabled-opacity))
-    text-decoration: none
-    transition: .2s ease-in-out
+.social-link :deep(.v-icon)
+  color: rgba(var(--v-theme-on-background), var(--v-disabled-opacity))
+  text-decoration: none
+  transition: .2s ease-in-out
 
-    &:hover
-      color: rgba(25, 118, 210, 1)
+  &:hover
+    color: rgba(25, 118, 210, 1)
 </style>
