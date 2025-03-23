@@ -1,0 +1,65 @@
+// 触摸友好的卡片样式
+
+.touch-card {
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  .v-card-title {
+    font-size: 1.25rem;
+    padding: 16px 20px;
+  }
+  
+  .v-card-text {
+    padding: 16px 20px;
+  }
+  
+  .v-card-actions {
+    padding: 12px 20px;
+  }
+  
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// 卡片发光效果
+.glow-card {
+  position: relative;
+  overflow: hidden;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), 
+                rgba(255, 255, 255, 0.2) 0%, 
+                rgba(255, 255, 255, 0) 60%);
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+  }
+  
+  &:hover::after {
+    opacity: 1;
+  }
+}
+
+// 网格布局优化
+.grid-masonry {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-auto-rows: 20px;
+  grid-gap: 16px;
+}
+
+// 空科目网格
+.empty-subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-gap: 16px;
+  margin-top: 16px;
+} 

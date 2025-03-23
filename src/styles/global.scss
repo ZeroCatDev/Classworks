@@ -1,0 +1,86 @@
+// 全局 UI 美化样式
+
+// 卡片悬浮效果
+.hover-card {
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  will-change: transform, box-shadow;
+  
+  &:hover, &:focus {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  &:active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+// 触摸友好的按钮
+.touch-button {
+  min-height: 48px;
+  min-width: 48px;
+  border-radius: 12px;
+  padding: 12px 24px;
+  
+  &.v-btn--icon {
+    min-height: 56px;
+    min-width: 56px;
+  }
+}
+
+// 波纹效果增强
+.ripple-enhanced {
+  position: relative;
+  overflow: hidden;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), 
+                rgba(255, 255, 255, 0.2) 0%, 
+                rgba(255, 255, 255, 0) 60%);
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+  }
+  
+  &:active::after {
+    opacity: 1;
+    transition: opacity 0.2s;
+  }
+}
+
+// 平滑滚动
+html {
+  scroll-behavior: smooth;
+}
+
+// 触摸友好的列表项
+.touch-list-item {
+  min-height: 56px;
+  padding: 12px 16px;
+}
+
+// 大型触摸目标
+.large-touch-target {
+  min-height: 56px;
+  min-width: 56px;
+}
+
+// 全屏模式样式
+.fullscreen-mode {
+  .v-app-bar {
+    background-color: rgba(var(--v-theme-surface-variant), 0.85) !important;
+    backdrop-filter: blur(10px);
+  }
+  
+  .main-window {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+} 

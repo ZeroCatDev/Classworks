@@ -102,6 +102,16 @@ const settingsDefinitions = {
     default: true,
     description: "是否显示全屏按钮",
   },
+  "display.cardHoverEffect": {
+    type: "boolean",
+    default: true,
+    description: "是否启用卡片悬浮效果",
+  },
+  "display.enhancedTouchMode": {
+    type: "boolean",
+    default: true,
+    description: "是否启用增强触摸模式（更大的触摸目标）",
+  },
 
   // 服务器设置（合并了数据提供者设置）
   "server.domain": {

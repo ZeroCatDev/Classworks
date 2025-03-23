@@ -1,25 +1,26 @@
 <template>
   <settings-card
     title="显示设置"
-    icon="mdi-monitor-dashboard"
+    icon="mdi-monitor"
+    border
   >
     <v-form v-model="isValid" @submit.prevent="save">
       <v-list>
         <v-list-item>
           <template #prepend>
-            <v-icon icon="mdi-eye" class="mr-3" />
+            <v-icon icon="mdi-card-outline" class="mr-3" />
           </template>
-          <v-list-item-title>空科目显示</v-list-item-title>
+          <v-list-item-title>空科目显示方式</v-list-item-title>
           <v-list-item-subtitle>选择空科目的显示方式</v-list-item-subtitle>
           <template #append>
-            <v-btn-toggle
-              v-model="localSettings.emptySubjectDisplay"
-              density="comfortable"
-              color="primary"
-            >
-              <v-btn value="button" :ripple="false">按钮</v-btn>
-              <v-btn value="card" :ripple="false">卡片</v-btn>
-            </v-btn-toggle>
+            <v-select
+              v-model="emptySubjectDisplay"
+              :items="displayOptions"
+              density="compact"
+              hide-details
+              variant="outlined"
+              style="max-width: 150px"
+            />
           </template>
         </v-list-item>
 
@@ -27,14 +28,13 @@
 
         <v-list-item>
           <template #prepend>
-            <v-icon icon="mdi-sort" class="mr-3" />
+            <v-icon icon="mdi-sort-variant" class="mr-3" />
           </template>
           <v-list-item-title>动态排序</v-list-item-title>
-          <v-list-item-subtitle>根据科目动态排序</v-list-item-subtitle>
+          <v-list-item-subtitle>优化卡片布局以提高显示效果</v-list-item-subtitle>
           <template #append>
             <v-switch
-              disabled
-              v-model="localSettings.dynamicSort"
+              v-model="dynamicSort"
               density="comfortable"
               hide-details
             />
@@ -47,11 +47,11 @@
           <template #prepend>
             <v-icon icon="mdi-dice-multiple" class="mr-3" />
           </template>
-          <v-list-item-title>随机点名按钮</v-list-item-title>
-          <v-list-item-subtitle>指向IslandCaller的链接</v-list-item-subtitle>
+          <v-list-item-title>显示随机按钮</v-list-item-title>
+          <v-list-item-subtitle>在主页显示随机点名按钮</v-list-item-subtitle>
           <template #append>
             <v-switch
-              v-model="localSettings.showRandomButton"
+              v-model="showRandomButton"
               density="comfortable"
               hide-details
             />
@@ -65,10 +65,44 @@
             <v-icon icon="mdi-fullscreen" class="mr-3" />
           </template>
           <v-list-item-title>显示全屏按钮</v-list-item-title>
-          <v-list-item-subtitle>在主页面显示全屏切换按钮</v-list-item-subtitle>
+          <v-list-item-subtitle>在主页显示全屏切换按钮</v-list-item-subtitle>
           <template #append>
             <v-switch
-              v-model="localSettings.showFullscreenButton"
+              v-model="showFullscreenButton"
+              density="comfortable"
+              hide-details
+            />
+          </template>
+        </v-list-item>
+
+        <v-divider class="my-2" />
+
+        <v-list-item>
+          <template #prepend>
+            <v-icon icon="mdi-cards-outline" class="mr-3" />
+          </template>
+          <v-list-item-title>卡片悬浮效果</v-list-item-title>
+          <v-list-item-subtitle>启用卡片悬停时的动画效果</v-list-item-subtitle>
+          <template #append>
+            <v-switch
+              v-model="cardHoverEffect"
+              density="comfortable"
+              hide-details
+            />
+          </template>
+        </v-list-item>
+
+        <v-divider class="my-2" />
+
+        <v-list-item>
+          <template #prepend>
+            <v-icon icon="mdi-gesture-tap" class="mr-3" />
+          </template>
+          <v-list-item-title>增强触摸模式</v-list-item-title>
+          <v-list-item-subtitle>优化触摸屏操作体验</v-list-item-subtitle>
+          <template #append>
+            <v-switch
+              v-model="enhancedTouchMode"
               density="comfortable"
               hide-details
             />
@@ -109,18 +143,78 @@ export default {
       emptySubjectDisplay: getSetting('display.emptySubjectDisplay'),
       dynamicSort: getSetting('display.dynamicSort'),
       showRandomButton: getSetting('display.showRandomButton'),
-      showFullscreenButton: getSetting('display.showFullscreenButton')
+      showFullscreenButton: getSetting('display.showFullscreenButton'),
+      cardHoverEffect: getSetting('display.cardHoverEffect'),
+      enhancedTouchMode: getSetting('display.enhancedTouchMode')
     };
 
     return {
       localSettings: { ...settings },
       originalSettings: settings,
-      isValid: true
+      isValid: true,
+      displayOptions: [
+        { title: '卡片', value: 'card' },
+        { title: '按钮', value: 'button' }
+      ]
     };
   },
   computed: {
     hasChanges() {
       return JSON.stringify(this.localSettings) !== JSON.stringify(this.originalSettings);
+    },
+    emptySubjectDisplay: {
+      get() {
+        return this.localSettings.emptySubjectDisplay;
+      },
+      set(value) {
+        this.localSettings.emptySubjectDisplay = value;
+        this.$emit('saved');
+      }
+    },
+    dynamicSort: {
+      get() {
+        return this.localSettings.dynamicSort;
+      },
+      set(value) {
+        this.localSettings.dynamicSort = value;
+        this.$emit('saved');
+      }
+    },
+    showRandomButton: {
+      get() {
+        return this.localSettings.showRandomButton;
+      },
+      set(value) {
+        this.localSettings.showRandomButton = value;
+        this.$emit('saved');
+      }
+    },
+    showFullscreenButton: {
+      get() {
+        return this.localSettings.showFullscreenButton;
+      },
+      set(value) {
+        this.localSettings.showFullscreenButton = value;
+        this.$emit('saved');
+      }
+    },
+    cardHoverEffect: {
+      get() {
+        return this.localSettings.cardHoverEffect;
+      },
+      set(value) {
+        this.localSettings.cardHoverEffect = value;
+        this.$emit('saved');
+      }
+    },
+    enhancedTouchMode: {
+      get() {
+        return this.localSettings.enhancedTouchMode;
+      },
+      set(value) {
+        this.localSettings.enhancedTouchMode = value;
+        this.$emit('saved');
+      }
     }
   },
   methods: {

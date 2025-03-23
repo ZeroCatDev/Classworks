@@ -163,3 +163,76 @@ $standard-accelerate: cubic-bezier(0.3, 0.0, 1.0, 1.0);
   user-select: none;
   -webkit-touch-callout: none;
 }
+
+// 动画过渡效果
+
+// 网格项目过渡
+.grid-enter-active,
+.grid-leave-active {
+  transition: all 0.5s ease;
+}
+
+.grid-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.grid-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+// 列表项目过渡
+.v-list-enter-active,
+.v-list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.v-list-enter-from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.v-list-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+// 页面过渡
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+// 淡入淡出
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+// 缩放过渡
+.scale-enter-active,
+.scale-leave-active {
+  transition: all 0.3s;
+}
+
+.scale-enter-from,
+.scale-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}

@@ -373,6 +373,7 @@ import { useDisplay } from "vuetify";
 import "../styles/index.scss";
 import "../styles/transitions.scss"; // 添加新的样式导入
 import { debounce, throttle } from "@/utils/debounce";
+import '../styles/global.scss';
 
 export default {
   name: "Classworks 作业板",
@@ -514,7 +515,9 @@ export default {
       return result;
     },
     unusedSubjects() {
-      const usedKeys = Object.keys(this.state.boardData.homework);
+      const usedKeys = Object.keys(this.state.boardData.homework).filter(
+        key => this.state.boardData.homework[key].content?.trim()
+      );
       return this.state.availableSubjects.filter(
         (subject) => !usedKeys.includes(subject.key)
       );
@@ -784,14 +787,11 @@ export default {
 
       // 如果内容发生变化(包括清空)，就视为修改
       if (content !== originalContent.trim()) {
-        if (content) {
-          // 使用精简的数据结构
-          this.state.boardData.homework[this.currentEditSubject] = {
-            content,
-          };
-        } else {
-          delete this.state.boardData.homework[this.currentEditSubject];
-        }
+        // 无论内容是否为空，都保留科目结构
+        this.state.boardData.homework[this.currentEditSubject] = {
+          content: content,
+        };
+        
         this.state.synced = false;
 
         // 处理自动保存
@@ -1181,8 +1181,8 @@ export default {
       const rect = card.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 100;
       const y = ((e.clientY - rect.top) / rect.height) * 100;
-      card.style.setProperty("--x", `${x}%`);
-      card.style.setProperty("--y", `${y}%`);
+      card.style.setProperty('--x', `${x}%`);
+      card.style.setProperty('--y', `${y}%`);
     },
 
     handleTouchMove(e) {
@@ -1192,8 +1192,8 @@ export default {
         const rect = card.getBoundingClientRect();
         const x = ((touch.clientX - rect.left) / rect.width) * 100;
         const y = ((touch.clientY - rect.top) / rect.height) * 100;
-        card.style.setProperty("--x", `${x}%`);
-        card.style.setProperty("--y", `${y}%`);
+        card.style.setProperty('--x', `${x}%`);
+        card.style.setProperty('--y', `${y}%`);
       }
     },
 
@@ -1285,8 +1285,56 @@ export default {
   },
 };
 </script>
-<style scoped>
-.gray-text {
-  opacity: 0.6;
+<style lang="scss">
+// 添加卡片发光效果
+.glow-track {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), 
+                rgba(255, 255, 255, 0.15) 0%, 
+                rgba(255, 255, 255, 0) 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  &:hover::before {
+    opacity: 1;
+  }
+}
+
+// 添加卡片悬浮效果
+.grid-item .v-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  &:active {
+    transform: translateY(-2px);
+  }
+}
+
+// 添加空科目卡片样式
+.empty-subject-card {
+  transition: all 0.3s ease;
+  opacity: 0.8;
+  
+  &:hover {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
 }
 </style>
