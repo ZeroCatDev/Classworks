@@ -109,6 +109,23 @@
           </template>
         </v-list-item>
 
+        <v-divider class="my-2" />
+
+        <v-list-item>
+          <template #prepend>
+            <v-icon icon="mdi-shield-check" class="mr-3" />
+          </template>
+          <v-list-item-title>显示防烧屏提示</v-list-item-title>
+          <v-list-item-subtitle>显示防烧屏技术提示卡片</v-list-item-subtitle>
+          <template #append>
+            <v-switch
+              v-model="showAntiScreenBurnCard"
+              density="comfortable"
+              hide-details
+            />
+          </template>
+        </v-list-item>
+
         <div class="d-flex gap-2 mt-4">
           <v-btn
             color="primary"
@@ -145,7 +162,8 @@ export default {
       showRandomButton: getSetting('display.showRandomButton'),
       showFullscreenButton: getSetting('display.showFullscreenButton'),
       cardHoverEffect: getSetting('display.cardHoverEffect'),
-      enhancedTouchMode: getSetting('display.enhancedTouchMode')
+      enhancedTouchMode: getSetting('display.enhancedTouchMode'),
+      showAntiScreenBurnCard: getSetting('display.showAntiScreenBurnCard')
     };
 
     return {
@@ -213,6 +231,15 @@ export default {
       },
       set(value) {
         this.localSettings.enhancedTouchMode = value;
+        this.$emit('saved');
+      }
+    },
+    showAntiScreenBurnCard: {
+      get() {
+        return this.localSettings.showAntiScreenBurnCard;
+      },
+      set(value) {
+        this.localSettings.showAntiScreenBurnCard = value;
         this.$emit('saved');
       }
     }

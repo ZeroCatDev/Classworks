@@ -112,6 +112,11 @@ const settingsDefinitions = {
     default: true,
     description: "是否启用增强触摸模式（更大的触摸目标）",
   },
+  "display.showAntiScreenBurnCard": {
+    type: "boolean",
+    default: false,
+    description: "是否显示防烧屏提示卡片",
+  },
 
   // 服务器设置（合并了数据提供者设置）
   "server.domain": {

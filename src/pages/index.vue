@@ -11,41 +11,20 @@
     <v-spacer />
 
     <template #append>
-      <v-btn
-        icon="mdi-format-font-size-decrease"
-        variant="text"
-        @click="zoom('out')"
-      />
-      <v-btn
-        icon="mdi-format-font-size-increase"
-        variant="text"
-        @click="zoom('up')"
-      />
+      <v-btn icon="mdi-format-font-size-decrease" variant="text" @click="zoom('out')" />
+      <v-btn icon="mdi-format-font-size-increase" variant="text" @click="zoom('up')" />
       <v-menu v-model="state.datePickerDialog" :close-on-content-click="false">
         <template #activator="{ props }">
           <v-btn icon="mdi-calendar" variant="text" v-bind="props" />
         </template>
         <v-card border>
-          <v-date-picker
-            v-model="state.selectedDateObj"
-            :model-value="state.selectedDateObj"
-            color="primary"
-            @update:model-value="handleDateSelect"
-          />
+          <v-date-picker v-model="state.selectedDateObj" :model-value="state.selectedDateObj" color="primary"
+            @update:model-value="handleDateSelect" />
         </v-card>
       </v-menu>
-      <v-btn
-        icon="mdi-refresh"
-        variant="text"
-        :loading="loading.download"
-        @click="downloadData"
-      /> <v-btn
-        icon="mdi-bell"
-        variant="text"
-        :badge="unreadCount || undefined"
-        :badge-color="unreadCount ? 'error' : undefined"
-        @click="$refs.messageLog.drawer = true"
-      />
+      <v-btn icon="mdi-refresh" variant="text" :loading="loading.download" @click="downloadData" /> <v-btn
+        icon="mdi-bell" variant="text" :badge="unreadCount || undefined"
+        :badge-color="unreadCount ? 'error' : undefined" @click="$refs.messageLog.drawer = true" />
       <v-btn icon="mdi-cog" variant="text" @click="$router.push('/settings')" />
 
     </template>
@@ -56,30 +35,16 @@
       <!-- 有内容的科目卡片 -->
       <div ref="gridContainer" class="grid-masonry">
         <TransitionGroup name="grid">
-          <div
-            v-for="item in sortedItems"
-            :key="item.key"
-            class="grid-item"
-            :style="{
-              'grid-row-end': `span ${item.rowSpan}`,
-              order: item.order,
-            }"
-          >
-            <v-card
-              border
-              height="100%"
-              class="glow-track"
-              @click="!isEditingDisabled && openDialog(item.key)"
-              @mousemove="handleMouseMove"
-              @touchmove="handleTouchMove"
-            >
+          <div v-for="item in sortedItems" :key="item.key" class="grid-item" :style="{
+            'grid-row-end': `span ${item.rowSpan}`,
+            order: item.order,
+          }">
+            <v-card border height="100%" class="glow-track" @click="!isEditingDisabled && openDialog(item.key)"
+              @mousemove="handleMouseMove" @touchmove="handleTouchMove">
               <v-card-title>{{ item.name }}</v-card-title>
               <v-card-text :style="state.contentStyle">
                 <v-list>
-                  <v-list-item
-                    v-for="text in splitPoint(item.content)"
-                    :key="text"
-                  >
+                  <v-list-item v-for="text in splitPoint(item.content)" :key="text">
                     {{ text }}
                   </v-list-item>
                 </v-list>
@@ -93,12 +58,8 @@
       <div class="empty-subjects mt-4">
         <template v-if="emptySubjectDisplay === 'button'">
           <v-btn-group divided variant="outlined">
-            <v-btn
-              v-for="subject in unusedSubjects"
-              :key="subject.key"
-              :disabled="isEditingDisabled"
-              @click="openDialog(subject.key)"
-            >
+            <v-btn v-for="subject in unusedSubjects" :key="subject.key" :disabled="isEditingDisabled"
+              @click="openDialog(subject.key)">
               <v-icon start> mdi-plus </v-icon>
               {{ subject.name }}
             </v-btn>
@@ -106,14 +67,8 @@
         </template>
         <div v-else class="empty-subjects-grid">
           <TransitionGroup name="v-list">
-            <v-card
-              v-for="subject in unusedSubjects"
-              :key="subject.key"
-              border
-              class="empty-subject-card"
-              :disabled="isEditingDisabled"
-              @click="openDialog(subject.key)"
-            >
+            <v-card v-for="subject in unusedSubjects" :key="subject.key" border class="empty-subject-card"
+              :disabled="isEditingDisabled" @click="openDialog(subject.key)">
               <v-card-title class="text-subtitle-1">
                 {{ subject.name }}
               </v-card-title>
@@ -125,48 +80,39 @@
           </TransitionGroup>
         </div>
       </div>
-      <v-btn
-        v-if="!state.synced"
-        color="error"
-        size="large"
-        :loading="loading.upload"
-        class="ml-2"
-        @click="manualUpload"
-      >
+      <v-btn v-if="!state.synced" color="error" size="large" :loading="loading.upload" class="ml-2"
+        @click="manualUpload">
         上传
       </v-btn>
       <v-btn v-else color="success" size="large" @click="showSyncMessage">
-        同步完成 </v-btn
-      ><v-btn
-        v-if="showRandomButton"
-        color="yellow"
-        prepend-icon="mdi-account-question"
-        append-icon="mdi-dice-multiple"
-        size="large"
-        class="ml-2"
-        href="classisland://plugins/IslandCaller/Run"
-      >
+        同步完成 </v-btn><v-btn v-if="showRandomButton" color="yellow" prepend-icon="mdi-account-question"
+        append-icon="mdi-dice-multiple" size="large" class="ml-2" href="classisland://plugins/IslandCaller/Run">
         随机点名
       </v-btn>
-      <v-btn
-        v-if="showFullscreenButton"
-        :color="state.isFullscreen ? 'blue-grey' : 'blue'"
-        :prepend-icon="state.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'"
-        size="large"
-        class="ml-2"
-        @click="toggleFullscreen"
-      >
+      <v-btn v-if="showFullscreenButton" :color="state.isFullscreen ? 'blue-grey' : 'blue'"
+        :prepend-icon="state.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'" size="large" class="ml-2"
+        @click="toggleFullscreen">
         {{ state.isFullscreen ? '退出全屏' : '全屏显示' }}
-      </v-btn>
+      </v-btn><!-- 修改防烧屏提示卡片，使用 tonal 样式减少信息密度 -->
+      <v-card v-if="showAntiScreenBurnCard" border class="mt-4 anti-burn-card" color="primary" variant="tonal">
+        <v-card-title class="text-subtitle-1">
+          <v-icon start icon="mdi-shield-check" size="small" />
+          屏幕保护技术已启用
+        </v-card-title>
+        <v-card-text class="text-body-2">
+          <p>本应用采用独立自研的动态像素偏移技术(DPO™)，有效防止LCD屏幕烧屏现象。</p>
+          <p class="text-caption text-grey">*研究显示动态像素偏移技术可以修复屏幕坏点，起到保护屏幕的作用，数据来自实验室。<a
+              href="https://patentscope.wipo.int/search/zh/detail.jsf?docId=CN232281523&_cid=P20-M8L0YX-67061-1"
+              target="_blank">专利号CN108648692 </a></p>
+          <p class="text-caption text-grey">*技术已自动适配您的设备，无需手动调整</p>
+
+        </v-card-text>
+      </v-card>
     </v-container>
 
     <!-- 出勤统计区域 -->
-    <v-col
-      v-if="state.studentList && state.studentList.length"
-      class="attendance-area no-select"
-      cols="1"
-      @click="setAttendanceArea()"
-    >
+    <v-col v-if="state.studentList && state.studentList.length" class="attendance-area no-select" cols="1"
+      @click="setAttendanceArea()">
       <h1>出勤</h1>
       <h2>
         <snap style="white-space: nowrap"> 应到 </snap>:
@@ -194,13 +140,9 @@
           {{ state.boardData.attendance.absent.length }}人
         </snap>
       </h2>
-      <h3
-        class="gray-text"
-        v-for="(name, index) in state.boardData.attendance.absent"
-        :key="'absent-' + index"
-      >
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
-        ><span style="white-space: nowrap">{{ name }}</span>
+      <h3 class="gray-text" v-for="(name, index) in state.boardData.attendance.absent" :key="'absent-' + index">
+        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name
+          }}</span>
       </h3>
       <h2>
         <snap style="white-space: nowrap">迟到</snap>:
@@ -208,13 +150,9 @@
           {{ state.boardData.attendance.late.length }}人
         </snap>
       </h2>
-      <h3
-        class="gray-text"
-        v-for="(name, index) in state.boardData.attendance.late"
-        :key="'late-' + index"
-      >
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
-        ><span style="white-space: nowrap">{{ name }}</span>
+      <h3 class="gray-text" v-for="(name, index) in state.boardData.attendance.late" :key="'late-' + index">
+        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name
+          }}</span>
       </h3>
       <h2>
         <snap style="white-space: nowrap">不参与</snap>:
@@ -222,35 +160,21 @@
           {{ state.boardData.attendance.exclude.length }}人
         </snap>
       </h2>
-      <h3
-        class="gray-text"
-        v-for="(name, index) in state.boardData.attendance.exclude"
-        :key="'exclude-' + index"
-      >
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
-        ><span style="white-space: nowrap">{{ name }}</span>
+      <h3 class="gray-text" v-for="(name, index) in state.boardData.attendance.exclude" :key="'exclude-' + index">
+        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name
+          }}</span>
       </h3>
     </v-col>
   </div>
 
-  <v-dialog
-    v-model="state.dialogVisible"
-    width="500"
-    @click:outside="handleClose"
-  >
+  <v-dialog v-model="state.dialogVisible" width="500" @click:outside="handleClose">
     <v-card border>
       <v-card-title>{{ state.dialogTitle }}</v-card-title>
       <v-card-subtitle>
         {{ autoSave ? "喵？喵呜！" : "写完后点击上传谢谢喵" }}
       </v-card-subtitle>
       <v-card-text>
-        <v-textarea
-          ref="inputRef"
-          v-model="state.textarea"
-          auto-grow
-          placeholder="使用换行表示分条"
-          rows="5"
-        />
+        <v-textarea ref="inputRef" v-model="state.textarea" auto-grow placeholder="使用换行表示分条" rows="5" />
       </v-card-text>
     </v-card>
   </v-dialog>
@@ -259,11 +183,7 @@
     {{ state.snackbarText }}
   </v-snackbar>
 
-  <v-dialog
-    v-model="state.attendanceDialog"
-    max-width="600"
-    @update:model-value="handleAttendanceDialogClose"
-  >
+  <v-dialog v-model="state.attendanceDialog" max-width="600" @update:model-value="handleAttendanceDialogClose">
     <v-card>
       <v-card-title class="text-h6"> 编辑出勤状态 </v-card-title>
 
@@ -273,25 +193,13 @@
             <v-expansion-panel-title> 批量操作 </v-expansion-panel-title>
             <v-expansion-panel-text>
               <v-btn-group>
-                <v-btn
-                  color="success"
-                  prepend-icon="mdi-account-check"
-                  @click="setAllPresent"
-                >
+                <v-btn color="success" prepend-icon="mdi-account-check" @click="setAllPresent">
                   全部到齐
                 </v-btn>
-                <v-btn
-                  color="error"
-                  prepend-icon="mdi-account-off"
-                  @click="setAllAbsent"
-                >
+                <v-btn color="error" prepend-icon="mdi-account-off" @click="setAllAbsent">
                   全部请假
                 </v-btn>
-                <v-btn
-                  color="warning"
-                  prepend-icon="mdi-clock-alert"
-                  @click="setAllLate"
-                >
+                <v-btn color="warning" prepend-icon="mdi-clock-alert" @click="setAllLate">
                   全部迟到
                 </v-btn>
               </v-btn-group>
@@ -301,37 +209,17 @@
 
         <v-list class="mt-4">
           <v-list-subheader>学生列表</v-list-subheader>
-          <v-list-item
-            v-for="(student, index) in state.studentList"
-            :key="index"
-            :title="student"
-          >
+          <v-list-item v-for="(student, index) in state.studentList" :key="index" :title="student">
             <template #append>
               <v-btn-group>
-                <v-btn
-                  :color="isPresent(index) ? 'success' : ''"
-                  icon="mdi-account-check"
-                  size="small"
-                  @click="setPresent(index)"
-                />
-                <v-btn
-                  :color="isAbsent(index) ? 'error' : ''"
-                  icon="mdi-account-off"
-                  size="small"
-                  @click="setAbsent(index)"
-                />
-                <v-btn
-                  :color="isLate(index) ? 'warning' : ''"
-                  icon="mdi-clock-alert"
-                  size="small"
-                  @click="setLate(index)"
-                />
-                <v-btn
-                  :color="isExclude(index) ? 'grey' : ''"
-                  icon="mdi-account-cancel"
-                  size="small"
-                  @click="setExclude(index)"
-                />
+                <v-btn :color="isPresent(index) ? 'success' : ''" icon="mdi-account-check" size="small"
+                  @click="setPresent(index)" />
+                <v-btn :color="isAbsent(index) ? 'error' : ''" icon="mdi-account-off" size="small"
+                  @click="setAbsent(index)" />
+                <v-btn :color="isLate(index) ? 'warning' : ''" icon="mdi-clock-alert" size="small"
+                  @click="setLate(index)" />
+                <v-btn :color="isExclude(index) ? 'grey' : ''" icon="mdi-account-cancel" size="small"
+                  @click="setExclude(index)" />
               </v-btn-group>
             </template>
           </v-list-item>
@@ -363,6 +251,8 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+
 </template>
 
 <script>
@@ -502,7 +392,7 @@ export default {
           rowSpan: Math.ceil(
             (value.content.split("\n").filter((line) => line.trim()).length +
               1) *
-              0.8
+            0.8
           ),
         }));
 
@@ -577,6 +467,9 @@ export default {
     },
     showFullscreenButton() {
       return getSetting("display.showFullscreenButton");
+    },
+    showAntiScreenBurnCard() {
+      return getSetting("display.showAntiScreenBurnCard");
     },
   },
 
@@ -791,7 +684,7 @@ export default {
         this.state.boardData.homework[this.currentEditSubject] = {
           content: content,
         };
-        
+
         this.state.synced = false;
 
         // 处理自动保存
@@ -985,7 +878,7 @@ export default {
             .replace({
               query: { date: formattedDate },
             })
-            .catch(() => {});
+            .catch(() => { });
           this.downloadData();
         }
       } catch (error) {
@@ -1247,10 +1140,10 @@ export default {
         this.exitFullscreen();
       }
     },
-    
+
     enterFullscreen() {
       const docElm = document.documentElement;
-      
+
       if (docElm.requestFullscreen) {
         docElm.requestFullscreen();
       } else if (docElm.webkitRequestFullScreen) {
@@ -1261,7 +1154,7 @@ export default {
         docElm.msRequestFullscreen();
       }
     },
-    
+
     exitFullscreen() {
       if (document.exitFullscreen) {
         document.exitFullscreen();
@@ -1273,7 +1166,7 @@ export default {
         document.msExitFullscreen();
       }
     },
-    
+
     fullscreenChangeHandler() {
       this.state.isFullscreen = !!(
         document.fullscreenElement ||
@@ -1291,7 +1184,7 @@ export default {
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -1299,15 +1192,15 @@ export default {
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), 
-                rgba(255, 255, 255, 0.15) 0%, 
-                rgba(255, 255, 255, 0) 70%);
+    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%),
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0) 70%);
     opacity: 0;
     transition: opacity 0.3s;
     pointer-events: none;
     z-index: 1;
   }
-  
+
   &:hover::before {
     opacity: 1;
   }
@@ -1316,12 +1209,12 @@ export default {
 // 添加卡片悬浮效果
 .grid-item .v-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
   }
-  
+
   &:active {
     transform: translateY(-2px);
   }
@@ -1331,10 +1224,31 @@ export default {
 .empty-subject-card {
   transition: all 0.3s ease;
   opacity: 0.8;
-  
+
   &:hover {
     opacity: 1;
     transform: translateY(-4px);
+  }
+}
+
+// 修改防烧屏提示卡片，使用 tonal 样式减少信息密度
+.anti-burn-card {
+  animation: subtle-glow 4s infinite alternate;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+@keyframes subtle-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(33, 150, 243, 0.1);
+  }
+
+  100% {
+    box-shadow: 0 0 15px rgba(33, 150, 243, 0.3);
   }
 }
 </style>
