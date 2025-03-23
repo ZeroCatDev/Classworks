@@ -183,52 +183,217 @@
     {{ state.snackbarText }}
   </v-snackbar>
 
-  <v-dialog v-model="state.attendanceDialog" max-width="600" @update:model-value="handleAttendanceDialogClose">
+  <v-dialog v-model="state.attendanceDialog" max-width="900" fullscreen-breakpoint="sm" @update:model-value="handleAttendanceDialogClose">
     <v-card>
-      <v-card-title class="text-h6"> 编辑出勤状态 </v-card-title>
+      <v-card-title class="d-flex align-center">
+        <v-icon icon="mdi-account-group" class="mr-2" />
+        出勤状态管理
+        <v-spacer />
+        <v-chip color="primary" size="small" class="ml-2">
+          {{ state.dateString }}
+        </v-chip>
+      </v-card-title>
 
       <v-card-text>
-        <v-expansion-panels>
-          <v-expansion-panel>
-            <v-expansion-panel-title> 批量操作 </v-expansion-panel-title>
-            <v-expansion-panel-text>
-              <v-btn-group>
-                <v-btn color="success" prepend-icon="mdi-account-check" @click="setAllPresent">
-                  全部到齐
-                </v-btn>
-                <v-btn color="error" prepend-icon="mdi-account-off" @click="setAllAbsent">
-                  全部请假
-                </v-btn>
-                <v-btn color="warning" prepend-icon="mdi-clock-alert" @click="setAllLate">
-                  全部迟到
-                </v-btn>
-              </v-btn-group>
-            </v-expansion-panel-text>
-          </v-expansion-panel>
-        </v-expansion-panels>
+      
 
-        <v-list class="mt-4">
-          <v-list-subheader>学生列表</v-list-subheader>
-          <v-list-item v-for="(student, index) in state.studentList" :key="index" :title="student">
-            <template #append>
-              <v-btn-group>
-                <v-btn :color="isPresent(index) ? 'success' : ''" icon="mdi-account-check" size="small"
-                  @click="setPresent(index)" />
-                <v-btn :color="isAbsent(index) ? 'error' : ''" icon="mdi-account-off" size="small"
-                  @click="setAbsent(index)" />
-                <v-btn :color="isLate(index) ? 'warning' : ''" icon="mdi-clock-alert" size="small"
-                  @click="setLate(index)" />
-                <v-btn :color="isExclude(index) ? 'grey' : ''" icon="mdi-account-cancel" size="small"
-                  @click="setExclude(index)" />
-              </v-btn-group>
-            </template>
-          </v-list-item>
-        </v-list>
+        <!-- 批量操作和搜索 -->
+        <v-row class="mb-4">
+         
+          <v-col cols="12" md="12">
+            <v-text-field
+              v-model="attendanceSearch"
+              prepend-inner-icon="mdi-magnify"
+              label="搜索学生"
+              hide-details
+              variant="outlined"
+              density="compact"
+              clearable
+              @update:model-value="handleSearchChange"
+            />
+            <div class="text-caption mt-1">支持筛选姓氏，如输入"张"可筛选所有姓张的学生</div>
+            
+            <!-- 智能姓氏筛选 -->
+            <div class="d-flex flex-wrap mt-2 gap-1">
+              <v-btn 
+                v-for="surname in extractedSurnames" 
+                :key="surname.name" 
+                size="small" 
+                :variant="attendanceSearch === surname.name ? 'elevated' : 'text'" 
+                :color="attendanceSearch === surname.name ? 'primary' : ''" 
+                @click="attendanceSearch = attendanceSearch === surname.name ? '' : surname.name"
+                class="surname-btn"
+              >
+                {{ surname.name }}
+                <span class="text-caption ml-1">({{ surname.count }})</span>
+              </v-btn>
+            </div>
+            
+            <!-- 搜索建议 -->
+            <div v-if="searchSuggestions.length > 0" class="mt-2">
+              <div class="text-caption text-grey">搜索建议:</div>
+              <div class="d-flex flex-wrap gap-1 mt-1">
+                <v-btn 
+                  v-for="suggestion in searchSuggestions" 
+                  :key="suggestion" 
+                  size="x-small" 
+                  variant="text" 
+                  color="secondary"
+                  @click="attendanceSearch = suggestion"
+                  class="suggestion-btn"
+                  density="compact"
+                >
+                  {{ suggestion }}
+                </v-btn>
+              </div>
+            </div>
+          </v-col>
+        </v-row>
+
+        <!-- 过滤器 -->
+        <div class="d-flex flex-wrap mb-4 gap-2">
+          <div>
+            <v-chip 
+              value="present" 
+              :color="attendanceFilter.includes('present') ? 'success' : ''" 
+              :variant="attendanceFilter.includes('present') ? 'elevated' : 'tonal'" 
+              class="px-2 filter-chip"
+              @click="toggleFilter('present')"
+              prepend-icon="mdi-account-check"
+              :append-icon="attendanceFilter.includes('present') ? 'mdi-check' : ''"
+            >
+              到课
+            </v-chip>
+            
+            <v-chip 
+              value="absent" 
+              :color="attendanceFilter.includes('absent') ? 'error' : ''" 
+              :variant="attendanceFilter.includes('absent') ? 'elevated' : 'tonal'" 
+              class="px-2 filter-chip"
+              @click="toggleFilter('absent')"
+              prepend-icon="mdi-account-off"
+              :append-icon="attendanceFilter.includes('absent') ? 'mdi-check' : ''"
+            >
+              请假
+            </v-chip>
+            <v-chip 
+              value="late" 
+              :color="attendanceFilter.includes('late') ? 'warning' : ''" 
+              :variant="attendanceFilter.includes('late') ? 'elevated' : 'tonal'" 
+              class="px-2 filter-chip"
+              @click="toggleFilter('late')"
+              prepend-icon="mdi-clock-alert"
+              :append-icon="attendanceFilter.includes('late') ? 'mdi-check' : ''"
+            >
+              迟到
+            </v-chip>
+            <v-chip 
+              value="exclude" 
+              :color="attendanceFilter.includes('exclude') ? 'grey' : ''" 
+              :variant="attendanceFilter.includes('exclude') ? 'elevated' : 'tonal'" 
+              class="px-2 filter-chip"
+              @click="toggleFilter('exclude')"
+              prepend-icon="mdi-account-cancel"
+              :append-icon="attendanceFilter.includes('exclude') ? 'mdi-check' : ''"
+            >
+              不参与
+            </v-chip>
+          </div>
+        </div>
+
+        <!-- 学生列表 -->
+        <v-row>
+          <v-col 
+            v-for="student in filteredStudents" 
+            :key="student" 
+            cols="12" sm="6" md="6" lg="4"
+          >
+            <v-card 
+              class="student-card"
+              border
+            >
+              <v-card-text class="d-flex align-center pa-2">
+                <div class="flex-grow-1">
+                  <div class="d-flex align-center">
+                    <v-avatar :color="getStudentStatusColor(state.studentList.indexOf(student))" size="24" class="mr-2">
+                      <v-icon size="small">{{ getStudentStatusIcon(state.studentList.indexOf(student)) }}</v-icon>
+                    </v-avatar>
+                    <div class="text-subtitle-1">{{ student }}</div>
+                  </div>
+                </div>
+                <div class="attendance-actions">
+                  <v-btn 
+                    :color="isPresent(state.studentList.indexOf(student)) ? 'success' : ''" 
+                    icon="mdi-account-check" 
+                    size="small"
+                    variant="text"
+                    @click="setPresent(state.studentList.indexOf(student))" 
+                    :title="'设为到课'"
+                  />
+                  <v-btn 
+                    :color="isAbsent(state.studentList.indexOf(student)) ? 'error' : ''" 
+                    icon="mdi-account-off" 
+                    size="small"
+                    variant="text"
+                    @click="setAbsent(state.studentList.indexOf(student))" 
+                    :title="'设为请假'"
+                  />
+                  <v-btn 
+                    :color="isLate(state.studentList.indexOf(student)) ? 'warning' : ''" 
+                    icon="mdi-clock-alert" 
+                    size="small"
+                    variant="text"
+                    @click="setLate(state.studentList.indexOf(student))" 
+                    :title="'设为迟到'"
+                  />
+                  <v-btn 
+                    :color="isExclude(state.studentList.indexOf(student)) ? 'grey' : ''" 
+                    icon="mdi-account-cancel" 
+                    size="small"
+                    variant="text"
+                    @click="setExclude(state.studentList.indexOf(student))" 
+                    :title="'设为不参与'"
+                  />
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+        <v-row> <v-col cols="12" md="12">
+            <v-card variant="tonal" color="primary" class="mb-4">
+              <v-card-text>
+                <div class="text-subtitle-2 mb-2">批量操作</div>
+                <v-btn-group>
+                  <v-btn color="success" prepend-icon="mdi-account-check" @click="setAllPresent">
+                    全部到齐
+                  </v-btn>
+                  <v-btn color="error" prepend-icon="mdi-account-off" @click="setAllAbsent">
+                    全部请假
+                  </v-btn>              </v-btn-group>  <v-btn-group>
+
+                  <v-btn color="warning" prepend-icon="mdi-clock-alert" @click="setAllLate">
+                    全部迟到
+                  </v-btn>
+                  <v-btn color="grey" prepend-icon="mdi-account-cancel" @click="setAllExclude">
+                    全部不参与
+                  </v-btn>
+                </v-btn-group>
+              </v-card-text>
+            </v-card>
+          </v-col></v-row>
       </v-card-text>
+
+      <v-divider />
 
       <v-card-actions>
         <v-spacer />
-        <v-btn color="primary" @click="saveAttendance"> 保存 </v-btn>
+        <v-btn color="grey" variant="text" @click="state.attendanceDialog = false">
+          取消
+        </v-btn>
+        <v-btn color="primary" @click="saveAttendance">
+          <v-icon start>mdi-content-save</v-icon>
+          保存
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -348,6 +513,9 @@ export default {
         resolve: null,
         reject: null,
       },
+      attendanceSearch: "",
+      attendanceFilter: [],
+      searchSuggestions: [],
     };
   },
 
@@ -470,6 +638,56 @@ export default {
     },
     showAntiScreenBurnCard() {
       return getSetting("display.showAntiScreenBurnCard");
+    },
+    filteredStudents() {
+      let students = [...this.state.studentList];
+      
+      // 应用搜索过滤
+      if (this.attendanceSearch) {
+        const searchTerm = this.attendanceSearch.toLowerCase();
+        students = students.filter(student => 
+          student.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      // 应用状态过滤
+      if (this.attendanceFilter && this.attendanceFilter.length > 0) {
+        students = students.filter(student => {
+          const index = this.state.studentList.indexOf(student);
+          if (this.attendanceFilter.includes('present') && this.isPresent(index)) return true;
+          if (this.attendanceFilter.includes('absent') && this.isAbsent(index)) return true;
+          if (this.attendanceFilter.includes('late') && this.isLate(index)) return true;
+          if (this.attendanceFilter.includes('exclude') && this.isExclude(index)) return true;
+          return false;
+        });
+      }
+      
+      return students;
+    },
+    extractedSurnames() {
+      // 从学生名单中提取姓氏并统计数量
+      if (!this.state.studentList || this.state.studentList.length === 0) {
+        return [];
+      }
+      
+      const surnameMap = new Map();
+      
+      this.state.studentList.forEach(student => {
+        if (student && student.length > 0) {
+          // 中文姓名通常姓在前，取第一个字作为姓氏
+          const surname = student.charAt(0);
+          if (surnameMap.has(surname)) {
+            surnameMap.set(surname, surnameMap.get(surname) + 1);
+          } else {
+            surnameMap.set(surname, 1);
+          }
+        }
+      });
+      
+      // 转换为数组并按数量排序
+      return Array.from(surnameMap.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
     },
   },
 
@@ -977,6 +1195,12 @@ export default {
       this.state.boardData.attendance.exclude = [];
       this.state.synced = false;
     },
+    setAllExclude() {
+      this.state.boardData.attendance.absent = [];
+      this.state.boardData.attendance.late = [];
+      this.state.boardData.attendance.exclude = [...this.state.studentList];
+      this.state.synced = false;
+    },  
 
     isPresent(index) {
       const student = this.state.studentList[index];
@@ -1008,14 +1232,14 @@ export default {
 
     setPresent(index) {
       const student = this.state.studentList[index];
-      const { absent, late, exclude } = this.state.boardData.attendance;
-      this.state.boardData.attendance.absent = absent.filter(
+      // 从所有状态列表中移除该学生
+      this.state.boardData.attendance.absent = this.state.boardData.attendance.absent.filter(
         (name) => name !== student
       );
-      this.state.boardData.attendance.late = late.filter(
+      this.state.boardData.attendance.late = this.state.boardData.attendance.late.filter(
         (name) => name !== student
       );
-      this.state.boardData.attendance.exclude = exclude.filter(
+      this.state.boardData.attendance.exclude = this.state.boardData.attendance.exclude.filter(
         (name) => name !== student
       );
       this.state.synced = false;
@@ -1023,29 +1247,29 @@ export default {
 
     setAbsent(index) {
       const student = this.state.studentList[index];
-      if (!this.state.boardData.attendance.absent.includes(student)) {
-        this.setPresent(index);
-        this.state.boardData.attendance.absent.push(student);
-        this.state.synced = false;
-      }
+      // 先从所有状态列表中移除该学生
+      this.setPresent(index);
+      // 然后添加到请假列表
+      this.state.boardData.attendance.absent.push(student);
+      this.state.synced = false;
     },
 
     setLate(index) {
       const student = this.state.studentList[index];
-      if (!this.state.boardData.attendance.late.includes(student)) {
-        this.setPresent(index);
-        this.state.boardData.attendance.late.push(student);
-        this.state.synced = false;
-      }
+      // 先从所有状态列表中移除该学生
+      this.setPresent(index);
+      // 然后添加到迟到列表
+      this.state.boardData.attendance.late.push(student);
+      this.state.synced = false;
     },
 
     setExclude(index) {
       const student = this.state.studentList[index];
-      if (!this.state.boardData.attendance.exclude.includes(student)) {
-        this.setPresent(index);
-        this.state.boardData.attendance.exclude.push(student);
-        this.state.synced = false;
-      }
+      // 先从所有状态列表中移除该学生
+      this.setPresent(index);
+      // 然后添加到不参与列表
+      this.state.boardData.attendance.exclude.push(student);
+      this.state.synced = false;
     },
 
     async saveAttendance() {
@@ -1175,6 +1399,93 @@ export default {
         document.msFullscreenElement
       );
     },
+
+    getStudentStatusColor(index) {
+      const studentName = this.state.studentList[index];
+      if (this.state.boardData.attendance.absent.includes(studentName)) return 'error';
+      if (this.state.boardData.attendance.late.includes(studentName)) return 'warning';
+      if (this.state.boardData.attendance.exclude.includes(studentName)) return 'grey';
+      return 'success';
+    },
+    
+    getStudentStatusVariant(index) {
+      const studentName = this.state.studentList[index];
+      if (this.state.boardData.attendance.absent.includes(studentName) ||
+          this.state.boardData.attendance.late.includes(studentName) ||
+          this.state.boardData.attendance.exclude.includes(studentName)) {
+        return 'tonal';
+      }
+      return 'outlined';
+    },
+    
+    getStudentStatusIcon(index) {
+      const studentName = this.state.studentList[index];
+      if (this.state.boardData.attendance.absent.includes(studentName)) return 'mdi-account-off';
+      if (this.state.boardData.attendance.late.includes(studentName)) return 'mdi-clock-alert';
+      if (this.state.boardData.attendance.exclude.includes(studentName)) return 'mdi-account-cancel';
+      return 'mdi-account-check';
+    },
+    
+    getStudentStatusText(index) {
+      const studentName = this.state.studentList[index];
+      if (this.state.boardData.attendance.absent.includes(studentName)) return '请假';
+      if (this.state.boardData.attendance.late.includes(studentName)) return '迟到';
+      if (this.state.boardData.attendance.exclude.includes(studentName)) return '不参与';
+      return '到课';
+    },
+
+    handleSearchChange(value) {
+      // 生成搜索建议
+      this.generateSearchSuggestions(value);
+    },
+    
+    generateSearchSuggestions(searchTerm) {
+      if (!searchTerm || searchTerm.length < 1) {
+        this.searchSuggestions = [];
+        return;
+      }
+      
+      // 查找匹配的学生名字
+      const matchingStudents = this.state.studentList.filter(student => 
+        student.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      
+      // 如果有精确匹配，不显示建议
+      if (matchingStudents.some(student => student === searchTerm)) {
+        this.searchSuggestions = [];
+        return;
+      }
+      
+      // 提取匹配的部分作为建议
+      const suggestions = new Set();
+      
+      // 如果是单个字符，可能是在搜索姓氏
+      if (searchTerm.length === 1) {
+        // 添加所有以该字符开头的学生的完整姓名作为建议
+        matchingStudents.forEach(student => {
+          if (student.startsWith(searchTerm)) {
+            suggestions.add(student);
+          }
+        });
+      } else {
+        // 对于多字符搜索，添加包含该字符串的学生名字
+        matchingStudents.forEach(student => {
+          suggestions.add(student);
+        });
+      }
+      
+      // 限制建议数量
+      this.searchSuggestions = Array.from(suggestions).slice(0, 5);
+    },
+
+    toggleFilter(filter) {
+      const index = this.attendanceFilter.indexOf(filter);
+      if (index === -1) {
+        this.attendanceFilter.push(filter);
+      } else {
+        this.attendanceFilter.splice(index, 1);
+      }
+    },
   },
 };
 </script>
@@ -1249,6 +1560,62 @@ export default {
 
   100% {
     box-shadow: 0 0 15px rgba(33, 150, 243, 0.3);
+  }
+}
+
+// 出勤管理对话框样式
+.attendance-stat {
+  height: 100%;
+}
+
+// 姓氏筛选按钮
+.surname-btn {
+  margin: 2px;
+  min-width: 0;
+  padding: 0 8px;
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// 搜索建议按钮
+.suggestion-btn {
+  margin: 2px;
+  min-width: 0;
+  padding: 0 6px;
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// 适配触摸屏
+@media (hover: none) {
+  .student-card .attendance-actions {
+    opacity: 1;
+  }
+}
+
+// 小屏幕适配
+@media (max-width: 600px) {
+  .student-card {
+    .attendance-actions .v-btn {
+      margin: 0 1px;
+      min-width: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+}
+
+// 过滤器芯片
+.filter-chip {
+  cursor: pointer;
+  margin: 2px;
+  
+  &:active {
+    transform: scale(0.95);
   }
 }
 </style>
