@@ -213,7 +213,8 @@ export default {
       display: {
         emptySubjectDisplay: getSetting('display.emptySubjectDisplay'),
         dynamicSort: getSetting('display.dynamicSort'),
-        showRandomButton: getSetting('display.showRandomButton')
+        showRandomButton: getSetting('display.showRandomButton'),
+        showFullscreenButton: getSetting('display.showFullscreenButton')
       },
       developer: {
         enabled: getSetting('developer.enabled'),

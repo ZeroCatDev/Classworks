@@ -58,6 +58,23 @@
           </template>
         </v-list-item>
 
+        <v-divider class="my-2" />
+
+        <v-list-item>
+          <template #prepend>
+            <v-icon icon="mdi-fullscreen" class="mr-3" />
+          </template>
+          <v-list-item-title>显示全屏按钮</v-list-item-title>
+          <v-list-item-subtitle>在主页面显示全屏切换按钮</v-list-item-subtitle>
+          <template #append>
+            <v-switch
+              v-model="localSettings.showFullscreenButton"
+              density="comfortable"
+              hide-details
+            />
+          </template>
+        </v-list-item>
+
         <div class="d-flex gap-2 mt-4">
           <v-btn
             color="primary"
@@ -91,7 +108,8 @@ export default {
     const settings = {
       emptySubjectDisplay: getSetting('display.emptySubjectDisplay'),
       dynamicSort: getSetting('display.dynamicSort'),
-      showRandomButton: getSetting('display.showRandomButton')
+      showRandomButton: getSetting('display.showRandomButton'),
+      showFullscreenButton: getSetting('display.showFullscreenButton')
     };
 
     return {

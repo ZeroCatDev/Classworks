@@ -148,6 +148,16 @@
       >
         随机点名
       </v-btn>
+      <v-btn
+        v-if="showFullscreenButton"
+        :color="state.isFullscreen ? 'blue-grey' : 'blue'"
+        :prepend-icon="state.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'"
+        size="large"
+        class="ml-2"
+        @click="toggleFullscreen"
+      >
+        {{ state.isFullscreen ? '退出全屏' : '全屏显示' }}
+      </v-btn>
     </v-container>
 
     <!-- 出勤统计区域 -->
@@ -429,6 +439,7 @@ export default {
           { key: "地理", name: "地理" },
           { key: "其他", name: "其他" },
         ],
+        isFullscreen: false,
       },
       loading: {
         download: false,
@@ -561,6 +572,9 @@ export default {
     shouldBlockAutoSave() {
       return !this.isToday && this.autoSave && this.blockNonTodayAutoSave;
     },
+    showFullscreenButton() {
+      return getSetting("display.showFullscreenButton");
+    },
   },
 
   watch: {
@@ -601,6 +615,12 @@ export default {
       this.unwatchSettings = watchSettings(() => {
         this.updateSettings();
       });
+
+      // 监听全屏变化事件
+      document.addEventListener('fullscreenchange', this.fullscreenChangeHandler);
+      document.addEventListener('webkitfullscreenchange', this.fullscreenChangeHandler);
+      document.addEventListener('mozfullscreenchange', this.fullscreenChangeHandler);
+      document.addEventListener('MSFullscreenChange', this.fullscreenChangeHandler);
     } catch (err) {
       console.error("初始化失败:", err);
       this.showError("初始化失败，请刷新页面重试");
@@ -615,6 +635,12 @@ export default {
       // 注意刷新间隔存放在 state 内
       clearInterval(this.state.refreshInterval);
     }
+
+    // 移除全屏变化事件监听
+    document.removeEventListener('fullscreenchange', this.fullscreenChangeHandler);
+    document.removeEventListener('webkitfullscreenchange', this.fullscreenChangeHandler);
+    document.removeEventListener('mozfullscreenchange', this.fullscreenChangeHandler);
+    document.removeEventListener('MSFullscreenChange', this.fullscreenChangeHandler);
   },
 
   methods: {
@@ -1211,6 +1237,50 @@ export default {
         // 对话框关闭且数据未同步时尝试保存
         await this.trySave(true);
       }
+    },
+
+    // 全屏相关方法
+    toggleFullscreen() {
+      if (!this.state.isFullscreen) {
+        this.enterFullscreen();
+      } else {
+        this.exitFullscreen();
+      }
+    },
+    
+    enterFullscreen() {
+      const docElm = document.documentElement;
+      
+      if (docElm.requestFullscreen) {
+        docElm.requestFullscreen();
+      } else if (docElm.webkitRequestFullScreen) {
+        docElm.webkitRequestFullScreen();
+      } else if (docElm.mozRequestFullScreen) {
+        docElm.mozRequestFullScreen();
+      } else if (docElm.msRequestFullscreen) {
+        docElm.msRequestFullscreen();
+      }
+    },
+    
+    exitFullscreen() {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    },
+    
+    fullscreenChangeHandler() {
+      this.state.isFullscreen = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      );
     },
   },
 };

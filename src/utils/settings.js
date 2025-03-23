@@ -97,6 +97,11 @@ const settingsDefinitions = {
     default: false,
     description: "是否显示随机按钮",
   },
+  "display.showFullscreenButton": {
+    type: "boolean",
+    default: true,
+    description: "是否显示全屏按钮",
+  },
 
   // 服务器设置（合并了数据提供者设置）
   "server.domain": {
