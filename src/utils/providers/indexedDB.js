@@ -2,7 +2,7 @@ import { openDB } from 'idb';
 import { formatResponse, formatError } from '../dataProvider';
 import { defaultConfig, defaultHomework } from '../defaults/defaultData';
 
-const DB_NAME = "HomeworkDB";
+const DB_NAME = "ClassworksDB";
 const DB_VERSION = 1;
 
 const initDB = async () => {

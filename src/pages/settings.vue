@@ -15,7 +15,7 @@
       <v-row>
         <v-col cols="12" md="6">
           <server-settings-card
-          border
+            border
             :loading="loading.server"
             @saved="onSettingsSaved"
           />
@@ -37,16 +37,14 @@
           <display-settings-card @saved="onSettingsSaved" border/>
         </v-col>
 
-        <!-- 添加主题设置卡片 -->
         <v-col cols="12" md="6">
           <theme-settings-card border />
         </v-col>
 
-
         <!-- 开发者选项卡片 -->
         <v-col :cols="12" :md="settings.developer.enabled ? 12 : 6">
           <settings-card
-          border
+            border
             title="开发者选项"
             icon="mdi-developer-board"
           >
@@ -84,8 +82,6 @@
                     />
                   </template>
                 </v-list-item>
-
-                <v-divider class="my-2" />
 
                 <v-expand-transition>
                   <div v-if="settings.developer.showDebugConfig">
@@ -138,12 +134,34 @@
         <v-col cols="12">
           <echo-chamber-card border />
         </v-col>
+        
         <!-- 关于卡片 -->
         <v-col cols="12">
           <about-card />
         </v-col>
+
+        <!-- 开发者模式下显示所有设置 -->
+        <v-col v-if="settings.developer.enabled" cols="12">
+          <v-card border>
+            <v-card-title class="d-flex align-center">
+              <v-icon icon="mdi-cog-outline" class="mr-2" />
+              所有设置
+            </v-card-title>
+            <v-card-subtitle>
+              浏览和修改所有可用设置
+            </v-card-subtitle>
+            <v-card-text>
+              <settings-explorer @update="onSettingUpdate" />
+            </v-card-text>
+          </v-card>
+        </v-col>
+
+        <v-col cols="12" md="6">
+          <random-picker-settings-card />
+        </v-col>
       </v-row>
     </v-container>
+    
     <!-- 消息记录组件 -->
     <message-log ref="messageLog" />
   </div>
@@ -170,6 +188,8 @@ import StudentListCard from '@/components/settings/StudentListCard.vue';
 import AboutCard from '@/components/settings/AboutCard.vue';
 import '../styles/settings.scss';
 import dataProvider from '@/utils/dataProvider';
+import SettingsExplorer from '@/components/settings/SettingsExplorer.vue';
+import RandomPickerSettingsCard from '@/components/settings/cards/RandomPickerSettingsCard.vue';
 
 export default {
   name: 'Settings',
@@ -184,7 +204,9 @@ export default {
     AboutCard,
     DataProviderSettingsCard,
     ThemeSettingsCard,
-    EchoChamberCard
+    EchoChamberCard,
+    SettingsExplorer,
+    RandomPickerSettingsCard
   },
   setup() {
     const { mobile } = useDisplay();
@@ -565,6 +587,11 @@ export default {
     onSettingsSaved() {
       this.showMessage('设置已更新', '您的设置已成功保存');
       // 如果需要，可以在这里重新加载相关数据
+    },
+
+    onSettingUpdate(key, value) {
+      // 处理设置更新
+      this.showMessage('设置已更新', `${key} 已保存为 ${value}`);
     }
   }
 }

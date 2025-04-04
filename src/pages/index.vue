@@ -85,14 +85,10 @@
         上传
       </v-btn>
       <v-btn v-else color="success" size="large" @click="showSyncMessage">
-        同步完成 </v-btn><v-btn v-if="showRandomButton" color="yellow" prepend-icon="mdi-account-question"
-        append-icon="mdi-dice-multiple" size="large" class="ml-2" href="classisland://plugins/IslandCaller/Run">
+        同步完成 </v-btn>
+      <v-btn v-if="showRandomPickerButton" color="amber" prepend-icon="mdi-account-question"
+        append-icon="mdi-dice-multiple" size="large" class="ml-2" @click="openRandomPicker">
         随机点名
-      </v-btn>
-      <v-btn v-if="showFullscreenButton" :color="state.isFullscreen ? 'blue-grey' : 'blue'"
-        :prepend-icon="state.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'" size="large" class="ml-2"
-        @click="toggleFullscreen">
-        {{ state.isFullscreen ? '退出全屏' : '全屏显示' }}
       </v-btn><!-- 修改防烧屏提示卡片，使用 tonal 样式减少信息密度 -->
       <v-card v-if="showAntiScreenBurnCard" border class="mt-4 anti-burn-card" color="primary" variant="tonal">
         <v-card-title class="text-subtitle-1">
@@ -142,7 +138,7 @@
       </h2>
       <h3 class="gray-text" v-for="(name, index) in state.boardData.attendance.absent" :key="'absent-' + index">
         <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name
-          }}</span>
+        }}</span>
       </h3>
       <h2>
         <snap style="white-space: nowrap">迟到</snap>:
@@ -152,7 +148,7 @@
       </h2>
       <h3 class="gray-text" v-for="(name, index) in state.boardData.attendance.late" :key="'late-' + index">
         <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name
-          }}</span>
+        }}</span>
       </h3>
       <h2>
         <snap style="white-space: nowrap">不参与</snap>:
@@ -162,7 +158,7 @@
       </h2>
       <h3 class="gray-text" v-for="(name, index) in state.boardData.attendance.exclude" :key="'exclude-' + index">
         <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name
-          }}</span>
+        }}</span>
       </h3>
     </v-col>
   </div>
@@ -183,7 +179,8 @@
     {{ state.snackbarText }}
   </v-snackbar>
 
-  <v-dialog v-model="state.attendanceDialog" max-width="900" fullscreen-breakpoint="sm" @update:model-value="handleAttendanceDialogClose">
+  <v-dialog v-model="state.attendanceDialog" max-width="900" fullscreen-breakpoint="sm"
+    @update:model-value="handleAttendanceDialogClose">
     <v-card>
       <v-card-title class="d-flex align-center">
         <v-icon icon="mdi-account-group" class="mr-2" />
@@ -195,107 +192,55 @@
       </v-card-title>
 
       <v-card-text>
-      
+
 
         <!-- 批量操作和搜索 -->
         <v-row class="mb-4">
-         
+
           <v-col cols="12" md="12">
-            <v-text-field
-              v-model="attendanceSearch"
-              prepend-inner-icon="mdi-magnify"
-              label="搜索学生"
-              hide-details
-              variant="outlined"
-              density="compact"
-              clearable
-              @update:model-value="handleSearchChange"
-            />
-            <div class="text-caption mt-1">支持筛选姓氏，如输入"张"可筛选所有姓张的学生</div>
-            
-            <!-- 智能姓氏筛选 -->
+            <v-text-field v-model="attendanceSearch" prepend-inner-icon="mdi-magnify" label="搜索学生"
+              hint="支持筛选姓氏，如输入'孙'可筛选所有姓孙的学生" variant="outlined" clearable @update:model-value="handleSearchChange" />
+
+            <!-- 姓氏筛选 -->
             <div class="d-flex flex-wrap mt-2 gap-1">
-              <v-btn 
-                v-for="surname in extractedSurnames" 
-                :key="surname.name" 
-                size="small" 
-                :variant="attendanceSearch === surname.name ? 'elevated' : 'text'" 
-                :color="attendanceSearch === surname.name ? 'primary' : ''" 
-                @click="attendanceSearch = attendanceSearch === surname.name ? '' : surname.name"
-                class="surname-btn"
-              >
+              <v-btn v-for="surname in extractedSurnames" :key="surname.name"
+                :variant="attendanceSearch === surname.name ? 'elevated' : 'text'"
+                :color="attendanceSearch === surname.name ? 'primary' : ''"
+                @click="attendanceSearch = attendanceSearch === surname.name ? '' : surname.name">
                 {{ surname.name }}
-                <span class="text-caption ml-1">({{ surname.count }})</span>
+                ({{ surname.count }})
               </v-btn>
             </div>
-            
-            <!-- 搜索建议 -->
-            <div v-if="searchSuggestions.length > 0" class="mt-2">
-              <div class="text-caption text-grey">搜索建议:</div>
-              <div class="d-flex flex-wrap gap-1 mt-1">
-                <v-btn 
-                  v-for="suggestion in searchSuggestions" 
-                  :key="suggestion" 
-                  size="x-small" 
-                  variant="text" 
-                  color="secondary"
-                  @click="attendanceSearch = suggestion"
-                  class="suggestion-btn"
-                  density="compact"
-                >
-                  {{ suggestion }}
-                </v-btn>
-              </div>
-            </div>
+
           </v-col>
         </v-row>
 
         <!-- 过滤器 -->
         <div class="d-flex flex-wrap mb-4 gap-2">
           <div>
-            <v-chip 
-              value="present" 
-              :color="attendanceFilter.includes('present') ? 'success' : ''" 
-              :variant="attendanceFilter.includes('present') ? 'elevated' : 'tonal'" 
-              class="px-2 filter-chip"
-              @click="toggleFilter('present')"
-              prepend-icon="mdi-account-check"
-              :append-icon="attendanceFilter.includes('present') ? 'mdi-check' : ''"
-            >
+            <v-chip value="present" :color="attendanceFilter.includes('present') ? 'success' : ''"
+              :variant="attendanceFilter.includes('present') ? 'elevated' : 'tonal'" class="px-2 filter-chip"
+              @click="toggleFilter('present')" prepend-icon="mdi-account-check"
+              :append-icon="attendanceFilter.includes('present') ? 'mdi-check' : ''">
               到课
             </v-chip>
-            
-            <v-chip 
-              value="absent" 
-              :color="attendanceFilter.includes('absent') ? 'error' : ''" 
-              :variant="attendanceFilter.includes('absent') ? 'elevated' : 'tonal'" 
-              class="px-2 filter-chip"
-              @click="toggleFilter('absent')"
-              prepend-icon="mdi-account-off"
-              :append-icon="attendanceFilter.includes('absent') ? 'mdi-check' : ''"
-            >
+
+            <v-chip value="absent" :color="attendanceFilter.includes('absent') ? 'error' : ''"
+              :variant="attendanceFilter.includes('absent') ? 'elevated' : 'tonal'" class="px-2 filter-chip"
+              @click="toggleFilter('absent')" prepend-icon="mdi-account-off"
+              :append-icon="attendanceFilter.includes('absent') ? 'mdi-check' : ''">
               请假
             </v-chip>
-            <v-chip 
-              value="late" 
-              :color="attendanceFilter.includes('late') ? 'warning' : ''" 
-              :variant="attendanceFilter.includes('late') ? 'elevated' : 'tonal'" 
-              class="px-2 filter-chip"
-              @click="toggleFilter('late')"
-              prepend-icon="mdi-clock-alert"
-              :append-icon="attendanceFilter.includes('late') ? 'mdi-check' : ''"
-            >
+            <v-chip value="late" :color="attendanceFilter.includes('late') ? 'warning' : ''"
+              :variant="attendanceFilter.includes('late') ? 'elevated' : 'tonal'" class="px-2 filter-chip"
+              @click="toggleFilter('late')" prepend-icon="mdi-clock-alert"
+              :append-icon="attendanceFilter.includes('late') ? 'mdi-check' : ''">
               迟到
             </v-chip>
-            <v-chip 
-              value="exclude" 
-              :color="attendanceFilter.includes('exclude') ? 'grey' : ''" 
-              :variant="attendanceFilter.includes('exclude') ? 'elevated' : 'tonal'" 
-              class="px-2 filter-chip"
-              @click="toggleFilter('exclude')"
-              prepend-icon="mdi-account-cancel"
-              :append-icon="attendanceFilter.includes('exclude') ? 'mdi-check' : ''"
-            >
+            <v-chip value="exclude" :color="attendanceFilter.includes('exclude') ? 'grey' : ''"
+              :variant="attendanceFilter.includes('exclude') ? 'elevated' : 'tonal'" class="px-2 filter-chip"
+              @click="toggleFilter('exclude')" prepend-icon="mdi-account-cancel"
+              :append-icon="attendanceFilter.includes('exclude') ? 'mdi-check' : ''">
               不参与
             </v-chip>
           </div>
@@ -303,15 +248,8 @@
 
         <!-- 学生列表 -->
         <v-row>
-          <v-col 
-            v-for="student in filteredStudents" 
-            :key="student" 
-            cols="12" sm="6" md="6" lg="4"
-          >
-            <v-card 
-              class="student-card"
-              border
-            >
+          <v-col v-for="student in filteredStudents" :key="student" cols="12" sm="6" md="6" lg="4">
+            <v-card class="student-card" border>
               <v-card-text class="d-flex align-center pa-2">
                 <div class="flex-grow-1">
                   <div class="d-flex align-center">
@@ -322,38 +260,17 @@
                   </div>
                 </div>
                 <div class="attendance-actions">
-                  <v-btn 
-                    :color="isPresent(state.studentList.indexOf(student)) ? 'success' : ''" 
-                    icon="mdi-account-check" 
-                    size="small"
-                    variant="text"
-                    @click="setPresent(state.studentList.indexOf(student))" 
-                    :title="'设为到课'"
-                  />
-                  <v-btn 
-                    :color="isAbsent(state.studentList.indexOf(student)) ? 'error' : ''" 
-                    icon="mdi-account-off" 
-                    size="small"
-                    variant="text"
-                    @click="setAbsent(state.studentList.indexOf(student))" 
-                    :title="'设为请假'"
-                  />
-                  <v-btn 
-                    :color="isLate(state.studentList.indexOf(student)) ? 'warning' : ''" 
-                    icon="mdi-clock-alert" 
-                    size="small"
-                    variant="text"
-                    @click="setLate(state.studentList.indexOf(student))" 
-                    :title="'设为迟到'"
-                  />
-                  <v-btn 
-                    :color="isExclude(state.studentList.indexOf(student)) ? 'grey' : ''" 
-                    icon="mdi-account-cancel" 
-                    size="small"
-                    variant="text"
-                    @click="setExclude(state.studentList.indexOf(student))" 
-                    :title="'设为不参与'"
-                  />
+                  <v-btn :color="isPresent(state.studentList.indexOf(student)) ? 'success' : ''"
+                    icon="mdi-account-check" size="small" variant="text"
+                    @click="setPresent(state.studentList.indexOf(student))" :title="'设为到课'" />
+                  <v-btn :color="isAbsent(state.studentList.indexOf(student)) ? 'error' : ''" icon="mdi-account-off"
+                    size="small" variant="text" @click="setAbsent(state.studentList.indexOf(student))"
+                    :title="'设为请假'" />
+                  <v-btn :color="isLate(state.studentList.indexOf(student)) ? 'warning' : ''" icon="mdi-clock-alert"
+                    size="small" variant="text" @click="setLate(state.studentList.indexOf(student))" :title="'设为迟到'" />
+                  <v-btn :color="isExclude(state.studentList.indexOf(student)) ? 'grey' : ''" icon="mdi-account-cancel"
+                    size="small" variant="text" @click="setExclude(state.studentList.indexOf(student))"
+                    :title="'设为不参与'" />
                 </div>
               </v-card-text>
             </v-card>
@@ -369,7 +286,7 @@
                   </v-btn>
                   <v-btn color="error" prepend-icon="mdi-account-off" @click="setAllAbsent">
                     全部请假
-                  </v-btn>              </v-btn-group>  <v-btn-group>
+                  </v-btn> </v-btn-group> <v-btn-group>
 
                   <v-btn color="warning" prepend-icon="mdi-clock-alert" @click="setAllLate">
                     全部迟到
@@ -387,9 +304,7 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn color="grey" variant="text" @click="state.attendanceDialog = false">
-          取消
-        </v-btn>
+
         <v-btn color="primary" @click="saveAttendance">
           <v-icon start>mdi-content-save</v-icon>
           保存
@@ -417,11 +332,14 @@
     </v-card>
   </v-dialog>
 
+  <!-- 添加随机点名组件 -->
+  <random-picker ref="randomPicker" :student-list="state.studentList" :attendance="state.boardData.attendance" />
 
 </template>
 
 <script>
 import MessageLog from "@/components/MessageLog.vue";
+import RandomPicker from "@/components/RandomPicker.vue"; // 导入随机点名组件
 import dataProvider from "@/utils/dataProvider";
 import { getSetting, watchSettings, setSetting } from "@/utils/settings";
 import { useDisplay } from "vuetify";
@@ -429,11 +347,13 @@ import "../styles/index.scss";
 import "../styles/transitions.scss"; // 添加新的样式导入
 import { debounce, throttle } from "@/utils/debounce";
 import '../styles/global.scss';
+import { pinyin } from "pinyin-pro";
 
 export default {
   name: "Classworks 作业板",
   components: {
     MessageLog,
+    RandomPicker, // 注册随机点名组件
   },
   data() {
     return {
@@ -515,7 +435,6 @@ export default {
       },
       attendanceSearch: "",
       attendanceFilter: [],
-      searchSuggestions: [],
     };
   },
 
@@ -621,8 +540,8 @@ export default {
     unreadCount() {
       return this.$refs.messageLog?.unreadCount || 0;
     },
-    showRandomButton() {
-      return getSetting("display.showRandomButton");
+    showRandomPickerButton() {
+      return getSetting("randomPicker.enabled");
     },
     confirmNonTodaySave() {
       return getSetting("edit.confirmNonTodaySave");
@@ -641,15 +560,15 @@ export default {
     },
     filteredStudents() {
       let students = [...this.state.studentList];
-      
+
       // 应用搜索过滤
       if (this.attendanceSearch) {
         const searchTerm = this.attendanceSearch.toLowerCase();
-        students = students.filter(student => 
+        students = students.filter(student =>
           student.toLowerCase().includes(searchTerm)
         );
       }
-      
+
       // 应用状态过滤
       if (this.attendanceFilter && this.attendanceFilter.length > 0) {
         students = students.filter(student => {
@@ -661,7 +580,7 @@ export default {
           return false;
         });
       }
-      
+
       return students;
     },
     extractedSurnames() {
@@ -669,9 +588,9 @@ export default {
       if (!this.state.studentList || this.state.studentList.length === 0) {
         return [];
       }
-      
+
       const surnameMap = new Map();
-      
+
       this.state.studentList.forEach(student => {
         if (student && student.length > 0) {
           // 中文姓名通常姓在前，取第一个字作为姓氏
@@ -683,11 +602,15 @@ export default {
           }
         }
       });
-      
-      // 转换为数组并按数量排序
+
+      // 转换为数组并按拼音排序
       return Array.from(surnameMap.entries())
         .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count);
+        .sort((a, b) => {
+          const pinyinA = pinyin(a.name, { toneType: "none", mode: 'surname' });
+          const pinyinB = pinyin(b.name, { toneType: "none", mode: 'surname' });
+          return pinyinA.localeCompare(pinyinB);
+        });
     },
   },
 
@@ -735,6 +658,12 @@ export default {
       document.addEventListener('webkitfullscreenchange', this.fullscreenChangeHandler);
       document.addEventListener('mozfullscreenchange', this.fullscreenChangeHandler);
       document.addEventListener('MSFullscreenChange', this.fullscreenChangeHandler);
+
+      // 检查URL哈希值，如果包含#pick则自动打开随机点名
+      this.checkHashForRandomPicker();
+
+      // 添加哈希变化监听器
+      window.addEventListener('hashchange', this.checkHashForRandomPicker);
     } catch (err) {
       console.error("初始化失败:", err);
       this.showError("初始化失败，请刷新页面重试");
@@ -755,6 +684,9 @@ export default {
     document.removeEventListener('webkitfullscreenchange', this.fullscreenChangeHandler);
     document.removeEventListener('mozfullscreenchange', this.fullscreenChangeHandler);
     document.removeEventListener('MSFullscreenChange', this.fullscreenChangeHandler);
+
+    // 移除哈希变化监听器
+    window.removeEventListener('hashchange', this.checkHashForRandomPicker);
   },
 
   methods: {
@@ -1065,9 +997,36 @@ export default {
       }
       if (autoRefresh) {
         this.state.refreshInterval = setInterval(() => {
-          this.downloadData();
+          // 检查是否应该跳过刷新
+          if (!this.shouldSkipRefresh()) {
+            this.downloadData();
+          }
         }, interval * 1000);
       }
+    },
+
+    // 新增方法：检查是否应该跳过自动刷新
+    shouldSkipRefresh() {
+      // 如果对话框打开，跳过刷新
+      if (this.state.dialogVisible) return true;
+
+      // 如果出勤对话框打开，跳过刷新
+      if (this.state.attendanceDialog) return true;
+
+      // 如果确认对话框打开，跳过刷新
+      if (this.confirmDialog.show) return true;
+
+      // 如果日期选择器打开，跳过刷新
+      if (this.state.datePickerDialog) return true;
+
+      // 如果正在上传或下载数据，跳过刷新
+      if (this.loading.upload || this.loading.download) return true;
+
+      // 如果数据未同步（有未保存的更改），跳过刷新
+      if (!this.state.synced) return true;
+
+      // 没有特殊状态，可以刷新
+      return false;
     },
 
     updateSettings() {
@@ -1200,7 +1159,7 @@ export default {
       this.state.boardData.attendance.late = [];
       this.state.boardData.attendance.exclude = [...this.state.studentList];
       this.state.synced = false;
-    },  
+    },
 
     isPresent(index) {
       const student = this.state.studentList[index];
@@ -1407,17 +1366,17 @@ export default {
       if (this.state.boardData.attendance.exclude.includes(studentName)) return 'grey';
       return 'success';
     },
-    
+
     getStudentStatusVariant(index) {
       const studentName = this.state.studentList[index];
       if (this.state.boardData.attendance.absent.includes(studentName) ||
-          this.state.boardData.attendance.late.includes(studentName) ||
-          this.state.boardData.attendance.exclude.includes(studentName)) {
+        this.state.boardData.attendance.late.includes(studentName) ||
+        this.state.boardData.attendance.exclude.includes(studentName)) {
         return 'tonal';
       }
       return 'outlined';
     },
-    
+
     getStudentStatusIcon(index) {
       const studentName = this.state.studentList[index];
       if (this.state.boardData.attendance.absent.includes(studentName)) return 'mdi-account-off';
@@ -1425,7 +1384,7 @@ export default {
       if (this.state.boardData.attendance.exclude.includes(studentName)) return 'mdi-account-cancel';
       return 'mdi-account-check';
     },
-    
+
     getStudentStatusText(index) {
       const studentName = this.state.studentList[index];
       if (this.state.boardData.attendance.absent.includes(studentName)) return '请假';
@@ -1434,49 +1393,6 @@ export default {
       return '到课';
     },
 
-    handleSearchChange(value) {
-      // 生成搜索建议
-      this.generateSearchSuggestions(value);
-    },
-    
-    generateSearchSuggestions(searchTerm) {
-      if (!searchTerm || searchTerm.length < 1) {
-        this.searchSuggestions = [];
-        return;
-      }
-      
-      // 查找匹配的学生名字
-      const matchingStudents = this.state.studentList.filter(student => 
-        student.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      
-      // 如果有精确匹配，不显示建议
-      if (matchingStudents.some(student => student === searchTerm)) {
-        this.searchSuggestions = [];
-        return;
-      }
-      
-      // 提取匹配的部分作为建议
-      const suggestions = new Set();
-      
-      // 如果是单个字符，可能是在搜索姓氏
-      if (searchTerm.length === 1) {
-        // 添加所有以该字符开头的学生的完整姓名作为建议
-        matchingStudents.forEach(student => {
-          if (student.startsWith(searchTerm)) {
-            suggestions.add(student);
-          }
-        });
-      } else {
-        // 对于多字符搜索，添加包含该字符串的学生名字
-        matchingStudents.forEach(student => {
-          suggestions.add(student);
-        });
-      }
-      
-      // 限制建议数量
-      this.searchSuggestions = Array.from(suggestions).slice(0, 5);
-    },
 
     toggleFilter(filter) {
       const index = this.attendanceFilter.indexOf(filter);
@@ -1486,136 +1402,22 @@ export default {
         this.attendanceFilter.splice(index, 1);
       }
     },
+
+    openRandomPicker() {
+      if (this.$refs.randomPicker) {
+        this.$refs.randomPicker.open();
+      }
+    },
+
+    checkHashForRandomPicker() {
+      if (window.location.hash === '#random-picker') {
+        this.$nextTick(() => {
+          console.log("打开随机点名");
+          window.location.hash = '';
+          this.openRandomPicker();
+        });
+      }
+    },
   },
 };
 </script>
-<style lang="scss">
-// 添加卡片发光效果
-.glow-track {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%),
-        rgba(255, 255, 255, 0.15) 0%,
-        rgba(255, 255, 255, 0) 70%);
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  &:hover::before {
-    opacity: 1;
-  }
-}
-
-// 添加卡片悬浮效果
-.grid-item .v-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
-  }
-
-  &:active {
-    transform: translateY(-2px);
-  }
-}
-
-// 添加空科目卡片样式
-.empty-subject-card {
-  transition: all 0.3s ease;
-  opacity: 0.8;
-
-  &:hover {
-    opacity: 1;
-    transform: translateY(-4px);
-  }
-}
-
-// 修改防烧屏提示卡片，使用 tonal 样式减少信息密度
-.anti-burn-card {
-  animation: subtle-glow 4s infinite alternate;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  }
-}
-
-@keyframes subtle-glow {
-  0% {
-    box-shadow: 0 0 5px rgba(33, 150, 243, 0.1);
-  }
-
-  100% {
-    box-shadow: 0 0 15px rgba(33, 150, 243, 0.3);
-  }
-}
-
-// 出勤管理对话框样式
-.attendance-stat {
-  height: 100%;
-}
-
-// 姓氏筛选按钮
-.surname-btn {
-  margin: 2px;
-  min-width: 0;
-  padding: 0 8px;
-  
-  &:active {
-    transform: scale(0.95);
-  }
-}
-
-// 搜索建议按钮
-.suggestion-btn {
-  margin: 2px;
-  min-width: 0;
-  padding: 0 6px;
-  
-  &:active {
-    transform: scale(0.95);
-  }
-}
-
-// 适配触摸屏
-@media (hover: none) {
-  .student-card .attendance-actions {
-    opacity: 1;
-  }
-}
-
-// 小屏幕适配
-@media (max-width: 600px) {
-  .student-card {
-    .attendance-actions .v-btn {
-      margin: 0 1px;
-      min-width: 28px;
-      width: 28px;
-      height: 28px;
-    }
-  }
-}
-
-// 过滤器芯片
-.filter-chip {
-  cursor: pointer;
-  margin: 2px;
-  
-  &:active {
-    transform: scale(0.95);
-  }
-}
-</style>

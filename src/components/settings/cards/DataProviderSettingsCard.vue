@@ -144,7 +144,7 @@ export default {
 
     async clearIndexedDB() {
       try {
-        const DBName = "HomeworkDB";
+        const DBName = "ClassworksDB";
         // 删除整个数据库
         await window.indexedDB.deleteDatabase(DBName);
         this.$message.success("清除成功", "数据库缓存已清除");
@@ -156,7 +156,7 @@ export default {
 
     async exportData() {
       try {
-        const DBName = "HomeworkDB";
+        const DBName = "ClassworksDB";
         const data = { indexedDB: {} };
 
         // 打开数据库

@@ -1,4 +1,124 @@
 
+
+
+// 添加卡片发光效果
+.glow-track {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%),
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0) 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+}
+
+// 添加卡片悬浮效果
+.grid-item .v-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  &:active {
+    transform: translateY(-2px);
+  }
+}
+
+// 添加空科目卡片样式
+.empty-subject-card {
+  transition: all 0.3s ease;
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+// 修改防烧屏提示卡片，使用 tonal 样式减少信息密度
+.anti-burn-card {
+  animation: subtle-glow 4s infinite alternate;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+@keyframes subtle-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(33, 150, 243, 0.1);
+  }
+
+  100% {
+    box-shadow: 0 0 15px rgba(33, 150, 243, 0.3);
+  }
+}
+
+// 出勤管理对话框样式
+.attendance-stat {
+  height: 100%;
+}
+
+
+// 搜索建议按钮
+.suggestion-btn {
+  margin: 2px;
+  min-width: 0;
+  padding: 0 6px;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// 适配触摸屏
+@media (hover: none) {
+  .student-card .attendance-actions {
+    opacity: 1;
+  }
+}
+
+// 小屏幕适配
+@media (max-width: 600px) {
+  .student-card {
+    .attendance-actions .v-btn {
+      margin: 0 1px;
+      min-width: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+}
+
+// 过滤器芯片
+.filter-chip {
+  cursor: pointer;
+  margin: 2px;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
 .grid-masonry {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -174,3 +294,123 @@
     opacity: 1;
     transform: scale(1.02);
   }
+
+  
+// 添加卡片发光效果
+.glow-track {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%),
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0) 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+}
+
+// 添加卡片悬浮效果
+.grid-item .v-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  &:active {
+    transform: translateY(-2px);
+  }
+}
+
+// 添加空科目卡片样式
+.empty-subject-card {
+  transition: all 0.3s ease;
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+// 修改防烧屏提示卡片，使用 tonal 样式减少信息密度
+.anti-burn-card {
+  animation: subtle-glow 4s infinite alternate;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+@keyframes subtle-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(33, 150, 243, 0.1);
+  }
+
+  100% {
+    box-shadow: 0 0 15px rgba(33, 150, 243, 0.3);
+  }
+}
+
+// 出勤管理对话框样式
+.attendance-stat {
+  height: 100%;
+}
+
+
+// 搜索建议按钮
+.suggestion-btn {
+  margin: 2px;
+  min-width: 0;
+  padding: 0 6px;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// 适配触摸屏
+@media (hover: none) {
+  .student-card .attendance-actions {
+    opacity: 1;
+  }
+}
+
+// 小屏幕适配
+@media (max-width: 600px) {
+  .student-card {
+    .attendance-actions .v-btn {
+      margin: 0 1px;
+      min-width: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+}
+
+// 过滤器芯片
+.filter-chip {
+  cursor: pointer;
+  margin: 2px;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
