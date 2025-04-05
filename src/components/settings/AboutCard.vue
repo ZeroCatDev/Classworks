@@ -32,6 +32,15 @@
                 报告问题
               </v-btn>
               <v-btn
+                color="primary"
+                variant="tonal"
+                href="https://qm.qq.com/q/qNBX4ZZVeg"
+                target="_blank"
+                prepend-icon="mdi-qqchat"
+              >
+                QQ 群
+              </v-btn>
+              <v-btn
                 variant="text"
                 href="https://github.com/ClassworksDev/Classworks"
                 target="_blank"
@@ -97,7 +106,7 @@
                 append-icon="mdi-link"
               >
                 <v-list-item-title>
-                  本项目与 IslandCaller 无关
+                  本项目与 IslandCaller 没有从属关系
                 </v-list-item-title>
                 <v-list-item-subtitle>
                   IslandCaller 是由 HUSX100 开发的基于 ClassIsland
@@ -110,7 +119,7 @@
                 append-icon="mdi-link"
               >
                 <v-list-item-title>
-                  本项目与 ClassIsland 无关
+                  本项目与 ClassIsland 没有从属关系
                 </v-list-item-title>
                 <v-list-item-subtitle>
                   ClassIsland 是由 HelloWRC

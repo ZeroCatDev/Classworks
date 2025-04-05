@@ -24,7 +24,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       devOptions: {
         navigateFallback: 'index.html',
-        enabled: true,
+        enabled: false,
         suppressWarnings: true,
       },
 
