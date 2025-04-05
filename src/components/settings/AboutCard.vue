@@ -76,7 +76,7 @@
                 </v-list-item-subtitle>
               </v-list-item>
               <v-list-item
-                href="https://houlangs.com"
+                href="https://hlyun.org"
                 target="_blank"
                 append-icon="mdi-link"
               >
