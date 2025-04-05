@@ -9,11 +9,7 @@
           </template>
           <v-list-item-title>检查服务器连接</v-list-item-title>
           <template #append>
-            <v-btn
-              :loading="loading"
-              variant="tonal"
-              @click="checkServerConnection"
-            >
+            <v-btn :loading="loading" variant="tonal" @click="checkServerConnection">
               测试连接
             </v-btn>
           </template>
@@ -27,9 +23,7 @@
             <v-icon icon="mdi-database" class="mr-3" />
           </template>
           <v-list-item-title>清除数据库缓存</v-list-item-title>
-          <v-list-item-subtitle
-            >这将清除所有IndexedDB中的数据</v-list-item-subtitle
-          >
+          <v-list-item-subtitle>这将清除所有IndexedDB中的数据</v-list-item-subtitle>
           <template #append>
             <v-btn color="error" variant="tonal" @click="confirmClearIndexedDB">
               清除
@@ -46,6 +40,17 @@
           </template>
         </v-list-item>
       </template>
+      <v-list-item>
+        <template #prepend>
+          <v-icon icon="mdi-lan-connect" class="mr-3" />
+        </template>
+        <v-list-item-title>查看本地缓存</v-list-item-title>
+        <template #append>
+          <v-btn variant="tonal" to="/cachemanagement">
+            查看
+          </v-btn>
+        </template>
+      </v-list-item>
     </v-list>
 
     <!-- 确认对话框 -->
@@ -55,12 +60,8 @@
         <v-card-text>{{ confirmMessage }}</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="grey" variant="text" @click="confirmDialog = false"
-            >取消</v-btn
-          >
-          <v-btn color="error" variant="tonal" @click="handleConfirm"
-            >确认</v-btn
-          >
+          <v-btn color="grey" variant="text" @click="confirmDialog = false">取消</v-btn>
+          <v-btn color="error" variant="tonal" @click="handleConfirm">确认</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

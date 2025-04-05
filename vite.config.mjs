@@ -19,15 +19,102 @@ export default defineConfig({
     Layouts(),
     Vue({
       template: { transformAssetUrls }
-    }), VitePWA({
+    }), 
+    VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
-        navigateFallback: '/index.html', // 离线支持（navigateFallback）
+        navigateFallback: '/',
         enabled: true,
-        suppressWarnings: true, // 是否抑制 Workbox 的警告
+        suppressWarnings: true,
       },
-
-      lang: 'zh-CN',
+      
+      lang: 'zh-CN', 
+      injectRegister: 'auto',
+      strategies: 'generateSW',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,png,svg,jpg,jpeg,gif,ico,woff,woff2,ttf,eot}'],
+        navigateFallback: '/',
+        runtimeCaching: [
+          {
+            urlPattern: /\.(?:js)$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'js-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 天
+              }
+            }
+          },
+          {
+            urlPattern: /\.(?:css)$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'css-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 天
+              }
+            }
+          },
+          {
+            urlPattern: /\.(?:html)$/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'html-cache',
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 // 1 天
+              }
+            }
+          },
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'images-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 天
+              }
+            }
+          },
+          {
+            urlPattern: /\/cdn-cgi\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'cdn-cgi-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 // 1 天
+              },
+              networkTimeoutSeconds: 10
+            }
+          },
+          {
+            // 匹配除了当前域名以外的所有请求
+            urlPattern: ({ url }) => {
+              return url.origin !== self.location.origin;
+            },
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'external-resources',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 // 1 天
+              },
+              networkTimeoutSeconds: 10,
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          }
+        ],
+        additionalManifestEntries: [],
+        clientsClaim: true,
+        skipWaiting: true,
+        importScripts: ['sw-cache-manager.js']
+      },
       manifest: {
         name: 'Classworks作业板',
         short_name: 'Classworks',
@@ -39,18 +126,6 @@ export default defineConfig({
         edge_side_panel: {
           default_path: '/',
         },
-        workbox: {
-          globPatterns: ['**/*.{js,css,html,png,svg}'],
-          navigateFallback: '/index.html', // 离线支持（navigateFallback）
-          runtimeCaching: [
-            //所有资源都使用网络优先
-            {
-              urlPattern: /./,
-              handler: 'NetworkFirst',
-            },
-          ],
-        },
-
         icons: [
           {
             src: '/image/pwa-64x64.png',
@@ -74,7 +149,6 @@ export default defineConfig({
             purpose: 'maskable'
           }
         ],
-
         shortcuts: [
           {
             name: '随机点名',
