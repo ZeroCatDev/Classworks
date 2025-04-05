@@ -41,4 +41,4 @@ self.addEventListener('message', (event) => {
   }
 });
 
-console.log('Cache Manager extension loaded'); 
+console.log('Cache Manager extension loaded');

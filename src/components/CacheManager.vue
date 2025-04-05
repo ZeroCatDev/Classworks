@@ -92,22 +92,22 @@ export default {
     },
     async refreshCaches() {
       if (!this.serviceWorkerActive) return;
-      
+
       this.loading = true;
       this.message = '';
       this.caches = [];
-      
+
       try {
         // 获取所有缓存名称
         const cacheNames = await this.sendMessageToSW({ type: 'CACHE_KEYS' });
-        
+
         // 获取每个缓存的内容
         for (const cacheName of cacheNames.cacheNames) {
-          const cacheContent = await this.sendMessageToSW({ 
-            type: 'CACHE_CONTENT', 
-            cacheName 
+          const cacheContent = await this.sendMessageToSW({
+            type: 'CACHE_CONTENT',
+            cacheName
           });
-          
+
           this.caches.push({
             name: cacheName,
             urls: cacheContent.urls || []
@@ -122,11 +122,11 @@ export default {
     async clearCache(cacheName) {
       this.loading = true;
       try {
-        const result = await this.sendMessageToSW({ 
-          type: 'CLEAR_CACHE', 
-          cacheName 
+        const result = await this.sendMessageToSW({
+          type: 'CLEAR_CACHE',
+          cacheName
         });
-        
+
         if (result.success) {
           this.showMessage(`已清除缓存: ${this.formatCacheName(cacheName)}`, 'success');
           await this.refreshCaches();
@@ -142,12 +142,12 @@ export default {
     async clearUrl(cacheName, url) {
       this.loading = true;
       try {
-        const result = await this.sendMessageToSW({ 
-          type: 'CLEAR_URL', 
+        const result = await this.sendMessageToSW({
+          type: 'CLEAR_URL',
           cacheName,
-          url 
+          url
         });
-        
+
         if (result.success) {
           this.showMessage(`已从缓存中删除: ${this.getFileName(url)}`, 'success');
           await this.refreshCaches();
@@ -164,11 +164,11 @@ export default {
       if (!confirm('确定要清除所有缓存吗？这可能会导致应用需要重新下载资源。')) {
         return;
       }
-      
+
       this.loading = true;
       try {
         const result = await this.sendMessageToSW({ type: 'CLEAR_ALL_CACHES' });
-        
+
         if (result.success) {
           this.showMessage('已清除所有缓存', 'success');
           await this.refreshCaches();
@@ -187,14 +187,14 @@ export default {
           reject(new Error('Service Worker 未控制页面'));
           return;
         }
-        
+
         const messageChannel = new MessageChannel();
         messageChannel.port1.onmessage = (event) => {
           resolve(event.data);
         };
-        
+
         navigator.serviceWorker.controller.postMessage(message, [messageChannel.port2]);
-        
+
         // 设置超时
         setTimeout(() => {
           reject(new Error('Service Worker 响应超时'));
@@ -218,14 +218,15 @@ export default {
         const urlObj = new URL(url);
         const pathParts = urlObj.pathname.split('/');
         return pathParts[pathParts.length - 1] || urlObj.hostname;
-      } catch (e) {
+      } catch (error) {
+        console.error('获取文件名失败:', error);
         return url;
       }
     },
     showMessage(message, type = 'info') {
       this.message = message;
       this.messageType = type;
-      
+
       // 5秒后自动清除消息
       setTimeout(() => {
         if (this.message === message) {
@@ -235,4 +236,4 @@ export default {
     }
   }
 }
-</script> 
+</script>

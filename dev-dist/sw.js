@@ -67,9 +67,9 @@ if (!self.define) {
     });
   };
 }
-define(['./workbox-5ea419d9'], (function (workbox) { 'use strict';
+define(['./workbox-20a2f87f'], (function (workbox) { 'use strict';
 
-  importScripts("sw-cache-manager.js");
+  importScripts("/sw-cache-manager.js");
   self.skipWaiting();
   workbox.clientsClaim();
 
@@ -82,55 +82,42 @@ define(['./workbox-5ea419d9'], (function (workbox) { 'use strict';
     "url": "suppress-warnings.js",
     "revision": "d41d8cd98f00b204e9800998ecf8427e"
   }, {
-    "url": "/",
-    "revision": "0.0lkakoc2in8"
+    "url": "index.html",
+    "revision": "0.vjgf6ab2p68"
   }], {});
   workbox.cleanupOutdatedCaches();
-  workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("/"), {
+  workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
     allowlist: [/^\/$/]
   }));
-  workbox.registerRoute(/\.(?:js)$/i, new workbox.StaleWhileRevalidate({
-    "cacheName": "js-cache",
+  workbox.registerRoute(({
+    url
+  }) => url.pathname.startsWith("/assets/"), new workbox.CacheFirst({
+    "cacheName": "assets-cache",
     plugins: [new workbox.ExpirationPlugin({
-      maxEntries: 100,
-      maxAgeSeconds: 604800
+      maxEntries: 200,
+      maxAgeSeconds: 5184000
+    }), new workbox.CacheableResponsePlugin({
+      statuses: [0, 200]
     })]
   }), 'GET');
-  workbox.registerRoute(/\.(?:css)$/i, new workbox.StaleWhileRevalidate({
-    "cacheName": "css-cache",
+  workbox.registerRoute(({
+    url
+  }) => url.pathname.startsWith("/pwa/"), new workbox.StaleWhileRevalidate({
+    "cacheName": "pwa-cache",
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 50,
       maxAgeSeconds: 604800
-    })]
-  }), 'GET');
-  workbox.registerRoute(/\.(?:html)$/i, new workbox.NetworkFirst({
-    "cacheName": "html-cache",
-    plugins: [new workbox.ExpirationPlugin({
-      maxEntries: 20,
-      maxAgeSeconds: 86400
-    })]
-  }), 'GET');
-  workbox.registerRoute(/\.(?:png|jpg|jpeg|svg|gif)$/i, new workbox.StaleWhileRevalidate({
-    "cacheName": "images-cache",
-    plugins: [new workbox.ExpirationPlugin({
-      maxEntries: 50,
-      maxAgeSeconds: 2592000
-    })]
-  }), 'GET');
-  workbox.registerRoute(/\/cdn-cgi\/.*/i, new workbox.NetworkFirst({
-    "cacheName": "cdn-cgi-cache",
-    "networkTimeoutSeconds": 10,
-    plugins: [new workbox.ExpirationPlugin({
-      maxEntries: 50,
-      maxAgeSeconds: 86400
+    }), new workbox.CacheableResponsePlugin({
+      statuses: [0, 200]
     })]
   }), 'GET');
   workbox.registerRoute(({
     url
   }) => {
-    return url.origin !== self.location.origin;
+    const path = url.pathname;
+    return !(path.includes("/assets/") || path.includes("/pwa/"));
   }, new workbox.NetworkFirst({
-    "cacheName": "external-resources",
+    "cacheName": "other-resources",
     "networkTimeoutSeconds": 10,
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 100,

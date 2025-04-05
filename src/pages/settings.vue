@@ -134,7 +134,7 @@
         <v-col cols="12">
           <echo-chamber-card border />
         </v-col>
-        
+
         <!-- 关于卡片 -->
         <v-col cols="12">
           <about-card />
@@ -156,12 +156,10 @@
           </v-card>
         </v-col>
 
-        <v-col cols="12" md="6">
-          <random-picker-settings-card />
-        </v-col>
+
       </v-row>
     </v-container>
-    
+
     <!-- 消息记录组件 -->
     <message-log ref="messageLog" />
   </div>
@@ -189,7 +187,6 @@ import AboutCard from '@/components/settings/AboutCard.vue';
 import '../styles/settings.scss';
 import dataProvider from '@/utils/dataProvider';
 import SettingsExplorer from '@/components/settings/SettingsExplorer.vue';
-import RandomPickerSettingsCard from '@/components/settings/cards/RandomPickerSettingsCard.vue';
 
 export default {
   name: 'Settings',
@@ -205,8 +202,7 @@ export default {
     DataProviderSettingsCard,
     ThemeSettingsCard,
     EchoChamberCard,
-    SettingsExplorer,
-    RandomPickerSettingsCard
+    SettingsExplorer
   },
   setup() {
     const { mobile } = useDisplay();
