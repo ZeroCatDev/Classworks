@@ -89,7 +89,11 @@
       <v-btn v-if="showRandomPickerButton" color="amber" prepend-icon="mdi-account-question"
         append-icon="mdi-dice-multiple" size="large" class="ml-2" @click="openRandomPicker">
         随机点名
-      </v-btn><!-- 修改防烧屏提示卡片，使用 tonal 样式减少信息密度 -->
+      </v-btn>
+       <v-btn v-if="showFullscreenButton" :color="state.isFullscreen ? 'blue-grey' : 'blue'"
+         :prepend-icon="state.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'" size="large" class="ml-2"
+         @click="toggleFullscreen">
+         {{ state.isFullscreen ? '退出全屏' : '全屏显示' }}<!-- 修改防烧屏提示卡片，使用 tonal 样式减少信息密度 -->
       <v-card v-if="showAntiScreenBurnCard" border class="mt-4 anti-burn-card" color="primary" variant="tonal">
         <v-card-title class="text-subtitle-1">
           <v-icon start icon="mdi-shield-check" size="small" />
