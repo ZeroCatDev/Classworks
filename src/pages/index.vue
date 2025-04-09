@@ -94,7 +94,7 @@
          :prepend-icon="state.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'" size="large" class="ml-2"
          @click="toggleFullscreen">
          {{ state.isFullscreen ? '退出全屏' : '全屏显示' }}<!-- 修改防烧屏提示卡片，使用 tonal 样式减少信息密度 -->
-      <v-card v-if="showAntiScreenBurnCard" border class="mt-4 anti-burn-card" color="primary" variant="tonal">
+     </v-btn> <v-card v-if="showAntiScreenBurnCard" border class="mt-4 anti-burn-card" color="primary" variant="tonal">
         <v-card-title class="text-subtitle-1">
           <v-icon start icon="mdi-shield-check" size="small" />
           屏幕保护技术已启用
