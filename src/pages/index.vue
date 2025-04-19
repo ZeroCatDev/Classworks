@@ -5,668 +5,289 @@
     </template>
 
     <v-app-bar-title>
-      {{ state.classNumber }} - {{ titleText }}
+      {{ configStore.serverConfig.classNumber }} - {{ titleText }}
     </v-app-bar-title>
 
     <v-spacer />
 
     <template #append>
-      <v-btn icon="mdi-format-font-size-decrease" variant="text" @click="zoom('out')" />
-      <v-btn icon="mdi-format-font-size-increase" variant="text" @click="zoom('up')" />
-      <v-menu v-model="state.datePickerDialog" :close-on-content-click="false">
+      <v-btn
+        icon="mdi-format-font-size-decrease"
+        variant="text"
+        @click="uiStore.zoom('out')"
+      />
+      <v-btn
+        icon="mdi-format-font-size-increase"
+        variant="text"
+        @click="uiStore.zoom('up')"
+      />
+      <v-menu
+        v-model="uiStore.datePickerVisible"
+        :close-on-content-click="false"
+      >
         <template #activator="{ props }">
           <v-btn icon="mdi-calendar" variant="text" v-bind="props" />
         </template>
         <v-card border>
-          <v-date-picker v-model="state.selectedDateObj" :model-value="state.selectedDateObj" color="primary"
-            @update:model-value="handleDateSelect" />
+          <v-date-picker
+            v-model="uiStore.selectedDateObj"
+            color="primary"
+            @update:model-value="handleDateSelect"
+          />
         </v-card>
       </v-menu>
-      <v-btn icon="mdi-refresh" variant="text" :loading="loading.download" @click="downloadData" /> <v-btn
-        icon="mdi-bell" variant="text" :badge="unreadCount || undefined"
-        :badge-color="unreadCount ? 'error' : undefined" @click="$refs.messageLog.drawer = true" />
+      <v-btn
+        icon="mdi-refresh"
+        variant="text"
+        :loading="uiStore.loadingState.download"
+        @click="downloadData"
+      />
+      <v-btn
+        icon="mdi-bell"
+        variant="text"
+        :badge="unreadCount || undefined"
+        :badge-color="unreadCount ? 'error' : undefined"
+        @click="$refs.messageLog.drawer = true"
+      />
       <v-btn icon="mdi-cog" variant="text" @click="$router.push('/settings')" />
-
     </template>
   </v-app-bar>
+
   <div class="d-flex">
     <!-- 主要内容区域 -->
-    <v-container class="main-window flex-grow-1 no-select" fluid>
-      <!-- 有内容的科目卡片 -->
-      <div ref="gridContainer" class="grid-masonry">
-        <TransitionGroup name="grid">
-          <div v-for="item in sortedItems" :key="item.key" class="grid-item" :style="{
-            'grid-row-end': `span ${item.rowSpan}`,
-            order: item.order,
-          }">
-            <v-card border height="100%" class="glow-track" @click="!isEditingDisabled && openDialog(item.key)"
-              @mousemove="handleMouseMove" @touchmove="handleTouchMove">
-              <v-card-title>{{ item.name }}</v-card-title>
-              <v-card-text :style="state.contentStyle">
-                <v-list>
-                  <v-list-item v-for="text in splitPoint(item.content)" :key="text">
-                    {{ text }}
-                  </v-list-item>
-                </v-list>
-              </v-card-text>
-            </v-card>
-          </div>
-        </TransitionGroup>
-      </div>
+    <v-container class="main-window flex-grow-1 no-select" fluid
+      >
+      <subject-grid
+        :homework="dataStore.boardData.homework"
+        :available-subjects="configStore.defaultSubjects"
+        :content-style="uiStore.contentStyle"
+        :empty-subject-display="configStore.featureFlags.emptySubjectDisplay"
+        :dynamic-sort="configStore.featureFlags.dynamicSort"
+        :disabled="isEditingDisabled"
+        @edit="openDialog"
+      />
 
-      <!-- 单独显示空科目 -->
-      <div class="empty-subjects mt-4">
-        <template v-if="emptySubjectDisplay === 'button'">
-          <v-btn-group divided variant="outlined">
-            <v-btn v-for="subject in unusedSubjects" :key="subject.key" :disabled="isEditingDisabled"
-              @click="openDialog(subject.key)">
-              <v-icon start> mdi-plus </v-icon>
-              {{ subject.name }}
-            </v-btn>
-          </v-btn-group>
-        </template>
-        <div v-else class="empty-subjects-grid">
-          <TransitionGroup name="v-list">
-            <v-card v-for="subject in unusedSubjects" :key="subject.key" border class="empty-subject-card"
-              :disabled="isEditingDisabled" @click="openDialog(subject.key)">
-              <v-card-title class="text-subtitle-1">
-                {{ subject.name }}
-              </v-card-title>
-              <v-card-text class="text-center">
-                <v-icon size="small" color="grey"> mdi-plus </v-icon>
-                <div class="text-caption text-grey">点击添加作业</div>
-              </v-card-text>
-            </v-card>
-          </TransitionGroup>
-        </div>
-      </div>
-      <v-btn v-if="!state.synced" color="error" size="large" :loading="loading.upload" class="ml-2"
-        @click="manualUpload">
+      <v-btn
+        v-if="!dataStore.synced"
+        color="error"
+        size="large"
+        :loading="uiStore.loadingState.upload"
+        class="ml-2"
+        @click="manualUpload"
+      >
         上传
       </v-btn>
       <v-btn v-else color="success" size="large" @click="showSyncMessage">
-        同步完成 </v-btn>
-      <v-btn v-if="showRandomPickerButton" color="amber" prepend-icon="mdi-account-question"
-        append-icon="mdi-dice-multiple" size="large" class="ml-2" @click="openRandomPicker">
+        同步完成
+      </v-btn>
+      <v-btn
+        v-if="configStore.featureFlags.showRandomPickerButton"
+        color="amber"
+        prepend-icon="mdi-account-question"
+        append-icon="mdi-dice-multiple"
+        size="large"
+        class="ml-2"
+        @click="openRandomPicker"
+      >
         随机点名
-      </v-btn><!-- 修改防烧屏提示卡片，使用 tonal 样式减少信息密度 -->
-      <v-card v-if="showAntiScreenBurnCard" border class="mt-4 anti-burn-card" color="primary" variant="tonal">
+      </v-btn>
+
+      <!-- 修改防烧屏提示卡片，使用 tonal 样式减少信息密度 -->
+      <v-card
+        v-if="configStore.featureFlags.showAntiScreenBurnCard"
+        border
+        class="mt-4 anti-burn-card"
+        color="primary"
+        variant="tonal"
+      >
         <v-card-title class="text-subtitle-1">
           <v-icon start icon="mdi-shield-check" size="small" />
           屏幕保护技术已启用
         </v-card-title>
         <v-card-text class="text-body-2">
-          <p>本应用采用独立自研的动态像素偏移技术(DPO™)，有效防止LCD屏幕烧屏现象。</p>
-          <p class="text-caption text-grey">*研究显示动态像素偏移技术可以修复屏幕坏点，起到保护屏幕的作用，数据来自实验室。<a
+          <p>
+            本应用采用独立自研的动态像素偏移技术(DPO™)，有效防止LCD屏幕烧屏现象。
+          </p>
+          <p class="text-caption text-grey">
+            *研究显示动态像素偏移技术可以修复屏幕坏点，起到保护屏幕的作用，数据来自实验室。<a
               href="https://patentscope.wipo.int/search/zh/detail.jsf?docId=CN232281523&_cid=P20-M8L0YX-67061-1"
-              target="_blank">专利号CN108648692 </a></p>
-          <p class="text-caption text-grey">*技术已自动适配您的设备，无需手动调整</p>
-
+              target="_blank"
+              >专利号CN108648692
+            </a>
+          </p>
+          <p class="text-caption text-grey">
+            *技术已自动适配您的设备，无需手动调整
+          </p>
         </v-card-text>
       </v-card>
     </v-container>
 
     <!-- 出勤统计区域 -->
-    <v-col v-if="state.studentList && state.studentList.length" class="attendance-area no-select" cols="1"
-      @click="setAttendanceArea()">
-      <h1>出勤</h1>
-      <h2>
-        <snap style="white-space: nowrap"> 应到 </snap>:
-        <snap style="white-space: nowrap">
-          {{
-            state.studentList.length -
-            state.boardData.attendance.exclude.length
-          }}人
-        </snap>
-      </h2>
-      <h2>
-        <snap style="white-space: nowrap"> 实到 </snap>:
-        <snap style="white-space: nowrap">
-          {{
-            state.studentList.length -
-            state.boardData.attendance.absent.length -
-            state.boardData.attendance.late.length -
-            state.boardData.attendance.exclude.length
-          }}人
-        </snap>
-      </h2>
-      <h2>
-        <snap style="white-space: nowrap"> 请假 </snap>:
-        <snap style="white-space: nowrap">
-          {{ state.boardData.attendance.absent.length }}人
-        </snap>
-      </h2>
-      <h3 class="gray-text" v-for="(name, index) in state.boardData.attendance.absent" :key="'absent-' + index">
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name
-        }}</span>
-      </h3>
-      <h2>
-        <snap style="white-space: nowrap">迟到</snap>:
-        <snap style="white-space: nowrap">
-          {{ state.boardData.attendance.late.length }}人
-        </snap>
-      </h2>
-      <h3 class="gray-text" v-for="(name, index) in state.boardData.attendance.late" :key="'late-' + index">
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name
-        }}</span>
-      </h3>
-      <h2>
-        <snap style="white-space: nowrap">不参与</snap>:
-        <snap style="white-space: nowrap">
-          {{ state.boardData.attendance.exclude.length }}人
-        </snap>
-      </h2>
-      <h3 class="gray-text" v-for="(name, index) in state.boardData.attendance.exclude" :key="'exclude-' + index">
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name
-        }}</span>
-      </h3>
-    </v-col>
+    <attendance-manager
+      :student-list="dataStore.studentList"
+      :attendance="dataStore.boardData.attendance"
+      :date-string="dataStore.dateString"
+      @change="dataStore.synced = false"
+      @save="saveAttendance"
+      @update="updateAttendance"
+    />
   </div>
 
-  <v-dialog v-model="state.dialogVisible" width="500" @click:outside="handleClose">
-    <v-card border>
-      <v-card-title>{{ state.dialogTitle }}</v-card-title>
-      <v-card-subtitle>
-        {{ autoSave ? "喵？喵呜！" : "写完后点击上传谢谢喵" }}
-      </v-card-subtitle>
-      <v-card-text>
-        <v-textarea ref="inputRef" v-model="state.textarea" auto-grow placeholder="使用换行表示分条" rows="5" />
-      </v-card-text>
-    </v-card>
-  </v-dialog>
+  <!-- 主题内容编辑对话框 -->
+  <subject-dialog
+    ref="subjectDialog"
+    :subject="currentSubject"
+    :auto-save="canAutoSave"
+    @save="saveSubjectContent"
+  />
 
-  <v-snackbar v-model="state.snackbar" :timeout="2000">
-    {{ state.snackbarText }}
+  <v-snackbar
+    v-model="uiStore.snackbar.visible"
+    :timeout="uiStore.snackbar.timeout"
+  >
+    {{ uiStore.snackbar.text }}
   </v-snackbar>
-
-  <v-dialog v-model="state.attendanceDialog" max-width="900" fullscreen-breakpoint="sm"
-    @update:model-value="handleAttendanceDialogClose">
-    <v-card>
-      <v-card-title class="d-flex align-center">
-        <v-icon icon="mdi-account-group" class="mr-2" />
-        出勤状态管理
-        <v-spacer />
-        <v-chip color="primary" size="small" class="ml-2">
-          {{ state.dateString }}
-        </v-chip>
-      </v-card-title>
-
-      <v-card-text>
-
-
-        <!-- 批量操作和搜索 -->
-        <v-row class="mb-4">
-
-          <v-col cols="12" md="12">
-            <v-text-field v-model="attendanceSearch" prepend-inner-icon="mdi-magnify" label="搜索学生"
-              hint="支持筛选姓氏，如输入'孙'可筛选所有姓孙的学生" variant="outlined" clearable @update:model-value="handleSearchChange" />
-
-            <!-- 姓氏筛选 -->
-            <div class="d-flex flex-wrap mt-2 gap-1">
-              <v-btn v-for="surname in extractedSurnames" :key="surname.name"
-                :variant="attendanceSearch === surname.name ? 'elevated' : 'text'"
-                :color="attendanceSearch === surname.name ? 'primary' : ''"
-                @click="attendanceSearch = attendanceSearch === surname.name ? '' : surname.name">
-                {{ surname.name }}
-                ({{ surname.count }})
-              </v-btn>
-            </div>
-
-          </v-col>
-        </v-row>
-
-        <!-- 过滤器 -->
-        <div class="d-flex flex-wrap mb-4 gap-2">
-          <div>
-            <v-chip value="present" :color="attendanceFilter.includes('present') ? 'success' : ''"
-              :variant="attendanceFilter.includes('present') ? 'elevated' : 'tonal'" class="px-2 filter-chip"
-              @click="toggleFilter('present')" prepend-icon="mdi-account-check"
-              :append-icon="attendanceFilter.includes('present') ? 'mdi-check' : ''">
-              到课
-            </v-chip>
-
-            <v-chip value="absent" :color="attendanceFilter.includes('absent') ? 'error' : ''"
-              :variant="attendanceFilter.includes('absent') ? 'elevated' : 'tonal'" class="px-2 filter-chip"
-              @click="toggleFilter('absent')" prepend-icon="mdi-account-off"
-              :append-icon="attendanceFilter.includes('absent') ? 'mdi-check' : ''">
-              请假
-            </v-chip>
-            <v-chip value="late" :color="attendanceFilter.includes('late') ? 'warning' : ''"
-              :variant="attendanceFilter.includes('late') ? 'elevated' : 'tonal'" class="px-2 filter-chip"
-              @click="toggleFilter('late')" prepend-icon="mdi-clock-alert"
-              :append-icon="attendanceFilter.includes('late') ? 'mdi-check' : ''">
-              迟到
-            </v-chip>
-            <v-chip value="exclude" :color="attendanceFilter.includes('exclude') ? 'grey' : ''"
-              :variant="attendanceFilter.includes('exclude') ? 'elevated' : 'tonal'" class="px-2 filter-chip"
-              @click="toggleFilter('exclude')" prepend-icon="mdi-account-cancel"
-              :append-icon="attendanceFilter.includes('exclude') ? 'mdi-check' : ''">
-              不参与
-            </v-chip>
-          </div>
-        </div>
-
-        <!-- 学生列表 -->
-        <v-row>
-          <v-col v-for="student in filteredStudents" :key="student" cols="12" sm="6" md="6" lg="4">
-            <v-card class="student-card" border>
-              <v-card-text class="d-flex align-center pa-2">
-                <div class="flex-grow-1">
-                  <div class="d-flex align-center">
-                    <v-avatar :color="getStudentStatusColor(state.studentList.indexOf(student))" size="24" class="mr-2">
-                      <v-icon size="small">{{ getStudentStatusIcon(state.studentList.indexOf(student)) }}</v-icon>
-                    </v-avatar>
-                    <div class="text-subtitle-1">{{ student }}</div>
-                  </div>
-                </div>
-                <div class="attendance-actions">
-                  <v-btn :color="isPresent(state.studentList.indexOf(student)) ? 'success' : ''"
-                    icon="mdi-account-check" size="small" variant="text"
-                    @click="setPresent(state.studentList.indexOf(student))" :title="'设为到课'" />
-                  <v-btn :color="isAbsent(state.studentList.indexOf(student)) ? 'error' : ''" icon="mdi-account-off"
-                    size="small" variant="text" @click="setAbsent(state.studentList.indexOf(student))"
-                    :title="'设为请假'" />
-                  <v-btn :color="isLate(state.studentList.indexOf(student)) ? 'warning' : ''" icon="mdi-clock-alert"
-                    size="small" variant="text" @click="setLate(state.studentList.indexOf(student))" :title="'设为迟到'" />
-                  <v-btn :color="isExclude(state.studentList.indexOf(student)) ? 'grey' : ''" icon="mdi-account-cancel"
-                    size="small" variant="text" @click="setExclude(state.studentList.indexOf(student))"
-                    :title="'设为不参与'" />
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row> <v-col cols="12" md="12">
-            <v-card variant="tonal" color="primary" class="mb-4">
-              <v-card-text>
-                <div class="text-subtitle-2 mb-2">批量操作</div>
-                <v-btn-group>
-                  <v-btn color="success" prepend-icon="mdi-account-check" @click="setAllPresent">
-                    全部到齐
-                  </v-btn>
-                  <v-btn color="error" prepend-icon="mdi-account-off" @click="setAllAbsent">
-                    全部请假
-                  </v-btn> </v-btn-group> <v-btn-group>
-
-                  <v-btn color="warning" prepend-icon="mdi-clock-alert" @click="setAllLate">
-                    全部迟到
-                  </v-btn>
-                  <v-btn color="grey" prepend-icon="mdi-account-cancel" @click="setAllExclude">
-                    全部不参与
-                  </v-btn>
-                </v-btn-group>
-              </v-card-text>
-            </v-card>
-          </v-col></v-row>
-      </v-card-text>
-
-      <v-divider />
-
-      <v-card-actions>
-        <v-spacer />
-
-        <v-btn color="primary" @click="saveAttendance">
-          <v-icon start>mdi-content-save</v-icon>
-          保存
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
 
   <message-log ref="messageLog" />
 
   <!-- 添加确认对话框 -->
-  <v-dialog v-model="confirmDialog.show" max-width="400">
+  <v-dialog v-model="uiStore.confirmDialogVisible" max-width="400">
     <v-card>
-      <v-card-title class="text-h6"> 确认保存 </v-card-title>
+      <v-card-title class="text-h6">确认保存</v-card-title>
       <v-card-text>
-        您正在修改 {{ state.dateString }} 的数据，确定要保存吗？
+        您正在修改 {{ dataStore.dateString }} 的数据，确定要保存吗？
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="grey" variant="text" @click="confirmDialog.reject">
+        <v-btn color="grey" variant="text" @click="uiStore.confirmDialogReject">
           取消
         </v-btn>
-        <v-btn color="primary" @click="confirmDialog.resolve"> 确认保存 </v-btn>
+        <v-btn color="primary" @click="uiStore.confirmDialogResolve"
+          >确认保存</v-btn
+        >
       </v-card-actions>
     </v-card>
   </v-dialog>
 
   <!-- 添加随机点名组件 -->
-  <random-picker ref="randomPicker" :student-list="state.studentList" :attendance="state.boardData.attendance" />
-
+  <random-picker
+    ref="randomPicker"
+    :student-list="dataStore.studentList"
+    :attendance="dataStore.boardData.attendance"
+  />
 </template>
 
 <script>
 import MessageLog from "@/components/MessageLog.vue";
-import RandomPicker from "@/components/RandomPicker.vue"; // 导入随机点名组件
-import dataProvider from "@/utils/dataProvider";
-import { getSetting, watchSettings, setSetting } from "@/utils/settings";
-import { useDisplay } from "vuetify";
-import "../styles/index.scss";
-import "../styles/transitions.scss"; // 添加新的样式导入
-import { debounce, throttle } from "@/utils/debounce";
-import '../styles/global.scss';
-import { pinyin } from "pinyin-pro";
+import RandomPicker from "@/components/RandomPicker.vue";
+import SubjectDialog from "@/components/SubjectDialog.vue";
+import SubjectGrid from "@/components/SubjectGrid.vue";
+import AttendanceManager from "@/components/AttendanceManager.vue";
+import { getRelativeDateText, isToday, formatDate } from "@/utils/dateUtils";
+import "@/styles/index.scss";
+import "@/styles/transitions.scss";
+import "@/styles/global.scss";
+
+// Import stores
+import dataStore from "@/store/dataStore";
+import uiStore from "@/store/uiStateStore";
+import configStore from "@/store/configStore";
 
 export default {
   name: "Classworks 作业板",
   components: {
     MessageLog,
-    RandomPicker, // 注册随机点名组件
+    RandomPicker,
+    SubjectDialog,
+    SubjectGrid,
+    AttendanceManager,
   },
+
   data() {
     return {
-      dataKey: "",
-      provider: "",
-      useDisplay: useDisplay,
-      state: {
-        classNumber: "",
-        studentList: [],
-        boardData: {
-          homework: {},
-          attendance: {
-            absent: [],
-            late: [],
-            exclude: [],
-          },
-        },
-        dialogVisible: false,
-        dialogTitle: "",
-        textarea: "",
-        dateString: "", // 从 state 内统一管理日期
-        synced: false,
-        attendDialogVisible: false,
-        contentStyle: { "font-size": `${getSetting("font.size")}px` },
-        uploadLoading: false,
-        downloadLoading: false,
-        snackbar: false,
-        snackbarText: "",
-        fontSize: getSetting("font.size"),
-        datePickerDialog: false,
-        selectedDate: new Date().toISOString().split("T")[0],
-        selectedDateObj: new Date(this.selectedDate),
-        refreshInterval: null,
-        subjectOrder: [
-          "语文",
-          "数学",
-          "英语",
-          "物理",
-          "化学",
-          "生物",
-          "政治",
-          "历史",
-          "地理",
-          "其他",
-        ],
-        showNoDataMessage: false,
-        noDataMessage: "",
-        isToday: false,
-        attendanceDialog: false,
-        availableSubjects: [
-          { key: "语文", name: "语文" },
-          { key: "数学", name: "数学" },
-          { key: "英语", name: "英语" },
-          { key: "物理", name: "物理" },
-          { key: "化学", name: "化学" },
-          { key: "生物", name: "生物" },
-          { key: "政治", name: "政治" },
-          { key: "历史", name: "历史" },
-          { key: "地理", name: "地理" },
-          { key: "其他", name: "其他" },
-        ],
-        isFullscreen: false,
-      },
-      loading: {
-        download: false,
-        upload: false,
-        students: false,
-      },
-      debouncedUpload: null,
-      throttledReflow: null,
-      sortedItemsCache: {
-        key: "",
-        value: [],
-      },
-      confirmDialog: {
-        show: false,
-        resolve: null,
-        reject: null,
-      },
-      attendanceSearch: "",
-      attendanceFilter: [],
+      // Make stores accessible in template
+      dataStore,
+      uiStore,
+      configStore,
+
+      // Unwatch function reference
+      unwatchSettings: null,
     };
   },
 
   computed: {
-    isMobile() {
-      return useDisplay().mobile.value;
-    },
     titleText() {
-      const today = this.getToday();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
+      return getRelativeDateText(dataStore.dateString);
+    },
 
-      const currentDateStr = this.state.dateString;
-      const todayStr = this.formatDate(today);
-      const yesterdayStr = this.formatDate(yesterday);
-
-      if (currentDateStr === todayStr) {
-        return "今天的作业";
-      } else if (currentDateStr === yesterdayStr) {
-        return "昨天的作业";
-      } else {
-        return `${currentDateStr}的作业`;
-      }
-    },
-    sortedItems() {
-      const key = `${JSON.stringify(
-        this.state.boardData.homework
-      )}_${this.state.subjectOrder.join()}_${this.dynamicSort}`;
-      if (this.sortedItemsCache.key === key) {
-        return this.sortedItemsCache.value;
-      }
-
-      const items = Object.entries(this.state.boardData.homework)
-        .filter(([, value]) => value.content?.trim())
-        .map(([key, value]) => ({
-          key,
-          name:
-            this.state.availableSubjects.find((s) => s.key === key)?.name ||
-            key,
-          content: value.content,
-          order: this.state.subjectOrder.indexOf(key),
-          rowSpan: Math.ceil(
-            (value.content.split("\n").filter((line) => line.trim()).length +
-              1) *
-            0.8
-          ),
-        }));
-
-      const result = this.dynamicSort
-        ? this.optimizeGridLayout(items)
-        : items.sort((a, b) => a.order - b.order);
-
-      this.updateSortedItemsCache(key, result);
-
-      return result;
-    },
-    unusedSubjects() {
-      const usedKeys = Object.keys(this.state.boardData.homework).filter(
-        key => this.state.boardData.homework[key].content?.trim()
-      );
-      return this.state.availableSubjects.filter(
-        (subject) => !usedKeys.includes(subject.key)
-      );
-    },
-    emptySubjects() {
-      if (this.emptySubjectDisplay !== "button") return [];
-      return this.unusedSubjects;
-    },
-    autoSave() {
-      return getSetting("edit.autoSave");
-    },
-    blockNonTodayAutoSave() {
-      return getSetting("edit.blockNonTodayAutoSave");
-    },
-    isToday() {
-      const today = new Date().toISOString().split("T")[0];
-      return this.state.dateString === today;
-    },
     canAutoSave() {
-      // 只考虑自动保存开关和非当天限制
-      return this.autoSave && (!this.blockNonTodayAutoSave || this.isToday);
+      // Only consider auto save toggle and non-today restriction
+      return (
+        configStore.featureFlags.autoSave &&
+        (!configStore.featureFlags.blockNonTodayAutoSave || this.isTodayData)
+      );
     },
+
+    isTodayData() {
+      return isToday(dataStore.dateString);
+    },
+
     needConfirmSave() {
-      // 只在非今天且开启了确认选项时需要确认
-      return !this.isToday && this.confirmNonTodaySave;
+      // Only in non-today and confirmation option is enabled
+      return !this.isTodayData && configStore.featureFlags.confirmNonTodaySave;
     },
+
     shouldShowBlockedMessage() {
-      // 只在非今天且开启了自动保存和禁止非当天自动保存时提示
-      return !this.isToday && this.autoSave && this.blockNonTodayAutoSave;
+      // Only in non-today, auto save is on and non-today auto save is blocked
+      return (
+        !this.isTodayData &&
+        configStore.featureFlags.autoSave &&
+        configStore.featureFlags.blockNonTodayAutoSave
+      );
     },
-    refreshBeforeEdit() {
-      return getSetting("edit.refreshBeforeEdit");
-    },
-    emptySubjectDisplay() {
-      return getSetting("display.emptySubjectDisplay");
-    },
-    dynamicSort() {
-      return getSetting("display.dynamicSort");
-    },
+
     isEditingDisabled() {
-      return this.state.uploadLoading || this.state.downloadLoading;
+      return uiStore.loadingState.upload || uiStore.loadingState.download;
     },
+
     unreadCount() {
       return this.$refs.messageLog?.unreadCount || 0;
     },
-    showRandomPickerButton() {
-      return getSetting("randomPicker.enabled");
-    },
-    confirmNonTodaySave() {
-      return getSetting("edit.confirmNonTodaySave");
-    },
-    shouldShowSaveConfirm() {
-      return !this.isToday && this.confirmNonTodaySave;
-    },
-    shouldBlockAutoSave() {
-      return !this.isToday && this.autoSave && this.blockNonTodayAutoSave;
-    },
-    showFullscreenButton() {
-      return getSetting("display.showFullscreenButton");
-    },
-    showAntiScreenBurnCard() {
-      return getSetting("display.showAntiScreenBurnCard");
-    },
-    filteredStudents() {
-      let students = [...this.state.studentList];
 
-      // 应用搜索过滤
-      if (this.attendanceSearch) {
-        const searchTerm = this.attendanceSearch.toLowerCase();
-        students = students.filter(student =>
-          student.toLowerCase().includes(searchTerm)
-        );
-      }
+    currentSubject() {
+      if (!uiStore.currentSubjectKey) return { name: "", content: "" };
 
-      // 应用状态过滤
-      if (this.attendanceFilter && this.attendanceFilter.length > 0) {
-        students = students.filter(student => {
-          const index = this.state.studentList.indexOf(student);
-          if (this.attendanceFilter.includes('present') && this.isPresent(index)) return true;
-          if (this.attendanceFilter.includes('absent') && this.isAbsent(index)) return true;
-          if (this.attendanceFilter.includes('late') && this.isLate(index)) return true;
-          if (this.attendanceFilter.includes('exclude') && this.isExclude(index)) return true;
-          return false;
-        });
-      }
-
-      return students;
+      return dataStore.getSubject(
+        uiStore.currentSubjectKey,
+        configStore.defaultSubjects
+      );
     },
-    extractedSurnames() {
-      // 从学生名单中提取姓氏并统计数量
-      if (!this.state.studentList || this.state.studentList.length === 0) {
-        return [];
-      }
-
-      const surnameMap = new Map();
-
-      this.state.studentList.forEach(student => {
-        if (student && student.length > 0) {
-          // 中文姓名通常姓在前，取第一个字作为姓氏
-          const surname = student.charAt(0);
-          if (surnameMap.has(surname)) {
-            surnameMap.set(surname, surnameMap.get(surname) + 1);
-          } else {
-            surnameMap.set(surname, 1);
-          }
-        }
-      });
-
-      // 转换为数组并按拼音排序
-      return Array.from(surnameMap.entries())
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => {
-          const pinyinA = pinyin(a.name, { toneType: "none", mode: 'surname' });
-          const pinyinB = pinyin(b.name, { toneType: "none", mode: 'surname' });
-          return pinyinA.localeCompare(pinyinB);
-        });
-    },
-  },
-
-  watch: {
-    homeworkData: {
-      handler() {
-        this.$nextTick(() => {
-          if (this.$refs.waterfall) {
-            this.$refs.waterfall.reflow();
-          }
-        });
-      },
-      deep: true,
-    },
-    "$vuetify.display.width": {
-      handler() {
-        this.throttledReflow();
-      },
-      deep: true,
-    },
-  },
-
-  created() {
-    // 创建防抖的上传函数
-    this.debouncedUpload = debounce(this.uploadData, 2000);
-    // 创建节流的重排函数
-    this.throttledReflow = throttle(() => {
-      if (this.$refs.gridContainer) {
-        this.optimizeGridLayout(this.sortedItems);
-      }
-    }, 200);
   },
 
   async mounted() {
     try {
-      this.updateBackendUrl();
+      // Initialize configuration
+      configStore.initialize();
+
+      // Initialize data
       await this.initializeData();
-      this.setupAutoRefresh();
-      this.unwatchSettings = watchSettings(() => {
-        this.updateSettings();
+
+      // Set up auto refresh
+      uiStore.setupAutoRefresh(this.downloadData, this.shouldSkipRefresh);
+
+      // Set up settings watcher
+      this.unwatchSettings = configStore.watchSettings(() => {
+        uiStore.updateFromSettings();
       });
 
-      // 监听全屏变化事件
-      document.addEventListener('fullscreenchange', this.fullscreenChangeHandler);
-      document.addEventListener('webkitfullscreenchange', this.fullscreenChangeHandler);
-      document.addEventListener('mozfullscreenchange', this.fullscreenChangeHandler);
-      document.addEventListener('MSFullscreenChange', this.fullscreenChangeHandler);
-
-      // 检查URL哈希值，如果包含#pick则自动打开随机点名
+      // Check URL hash for random picker
       this.checkHashForRandomPicker();
 
-      // 添加哈希变化监听器
-      window.addEventListener('hashchange', this.checkHashForRandomPicker);
+      // Add hash change listener
+      window.addEventListener("hashchange", this.checkHashForRandomPicker);
     } catch (err) {
-      console.error("初始化失败:", err);
-      this.showError("初始化失败，请刷新页面重试");
+      console.error("Initialization failed:", err);
+      this.showMessage("初始化失败，请刷新页面重试", "error");
     }
   },
 
@@ -674,123 +295,48 @@ export default {
     if (this.unwatchSettings) {
       this.unwatchSettings();
     }
-    if (this.state.refreshInterval) {
-      // 注意刷新间隔存放在 state 内
-      clearInterval(this.state.refreshInterval);
-    }
 
-    // 移除全屏变化事件监听
-    document.removeEventListener('fullscreenchange', this.fullscreenChangeHandler);
-    document.removeEventListener('webkitfullscreenchange', this.fullscreenChangeHandler);
-    document.removeEventListener('mozfullscreenchange', this.fullscreenChangeHandler);
-    document.removeEventListener('MSFullscreenChange', this.fullscreenChangeHandler);
+    // Clean up UI resources
+    uiStore.cleanup();
 
-    // 移除哈希变化监听器
-    window.removeEventListener('hashchange', this.checkHashForRandomPicker);
+    // Remove hash change listener
+    window.removeEventListener("hashchange", this.checkHashForRandomPicker);
   },
 
   methods: {
-    // 添加新的日期辅助方法
-    ensureDate(dateInput) {
-      if (dateInput instanceof Date) {
-        return dateInput;
-      }
-      if (typeof dateInput === "string") {
-        const date = new Date(dateInput);
-        if (!isNaN(date.getTime())) {
-          return date;
-        }
-      }
-      return new Date(); // 如果无法解析，返回当前日期
-    },
-
-    formatDate(dateInput) {
-      const date = this.ensureDate(dateInput);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
-    },
-
-    getToday() {
-      return new Date();
-    },
-
     async initializeData() {
-      this.provider = getSetting("server.provider");
-      const domain = getSetting("server.domain");
-      const classNum = getSetting("server.classNumber");
-
-      this.dataKey =
-        this.provider === "server" ? `${domain}/${classNum}` : classNum;
-      this.state.classNumber = classNum;
-
-      // 从 URL 获取日期，如果没有则使用今天的日期
+      // Get URL parameters for date
       const urlParams = new URLSearchParams(window.location.search);
       const dateFromUrl = urlParams.get("date");
-      const today = this.getToday();
 
-      // 确保日期格式正确
-      const currentDate = dateFromUrl ? new Date(dateFromUrl) : today;
-      this.state.dateString = this.formatDate(currentDate);
-      this.state.selectedDate = this.state.dateString;
-      this.state.isToday =
-        this.formatDate(currentDate) === this.formatDate(today);
+      // Set date (default to today if not specified)
+      dataStore.dateString = formatDate(dateFromUrl || new Date());
+      uiStore.selectedDateObj = new Date(dataStore.dateString);
 
+      // Load data and config in parallel
       await Promise.all([this.downloadData(), this.loadConfig()]);
     },
 
     async downloadData() {
-      if (this.loading.download) return;
+      if (uiStore.loadingState.download) return;
 
       try {
-        this.loading.download = true;
-        const response = await dataProvider.loadData(
-          this.provider,
-          this.dataKey,
-          this.state.dateString
+        uiStore.loadingState.download = true;
+        await dataStore.loadData(
+          configStore.serverConfig.provider,
+          configStore.dataKey,
+          dataStore.dateString
         );
-
-        if (!response.success) {
-          if (response.error.code === "NOT_FOUND") {
-            this.state.showNoDataMessage = true;
-            this.state.noDataMessage = response.error.message;
-            // 确保数据结构完整
-            this.state.boardData = {
-              homework: {},
-              attendance: { absent: [], late: [], exclude: [] },
-            };
-          } else {
-            throw new Error(response.error.message);
-          }
-        } else {
-          // 确保数据结构完整
-          this.state.boardData = {
-            homework: response.data.homework || {},
-            attendance: {
-              absent: response.data.attendance?.absent || [],
-              late: response.data.attendance?.late || [],
-              exclude: response.data.attendance?.exclude || [],
-            },
-          };
-          this.state.synced = true;
-          this.state.showNoDataMessage = false;
-          this.$message.success("下载成功", "数据已更新");
-        }
+        this.$message.success("下载成功", "数据已更新");
       } catch (error) {
-        // 发生错误时也要确保数据结构完整
-        this.state.boardData = {
-          homework: {},
-          attendance: { absent: [], late: [], exclude: [] },
-        };
         this.$message.error("下载失败", error.message);
       } finally {
-        this.loading.download = false;
+        uiStore.loadingState.download = false;
       }
     },
 
     async trySave(isAutoSave = false) {
-      // 如果是自动保存但不满足自动保存条件
+      // If auto save but doesn't meet auto save conditions
       if (isAutoSave && !this.canAutoSave) {
         if (this.shouldShowBlockedMessage) {
           this.showMessage(
@@ -802,16 +348,16 @@ export default {
         return false;
       }
 
-      // 如果需要确认且不是自动保存
+      // If needs confirmation and not auto save
       if (!isAutoSave && this.needConfirmSave) {
         try {
-          await this.showConfirmDialog();
+          await uiStore.showConfirmDialog();
         } catch {
           return false;
         }
       }
 
-      // 尝试保存
+      // Try to save
       try {
         await this.uploadData();
         return true;
@@ -821,68 +367,30 @@ export default {
       }
     },
 
-    async handleClose() {
-      if (!this.currentEditSubject) return;
-
-      const content = this.state.textarea.trim();
-      const originalContent =
-        this.state.boardData.homework[this.currentEditSubject]?.content || "";
-
-      // 如果内容发生变化(包括清空)，就视为修改
-      if (content !== originalContent.trim()) {
-        // 无论内容是否为空，都保留科目结构
-        this.state.boardData.homework[this.currentEditSubject] = {
-          content: content,
-        };
-
-        this.state.synced = false;
-
-        // 处理自动保存
-        if (this.autoSave) {
-          await this.trySave(true);
-        }
-      }
-
-      this.state.dialogVisible = false;
-    },
-
     async uploadData() {
-      if (this.loading.upload) return;
+      if (uiStore.loadingState.upload) return;
 
       try {
-        this.loading.upload = true;
-        const response = await dataProvider.saveData(
-          this.provider,
-          this.dataKey,
-          this.state.boardData,
-          this.state.dateString // 添加dateString参数
+        uiStore.loadingState.upload = true;
+        await dataStore.saveData(
+          configStore.serverConfig.provider,
+          configStore.dataKey,
+          dataStore.dateString
         );
-
-        if (!response.success) {
-          throw new Error(response.error.message);
-        }
-
-        this.state.synced = true;
-        this.$message.success(response.message || "保存成功");
+        this.$message.success("保存成功");
       } finally {
-        this.loading.upload = false;
+        uiStore.loadingState.upload = false;
       }
     },
 
     async loadConfig() {
       try {
-        const response = await dataProvider.loadConfig(
-          this.provider,
-          this.dataKey
+        await dataStore.loadConfig(
+          configStore.serverConfig.provider,
+          configStore.dataKey
         );
-
-        if (!response.success) {
-          throw new Error(response.error.message);
-        }
-
-        this.state.studentList = response.data.studentList || [];
       } catch (error) {
-        console.error("加载配置失败:", error);
+        console.error("Failed to load config:", error);
         this.$message.error("加载配置失败", error.message);
       }
     },
@@ -892,7 +400,7 @@ export default {
     },
 
     async openDialog(subject) {
-      if (this.refreshBeforeEdit) {
+      if (configStore.featureFlags.refreshBeforeEdit) {
         try {
           await this.downloadData();
         } catch (err) {
@@ -901,161 +409,68 @@ export default {
         }
       }
 
-      this.currentEditSubject = subject;
-      // 如果是新科目，需要创建对应的精简数据结构
-      if (!this.state.boardData.homework[subject]) {
-        this.state.boardData.homework[subject] = {
+      uiStore.setCurrentSubject(subject);
+
+      // If new subject, create empty structure
+      if (!dataStore.boardData.homework[subject]) {
+        dataStore.boardData.homework[subject] = {
           content: "",
         };
       }
-      this.state.dialogTitle =
-        this.state.availableSubjects.find((s) => s.key === subject)?.name ||
-        subject;
-      this.state.textarea = this.state.boardData.homework[subject].content;
-      this.state.dialogVisible = true;
-      this.$nextTick(() => {
-        if (this.$refs.inputRef) {
-          this.$refs.inputRef.focus();
-        }
-      });
+
+      this.$refs.subjectDialog.open();
     },
 
-    splitPoint(content) {
-      return content.split("\n").filter((text) => text.trim());
-    },
+    saveSubjectContent(content) {
+      if (!uiStore.currentSubjectKey) return;
 
-    setAttendanceArea() {
-      this.state.attendanceDialog = true;
-    },
+      dataStore.setHomework(uiStore.currentSubjectKey, content);
 
-    toggleStudentStatus(index) {
-      const student = this.state.studentList[index];
-      if (this.state.boardData.attendance.absent.includes(student)) {
-        this.state.boardData.attendance.absent =
-          this.state.boardData.attendance.absent.filter(
-            (name) => name !== student
-          );
-        this.state.boardData.attendance.late.push(student);
-      } else if (this.state.boardData.attendance.late.includes(student)) {
-        this.state.boardData.attendance.late =
-          this.state.boardData.attendance.late.filter(
-            (name) => name !== student
-          );
-        this.state.boardData.attendance.exclude.push(student);
-      } else if (this.state.boardData.attendance.exclude.includes(student)) {
-        this.state.boardData.attendance.exclude =
-          this.state.boardData.attendance.exclude.filter(
-            (name) => name !== student
-          );
-      } else {
-        this.state.boardData.attendance.absent.push(student);
-      }
-      this.state.synced = false;
-      if (this.canAutoSave) {
-        this.uploadData();
+      // Handle auto save
+      if (configStore.featureFlags.autoSave) {
+        this.trySave(true);
       }
     },
 
-    cleanstudentslist() {
-      this.state.boardData.attendance.absent = [];
-      this.state.boardData.attendance.late = [];
-      this.state.boardData.attendance.exclude = [];
-      this.state.synced = false;
-      if (this.canAutoSave) {
-        this.uploadData();
-      }
-    },
-
-    zoom(direction) {
-      const step = 2;
-      if (direction === "up" && this.state.fontSize < 100) {
-        this.state.fontSize += step;
-      } else if (direction === "out" && this.state.fontSize > 16) {
-        this.state.fontSize -= step;
-      }
-      this.state.contentStyle = {
-        "font-size": `${this.state.fontSize}px`,
-      };
-      setSetting("font.size", this.state.fontSize);
-    },
-
-    updateBackendUrl() {
-      const provider = getSetting("server.provider");
-      const domain = getSetting("server.domain");
-      const classNum = getSetting("server.classNumber");
-
-      this.provider = provider;
-      this.dataKey = provider === "server" ? `${domain}/${classNum}` : classNum;
-      this.state.classNumber = classNum;
-    },
-
-    setupAutoRefresh() {
-      const autoRefresh = getSetting("refresh.auto");
-      const interval = getSetting("refresh.interval");
-      if (this.state.refreshInterval) {
-        clearInterval(this.state.refreshInterval);
-      }
-      if (autoRefresh) {
-        this.state.refreshInterval = setInterval(() => {
-          // 检查是否应该跳过刷新
-          if (!this.shouldSkipRefresh()) {
-            this.downloadData();
-          }
-        }, interval * 1000);
-      }
-    },
-
-    // 新增方法：检查是否应该跳过自动刷新
+    // Check if auto refresh should be skipped
     shouldSkipRefresh() {
-      // 如果对话框打开，跳过刷新
-      if (this.state.dialogVisible) return true;
+      // If dialog is open, skip refresh
+      if (this.$refs.subjectDialog?.dialogVisible) return true;
 
-      // 如果出勤对话框打开，跳过刷新
-      if (this.state.attendanceDialog) return true;
+      // If confirm dialog is open, skip refresh
+      if (uiStore.confirmDialogVisible) return true;
 
-      // 如果确认对话框打开，跳过刷新
-      if (this.confirmDialog.show) return true;
+      // If date picker is open, skip refresh
+      if (uiStore.datePickerVisible) return true;
 
-      // 如果日期选择器打开，跳过刷新
-      if (this.state.datePickerDialog) return true;
+      // If loading, skip refresh
+      if (uiStore.loadingState.upload || uiStore.loadingState.download)
+        return true;
 
-      // 如果正在上传或下载数据，跳过刷新
-      if (this.loading.upload || this.loading.download) return true;
+      // If data is not synced (has unsaved changes), skip refresh
+      if (!dataStore.synced) return true;
 
-      // 如果数据未同步（有未保存的更改），跳过刷新
-      if (!this.state.synced) return true;
-
-      // 没有特殊状态，可以刷新
+      // No special condition, don't skip refresh
       return false;
-    },
-
-    updateSettings() {
-      this.state.fontSize = getSetting("font.size");
-      this.state.contentStyle = { "font-size": `${this.state.fontSize}px` };
-      this.setupAutoRefresh();
-      this.updateBackendUrl();
     },
 
     handleDateSelect(newDate) {
       if (!newDate) return;
 
       try {
-        const selectedDate = this.ensureDate(newDate);
-        const formattedDate = this.formatDate(selectedDate);
+        const formattedDate = formatDate(newDate);
 
-        // 只有当日期真正改变时才更新
-        if (this.state.dateString !== formattedDate) {
-          this.state.dateString = formattedDate;
-          this.state.selectedDate = formattedDate;
-          this.state.isToday =
-            formattedDate === this.formatDate(this.getToday());
+        // Only update if date actually changed
+        if (dataStore.dateString !== formattedDate) {
+          dataStore.dateString = formattedDate;
+          uiStore.selectedDateObj = new Date(newDate);
 
-          // 使用 replace 而不是 push 来避免创建新的历史记录
+          // Use replace instead of push to avoid creating new history record
           this.$router
             .replace({
               query: { date: formattedDate },
             })
-            .catch(() => { });
+            .catch(() => {});
           this.downloadData();
         }
       } catch (error) {
@@ -1064,343 +479,22 @@ export default {
       }
     },
 
-    optimizeGridLayout(items) {
-      // 设置最大列数
-      const maxColumns = Math.min(3, Math.floor(window.innerWidth / 300));
-      if (maxColumns <= 1) return items;
-
-      // 使用贪心算法分配
-      const columns = Array.from({ length: maxColumns }, () => ({
-        height: 0,
-        items: [],
-      }));
-
-      items.forEach((item) => {
-        const shortestColumn = columns.reduce(
-          (min, col, i) => (col.height < columns[min].height ? i : min),
-          0
-        );
-        columns[shortestColumn].items.push(item);
-        columns[shortestColumn].height += item.rowSpan;
-      });
-
-      // 展平结果并添加顺序
-      return columns
-        .flatMap((col) => col.items)
-        .map((item, index) => ({
-          ...item,
-          order: index,
-        }));
-    },
-
-    fixedGridLayout(items) {
-      const rowSubjects = [
-        ["语文", "数学", "英语"],
-        ["物理", "化学", "生物"],
-        ["政治", "历史", "地理", "其他"],
-      ];
-      return items
-        .sort((a, b) => {
-          const getRowIndex = (subject) => {
-            for (let i = 0; i < rowSubjects.length; i++) {
-              if (rowSubjects[i].includes(subject)) {
-                return i;
-              }
-            }
-            return rowSubjects.length;
-          };
-          const getColumnIndex = (subject) => {
-            for (const row of rowSubjects) {
-              const index = row.indexOf(subject);
-              if (index !== -1) return index;
-            }
-            return 999;
-          };
-          const rowA = getRowIndex(a.key);
-          const rowB = getRowIndex(b.key);
-          if (rowA !== rowB) {
-            return rowA - rowB;
-          }
-          const colA = getColumnIndex(a.key);
-          const colB = getColumnIndex(b.key);
-          return colA - colB;
-        })
-        .map((item, index) => ({
-          ...item,
-          order: index,
-          rowSpan: item.content ? 2 : 1,
-        }));
-    },
-
-    setAllPresent() {
-      this.state.boardData.attendance = {
-        absent: [],
-        late: [],
-        exclude: [],
-      };
-      this.state.synced = false;
-    },
-
-    setAllAbsent() {
-      this.state.boardData.attendance.absent = [...this.state.studentList];
-      this.state.boardData.attendance.late = [];
-      this.state.boardData.attendance.exclude = [];
-      this.state.synced = false;
-    },
-
-    setAllLate() {
-      this.state.boardData.attendance.absent = [];
-      this.state.boardData.attendance.late = [...this.state.studentList];
-      this.state.boardData.attendance.exclude = [];
-      this.state.synced = false;
-    },
-    setAllExclude() {
-      this.state.boardData.attendance.absent = [];
-      this.state.boardData.attendance.late = [];
-      this.state.boardData.attendance.exclude = [...this.state.studentList];
-      this.state.synced = false;
-    },
-
-    isPresent(index) {
-      const student = this.state.studentList[index];
-      const { absent, late, exclude } = this.state.boardData.attendance;
-      return (
-        !absent.includes(student) &&
-        !late.includes(student) &&
-        !exclude.includes(student)
-      );
-    },
-
-    isAbsent(index) {
-      return this.state.boardData.attendance.absent.includes(
-        this.state.studentList[index]
-      );
-    },
-
-    isLate(index) {
-      return this.state.boardData.attendance.late.includes(
-        this.state.studentList[index]
-      );
-    },
-
-    isExclude(index) {
-      return this.state.boardData.attendance.exclude.includes(
-        this.state.studentList[index]
-      );
-    },
-
-    setPresent(index) {
-      const student = this.state.studentList[index];
-      // 从所有状态列表中移除该学生
-      this.state.boardData.attendance.absent = this.state.boardData.attendance.absent.filter(
-        (name) => name !== student
-      );
-      this.state.boardData.attendance.late = this.state.boardData.attendance.late.filter(
-        (name) => name !== student
-      );
-      this.state.boardData.attendance.exclude = this.state.boardData.attendance.exclude.filter(
-        (name) => name !== student
-      );
-      this.state.synced = false;
-    },
-
-    setAbsent(index) {
-      const student = this.state.studentList[index];
-      // 先从所有状态列表中移除该学生
-      this.setPresent(index);
-      // 然后添加到请假列表
-      this.state.boardData.attendance.absent.push(student);
-      this.state.synced = false;
-    },
-
-    setLate(index) {
-      const student = this.state.studentList[index];
-      // 先从所有状态列表中移除该学生
-      this.setPresent(index);
-      // 然后添加到迟到列表
-      this.state.boardData.attendance.late.push(student);
-      this.state.synced = false;
-    },
-
-    setExclude(index) {
-      const student = this.state.studentList[index];
-      // 先从所有状态列表中移除该学生
-      this.setPresent(index);
-      // 然后添加到不参与列表
-      this.state.boardData.attendance.exclude.push(student);
-      this.state.synced = false;
-    },
-
-    async saveAttendance() {
-      try {
-        await this.trySave(true);
-        this.state.attendanceDialog = false;
-      } catch (error) {
-        console.error("保存出勤状态失败:", error);
-        this.$message.error("保存失败", "请重试");
-      }
-    },
-
     showMessage(title, content = "", type = "success") {
       this.$message[type](title, content);
     },
 
-    updateSortedItemsCache(key, value) {
-      this._sortedItemsCache = {
-        key,
-        value,
-      };
-    },
-
-    handleMouseMove(e) {
-      const card = e.currentTarget;
-      const rect = card.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      card.style.setProperty('--x', `${x}%`);
-      card.style.setProperty('--y', `${y}%`);
-    },
-
-    handleTouchMove(e) {
-      if (e.touches.length === 1) {
-        const touch = e.touches[0];
-        const card = e.currentTarget;
-        const rect = card.getBoundingClientRect();
-        const x = ((touch.clientX - rect.left) / rect.width) * 100;
-        const y = ((touch.clientY - rect.top) / rect.height) * 100;
-        card.style.setProperty('--x', `${x}%`);
-        card.style.setProperty('--y', `${y}%`);
-      }
-    },
-
-    showConfirmDialog() {
-      return new Promise((resolve, reject) => {
-        this.confirmDialog = {
-          show: true,
-          resolve: () => {
-            this.confirmDialog.show = false;
-            resolve();
-          },
-          reject: () => {
-            this.confirmDialog.show = false;
-            reject(new Error("用户取消保存"));
-          },
-        };
-      });
-    },
-
-    confirmSave() {
-      this.confirmDialog.show = false;
-      if (this.confirmDialog.resolve) {
-        this.confirmDialog.resolve(true);
-      }
-    },
-
-    cancelSave() {
-      this.confirmDialog.show = false;
-      if (this.confirmDialog.reject) {
-        this.confirmDialog.reject(new Error("用户取消保存"));
-      }
-    },
-
-    // 点击上传按钮时调用
+    // Manual upload button
     async manualUpload() {
       return this.trySave(false);
     },
 
-    async handleAttendanceDialogClose(newValue) {
-      if (!newValue && !this.state.synced) {
-        // 对话框关闭且数据未同步时尝试保存
-        await this.trySave(true);
-      }
+    saveAttendance(attendance) {
+      dataStore.updateAttendance(attendance);
+      this.trySave(true);
     },
 
-    // 全屏相关方法
-    toggleFullscreen() {
-      if (!this.state.isFullscreen) {
-        this.enterFullscreen();
-      } else {
-        this.exitFullscreen();
-      }
-    },
-
-    enterFullscreen() {
-      const docElm = document.documentElement;
-
-      if (docElm.requestFullscreen) {
-        docElm.requestFullscreen();
-      } else if (docElm.webkitRequestFullScreen) {
-        docElm.webkitRequestFullScreen();
-      } else if (docElm.mozRequestFullScreen) {
-        docElm.mozRequestFullScreen();
-      } else if (docElm.msRequestFullscreen) {
-        docElm.msRequestFullscreen();
-      }
-    },
-
-    exitFullscreen() {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
-    },
-
-    fullscreenChangeHandler() {
-      this.state.isFullscreen = !!(
-        document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        document.msFullscreenElement
-      );
-    },
-
-    getStudentStatusColor(index) {
-      const studentName = this.state.studentList[index];
-      if (this.state.boardData.attendance.absent.includes(studentName)) return 'error';
-      if (this.state.boardData.attendance.late.includes(studentName)) return 'warning';
-      if (this.state.boardData.attendance.exclude.includes(studentName)) return 'grey';
-      return 'success';
-    },
-
-    getStudentStatusVariant(index) {
-      const studentName = this.state.studentList[index];
-      if (this.state.boardData.attendance.absent.includes(studentName) ||
-        this.state.boardData.attendance.late.includes(studentName) ||
-        this.state.boardData.attendance.exclude.includes(studentName)) {
-        return 'tonal';
-      }
-      return 'outlined';
-    },
-
-    getStudentStatusIcon(index) {
-      const studentName = this.state.studentList[index];
-      if (this.state.boardData.attendance.absent.includes(studentName)) return 'mdi-account-off';
-      if (this.state.boardData.attendance.late.includes(studentName)) return 'mdi-clock-alert';
-      if (this.state.boardData.attendance.exclude.includes(studentName)) return 'mdi-account-cancel';
-      return 'mdi-account-check';
-    },
-
-    getStudentStatusText(index) {
-      const studentName = this.state.studentList[index];
-      if (this.state.boardData.attendance.absent.includes(studentName)) return '请假';
-      if (this.state.boardData.attendance.late.includes(studentName)) return '迟到';
-      if (this.state.boardData.attendance.exclude.includes(studentName)) return '不参与';
-      return '到课';
-    },
-
-
-    toggleFilter(filter) {
-      const index = this.attendanceFilter.indexOf(filter);
-      if (index === -1) {
-        this.attendanceFilter.push(filter);
-      } else {
-        this.attendanceFilter.splice(index, 1);
-      }
+    updateAttendance(attendance) {
+      dataStore.updateAttendance(attendance);
     },
 
     openRandomPicker() {
@@ -1410,10 +504,9 @@ export default {
     },
 
     checkHashForRandomPicker() {
-      if (window.location.hash === '#random-picker') {
+      if (window.location.hash === "#random-picker") {
         this.$nextTick(() => {
-          console.log("打开随机点名");
-          window.location.hash = '';
+          window.location.hash = "";
           this.openRandomPicker();
         });
       }
@@ -1421,3 +514,18 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.main-window {
+  padding: 1rem;
+  max-width: 100%;
+}
+
+.no-select {
+  user-select: none;
+}
+
+.anti-burn-card {
+  max-width: 600px;
+}
+</style>
