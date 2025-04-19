@@ -40,7 +40,9 @@
         <v-col cols="12" md="6">
           <theme-settings-card border />
         </v-col>
-
+        <v-col cols="12">
+          <settings-link-generator border />
+        </v-col>
         <!-- 开发者选项卡片 -->
         <v-col :cols="12" :md="settings.developer.enabled ? 12 : 6">
           <settings-card
@@ -187,7 +189,7 @@ import AboutCard from '@/components/settings/AboutCard.vue';
 import '../styles/settings.scss';
 import dataProvider from '@/utils/dataProvider';
 import SettingsExplorer from '@/components/settings/SettingsExplorer.vue';
-
+import SettingsLinkGenerator from '@/components/SettingsLinkGenerator.vue';
 export default {
   name: 'Settings',
   components: {
@@ -202,7 +204,8 @@ export default {
     DataProviderSettingsCard,
     ThemeSettingsCard,
     EchoChamberCard,
-    SettingsExplorer
+    SettingsExplorer,
+    SettingsLinkGenerator
   },
   setup() {
     const { mobile } = useDisplay();
