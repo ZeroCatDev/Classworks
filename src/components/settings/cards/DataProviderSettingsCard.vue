@@ -50,6 +50,16 @@
             查看
           </v-btn>
         </template>
+      </v-list-item> <v-list-item>
+        <template #prepend>
+          <v-icon icon="mdi-lan-connect" class="mr-3" />
+        </template>
+        <v-list-item-title>CSES转WakeUP工具</v-list-item-title>
+        <template #append>
+          <v-btn variant="tonal" to="/cses2wakeup">
+            查看
+          </v-btn>
+        </template>
       </v-list-item>
     </v-list>
 
