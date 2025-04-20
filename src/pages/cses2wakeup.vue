@@ -1,12 +1,13 @@
-<template>x
+<template>
   <v-container class="fill-height">
     <v-row>
       <v-col cols="12">
         <v-card class="elevation-12" border>
-          <v-card-title class="text-h5 text-center pt-6">
+          <v-card-title >
             课程表转换工具
           </v-card-title>
-
+          <v-card-subtitle>    请在CSES中将数据格式改为“通用CSES(JSON)”
+          </v-card-subtitle>
           <v-card-text>
             <v-alert
               v-if="error"
