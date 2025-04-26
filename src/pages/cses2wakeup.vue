@@ -317,6 +317,15 @@
                   <v-icon start size="x-small">mdi-clock-outline</v-icon>
                   {{ totalClassHours }} 课时
                 </v-chip>
+                <v-tooltip v-if="exportPeriods.length > 0">
+                  <template v-slot:activator="{ props }">
+                    <v-chip class="ml-2" size="small" color="info" v-bind="props" pill>
+                      <v-icon start size="x-small">mdi-information-outline</v-icon>
+                      节次已重排
+                    </v-chip>
+                  </template>
+                  <span>已将选中的节次 {{ exportPeriods.join(', ') }} 重新排序为连续的 1-{{ exportPeriods.length }}</span>
+                </v-tooltip>
               </v-card-title>
               <v-card-text>
                 <!-- 美化日期导航标签 -->
@@ -348,7 +357,15 @@
                       <tbody>
                         <template v-for="(group, index) in groupByPeriod(getDaySchedule(day))" :key="index">
                           <tr>
-                            <td class="text-center font-weight-bold">{{ group.period }}</td>
+                            <td class="text-center font-weight-bold">
+                              {{ group.period }}
+                              <v-tooltip v-if="group.originalPeriod !== group.period">
+                                <template v-slot:activator="{ props }">
+                                  <v-icon size="x-small" v-bind="props" color="info" class="ml-1">mdi-sync</v-icon>
+                                </template>
+                                原节次: {{ group.originalPeriod }}
+                              </v-tooltip>
+                            </td>
                             <td>
                               <div v-for="(item, i) in group.items" :key="i" class="mb-1">
                                 <v-chip size="small" :color="getSubjectColor(item.subject)" label text-color="white" class="mr-1">
@@ -625,6 +642,14 @@ export default {
         row => this.exportPeriods.includes(row.period)
       );
 
+      // 创建节次映射 - 将原始节次映射到新的连续节次
+      const periodMap = {};
+      selectedRows
+        .sort((a, b) => a.period - b.period)
+        .forEach((row, index) => {
+          periodMap[row.period] = index + 1; // 重新映射为连续的1,2,3...
+        });
+
       // 对每个选中的节次和每天的课程进行处理
       selectedRows.forEach(row => {
         for (let day = 1; day <= 7; day++) {
@@ -640,7 +665,8 @@ export default {
               if (!course || !course.name) return;
 
               timeTableData.push({
-                period: row.period,
+                originalPeriod: row.period, // 保留原始节次
+                period: periodMap[row.period], // 使用重新计算的节次
                 subject: course.name,
                 day: this.dayNames[day],
                 startTime: course.startTime,
@@ -655,7 +681,8 @@ export default {
             if (!courses.name) continue;
 
             timeTableData.push({
-              period: row.period,
+              originalPeriod: row.period, // 保留原始节次
+              period: periodMap[row.period], // 使用重新计算的节次
               subject: courses.name,
               day: this.dayNames[day],
               startTime: courses.startTime,
@@ -981,7 +1008,7 @@ export default {
             const teacher = this.settings.hideTeacherName ? "" : (item.teacher || "");
             const room = this.settings.hideRoom ? "" : (item.room || "");
 
-            // 每节课单独导出
+            // 每节课单独导出，使用重新计算的节次
             csvContent += `${item.subject},${dayNumber},${item.period},${item.period},${teacher},${room},${item.weeks}\n`;
           }
         }
@@ -1003,7 +1030,7 @@ export default {
       this.success = `导出成功！共计 ${this.totalClassHours} 课时`;
     },
 
-    // 添加导出数据预览功能
+    // 修改showExportPreview方法
     showExportPreview() {
       if (!this.hasExportData) {
         this.error = "请先选择要导出的节次";
@@ -1015,10 +1042,18 @@ export default {
       ).join('\n');
 
       if (this.timeTableData.length > 5) {
-        this.success = `导出预览 (共${this.totalClassHours}课时):\n${previewContent}\n...等${this.totalClassHours - 5}节`;
+        this.success = `导出预览 (共${this.totalClassHours}课时):\n${previewContent}\n...等${this.totalClassHours - 5}节课程`;
       } else {
         this.success = `导出预览 (共${this.totalClassHours}课时):\n${previewContent}`;
       }
+
+      // 刷新视图，确保节次重排效果显示
+      this.$nextTick(() => {
+        // 如果当前没有选中天数，自动选择第一个有课程的天数
+        if (this.daysWithSchedule.length > 0 && !this.activeDay) {
+          this.activeDay = this.daysWithSchedule[0];
+        }
+      });
     },
 
     // 添加YAML解析相关方法
@@ -1075,6 +1110,14 @@ export default {
         row => this.exportPeriods.includes(row.period)
       );
 
+      // 创建节次映射
+      const periodMap = {};
+      selectedRows
+        .sort((a, b) => a.period - b.period)
+        .forEach((row, index) => {
+          periodMap[row.period] = index + 1;
+        });
+
       // 对每个选中的节次和每天的课程进行处理
       selectedRows.forEach(row => {
         for (let day = 1; day <= 7; day++) {
@@ -1087,7 +1130,8 @@ export default {
               if (!course || !course.name) return;
 
               timeTableData.push({
-                period: row.period,
+                originalPeriod: row.period,
+                period: periodMap[row.period],
                 subject: course.name,
                 day: this.dayNames[day],
                 startTime: course.startTime,
@@ -1102,7 +1146,8 @@ export default {
             if (!courses.name) continue;
 
             timeTableData.push({
-              period: row.period,
+              originalPeriod: row.period,
+              period: periodMap[row.period],
               subject: courses.name,
               day: this.dayNames[day],
               startTime: courses.startTime,
@@ -1125,7 +1170,7 @@ export default {
       });
     },
 
-    // 添加按节次分组的方法
+    // 修改groupByPeriod方法，添加原始节次信息
     groupByPeriod(daySchedule) {
       // 按节次分组
       const groups = {};
@@ -1133,6 +1178,7 @@ export default {
         if (!groups[item.period]) {
           groups[item.period] = {
             period: item.period,
+            originalPeriod: item.originalPeriod, // 保存原始节次
             items: [],
             timeSlots: []
           };
