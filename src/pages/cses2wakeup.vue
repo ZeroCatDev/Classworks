@@ -3,155 +3,236 @@
     <v-row>
       <v-col cols="12">
         <v-card class="elevation-12" border>
-          <v-card-title >
+          <v-card-title class="d-flex align-center primary lighten-1 white--text py-3 px-4">
+            <v-icon color="white" class="mr-2">mdi-swap-horizontal</v-icon>
             课程表转换工具
           </v-card-title>
-          <v-card-subtitle>    请在CSES中将数据格式改为“通用CSES(JSON)”
+          <v-card-subtitle>
+            将CSES格式的JSON或YAML文本转换为WakeUp软件使用的课程表
           </v-card-subtitle>
           <v-card-text>
+            <!-- 错误提示 -->
             <v-alert
               v-if="error"
               type="error"
-              class="mb-4"
+              class="mb-4 mt-3 mx-2"
+              variant="tonal"
+              border="start"
               closable
               @click:close="error = ''"
             >
-              {{ error }}
+              <div class="d-flex align-center">
+                <v-icon class="mr-2">mdi-alert-circle</v-icon>
+                {{ error }}
+              </div>
             </v-alert>
 
+            <!-- 成功提示 -->
             <v-alert
               v-if="success"
               type="success"
-              class="mb-4"
+              class="mb-4 mt-3 mx-2"
+              variant="tonal"
+              border="start"
               closable
               @click:close="success = ''"
             >
-              {{ success }}
+              <div class="d-flex align-center">
+                <v-icon class="mr-2">mdi-check-circle</v-icon>
+                {{ success }}
+              </div>
             </v-alert>
 
-            <v-tabs v-model="activeTab" class="mb-4">
-              <v-tab value="text">文本粘贴</v-tab>
-
-              <v-tab value="file" disabled>文件上传</v-tab>
+            <!-- 输入方式选择 -->
+            <v-tabs v-model="activeTab" class="mb-4 mx-2" color="primary" rounded>
+              <v-tab value="text" class="px-5"><v-icon start>mdi-text-box</v-icon> 文本粘贴</v-tab>
+              <v-tab value="file" class="px-5"><v-icon start>mdi-file-upload</v-icon> 文件上传</v-tab>
             </v-tabs>
+
+            <!-- 格式选择 -->
+            <v-btn-toggle v-model="formatMode" color="primary" class="mb-4 mx-2" mandatory density="comfortable" border rounded>
+              <v-btn value="auto">自动检测</v-btn>
+              <v-btn value="json">JSON</v-btn>
+              <v-btn value="yaml" :disabled="!yamlLibLoaded">
+                YAML
+                <v-tooltip activator="parent" location="bottom">
+                  {{ yamlLibLoaded ? 'YAML解析库已加载' : '正在加载YAML解析库...' }}
+                </v-tooltip>
+              </v-btn>
+            </v-btn-toggle>
+
+            <!-- 添加当前检测到的格式提示 -->
+            <div v-if="jsonText && formatMode === 'auto'" class="text-caption mb-2">
+              检测到的格式: {{ isYaml(jsonText) ? 'YAML' : 'JSON' }}
+            </div>
 
             <v-window v-model="activeTab">
               <v-window-item value="text">
-                <v-textarea
-                  v-model="jsonText"
-                  label="粘贴JSON文本"
-                  :loading="loading"
-                  :disabled="loading"
-                  row-height="25"
-                  rows="3"
-                  placeholder="请在此粘贴JSON格式的课程表数据..."
-                  @input="handleTextChange"
-                ></v-textarea>
+                <div class="d-flex align-center mb-2">
+                  <v-textarea
+                    v-model="jsonText"
+                    label="粘贴JSON或YAML文本"
+                    :loading="loading"
+                    :disabled="loading"
+                    row-height="25"
+                    rows="6"
+                    placeholder="请在此粘贴CSES格式的数据..."
+                    @input="handleTextChange"
+                  ></v-textarea>
+                </div>
               </v-window-item>
               <v-window-item value="file">
                 <v-file-input
                   v-model="file"
-                  accept=".js,.json"
+                  accept=".js,.json,.yml,.yaml"
                   label="选择课程表文件"
                   prepend-icon="mdi-file-upload"
                   :loading="loading"
                   :disabled="loading"
                   @change="handleFileChange"
+                  hint="支持JSON、YAML格式文件"
+                  persistent-hint
                   :rules="[
-                    (v) => !v || v.size < 2000000 || '文件大小不能超过 2 MB',
+                    v => !v || v.size < 2000000 || '文件大小不能超过 2 MB',
                   ]"
                 ></v-file-input>
+
+                <v-alert
+                  v-if="file && formatMode === 'auto'"
+                  type="info"
+                  class="mb-4"
+                  variant="tonal"
+                  density="compact"
+                >
+                  将根据文件扩展名自动检测格式
+                </v-alert>
               </v-window-item>
             </v-window>
-            <v-card class="mb-4" outlined>
-              <v-card-title class="text-subtitle-1"> 课程设置 </v-card-title>
-              <v-card-text>
-                <div v-if="processedData">
-                  <div class="text-subtitle-2 mb-2">导出设置</div>
-                  <v-row>
-                    <v-col cols="12" sm="6">
-                      <v-switch
-                        v-model="settings.hideIndoorLocation"
-                        label="室内课程不显示地点"
-                        color="primary"
-                      ></v-switch>
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <v-switch
-                        v-model="settings.hideTeacherName"
-                        label="不显示教师姓名"
-                        color="primary"
-                      ></v-switch>
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <v-text-field
-                        v-model.number="settings.totalWeeks"
-                        label="总周数"
-                        type="number"
-                        min="1"
-                        max="30"
-                        :rules="[(v) => v > 0 || '周数必须大于0']"
-                        dense
-                      ></v-text-field>
-                    </v-col>
 
-                  </v-row>
-
-                  <!-- 课表选择 - 仅在新格式数据时显示 -->
-                  <div
-                    v-if="
-                      processedData.schedules &&
-                      processedData.schedules.length > 0
-                    "
+            <!-- 设置面板 -->
+            <v-col cols="12">
+              <v-card flat class="pa-4  rounded-lg" border>
+                <div class="d-flex align-center mb-3">
+                  <v-icon color="primary" class="mr-2">mdi-calendar-multiselect</v-icon>
+                  <h3 class="text-subtitle-1 font-weight-medium mr-auto">选择导出天数</h3>
+                  <v-btn
+                    variant="text"
+                    color="primary"
+                    class="ml-2"
+                    @click="selectAllDays"
                   >
-                    <div class="text-subtitle-2 mb-2">课表选择</div>
-                    <v-row>
-                      <v-col cols="12">
-                        <!-- 使用普通的chip而不是v-chip-group，手动处理点击事件 -->
-                        <div class="d-flex flex-wrap">
-                          <v-chip
-                            v-for="schedule in processedData.schedules"
-                            :key="schedule.uuid"
-                            :color="
-                              selectedSchedules[schedule.uuid]
-                                ? 'primary'
-                                : 'grey'
-                            "
-                            :outlined="!selectedSchedules[schedule.uuid]"
-                            :input-value="selectedSchedules[schedule.uuid]"
-                            :prepend-icon="
-                              selectedSchedules[schedule.uuid]
-                                ? 'mdi-check'
-                                : ''
-                            "
-                            class="ma-1"
-                            @click="toggleScheduleSelection(schedule)"
-                            filter
-                          >
-                            {{ schedule.name }}
-                            <span
-                              v-if="
-                                schedule.weeks === 'odd' ||
-                                schedule.weeks === 'even'
-                              "
-                              class="ml-1"
-                            >
-                              ({{ schedule.weeks === "odd" ? "单" : "双" }}周)
-                            </span>
-                          </v-chip>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </div>
+                    <v-icon start size="small">mdi-checkbox-multiple-marked</v-icon>
+                    全选
+                  </v-btn>
+                  <v-btn
+                    variant="text"
+                    color="error"
+                    class="ml-2"
+                    @click="clearSelectedDays"
+                  >
+                    <v-icon start size="small">mdi-checkbox-multiple-blank-outline</v-icon>
+                    清除
+                  </v-btn>
                 </div>
+                <v-chip-group v-model="selectedDays" multiple class="mb-2" color="primary">
+                  <v-chip v-for="day in 7" :key="day" :value="day" filter variant="tonal" class="filter-chip" label>
+                    {{ dayNames[day] }}
+                    <v-badge
+                      v-if="getDaySchedule(day).length > 0"
+                      :content="getDaySchedule(day).length"
+                      color="primary"
+                      inline
+                    ></v-badge>
+                  </v-chip>
+                </v-chip-group>
+              </v-card>
+            </v-col>
+
+            <!-- 改进设置选项卡，显示为开关组 -->
+            <v-col cols="12">
+              <v-card flat class="pa-4  rounded-lg" border>
+                <div class="d-flex align-center mb-3">
+                  <v-icon color="primary" class="mr-2">mdi-cog</v-icon>
+                  <h3 class="text-subtitle-1 font-weight-medium">显示配置</h3>
+                </div>
+                <v-row>
+                  <v-col cols="12" sm="6">
+                    <v-switch
+                      v-model="settings.hideTeacherName"
+                      label="不显示教师姓名"
+                      color="primary"
+                      inset
+                      hide-details
+                    ></v-switch>
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-switch
+                      v-model="settings.hideRoom"
+                      label="不显示教室信息"
+                      color="primary"
+                      inset
+                      hide-details
+                    ></v-switch>
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-text-field
+                      v-model.number="settings.totalWeeks"
+                      label="总周数"
+                      type="number"
+                      min="1"
+                      max="30"
+                      :rules="[(v) => v > 0 || '周数必须大于0']"
+                      density="comfortable"
+                      variant="outlined"
+                      prepend-inner-icon="mdi-calendar-week"
+                      class="mt-3"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+              </v-card>
+            </v-col>
+
+            <!-- 添加加载状态的骨架屏 -->
+            <v-card v-if="loading" class="my-4" outlined>
+              <v-card-text>
+                <v-skeleton-loader
+                  type="table"
+                  class="mx-auto"
+                ></v-skeleton-loader>
               </v-card-text>
             </v-card>
-            <v-card v-if="processedData" class="mt-4" outlined>
-              <v-card-title class="text-subtitle-1">
-                处理结果预览
+
+            <!-- 添加结果计数展示 -->
+            <v-chip
+              v-if="processedData"
+              color="primary"
+              class="ml-2"
+              prepend-icon="mdi-book-open-variant"
+            >
+              {{ processedData.tableData.length }} 节课程
+            </v-chip>
+
+            <!-- 添加更清晰的选择提示 -->
+            <v-alert
+              v-if="processedData && exportPeriods.length === 0"
+              type="warning"
+              class="mb-4"
+              closable
+            >
+              请选择要导出的节次
+            </v-alert>
+
+            <!-- 课程表预览 -->
+            <v-card v-if="processedData" class="my-4" elevation="1">
+              <v-card-title class="d-flex align-center pa-4 bg-primary-lighten-5">
+                <v-icon color="primary" class="mr-2">mdi-table</v-icon>
+                <span class="font-weight-bold">课程表</span>
+                <v-chip color="primary" class="ml-3" size="small" pill>
+                  <v-icon start size="x-small">mdi-book-open-variant</v-icon>
+                  {{ processedData.tableData.length }} 节课程
+                </v-chip>
               </v-card-title>
-              <v-card-text>
-                <div class="text-subtitle-2 mb-2">每周课程表</div>
+              <v-card-text class="pa-0">
                 <v-data-table
                   v-model:items-selected="selectedRows"
                   :headers="tableHeaders"
@@ -162,6 +243,8 @@
                   item-value="period"
                   show-select
                   select-strategy="single-independent"
+                  :sort-by="[]"
+                  disable-sort
                   @update:items-selected="updateSelectedPeriods"
                 >
                   <template #[`item.data-table-select`]="{ item }">
@@ -173,11 +256,11 @@
                     />
                   </template>
 
-                  <template #[`item.1`]="{ item }">
-                    <div v-if="item['1']" class="course-cell">
-                      <template v-if="Array.isArray(item['1'])">
+                  <template v-for="day in 7" #[`item.${day}`]="{ item }" :key="day">
+                    <div v-if="item[day]" class="course-cell">
+                      <template v-if="Array.isArray(item[day])">
                         <div
-                          v-for="(course, index) in item['1']"
+                          v-for="(course, index) in item[day]"
                           :key="index"
                           class="course-item"
                         >
@@ -188,43 +271,9 @@
                             <br />{{ course.teacher }}
                           </span>
                           <span
-                            v-if="course.weekType"
-                            class="week-type"
+                            v-if="!settings.hideRoom && course.room"
                           >
-                            {{ course.weekType }}周
-                          </span>
-                        </div>
-                      </template>
-                      <template v-else>
-                        {{ item['1'].name }}
-                        <span
-                          v-if="!settings.hideTeacherName && item['1'].teacher"
-                        >
-                          <br />{{ item['1'].teacher }}
-                        </span>
-                        <span
-                          v-if="item['1'].weekType"
-                          class="week-type"
-                        >
-                          {{ item['1'].weekType }}周
-                        </span>
-                      </template>
-                    </div>
-                  </template>
-
-                  <template #[`item.2`]="{ item }">
-                    <div v-if="item['2']" class="course-cell">
-                      <template v-if="Array.isArray(item['2'])">
-                        <div
-                          v-for="(course, index) in item['2']"
-                          :key="index"
-                          class="course-item"
-                        >
-                          {{ course.name }}
-                          <span
-                            v-if="!settings.hideTeacherName && course.teacher"
-                          >
-                            <br />{{ course.teacher }}
+                            <br />{{ course.room }}
                           </span>
                           <span
                             v-if="course.weekType"
@@ -235,212 +284,22 @@
                         </div>
                       </template>
                       <template v-else>
-                        {{ item['2'].name }}
+                        {{ item[day].name }}
                         <span
-                          v-if="!settings.hideTeacherName && item['2'].teacher"
+                          v-if="!settings.hideTeacherName && item[day].teacher"
                         >
-                          <br />{{ item['2'].teacher }}
+                          <br />{{ item[day].teacher }}
                         </span>
                         <span
-                          v-if="item['2'].weekType"
-                          class="week-type"
+                          v-if="!settings.hideRoom && item[day].room"
                         >
-                          {{ item['2'].weekType }}周
+                          <br />{{ item[day].room }}
                         </span>
-                      </template>
-                    </div>
-                  </template>
-
-                  <template #[`item.3`]="{ item }">
-                    <div v-if="item['3']" class="course-cell">
-                      <template v-if="Array.isArray(item['3'])">
-                        <div
-                          v-for="(course, index) in item['3']"
-                          :key="index"
-                          class="course-item"
-                        >
-                          {{ course.name }}
                           <span
-                            v-if="!settings.hideTeacherName && course.teacher"
-                          >
-                            <br />{{ course.teacher }}
-                          </span>
-                          <span
-                            v-if="course.weekType"
+                          v-if="item[day].weekType"
                             class="week-type"
                           >
-                            {{ course.weekType }}周
-                          </span>
-                        </div>
-                      </template>
-                      <template v-else>
-                        {{ item['3'].name }}
-                        <span
-                          v-if="!settings.hideTeacherName && item['3'].teacher"
-                        >
-                          <br />{{ item['3'].teacher }}
-                        </span>
-                        <span
-                          v-if="item['3'].weekType"
-                          class="week-type"
-                        >
-                          {{ item['3'].weekType }}周
-                        </span>
-                      </template>
-                    </div>
-                  </template>
-
-                  <template #[`item.4`]="{ item }">
-                    <div v-if="item['4']" class="course-cell">
-                      <template v-if="Array.isArray(item['4'])">
-                        <div
-                          v-for="(course, index) in item['4']"
-                          :key="index"
-                          class="course-item"
-                        >
-                          {{ course.name }}
-                          <span
-                            v-if="!settings.hideTeacherName && course.teacher"
-                          >
-                            <br />{{ course.teacher }}
-                          </span>
-                          <span
-                            v-if="course.weekType"
-                            class="week-type"
-                          >
-                            {{ course.weekType }}周
-                          </span>
-                        </div>
-                      </template>
-                      <template v-else>
-                        {{ item['4'].name }}
-                        <span
-                          v-if="!settings.hideTeacherName && item['4'].teacher"
-                        >
-                          <br />{{ item['4'].teacher }}
-                        </span>
-                        <span
-                          v-if="item['4'].weekType"
-                          class="week-type"
-                        >
-                          {{ item['4'].weekType }}周
-                        </span>
-                      </template>
-                    </div>
-                  </template>
-
-                  <template #[`item.5`]="{ item }">
-                    <div v-if="item['5']" class="course-cell">
-                      <template v-if="Array.isArray(item['5'])">
-                        <div
-                          v-for="(course, index) in item['5']"
-                          :key="index"
-                          class="course-item"
-                        >
-                          {{ course.name }}
-                          <span
-                            v-if="!settings.hideTeacherName && course.teacher"
-                          >
-                            <br />{{ course.teacher }}
-                          </span>
-                          <span
-                            v-if="course.weekType"
-                            class="week-type"
-                          >
-                            {{ course.weekType }}周
-                          </span>
-                        </div>
-                      </template>
-                      <template v-else>
-                        {{ item['5'].name }}
-                        <span
-                          v-if="!settings.hideTeacherName && item['5'].teacher"
-                        >
-                          <br />{{ item['5'].teacher }}
-                        </span>
-                        <span
-                          v-if="item['5'].weekType"
-                          class="week-type"
-                        >
-                          {{ item['5'].weekType }}周
-                        </span>
-                      </template>
-                    </div>
-                  </template>
-
-                  <template #[`item.6`]="{ item }">
-                    <div v-if="item['6']" class="course-cell">
-                      <template v-if="Array.isArray(item['6'])">
-                        <div
-                          v-for="(course, index) in item['6']"
-                          :key="index"
-                          class="course-item"
-                        >
-                          {{ course.name }}
-                          <span
-                            v-if="!settings.hideTeacherName && course.teacher"
-                          >
-                            <br />{{ course.teacher }}
-                          </span>
-                          <span
-                            v-if="course.weekType"
-                            class="week-type"
-                          >
-                            {{ course.weekType }}周
-                          </span>
-                        </div>
-                      </template>
-                      <template v-else>
-                        {{ item['6'].name }}
-                        <span
-                          v-if="!settings.hideTeacherName && item['6'].teacher"
-                        >
-                          <br />{{ item['6'].teacher }}
-                        </span>
-                        <span
-                          v-if="item['6'].weekType"
-                          class="week-type"
-                        >
-                          {{ item['6'].weekType }}周
-                        </span>
-                      </template>
-                    </div>
-                  </template>
-
-                  <template #[`item.7`]="{ item }">
-                    <div v-if="item['7']" class="course-cell">
-                      <template v-if="Array.isArray(item['7'])">
-                        <div
-                          v-for="(course, index) in item['7']"
-                          :key="index"
-                          class="course-item"
-                        >
-                          {{ course.name }}
-                          <span
-                            v-if="!settings.hideTeacherName && course.teacher"
-                          >
-                            <br />{{ course.teacher }}
-                          </span>
-                          <span
-                            v-if="course.weekType"
-                            class="week-type"
-                          >
-                            {{ course.weekType }}周
-                          </span>
-                        </div>
-                      </template>
-                      <template v-else>
-                        {{ item['7'].name }}
-                        <span
-                          v-if="!settings.hideTeacherName && item['7'].teacher"
-                        >
-                          <br />{{ item['7'].teacher }}
-                        </span>
-                        <span
-                          v-if="item['7'].weekType"
-                          class="week-type"
-                        >
-                          {{ item['7'].weekType }}周
+                          {{ item[day].weekType }}周
                         </span>
                       </template>
                     </div>
@@ -448,22 +307,131 @@
                 </v-data-table>
               </v-card-text>
             </v-card>
+
+            <!-- 时间表 -->
+            <v-card v-if="hasExportData" class="my-4" elevation="1">
+              <v-card-title class="d-flex align-center pa-4 bg-primary-lighten-5">
+                <v-icon color="primary" class="mr-2">mdi-timetable</v-icon>
+                <span class="font-weight-bold">每日课程时间表</span>
+                <v-chip class="ml-3" size="small" color="primary" pill>
+                  <v-icon start size="x-small">mdi-clock-outline</v-icon>
+                  {{ totalClassHours }} 课时
+                </v-chip>
+              </v-card-title>
+              <v-card-text>
+                <!-- 美化日期导航标签 -->
+                <v-tabs v-if="daysWithSchedule.length > 0" v-model="activeDay" class="mb-4" color="primary" grow align-tabs="center">
+                  <v-tab v-for="day in daysWithSchedule" :key="day" :value="day" class="px-2 font-weight-medium">
+                    {{ dayNames[day] }}
+                    <v-badge
+                      :content="getDaySchedule(day).length"
+                      color="primary"
+                      inline
+                    ></v-badge>
+                  </v-tab>
+                </v-tabs>
+
+                <!-- 当前选中日期的课程表 -->
+                <v-window v-model="activeDay">
+                  <v-window-item v-for="day in daysWithSchedule" :key="day" :value="day">
+                    <v-table density="compact" class="rounded" :headers-length="6" disable-sort>
+                      <thead>
+                        <tr>
+                          <th class="text-center">节次</th>
+                          <th>课程</th>
+                          <th>时间</th>
+                          <th>教师</th>
+                          <th>教室</th>
+                          <th>周次</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <template v-for="(group, index) in groupByPeriod(getDaySchedule(day))" :key="index">
+                          <tr>
+                            <td class="text-center font-weight-bold">{{ group.period }}</td>
+                            <td>
+                              <div v-for="(item, i) in group.items" :key="i" class="mb-1">
+                                <v-chip size="small" :color="getSubjectColor(item.subject)" label text-color="white" class="mr-1">
+                                  {{ item.subject }}
+                                </v-chip>
+                                <v-chip v-if="group.items.length > 1" size="x-small" class="ml-1" :color="item.weekType === '单' ? 'warning' : 'success'">
+                                  {{ item.weekType }}周
+                                </v-chip>
+                              </div>
+                            </td>
+                            <td>
+                              <div v-for="(timeSlot, i) in group.uniqueTimeSlots" :key="i" class="mb-1">
+                                <v-chip size="x-small" class="time-chip">
+                                  {{ formatTime(timeSlot.startTime) }} - {{ formatTime(timeSlot.endTime) }}
+                                </v-chip>
+                              </div>
+                            </td>
+                            <td>
+                              <template v-if="!settings.hideTeacherName">
+                                <div v-for="(item, i) in group.items" :key="i" class="mb-1">
+                                  {{ item.teacher || '-' }}
+                                </div>
+                              </template>
+                              <template v-else>-</template>
+                            </td>
+                            <td>
+                              <template v-if="!settings.hideRoom">
+                                <div v-for="(item, i) in group.items" :key="i" class="mb-1">
+                                  {{ item.room || '-' }}
+                                </div>
+                              </template>
+                              <template v-else>-</template>
+                            </td>
+                            <td>
+                              <div v-for="(item, i) in group.items" :key="i" class="mb-1">
+                                {{ item.weeks }}
+                              </div>
+                            </td>
+                          </tr>
+                        </template>
+                      </tbody>
+                    </v-table>
+                  </v-window-item>
+                </v-window>
+
+                <!-- 无数据提示 -->
+                <v-alert v-if="hasExportData && daysWithSchedule.length === 0" type="info" class="mt-3">
+                  没有找到任何课程数据
+                </v-alert>
+              </v-card-text>
+            </v-card>
           </v-card-text>
 
-          <v-card-actions class="pa-4">
+          <v-card-actions class="">
             <v-spacer></v-spacer>
             <v-btn
               color="primary"
+              variant="outlined"
               :loading="loading"
-              :disabled="(!file && !jsonText) || loading"
+              :disabled="(!jsonText && !file) || loading"
               @click="processInput"
+              prepend-icon="mdi-cog-refresh"
             >
               处理数据
             </v-btn>
             <v-btn
+              color="info"
+              :disabled="!hasExportData"
+              @click="showExportPreview"
+              class="ml-2"
+              prepend-icon="mdi-eye"
+              border
+            >
+              刷新
+            </v-btn>
+            <v-btn
               color="success"
-              :disabled="!processedData"
+              variant="outlined"
+              :disabled="!hasExportData"
               @click="downloadCSV"
+              class="ml-2"
+              prepend-icon="mdi-download"
+              border
             >
               下载CSV
             </v-btn>
@@ -475,6 +443,106 @@
 </template>
 
 <script>
+// 添加外部库的CDN加载
+const loadJsYaml = () => {
+  return new Promise((resolve, reject) => {
+    if (typeof window.jsyaml !== 'undefined') {
+      return resolve(window.jsyaml);
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js';
+    script.async = true;
+    script.onload = () => resolve(window.jsyaml);
+    script.onerror = () => reject(new Error('无法加载YAML解析库'));
+    document.head.appendChild(script);
+  });
+};
+
+// 添加CSES解析器类
+class CSESParser {
+  constructor(data) {
+    /**
+     * 初始化 CSES 解析器
+     * @param {Object} data - 解析后的YAML数据
+     */
+    this.data = data;
+    this.version = null;
+    this.subjects = [];
+    this.schedules = [];
+
+    this._parseData();
+  }
+
+  _parseData() {
+    /** 解析数据 */
+    if (!this.data) return;
+
+    // 获取版本信息
+    this.version = this.data.version || 1;
+
+    // 解析科目信息
+    const subjectsData = this.data.subjects || [];
+    for (const subject of subjectsData) {
+      this.subjects.push({
+        name: subject.name,
+        simplified_name: subject.simplified_name || null,
+        teacher: subject.teacher || null,
+        room: subject.room || null
+      });
+    }
+
+    // 解析课程安排
+    const schedulesData = this.data.schedules || [];
+    for (const schedule of schedulesData) {
+      const classes = [];
+      for (const cls of schedule.classes || []) {
+        classes.push({
+          subject: cls.subject,
+          start_time: cls.start_time,
+          end_time: cls.end_time
+        });
+      }
+
+      this.schedules.push({
+        name: schedule.name,
+        enable_day: schedule.enable_day,
+        weeks: schedule.weeks || 'all',
+        classes: classes
+      });
+    }
+  }
+
+  getSubjects() {
+    /** 获取所有科目信息 */
+    return this.subjects;
+  }
+
+  getSchedules() {
+    /** 获取所有课程安排 */
+    return this.schedules;
+  }
+
+  getScheduleByDay(day) {
+    /**
+     * 根据星期获取课程安排
+     * @param {number} day - 星期（整数型，如 1, 2 等）
+     * @returns {Array} 该星期的课程安排
+     */
+    const schedule = this.schedules.find(s => s.enable_day === day);
+    return schedule ? schedule.classes : [];
+  }
+
+  // 转换为标准格式的CSES数据
+  toCsesData() {
+    return {
+      version: this.version,
+      subjects: this.subjects,
+      schedules: this.schedules
+    };
+  }
+}
+
 export default {
   name: "Cses2Wakeup",
   data() {
@@ -486,34 +554,34 @@ export default {
       error: "",
       success: "",
       processedData: null,
-      selectedRows: [], // 存储选中的行
-      selectedPeriodIds: [], // 存储选中的节次ID（数字）
-      exportPeriods: [], // 存储需要导出的节次列表
-      selectedSchedules: {}, // 存储用户选择的课表
+      selectedRows: [],
+      exportPeriods: [],
+      selectedDays: [1, 2, 3, 4, 5, 6, 7], // 默认选中所有天
+      formatMode: "auto", // 'auto', 'json', 或 'yaml'
+      yamlLibLoaded: false, // YAML库是否加载成功
+      activeDay: null, // 当前选中的日期
+      subjectColors: {
+        "数学": "blue",
+        "语文": "red",
+        "英语": "green",
+        "物理": "purple",
+        "化学": "orange",
+        "生物": "teal",
+        "历史": "brown",
+        "地理": "indigo",
+        "政治": "pink",
+        "体育": "cyan",
+        "自习": "grey",
+        "早读": "amber",
+        "班会": "deep-purple",
+        "听力": "light-blue",
+        "信息技术": "light-green",
+      },
       settings: {
-        hideIndoorLocation: false,
         hideTeacherName: false,
+        hideRoom: false,
         totalWeeks: 30
       },
-      courseColors: {
-        语文: "red",
-        数学: "blue",
-        英语: "green",
-        物理: "purple",
-        化学: "orange",
-        生物: "teal",
-        历史: "brown",
-        地理: "indigo",
-        政治: "pink",
-        体育: "cyan",
-        自习: "grey",
-        早读: "amber",
-        班会: "deep-purple",
-        听力: "light-blue",
-        答疑: "lime",
-        信息技术: "light-green",
-      },
-
       tableHeaders: [
         { title: "", key: "data-table-select" },
         { title: "节次", key: "period" },
@@ -525,32 +593,172 @@ export default {
         { title: "周六", key: "6" },
         { title: "周日", key: "7" },
       ],
+      timeTableHeaders: [
+        { title: "节次", key: "period" },
+        { title: "课程", key: "subject" },
+        { title: "星期", key: "day" },
+        { title: "开始时间", key: "startTime" },
+        { title: "结束时间", key: "endTime" },
+        { title: "教师", key: "teacher" },
+        { title: "教室", key: "room" },
+        { title: "周次", key: "weeks" },
+      ],
+      dayNames: {
+        1: "周一",
+        2: "周二",
+        3: "周三",
+        4: "周四",
+        5: "周五",
+        6: "周六",
+        7: "周日"
+      }
     };
   },
+  computed: {
+    timeTableData() {
+      if (!this.processedData || !this.processedData.tableData) return [];
+
+      const timeTableData = [];
+
+      // 获取选中的节次
+      const selectedRows = this.processedData.tableData.filter(
+        row => this.exportPeriods.includes(row.period)
+      );
+
+      // 对每个选中的节次和每天的课程进行处理
+      selectedRows.forEach(row => {
+        for (let day = 1; day <= 7; day++) {
+          // 只处理用户选中的日期
+          if (!this.selectedDays.includes(day)) continue;
+
+          const courses = row[day];
+          if (!courses) continue;
+
+          if (Array.isArray(courses)) {
+            // 处理数组形式的课程（单双周课程）
+            courses.forEach(course => {
+              if (!course || !course.name) return;
+
+              timeTableData.push({
+                period: row.period,
+                subject: course.name,
+                day: this.dayNames[day],
+                startTime: course.startTime,
+                endTime: course.endTime,
+                teacher: this.settings.hideTeacherName ? "" : (course.teacher || ""),
+                room: this.settings.hideRoom ? "" : (course.room || ""),
+                weeks: course.weekType ? `1-${this.settings.totalWeeks}${course.weekType}` : `1-${this.settings.totalWeeks}`
+              });
+            });
+          } else {
+            // 处理单个课程
+            if (!courses.name) continue;
+
+            timeTableData.push({
+              period: row.period,
+              subject: courses.name,
+              day: this.dayNames[day],
+              startTime: courses.startTime,
+              endTime: courses.endTime,
+              teacher: this.settings.hideTeacherName ? "" : (courses.teacher || ""),
+              room: this.settings.hideRoom ? "" : (courses.room || ""),
+              weeks: courses.weekType ? `1-${this.settings.totalWeeks}${courses.weekType}` : `1-${this.settings.totalWeeks}`
+            });
+          }
+        }
+      });
+
+      // 按照节次和星期排序
+      return timeTableData.sort((a, b) => {
+        // 先按节次排序
+        if (a.period !== b.period) return a.period - b.period;
+        // 再按星期排序
+        const dayOrder = { "周一": 1, "周二": 2, "周三": 3, "周四": 4, "周五": 5, "周六": 6, "周日": 7 };
+        return dayOrder[a.day] - dayOrder[b.day];
+      });
+    },
+
+    hasExportData() {
+      return this.processedData && this.exportPeriods.length > 0;
+    },
+
+    totalClassHours() {
+      return this.timeTableData.length;
+    },
+
+    // 添加新的计算属性
+    daysWithSchedule() {
+      // 返回有课程的天数数组（只包括用户选中的天数）
+      const days = [];
+      for (let day = 1; day <= 7; day++) {
+        if (this.selectedDays.includes(day) && this.getDaySchedule(day).length > 0) {
+          days.push(day);
+        }
+      }
+      return days;
+    }
+  },
   methods: {
-    handleFileChange() {
-      this.error = "";
-      this.success = "";
-      this.processedData = null;
-      this.jsonText = "";
-      this.selectedRows = [];
-      this.selectedPeriodIds = [];
-      this.exportPeriods = [];
-      this.selectedSchedules = {};
+    async handleFileChange() {
+      this.resetData();
+
+      if (!this.file) return;
+
+      // 根据文件扩展名自动设置格式模式
+      const fileName = this.file.name.toLowerCase();
+      if (fileName.endsWith('.json') || fileName.endsWith('.js')) {
+        this.formatMode = 'json';
+      } else if (fileName.endsWith('.yml') || fileName.endsWith('.yaml')) {
+        this.formatMode = 'yaml';
+
+        // 确保YAML库已加载
+        if (!this.yamlLibLoaded) {
+          try {
+            await loadJsYaml();
+            this.yamlLibLoaded = true;
+          } catch (error) {
+            this.error = `无法加载YAML解析库: ${error.message}`;
+            return;
+          }
+        }
+      }
+
+      // 读取文件内容
+      try {
+        const reader = new FileReader();
+        reader.onload = async (fileEvent) => {
+          try {
+            this.jsonText = fileEvent.target.result;
+            // 自动处理数据
+            await this.processInput();
+          } catch (error) {
+            this.error = `文件读取失败: ${error.message}`;
+          }
+        };
+        reader.onerror = () => {
+          this.error = "文件读取失败";
+        };
+        reader.readAsText(this.file);
+      } catch (error) {
+        this.error = `文件处理失败: ${error.message}`;
+      }
     },
+
     handleTextChange() {
+      this.resetData();
+    },
+
+    resetData() {
       this.error = "";
       this.success = "";
       this.processedData = null;
-      this.file = null;
       this.selectedRows = [];
-      this.selectedPeriodIds = [];
       this.exportPeriods = [];
-      this.selectedSchedules = {};
     },
+
     async processInput() {
-      if (!this.file && !this.jsonText) {
-        this.error = "请选择文件或粘贴JSON文本";
+      if (!this.jsonText && !this.file) {
+        this.error = "请粘贴文本或上传文件";
         return;
       }
 
@@ -559,42 +767,45 @@ export default {
       this.success = "";
 
       try {
+        // 释放一个事件循环以允许UI更新
+        await this.$nextTick();
+
+        // 解析输入数据
         let data;
-        if (this.activeTab === "file") {
-          const fileContent = await this.file.text();
-          // 使用 Function 构造器来执行文件内容
-          const processFunction = new Function("return " + fileContent)();
-          data = processFunction.default.data;
-        } else {
-          // 尝试解析JSON文本
-          try {
+        try {
+          if (this.formatMode === 'yaml' || (this.formatMode === 'auto' && this.isYaml(this.jsonText))) {
+            // 解析YAML
+            const yamlData = this.parseYaml(this.jsonText);
+            // 使用CSESParser处理YAML数据
+            const parser = new CSESParser(yamlData);
+            data = parser.toCsesData();
+          } else {
+            // 解析JSON
             data = JSON.parse(this.jsonText);
-          } catch {
-            throw new Error("JSON格式不正确，请检查输入");
           }
+        } catch (error) {
+          throw new Error(`格式解析错误: ${error.message}`);
         }
 
-        // 为课表生成新的唯一ID
-        if (data.schedules) {
-          data.schedules = this.assignUniqueIds(data.schedules);
+        // 验证CSES格式
+        if (!this.validateCsesFormat(data)) {
+          throw new Error("不是有效的CSES格式数据");
         }
 
-        // 初始化所有课表为未选中状态
-        this.selectedSchedules = {};
-        if (data.schedules) {
-          data.schedules.forEach((schedule) => {
-            this.selectedSchedules[schedule.uuid] = false;
-          });
-        }
+        // 处理数据
+        const result = this.processCsesData(data);
+        this.processedData = result;
 
-        const result = this.processScheduleData(data);
-        this.processedData = {
-          ...this.processedData,
-          tableData: result.tableData,
-          schedules: data.schedules,
-          processedData: data,
-        };
-        this.success = "数据处理成功！";
+        // 重置选中的天数到工作日（1-5）
+        this.selectedDays = [1, 2, 3, 4, 5];
+
+        this.success = `数据处理成功！`;
+
+        // 默认选中所有节次
+        if (result.tableData && result.tableData.length > 0) {
+          this.selectedRows = [...result.tableData];
+          this.exportPeriods = result.tableData.map(row => row.period);
+        }
       } catch (err) {
         this.error = "数据处理失败：" + err.message;
         console.error(err);
@@ -603,171 +814,42 @@ export default {
       }
     },
 
-
-    downloadCSV() {
-      if (!this.processedData?.tableData) {
-        this.error = "没有可下载的数据";
-        return;
+    validateCsesFormat(data) {
+      // 如果数据是通过CSESParser解析的
+      if (data instanceof CSESParser) {
+        return data.version === 1 &&
+               Array.isArray(data.subjects) &&
+               Array.isArray(data.schedules);
       }
 
-      // 生成CSV内容
-      let csvContent = "课程名称,星期,开始节数,结束节数,老师,地点,周数\n";
+      // 基本验证
+      if (!data || typeof data !== 'object') return false;
 
-      // 如果没有选中任何要导出的节次，提示用户
-      if (this.exportPeriods.length === 0) {
-        this.error = "请至少选择一节要导出的课";
-        return;
-      }
+      // 检查版本
+      if (data.version !== 1) return false;
 
-      // 获取所有需要导出的节次对应的行数据
-      const selectedRows = this.processedData.tableData.filter(
-        row => this.exportPeriods.includes(row.period)
+      // 检查subjects数组
+      if (!Array.isArray(data.subjects)) return false;
+
+      // 检查schedules数组
+      if (!Array.isArray(data.schedules)) return false;
+
+      return true;
+    },
+
+    processCsesData(data) {
+      const { schedules, subjects } = data;
+
+      // 使用对象引用优化内存使用
+      const subjectMap = Object.fromEntries(
+        subjects.map(subject => [subject.name, subject])
       );
 
-      // 对选中的行按照节次排序
-      selectedRows.sort((a, b) => a.period - b.period);
-
-      // 计算总课时数
-      let totalClassHours = 0;
-
-      // 遍历选中的行，并重新编号
-      selectedRows.forEach((periodData, newPeriodIndex) => {
-        // 新的节次编号（从1开始）
-        const newPeriod = newPeriodIndex + 1;
-
-        // 遍历每一天
-        for (let day = 1; day <= 7; day++) {
-          const courseData = periodData[day];
-
-          // 如果是数组（单双周课程）
-          if (Array.isArray(courseData)) {
-            courseData.forEach((course) => {
-              if (course && course.name) {
-                // 增加课时计数（每节课算一课时）
-                totalClassHours++;
-
-                // 根据设置处理地点和教师信息
-                const location =
-                  this.settings.hideIndoorLocation && course.location === "教室"
-                    ? ""
-                    : course.location || "";
-
-                const teacher = this.settings.hideTeacherName
-                  ? ""
-                  : course.teacher || "";
-
-                // 处理周数
-                const weekRange = course.weekType
-                  ? `1-${this.settings.totalWeeks}${course.weekType}`
-                  : `1-${this.settings.totalWeeks}`;
-
-                // 每节课单独导出，开始节数和结束节数相同
-                csvContent += `${course.name},${day},${periodData.period},${periodData.period},${teacher},${location},${weekRange}\n`;
-              }
-            });
-          }
-          // 单个课程
-          else if (courseData && courseData.name) {
-            // 增加课时计数（每节课算一课时）
-            totalClassHours++;
-
-            // 根据设置处理地点和教师信息
-            const location =
-              this.settings.hideIndoorLocation && courseData.location === "教室"
-                ? ""
-                : courseData.location || "";
-
-            const teacher = this.settings.hideTeacherName
-              ? ""
-              : courseData.teacher || "";
-
-            // 处理周数
-            const weekRange = courseData.weekType
-              ? `1-${this.settings.totalWeeks}${courseData.weekType}`
-              : `1-${this.settings.totalWeeks}`;
-
-            // 每节课单独导出，开始节数和结束节数相同
-            csvContent += `${courseData.name},${day},${periodData.period},${periodData.period},${teacher},${location},${weekRange}\n`;
-          }
-        }
-      });
-
-      // 添加BOM头以确保Excel正确识别UTF-8编码
-      const BOM = "\uFEFF";
-      const blob = new Blob([BOM + csvContent], {
-        type: "text/csv;charset=utf-8",
-      });
-
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `course_schedule_${totalClassHours}课时.csv`;
-      link.click();
-      URL.revokeObjectURL(link.href);
-
-      // 显示成功信息，包含课时数
-      this.success = `导出成功！共计 ${totalClassHours} 课时`;
-    },
-    getCourseColor(courseName) {
-      return this.courseColors[courseName] || "grey";
-    },
-    updateProcessedData() {
-      if (!this.processedData) return;
-      const data = this.processedData.processedData;
-      const result = this.processScheduleData(data);
-      this.processedData = {
-        ...this.processedData,
-        tableData: result.tableData,
-      };
-    },
-    updateSelectedPeriods(selected) {
-      // 更新selectedPeriodIds数组，与selectedRows保持同步
-      this.selectedPeriodIds = [];
-      if (selected && selected.length > 0) {
-        // 提取所有选中行的period值并去重
-        this.selectedPeriodIds = [...new Set(
-          selected
-            .filter(row => row && typeof row.period === 'number')
-            .map(row => row.period)
-        )];
-      }
-
-      // 同时更新exportPeriods列表
-      this.exportPeriods = [...this.selectedPeriodIds];
-    },
-
-    // 切换节次是否导出
-    toggleExportPeriod(period) {
-      const index = this.exportPeriods.indexOf(period);
-      if (index === -1) {
-        this.exportPeriods.push(period);
-      } else {
-        this.exportPeriods.splice(index, 1);
-      }
-    },
-
-    // 检查节次是否需要导出
-    isExportPeriod(period) {
-      return this.exportPeriods.includes(period);
-    },
-    processScheduleData(data) {
-      // 检测新旧数据格式
-      if (data.schedules && Array.isArray(data.schedules)) {
-        return this.processNewFormatData(data);
-      } else if (data.Subjects && data.TimeLayouts) {
-        return this.processOldFormatData(data);
-      } else {
-        throw new Error("数据格式不正确");
-      }
-    },
-
-    // 处理新格式数据
-    processNewFormatData(data) {
-      const { schedules, subjects } = data;
       const tableData = [];
 
       // 获取最大节次数
-      let maxPeriods = 12; // 默认值
-      schedules.forEach((schedule) => {
+      let maxPeriods = 0;
+      schedules.forEach(schedule => {
         if (schedule.classes && schedule.classes.length > maxPeriods) {
           maxPeriods = schedule.classes.length;
         }
@@ -787,33 +869,12 @@ export default {
         });
       }
 
-      // 默认选中所有行
-      this.selectedRows = [...tableData];
-      // 更新选中的节次ID
-      this.selectedPeriodIds = tableData.map(row => row.period);
-      // 默认所有节次都导出
-      this.exportPeriods = [...this.selectedPeriodIds];
+      // 处理每个课表
+      schedules.forEach(schedule => {
+        const day = schedule.enable_day;
+        if (!day || day < 1 || day > 7) return;
 
-      // 仅处理用户选择的课表
-      const selectedSchedules = schedules.filter(
-        (schedule) => this.selectedSchedules[schedule.uuid] === true
-      );
-
-      // 如果没有选中任何课表，直接返回空表格
-      if (selectedSchedules.length === 0) {
-        return {
-          tableData,
-          processedData: data,
-        };
-      }
-
-      // 处理每张课表
-      selectedSchedules.forEach((schedule) => {
-        // 获取星期
-        const weekday = String(schedule.enable_day);
-        if (!weekday || weekday < 1 || weekday > 7) return;
-
-        // 获取单双周信息
+        // 获取周类型
         let weekType = "";
         if (schedule.weeks === "odd") {
           weekType = "单";
@@ -821,372 +882,351 @@ export default {
           weekType = "双";
         }
 
-        // 处理课程
+        // 处理每节课
         schedule.classes.forEach((classInfo, index) => {
           if (!classInfo.subject) return;
 
           const period = index + 1;
           if (period > maxPeriods) return;
 
-          // 查找科目信息
-          let teacher = "";
-          if (subjects && Array.isArray(subjects)) {
-            const subjectInfo = subjects.find(
-              (s) => s.name === classInfo.subject
-            );
-            if (subjectInfo) {
-              teacher = subjectInfo.teacher || "";
-            }
-          }
+          // 获取科目详细信息
+          const subjectInfo = subjectMap[classInfo.subject] || {};
 
           const courseInfo = {
             name: classInfo.subject,
-            teacher: teacher,
-            location: "", // 新格式没有提供地点信息
+            teacher: subjectInfo.teacher || "",
+            room: subjectInfo.room || "",
             period: period,
             startTime: classInfo.start_time,
             endTime: classInfo.end_time,
-            weekday: schedule.name,
+            day: day,
             weekType: weekType,
           };
 
-          // 将课程信息存储到对应的节次和星期
-          const existing = tableData[period - 1][weekday];
+          // 将课程信息添加到表格
+          const existingCourse = tableData[period - 1][day];
 
-          // 处理课程放置逻辑
-          if (!existing) {
+          if (!existingCourse) {
             // 位置为空，直接添加
-            tableData[period - 1][weekday] = courseInfo;
-          } else if (
-            weekType &&
-            existing.weekType &&
-            weekType !== existing.weekType
-          ) {
-            // 如果是不同的单/双周类型，创建数组存储
-            if (!Array.isArray(tableData[period - 1][weekday])) {
-              tableData[period - 1][weekday] = [existing];
+            tableData[period - 1][day] = courseInfo;
+          } else if (weekType && existingCourse.weekType && weekType !== existingCourse.weekType) {
+            // 如果是不同的单/双周，创建数组
+            if (!Array.isArray(tableData[period - 1][day])) {
+              tableData[period - 1][day] = [existingCourse];
             }
-            tableData[period - 1][weekday].push(courseInfo);
+            tableData[period - 1][day].push(courseInfo);
+          } else if (weekType === existingCourse.weekType) {
+            // 相同周类型的课程，可能是冲突，使用后者覆盖
+            tableData[period - 1][day] = courseInfo;
+          } else if (!weekType) {
+            // 非单双周课程覆盖已有课程
+            tableData[period - 1][day] = courseInfo;
           }
-          // 其他情况下（相同周类型或无周类型），直接覆盖
-          // 这应该不会发生，因为在选择过程中已经处理了冲突
         });
       });
 
       return {
         tableData,
-        processedData: data,
+        originalData: data
       };
     },
 
-    // 处理旧格式数据（保持兼容性）
-    processOldFormatData(data) {
-      if (!data || !data.Subjects || !data.TimeLayouts) {
-        throw new Error("数据格式不正确");
+    updateSelectedPeriods(selected) {
+      this.exportPeriods = [];
+      if (selected && selected.length > 0) {
+        // 提取所有选中行的period值并去重
+        this.exportPeriods = [...new Set(
+          selected
+            .filter(row => row && typeof row.period === 'number')
+            .map(row => row.period)
+        )];
       }
-
-      const subjects = data.Subjects;
-      const timeLayouts = data.TimeLayouts;
-      const classPlans = data.ClassPlans || {};
-      const tableData = [];
-
-      // 确定最大节次数
-      let maxPeriods = 100; // 默认最大值
-      for (const layoutId in timeLayouts) {
-        const layout = timeLayouts[layoutId];
-        let periodCount = 0;
-        layout.Layouts.forEach((timeSlot) => {
-          if (timeSlot.TimeType === 0) {
-            periodCount++;
-          }
-        });
-        maxPeriods = Math.max(maxPeriods, periodCount);
-      }
-
-      // 初始化课表数据结构
-      for (let i = 1; i <= maxPeriods; i++) {
-        tableData.push({
-          period: i,
-          1: null,
-          2: null,
-          3: null,
-          4: null,
-          5: null,
-          6: null,
-          7: null,
-        });
-      }
-
-      // 默认选中所有行
-      this.selectedRows = [...tableData];
-      // 更新选中的节次ID
-      this.selectedPeriodIds = tableData.map(row => row.period);
-      // 默认所有节次都导出
-      this.exportPeriods = [...this.selectedPeriodIds];
-
-      // 映射每个TimeLayout到对应的ClassPlan
-      const layoutToClassPlan = {};
-      for (const planId in classPlans) {
-        const plan = classPlans[planId];
-        if (plan.TimeLayoutId) {
-          layoutToClassPlan[plan.TimeLayoutId] = plan;
-        }
-      }
-
-      // 处理每个时间布局
-      for (const layoutId in timeLayouts) {
-        const layout = timeLayouts[layoutId];
-        let layoutName = layout.Name;
-        let weekType = "";
-        let weekday = "";
-
-        // 获取对应的ClassPlan
-        const classPlan = layoutToClassPlan[layoutId];
-
-        // 处理单双周的情况
-        if (layoutName.startsWith("Odd_")) {
-          weekType = "单";
-          layoutName = layoutName.replace("Odd_", "");
-        } else if (layoutName.startsWith("Even_")) {
-          weekType = "双";
-          layoutName = layoutName.replace("Even_", "");
-        }
-
-        // 如果有ClassPlan，从TimeRule获取详细信息
-        if (classPlan && classPlan.TimeRule) {
-          // 周几 (0-6 代表周日到周六)
-          const weekDay = classPlan.TimeRule.WeekDay;
-          weekday = weekDay === 0 ? "7" : String(weekDay);
-
-          // 更精确的单双周信息
-          if (
-            classPlan.TimeRule.WeekCountDiv &&
-            classPlan.TimeRule.WeekCountDivTotal
-          ) {
-            if (
-              classPlan.TimeRule.WeekCountDiv === 1 &&
-              classPlan.TimeRule.WeekCountDivTotal === 2
-            ) {
-              weekType = "单";
-            } else if (
-              classPlan.TimeRule.WeekCountDiv === 2 &&
-              classPlan.TimeRule.WeekCountDivTotal === 2
-            ) {
-              weekType = "双";
-            }
-          }
-        } else {
-          // 没有ClassPlan，使用Name中的信息
-          weekday = this.weekdayMap[layoutName];
-          if (!weekday) continue; // 跳过无法识别的星期
-        }
-
-        let currentPeriod = 0;
-
-        layout.Layouts.forEach((timeSlot) => {
-          const classId = timeSlot.DefaultClassId;
-          if (subjects[classId] && timeSlot.TimeType === 0) {
-            const subject = subjects[classId];
-            currentPeriod++;
-
-            const courseInfo = {
-              name: subject.Name,
-              teacher: subject.TeacherName || "",
-              location: subject.IsOutDoor ? "户外" : "教室",
-              period: currentPeriod,
-              startTime: timeSlot.StartSecond.substr(11, 5),
-              endTime: timeSlot.EndSecond.substr(11, 5),
-              weekday: layoutName,
-              weekType: weekType,
-            };
-
-            // 将课程信息存储到对应的节次和星期
-            // 对于单双周的处理：如果同一位置已经有课程，并且是另一类型的单双周，则保留两者
-            if (currentPeriod <= maxPeriods && weekday) {
-              const existing = tableData[currentPeriod - 1][weekday];
-
-              // 如果位置为空，直接添加
-              if (!existing) {
-                tableData[currentPeriod - 1][weekday] = courseInfo;
-              }
-              // 如果已存在课程且当前处理的是单双周课程
-              else if (weekType) {
-                // 如果现有课程是另一种单双周课程，或不是单双周课程
-                if (existing.weekType !== weekType) {
-                  // 创建组合课程数组
-                  if (!Array.isArray(tableData[currentPeriod - 1][weekday])) {
-                    tableData[currentPeriod - 1][weekday] = [existing];
-                  }
-                  tableData[currentPeriod - 1][weekday].push(courseInfo);
-                }
-                // 如果是相同的单双周类型，可能是重复，不处理
-              }
-              // 如果当前不是单双周课程，但已存在课程
-              else {
-                // 普通课程优先级更高，替换现有的
-                tableData[currentPeriod - 1][weekday] = courseInfo;
-              }
-            }
-          }
-        });
-      }
-
-      return {
-        tableData,
-        processedData: data, // 保存原始数据以供后续使用
-      };
     },
-    getCourseByDayAndPeriod(day, period) {
-      if (!this.processedData?.periodCourses) return null;
-      return this.processedData.periodCourses[period]?.[day] || null;
+
+    getTimeTableData() {
+      return this.timeTableData;
     },
-    toggleScheduleSelection(schedule) {
-      if (!schedule || !schedule.uuid) return;
 
-      // 获取当前课表的选中状态
-      const isCurrentlySelected = !!this.selectedSchedules[schedule.uuid];
-
-      // 创建新的选中状态对象
-      const newSelectedSchedules = { ...this.selectedSchedules };
-
-      // 如果当前课表已选中，则取消选中
-      if (isCurrentlySelected) {
-        newSelectedSchedules[schedule.uuid] = false;
-        this.selectedSchedules = newSelectedSchedules;
-        this.updateProcessedData();
+    downloadCSV() {
+      if (!this.processedData?.tableData) {
+        this.error = "没有可下载的数据";
         return;
       }
 
-      // 当前操作是选中课表，获取课表相关信息
-      const day = schedule.enable_day;
-      const weekType = schedule.weeks; // "odd", "even", "all" 或其他
-
-      // 检测冲突，仅处理同一天的课表冲突
-      if (this.processedData?.schedules) {
-        this.processedData.schedules.forEach((otherSchedule) => {
-          // 跳过当前课表
-          if (otherSchedule.uuid === schedule.uuid) return;
-
-          // 如果不在同一天，跳过
-          if (otherSchedule.enable_day !== day) return;
-
-          const otherWeekType = otherSchedule.weeks;
-
-          // 冲突处理逻辑：
-          // - 单周与双周不冲突
-          // - 相同类型课程冲突
-          // - "all" 会与任何类型冲突
-          let hasConflict = false;
-
-          if (weekType === "odd" && otherWeekType === "even") {
-            hasConflict = false;
-          } else if (weekType === "even" && otherWeekType === "odd") {
-            hasConflict = false;
-          } else if (weekType === "all" || otherWeekType === "all") {
-            hasConflict = true;
-          } else if (weekType === otherWeekType) {
-            hasConflict = true;
-          }
-
-          // 如果有冲突且其他课表当前被选中，则取消选中
-          if (hasConflict && newSelectedSchedules[otherSchedule.uuid]) {
-            newSelectedSchedules[otherSchedule.uuid] = false;
-          }
-        });
+      // 如果没有选中任何要导出的节次
+      if (this.exportPeriods.length === 0) {
+        this.error = "请至少选择一节要导出的课";
+        return;
       }
 
-      // 选中当前课表
-      newSelectedSchedules[schedule.uuid] = true;
+      // 如果没有课程数据
+      if (this.daysWithSchedule.length === 0 || this.totalClassHours === 0) {
+        this.error = "没有课程数据可导出";
+        return;
+      }
 
-      // 更新选中状态
-      this.selectedSchedules = newSelectedSchedules;
+      // 生成CSV内容
+      let csvContent = "课程名称,星期,开始节数,结束节数,老师,地点,周数\n";
 
-      // 更新处理数据
-      this.updateProcessedData();
-    },
+      // 遍历每天的课程
+      for (const day of this.daysWithSchedule) {
+        // 获取该天的课程分组
+        const periodGroups = this.groupByPeriod(this.getDaySchedule(day));
 
-    // 生成唯一ID的方法
-    assignUniqueIds(schedules) {
-      if (!schedules || !Array.isArray(schedules)) return schedules;
+        // 遍历每个节次分组
+        for (const group of periodGroups) {
+          // 遍历该节次的每个课程
+          for (const item of group.items) {
+            const dayNumber = { "周一": 1, "周二": 2, "周三": 3, "周四": 4, "周五": 5, "周六": 6, "周日": 7 }[item.day];
+            const teacher = this.settings.hideTeacherName ? "" : (item.teacher || "");
+            const room = this.settings.hideRoom ? "" : (item.room || "");
 
-      // 按天和周类型分组
-      const groupedSchedules = {};
-
-      schedules.forEach(schedule => {
-        const day = schedule.enable_day;
-        const weekType = schedule.weeks || 'all';
-        const key = `${day}_${weekType}`;
-
-        if (!groupedSchedules[key]) {
-          groupedSchedules[key] = [];
+            // 每节课单独导出
+            csvContent += `${item.subject},${dayNumber},${item.period},${item.period},${teacher},${room},${item.weeks}\n`;
+          }
         }
+      }
 
-        groupedSchedules[key].push(schedule);
+      // 添加BOM头以确保Excel正确识别UTF-8编码
+      const BOM = "\uFEFF";
+      const blob = new Blob([BOM + csvContent], {
+        type: "text/csv;charset=utf-8",
       });
 
-      // 为每个组内的课表分配新ID
-      const newSchedules = [];
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `course_schedule_${this.totalClassHours}课时.csv`;
+      link.click();
+      URL.revokeObjectURL(link.href);
 
-      Object.values(groupedSchedules).forEach(group => {
-        group.forEach((schedule, index) => {
-          // 创建带有新ID的课表副本
-          const newSchedule = { ...schedule };
-          // 生成新的UUID: 原始ID + 日期 + 周类型 + 索引
-          const day = schedule.enable_day;
-          const weekType = schedule.weeks || 'all';
-          newSchedule.uuid = `schedule_${day}_${weekType}_${index}_${Date.now()}`;
-          newSchedules.push(newSchedule);
+      // 显示成功信息，包含课时数
+      this.success = `导出成功！共计 ${this.totalClassHours} 课时`;
+    },
+
+    // 添加导出数据预览功能
+    showExportPreview() {
+      if (!this.hasExportData) {
+        this.error = "请先选择要导出的节次";
+        return;
+      }
+
+      const previewContent = this.timeTableData.slice(0, 5).map(item =>
+        `${item.subject} (${item.day} 第${item.period}节)`
+      ).join('\n');
+
+      if (this.timeTableData.length > 5) {
+        this.success = `导出预览 (共${this.totalClassHours}课时):\n${previewContent}\n...等${this.totalClassHours - 5}节`;
+      } else {
+        this.success = `导出预览 (共${this.totalClassHours}课时):\n${previewContent}`;
+      }
+    },
+
+    // 添加YAML解析相关方法
+    isYaml(text) {
+      // 简单判断是否为YAML格式
+      // YAML通常不以{或[开头，而JSON必须以{或[开头
+      const trimmed = text.trim();
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        // 可能是JSON，尝试解析
+        try {
+          JSON.parse(trimmed);
+          return false; // 成功解析为JSON
+        } catch {
+          // 解析JSON失败，可能是YAML
+        }
+      }
+      // 检查是否含有YAML典型的格式如键值对 key: value
+      return /^\s*[a-zA-Z0-9_-]+\s*:/.test(trimmed) ||
+             /\n\s*[a-zA-Z0-9_-]+\s*:/.test(trimmed);
+    },
+
+    parseYaml(text) {
+      try {
+        // 使用CDN加载的jsyaml
+        if (typeof window.jsyaml !== 'undefined') {
+          return window.jsyaml.load(text);
+        } else {
+          throw new Error("YAML解析器未加载");
+        }
+      } catch (error) {
+        throw new Error(`YAML解析错误: ${error.message}`);
+      }
+    },
+
+    // 添加获取每天课程表的方法
+    getDaySchedule(day) {
+      if (!this.timeTableData) return [];
+      // 获取原始数据并过滤
+      const allData = this.getUnfilteredTimeTableData();
+      return allData.filter(item => {
+        const dayNum = { "周一": 1, "周二": 2, "周三": 3, "周四": 4, "周五": 5, "周六": 6, "周日": 7 }[item.day];
+        return dayNum === day;
+      });
+    },
+
+    // 添加一个辅助方法，获取不受selectedDays过滤的完整数据
+    getUnfilteredTimeTableData() {
+      if (!this.processedData || !this.processedData.tableData) return [];
+
+      const timeTableData = [];
+
+      // 获取选中的节次
+      const selectedRows = this.processedData.tableData.filter(
+        row => this.exportPeriods.includes(row.period)
+      );
+
+      // 对每个选中的节次和每天的课程进行处理
+      selectedRows.forEach(row => {
+        for (let day = 1; day <= 7; day++) {
+          const courses = row[day];
+          if (!courses) continue;
+
+          if (Array.isArray(courses)) {
+            // 处理数组形式的课程（单双周课程）
+            courses.forEach(course => {
+              if (!course || !course.name) return;
+
+              timeTableData.push({
+                period: row.period,
+                subject: course.name,
+                day: this.dayNames[day],
+                startTime: course.startTime,
+                endTime: course.endTime,
+                teacher: this.settings.hideTeacherName ? "" : (course.teacher || ""),
+                room: this.settings.hideRoom ? "" : (course.room || ""),
+                weeks: course.weekType ? `1-${this.settings.totalWeeks}${course.weekType}` : `1-${this.settings.totalWeeks}`
+              });
+            });
+          } else {
+            // 处理单个课程
+            if (!courses.name) continue;
+
+            timeTableData.push({
+              period: row.period,
+              subject: courses.name,
+              day: this.dayNames[day],
+              startTime: courses.startTime,
+              endTime: courses.endTime,
+              teacher: this.settings.hideTeacherName ? "" : (courses.teacher || ""),
+              room: this.settings.hideRoom ? "" : (courses.room || ""),
+              weeks: courses.weekType ? `1-${this.settings.totalWeeks}${courses.weekType}` : `1-${this.settings.totalWeeks}`
+            });
+          }
+        }
+      });
+
+      // 按照节次和星期排序
+      return timeTableData.sort((a, b) => {
+        // 先按节次排序
+        if (a.period !== b.period) return a.period - b.period;
+        // 再按星期排序
+        const dayOrder = { "周一": 1, "周二": 2, "周三": 3, "周四": 4, "周五": 5, "周六": 6, "周日": 7 };
+        return dayOrder[a.day] - dayOrder[b.day];
+      });
+    },
+
+    // 添加按节次分组的方法
+    groupByPeriod(daySchedule) {
+      // 按节次分组
+      const groups = {};
+      daySchedule.forEach(item => {
+        if (!groups[item.period]) {
+          groups[item.period] = {
+            period: item.period,
+            items: [],
+            timeSlots: []
+          };
+        }
+        groups[item.period].items.push(item);
+        groups[item.period].timeSlots.push({
+          startTime: item.startTime,
+          endTime: item.endTime
         });
       });
 
-      return newSchedules;
+      // 对每个分组，找出唯一的时间段
+      Object.values(groups).forEach(group => {
+        // 对时间段去重
+        group.uniqueTimeSlots = [];
+        group.timeSlots.forEach(timeSlot => {
+          if (!group.uniqueTimeSlots.some(
+            slot => slot.startTime === timeSlot.startTime && slot.endTime === timeSlot.endTime
+          )) {
+            group.uniqueTimeSlots.push(timeSlot);
+          }
+        });
+
+        // 对时间段排序
+        group.uniqueTimeSlots.sort((a, b) => {
+          return a.startTime.localeCompare(b.startTime);
+        });
+      });
+
+      // 转换为数组并按节次排序
+      return Object.values(groups).sort((a, b) => a.period - b.period);
     },
+
+    // 格式化时间 - 去掉秒数
+    formatTime(timeStr) {
+      if (!timeStr) return '';
+      // 如果时间格式是 HH:MM:SS，则去掉秒数部分
+      return timeStr.substring(0, 5);
+    },
+
+    // 获取课程颜色
+    getSubjectColor(subject) {
+      return this.subjectColors[subject] || 'grey';
+    },
+
+    selectAllDays() {
+      this.selectedDays = [1, 2, 3, 4, 5, 6, 7];
+    },
+
+    clearSelectedDays() {
+      this.selectedDays = [];
+    }
   },
-  computed: {
-    weekdayMap() {
-      return {
-        周一: "1",
-        周二: "2",
-        周三: "3",
-        周四: "4",
-        周五: "5",
-        周六: "6",
-        周日: "7",
-        Monday: "1",
-        Tuesday: "2",
-        Wednesday: "3",
-        Thursday: "4",
-        Friday: "5",
-        Saturday: "6",
-        Sunday: "7",
-      };
-    },
-    maxPeriods() {
-      if (!this.processedData) return [];
-      let max = 0;
-      for (const day in this.processedData.statistics) {
-        const courses = this.processedData.statistics[day].courses;
-        if (courses.length > 0) {
-          max = Math.max(max, ...courses.map((c) => c.period));
-        }
+  async mounted() {
+    // 加载YAML解析库
+    try {
+      await loadJsYaml();
+      this.yamlLibLoaded = true;
+    } catch (error) {
+      this.error = error.message;
+    }
+
+    // 监听daysWithSchedule变化，设置默认选中的日期
+    this.$watch('daysWithSchedule', (newVal) => {
+      if (newVal.length > 0 && !this.activeDay) {
+        this.activeDay = newVal[0];
       }
-      return Array.from({ length: max }, (_, i) => i + 1);
-    },
-  },
+    });
+  }
 };
 </script>
 
 <style scoped>
+.v-chip--selected {
+  font-weight: bold;
+}
+
+.v-chip .v-badge {
+  margin-left: 4px;
+}
+
+.time-chip {
+  font-size: 0.75rem;
+}
+
 .course-cell {
   padding: 4px;
-  text-align: center;
-  min-height: 60px;
-  position: relative;
+  font-size: 0.85rem;
+  white-space: pre-line;
 }
 
 .course-item {
-  padding: 4px 0;
-  border-bottom: 1px dashed #eee;
+  padding: 2px 0;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
 }
 
 .course-item:last-child {
@@ -1194,12 +1234,43 @@ export default {
 }
 
 .week-type {
-  display: inline-block;
-  font-size: 0.8em;
-  color: #666;
-  margin-top: 4px;
-  padding: 1px 4px;
+  font-size: 0.7rem;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 1px 3px;
   border-radius: 2px;
-  background-color: #f5f5f5;
+  margin-left: 2px;
+}
+
+/* 日期选择器样式 */
+.filter-chip {
+  min-width: 60px;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.filter-chip.v-chip--selected {
+  transform: scale(1.05);
+  font-weight: bold;
+}
+
+/* 表格美化 */
+.v-data-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 卡片美化 */
+.v-card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* 美化按钮悬浮效果 */
+.v-btn {
+  transition: transform 0.2s ease;
+}
+
+.v-btn:not(:disabled):hover {
+  transform: translateY(-2px);
 }
 </style>
