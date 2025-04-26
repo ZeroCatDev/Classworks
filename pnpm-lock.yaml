@@ -20,9 +20,6 @@ importers:
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
-      jscses:
-        specifier: ^1.0.6
-        version: 1.0.6
       pinyin-pro:
         specifier: ^3.26.0
         version: 3.26.0
@@ -2304,10 +2301,6 @@ packages:
 
   js-yaml@4.1.0:
     resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
-    hasBin: true
-
-  jscses@1.0.6:
-    resolution: {integrity: sha512-AKQZuopfyWv+BOEZtiEvfhn2FGr2cfAfY0oAuoGqKjBXkgx3lpq6VfW7nQREnJ9Whhr1t6LV2BNLFry/Kwajdg==}
     hasBin: true
 
   jsesc@3.0.2:
@@ -5880,10 +5873,6 @@ snapshots:
   js-yaml@4.1.0:
     dependencies:
       argparse: 2.0.1
-
-  jscses@1.0.6:
-    dependencies:
-      js-yaml: 4.1.0
 
   jsesc@3.0.2: {}
 

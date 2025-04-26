@@ -14,7 +14,6 @@
     "axios": "^1.8.4",
     "idb": "^8.0.2",
     "js-yaml": "^4.1.0",
-    "jscses": "^1.0.6",
     "pinyin-pro": "^3.26.0",
     "roboto-fontface": "*",
     "typewriter-effect": "^2.21.0",
