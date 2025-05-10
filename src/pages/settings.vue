@@ -127,7 +127,7 @@
             :is-mobile="isMobile"
             :unsaved-changes="hasUnsavedChanges"
             @save="saveStudents"
-            @reload="loadStudentList"
+            @reload="loadStudents"
             @update:modelValue="handleStudentDataChange"
           />
         </v-col>
@@ -187,7 +187,7 @@ import SettingsCard from '@/components/SettingsCard.vue';
 import StudentListCard from '@/components/settings/StudentListCard.vue';
 import AboutCard from '@/components/settings/AboutCard.vue';
 import '../styles/settings.scss';
-import dataProvider from '@/utils/dataProvider';
+import { kvProvider } from '@/utils/providers/kvProvider';
 import SettingsExplorer from '@/components/settings/SettingsExplorer.vue';
 import SettingsLinkGenerator from '@/components/SettingsLinkGenerator.vue';
 export default {
@@ -306,7 +306,7 @@ export default {
     this.unwatchSettings = watchSettings(() => {
       this.loadAllSettings();
     });
-    this.loadStudentList();
+    this.loadStudents();
     this.refreshDebugConfig();
 
     // 检查开发者选项,如果未启用则关闭相关功能
@@ -366,30 +366,34 @@ export default {
       this.$message.error(title, content);
     },
 
-    async loadStudentList() {
+    async loadStudents() {
+      this.studentsError = null;
       try {
         this.loading.students = true;
-        this.studentsError = null;
-
-        const domain = getSetting('server.domain');
         const classNum = getSetting('server.classNumber');
-        const provider = getSetting('server.provider');
 
         if (!classNum) {
           throw new Error('请先设置班号');
         }
 
-        const key = provider === 'server' ? `${domain}/${classNum}` : classNum;
-        const res = await dataProvider.loadConfig(provider, key);
+        const provider = getSetting('server.provider');
+        const useServer = provider === 'kv-server' || provider === 'classworkscloud';
+        let response;
 
-        if (!res.success) {
-          throw new Error(res.error.message);
+        if (useServer) {
+          response = await kvProvider.server.loadConfig();
+        } else {
+          response = await kvProvider.local.loadConfig();
         }
 
-        if (res.data && Array.isArray(res.data.studentList)) {
-          this.studentData.list = res.data.studentList;
-          this.studentData.text = res.data.studentList.join('\n');
-          this.lastSavedData = [...res.data.studentList];
+        if (!response.success) {
+          throw new Error(response.error.message);
+        }
+
+        if (response.data && Array.isArray(response.data.studentList)) {
+          this.studentData.list = response.data.studentList;
+          this.studentData.text = response.data.studentList.join('\n');
+          this.lastSavedData = [...response.data.studentList];
           this.hasUnsavedChanges = false;
         }
       } catch (error) {
@@ -403,21 +407,28 @@ export default {
 
     async saveStudents() {
       try {
-        const domain = getSetting('server.domain');
         const classNum = getSetting('server.classNumber');
-        const provider = getSetting('server.provider');
 
         if (!classNum) {
           throw new Error('请先设置班号');
         }
 
-        const key = provider === 'server' ? `${domain}/${classNum}` : classNum;
-        const res = await dataProvider.saveConfig(provider, key, {
-          studentList: this.studentData.list,
-        });
+        const provider = getSetting('server.provider');
+        const useServer = provider === 'kv-server' || provider === 'classworkscloud';
+        let response;
 
-        if (!res.success) {
-          throw new Error(res.error.message);
+        if (useServer) {
+          response = await kvProvider.server.saveConfig({
+            studentList: this.studentData.list,
+          });
+        } else {
+          response = await kvProvider.local.saveConfig({
+            studentList: this.studentData.list,
+          });
+        }
+
+        if (!response.success) {
+          throw new Error(response.error.message);
         }
 
         // 更新保存状态

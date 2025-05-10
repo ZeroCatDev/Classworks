@@ -12,12 +12,18 @@
         </p>
       </v-alert>
 
+      <v-alert v-if="isClassworksCloud" type="info" color="success" variant="tonal" class="my-2">
+        <v-alert-title>Classworks云端存储</v-alert-title>
+        <p>Classworks云端存储是官方提供的存储解决方案，自动配置了最优的访问设置。</p>
+        <p>使用此选项时，服务器域名和网站令牌将自动配置，无需手动设置。</p>
+      </v-alert>
+
       <v-divider class="my-2" />
-      <setting-item setting-key="server.domain" title="服务器域名" />
+      <setting-item setting-key="server.domain" title="服务器域名" :disabled="isClassworksCloud" />
       <v-divider class="my-2" />
       <setting-item setting-key="server.classNumber" title="班号" />
       <v-divider class="my-2" />
-      <setting-item setting-key="server.siteKey" title="网站令牌">
+      <setting-item setting-key="server.siteKey" title="网站令牌" :disabled="isClassworksCloud">
         <template #description>
           用于后端验证请求的安全令牌。如需要，请从系统管理员获取。
         </template>
@@ -53,8 +59,11 @@ export default {
     isKvProvider() {
       return this.currentProvider === 'kv-local' || this.currentProvider === 'kv-server';
     },
+    isClassworksCloud() {
+      return this.currentProvider === 'classworkscloud';
+    },
     useServer() {
-      return this.currentProvider === 'server' || this.currentProvider === 'kv-server';
+      return this.currentProvider === 'server' || this.currentProvider === 'kv-server' || this.currentProvider === 'classworkscloud';
     }
   }
 };

@@ -23,11 +23,6 @@ const getHeaders = () => {
     return headers;
 };
 
-// Get machine UUID from settings
-const getMachineId = () => {
-    return getSetting("device.uuid");
-};
-
 // Removed migrateToKvStorage function - now handled by the dedicated migration tool
 
 const initDB = async () => {
@@ -58,17 +53,13 @@ const formatDateForKey = (date) => {
 export const kvProvider = {
     // Local storage provider
     local: {
-        async loadData(classNumber, date) {
+        async loadData(date) {
             try {
-                if (!classNumber) {
-                    return formatError("请先设置班号", "CONFIG_ERROR");
-                }
-
                 const formattedDate = formatDateForKey(date);
                 const key = `${DATA_KEY_PREFIX}${formattedDate}`;
 
                 const db = await initDB();
-                const data = await db.get("kv", `${classNumber}/${key}`);
+                const data = await db.get("kv", key);
 
                 if (!data) {
                     const today = new Date().toISOString().split("T")[0];
@@ -91,31 +82,23 @@ export const kvProvider = {
             }
         },
 
-        async saveData(classNumber, data, date) {
+        async saveData(data, date) {
             try {
-                if (!classNumber) {
-                    return formatError("请先设置班号", "CONFIG_ERROR");
-                }
-
                 const formattedDate = formatDateForKey(date);
                 const key = `${DATA_KEY_PREFIX}${formattedDate}`;
 
                 const db = await initDB();
-                await db.put("kv", JSON.stringify(data), `${classNumber}/${key}`);
+                await db.put("kv", JSON.stringify(data), key);
                 return formatResponse(null, "保存成功");
             } catch (error) {
                 return formatError("保存本地数据失败：" + error);
             }
         },
 
-        async loadConfig(classNumber) {
+        async loadConfig() {
             try {
-                if (!classNumber) {
-                    return formatError("请先设置班号", "CONFIG_ERROR");
-                }
-
                 const db = await initDB();
-                const config = await db.get("kv", `${classNumber}/${CONFIG_KEY}`);
+                const config = await db.get("kv", CONFIG_KEY);
 
                 if (!config) {
                     return formatResponse({
@@ -134,14 +117,10 @@ export const kvProvider = {
             }
         },
 
-        async saveConfig(classNumber, config) {
+        async saveConfig(config) {
             try {
-                if (!classNumber) {
-                    return formatError("请先设置班号", "CONFIG_ERROR");
-                }
-
                 const db = await initDB();
-                await db.put("kv", JSON.stringify(config), `${classNumber}/${CONFIG_KEY}`);
+                await db.put("kv", JSON.stringify(config), CONFIG_KEY);
                 return formatResponse(null, "保存成功");
             } catch (error) {
                 return formatError("保存本地配置失败：" + error);
@@ -151,9 +130,10 @@ export const kvProvider = {
 
     // Server storage provider
     server: {
-        async loadData(serverUrl, classNumber, date) {
+        async loadData(classNumber, date) {
             try {
-                const machineId = getMachineId();
+                const serverUrl = getSetting("server.domain");
+                const machineId = getSetting("device.uuid");
                 const formattedDate = formatDateForKey(date);
                 const key = `${DATA_KEY_PREFIX}${formattedDate}`;
 
@@ -185,9 +165,10 @@ export const kvProvider = {
             }
         },
 
-        async saveData(serverUrl, classNumber, data, date) {
+        async saveData(classNumber, data, date) {
             try {
-                const machineId = getMachineId();
+                const serverUrl = getSetting("server.domain");
+                const machineId = getSetting("device.uuid");
                 const formattedDate = formatDateForKey(date);
                 const key = `${DATA_KEY_PREFIX}${formattedDate}`;
 
@@ -203,9 +184,10 @@ export const kvProvider = {
             }
         },
 
-        async loadConfig(serverUrl) {
+        async loadConfig() {
             try {
-                const machineId = getMachineId();
+                const serverUrl = getSetting("server.domain");
+                const machineId = getSetting("device.uuid");
                 const res = await axios.get(`${serverUrl}/${machineId}/${CONFIG_KEY}`, {
                     headers: getHeaders()
                 });
@@ -230,9 +212,10 @@ export const kvProvider = {
             }
         },
 
-        async saveConfig(serverUrl, config) {
+        async saveConfig(config) {
             try {
-                const machineId = getMachineId();
+                const serverUrl = getSetting("server.domain");
+                const machineId = getSetting("device.uuid");
                 await axios.post(`${serverUrl}/${machineId}/${CONFIG_KEY}`, config, {
                     headers: getHeaders()
                 });
@@ -247,4 +230,3 @@ export const kvProvider = {
     }
 };
 
-export { getMachineId };

@@ -74,6 +74,12 @@ function generateUUID() {
   });
 }
 
+// 新增: Classworks云端存储的默认设置
+const classworksCloudDefaults = {
+  "server.domain": "http://localhost:3030",
+  "server.siteKey": "123456",
+};
+
 /**
  * 所有配置项的定义
  * @type {Object.<string, SettingDefinition>}
@@ -182,11 +188,11 @@ const settingsDefinitions = {
   },
   "server.provider": {
     type: "string",
-    default: "indexedDB",
-    validate: (value) => ["server", "indexedDB", "kv-local", "kv-server"].includes(value),
+    default: "kv-local",
+    validate: (value) => ["kv-local", "kv-server", "classworkscloud"].includes(value),
     description: "数据提供者",
     icon: "mdi-database",
-    // 选择数据存储方式：使用本地IndexedDB或远程服务器
+    // 选择数据存储方式：使用本地存储或远程服务器
   },
 
   // 刷新设置
@@ -477,6 +483,13 @@ class SettingsManagerClass {
       const devEnabled = this.settingsCache["developer.enabled"];
       if (!devEnabled) {
         return definition.default;
+      }
+    }
+
+    // 检查是否使用Classworks云端存储，并覆盖特定设置
+    if (this.settingsCache["server.provider"] === "classworkscloud") {
+      if (classworksCloudDefaults[key] !== undefined) {
+        return classworksCloudDefaults[key];
       }
     }
 

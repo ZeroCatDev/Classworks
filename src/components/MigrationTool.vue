@@ -82,14 +82,14 @@
     <!-- 统一的数据显示卡片 -->
     <v-card class="mb-6">
       <v-card-title class="d-flex align-center">
-        <span>{{ migrationType === 'local' ? '本地数据库内容' : '服务器数据预览' }}</span>
+        <span>{{ migrationType === 'local' ? '本地数据库内容' : '服务器数据内容' }}</span>
         <v-spacer></v-spacer>
         <v-btn
           color="primary"
           @click="migrationType === 'local' ? scanLocalDatabase() : previewServerData()"
           :loading="loading || scanning"
         >
-          {{ migrationType === 'local' ? '扫描数据' : '预览数据' }}
+          {{ migrationType === 'local' ? '扫描数据' : '加载数据' }}
         </v-btn>
       </v-card-title>
       <v-card-text>
@@ -99,7 +99,7 @@
         >
           {{ migrationType === 'local'
             ? '尚未扫描本地数据或未找到可迁移的数据。点击"扫描数据"按钮开始扫描。'
-            : '尚未预览服务器数据或未找到可迁移的数据。点击"预览数据"按钮开始查询。'
+            : '尚未预览服务器数据或未找到可迁移的数据。点击"加载数据"按钮开始查询。'
           }}
         </v-alert>
 
@@ -478,7 +478,8 @@ export default {
             const res = await axios.get(homeworkUrl, {
               headers: this.getRequestHeaders()
             });
-            if (res.data) {
+            if (res.data&&res.data.status!=false) {
+              console.log(res.data);
               this.serverItems.push({
                 type: 'homework',
                 key: `homework_${this.classNumber}_${dateStr}`,
@@ -624,7 +625,7 @@ export default {
 
         if (itemType === 'config') {
           // 配置键名: classNumber/classworks-config
-          await db.put("kv", JSON.stringify(value), `${this.classNumber}/classworks-config`);
+          await db.put("kv", JSON.stringify(value), `classworks-config`);
           return { success: true, message: '配置已迁移' };
         } else {
           // 数据键名: classNumber/classworks-data-YYYYMMDD
@@ -644,7 +645,7 @@ export default {
             }
           }
 
-          await db.put("kv", JSON.stringify(value), `${this.classNumber}/classworks-data-${dateStr}`);
+          await db.put("kv", JSON.stringify(value), `classworks-data-${dateStr}`);
           return { success: true, message: `${dateStr} 数据已迁移` };
         }
       } catch (error) {

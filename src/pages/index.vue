@@ -625,6 +625,7 @@
 import MessageLog from "@/components/MessageLog.vue";
 import RandomPicker from "@/components/RandomPicker.vue"; // 导入随机点名组件
 import dataProvider from "@/utils/dataProvider";
+import { kvProvider } from "@/utils/providers/kvProvider";
 import {
   getSetting,
   watchSettings,
@@ -1086,7 +1087,6 @@ export default {
       try {
         this.loading.download = true;
         const response = await dataProvider.loadData(
-          this.provider,
           this.dataKey,
           this.state.dateString
         );
@@ -1192,10 +1192,9 @@ export default {
       try {
         this.loading.upload = true;
         const response = await dataProvider.saveData(
-          this.provider,
           this.dataKey,
           this.state.boardData,
-          this.state.dateString // 添加dateString参数
+          this.state.dateString
         );
 
         if (!response.success) {
@@ -1211,10 +1210,16 @@ export default {
 
     async loadConfig() {
       try {
-        const response = await dataProvider.loadConfig(
-          this.provider,
-          this.dataKey
-        );
+        // 使用新的kvProvider直接加载配置
+        const provider = getSetting("server.provider");
+        const useServer = provider === "kv-server" || provider === "classworkscloud";
+        let response;
+
+        if (useServer) {
+          response = await kvProvider.server.loadConfig();
+        } else {
+          response = await kvProvider.local.loadConfig();
+        }
 
         if (!response.success) {
           throw new Error(response.error.message);
@@ -1325,7 +1330,7 @@ export default {
       const classNum = getSetting("server.classNumber");
 
       this.provider = provider;
-      this.dataKey = provider === "server" ? `${domain}/${classNum}` : classNum;
+      this.dataKey = provider === "server" || provider === "classworkscloud" ? `${domain}/${classNum}` : classNum;
       this.state.classNumber = classNum;
     },
 

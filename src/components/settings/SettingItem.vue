@@ -169,10 +169,9 @@ export default {
           'dark': '深色'
         },
         'server.provider': {
-          'server': '远程服务器',
-          'indexedDB': '本地存储',
           'kv-local': 'KV本地存储',
-          'kv-server': 'KV远程服务器'
+          'kv-server': 'KV远程服务器',
+          'classworkscloud': 'Classworks云端存储'
         }
       },
       // 默认图标映射，按设置类型

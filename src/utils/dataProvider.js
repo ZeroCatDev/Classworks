@@ -1,5 +1,3 @@
-import { serverProvider } from "./providers/server";
-import { indexedDBProvider } from "./providers/indexedDB";
 import { kvProvider } from "./providers/kvProvider";
 import { getSetting } from "./settings";
 
@@ -14,84 +12,28 @@ export const formatError = (message, code = "UNKNOWN_ERROR") => ({
   error: { code, message },
 });
 
-// Legacy providers
-const legacyProviders = {
-  server: serverProvider,
-  indexedDB: indexedDBProvider,
-};
-
-// New KV provider
-const newProviders = {
-  kv: kvProvider,
-};
-
-// Main data provider with support for both legacy and new API
+// Main data provider with simplified API
 export default {
   // Provider API methods
-  loadData: (provider, key, date) => {
-    if (legacyProviders[provider]) {
-      return legacyProviders[provider]?.loadData(key, date);
-    }
+  loadData: async (key, date) => {
+    const provider = getSetting("server.provider");
+    const useServer = provider === "kv-server" || provider === "classworkscloud";
 
-    // If using new KV provider
-    if (provider === "kv-local") {
-      const classNumber = key.split("/").pop();
-      return newProviders.kv.local.loadData(classNumber, date);
-    } else if (provider === "kv-server") {
-      const classNumber = key.split("/").pop();
-      const serverUrl = getSetting("server.domain");
-      return newProviders.kv.server.loadData(serverUrl, classNumber, date);
+    if (useServer) {
+      return kvProvider.server.loadData(key, date);
+    } else {
+      return kvProvider.local.loadData(date);
     }
   },
 
-  saveData: (provider, key, data, date) => {
-    if (legacyProviders[provider]) {
-      return legacyProviders[provider]?.saveData(key, data, date);
-    }
+  saveData: async (key, data, date) => {
+    const provider = getSetting("server.provider");
+    const useServer = provider === "kv-server" || provider === "classworkscloud";
 
-    // If using new KV provider
-    if (provider === "kv-local") {
-      const classNumber = key.split("/").pop();
-      return newProviders.kv.local.saveData(classNumber, data, date);
-    } else if (provider === "kv-server") {
-      const classNumber = key.split("/").pop();
-      const serverUrl = getSetting("server.domain");
-      return newProviders.kv.server.saveData(
-        serverUrl,
-        classNumber,
-        data,
-        date
-      );
-    }
-  },
-
-  loadConfig: (provider, key) => {
-    if (legacyProviders[provider]) {
-      return legacyProviders[provider]?.loadConfig(key);
-    }
-
-    // If using new KV provider
-    if (provider === "kv-local") {
-      const classNumber = key.split("/").pop();
-      return newProviders.kv.local.loadConfig(classNumber);
-    } else if (provider === "kv-server") {
-      const serverUrl = getSetting("server.domain");
-      return newProviders.kv.server.loadConfig(serverUrl);
-    }
-  },
-
-  saveConfig: (provider, key, config) => {
-    if (legacyProviders[provider]) {
-      return legacyProviders[provider]?.saveConfig(key, config);
-    }
-
-    // If using new KV provider
-    if (provider === "kv-local") {
-      const classNumber = key.split("/").pop();
-      return newProviders.kv.local.saveConfig(classNumber, config);
-    } else if (provider === "kv-server") {
-      const serverUrl = getSetting("server.domain");
-      return newProviders.kv.server.saveConfig(serverUrl, config);
+    if (useServer) {
+      return kvProvider.server.saveData(key, data, date);
+    } else {
+      return kvProvider.local.saveData(data, date);
     }
   },
 };
