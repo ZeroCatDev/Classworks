@@ -2,30 +2,27 @@
   <settings-card title="数据源设置" icon="mdi-database-cog">
     <v-list>
       <!-- 服务器模式设置 -->
-      <template v-if="currentProvider === 'kv-server' || currentProvider === 'classworkscloud'">
+      <template
+        v-if="
+          currentProvider === 'kv-server' ||
+          currentProvider === 'classworkscloud'
+        "
+      >
         <v-list-item>
           <template #prepend>
             <v-icon icon="mdi-lan-connect" class="mr-3" />
           </template>
           <v-list-item-title>检查服务器连接</v-list-item-title>
           <template #append>
-            <v-btn :loading="loading" variant="tonal" @click="checkServerConnection">
+            <v-btn
+              :loading="loading"
+              variant="tonal"
+              @click="checkServerConnection"
+            >
               测试连接
             </v-btn>
-          </template>
-        </v-list-item><!-- 数据迁移，仅对KV本地存储有效 -->
-        <v-list-item>
-          <template #prepend>
-            <v-icon icon="mdi-database-import" class="mr-3" />
-          </template>
-          <v-list-item-title>迁移旧数据</v-list-item-title>
-          <v-list-item-subtitle>将旧的存储格式数据转移到新的KV存储</v-list-item-subtitle>
-          <template #append>
-            <v-btn :loading="migrateLoading" variant="tonal" @click="migrateData">
-              迁移
-            </v-btn>
-          </template>
-        </v-list-item>
+          </template> </v-list-item
+        ><!-- 数据迁移，仅对KV本地存储有效 -->
       </template>
 
       <!-- 本地存储设置 -->
@@ -35,7 +32,9 @@
             <v-icon icon="mdi-database" class="mr-3" />
           </template>
           <v-list-item-title>清除数据库缓存</v-list-item-title>
-          <v-list-item-subtitle>这将清除所有本地数据库中的数据</v-list-item-subtitle>
+          <v-list-item-subtitle
+            >这将清除所有本地数据库中的数据</v-list-item-subtitle
+          >
           <template #append>
             <v-btn color="error" variant="tonal" @click="confirmClearIndexedDB">
               清除
@@ -51,41 +50,38 @@
             <v-btn variant="tonal" @click="exportData"> 导出 </v-btn>
           </template>
         </v-list-item>
-
-        <!-- 显示机器ID -->
-        <v-list-item>
-          <template #prepend>
-            <v-icon icon="mdi-identifier" class="mr-3" />
-          </template>
-          <v-list-item-title>本机唯一标识符</v-list-item-title>
-          <v-list-item-subtitle v-if="machineId">{{ machineId }}</v-list-item-subtitle>
-          <v-list-item-subtitle v-else>正在加载...</v-list-item-subtitle>
-        </v-list-item>
-
-        <!-- 数据迁移，仅对KV本地存储有效 -->
-        <v-list-item v-if="currentProvider === 'kv-local'">
-          <template #prepend>
-            <v-icon icon="mdi-database-import" class="mr-3" />
-          </template>
-          <v-list-item-title>迁移旧数据</v-list-item-title>
-          <v-list-item-subtitle>将旧的存储格式数据转移到新的KV存储</v-list-item-subtitle>
-          <template #append>
-            <v-btn :loading="migrateLoading" variant="tonal" @click="migrateData">
-              迁移
-            </v-btn>
-          </template>
-        </v-list-item>
       </template>
-
+      <v-list-item>
+        <template #prepend>
+          <v-icon icon="mdi-database-import" class="mr-3" />
+        </template>
+        <v-list-item-title>迁移旧数据</v-list-item-title>
+        <v-list-item-subtitle
+          >将旧的存储格式数据转移到新的KV存储</v-list-item-subtitle
+        >
+        <template #append>
+          <v-btn :loading="migrateLoading" variant="tonal" @click="migrateData">
+            迁移
+          </v-btn>
+        </template> </v-list-item
+      ><!-- 显示机器ID -->
+      <v-list-item>
+        <template #prepend>
+          <v-icon icon="mdi-identifier" class="mr-3" />
+        </template>
+        <v-list-item-title>本机唯一标识符</v-list-item-title>
+        <v-list-item-subtitle v-if="machineId">{{
+          machineId
+        }}</v-list-item-subtitle>
+        <v-list-item-subtitle v-else>正在加载...</v-list-item-subtitle>
+      </v-list-item>
       <v-list-item>
         <template #prepend>
           <v-icon icon="mdi-lan-connect" class="mr-3" />
         </template>
         <v-list-item-title>查看本地缓存</v-list-item-title>
         <template #append>
-          <v-btn variant="tonal" to="/cachemanagement">
-            查看
-          </v-btn>
+          <v-btn variant="tonal" to="/cachemanagement"> 查看 </v-btn>
         </template>
       </v-list-item>
     </v-list>
@@ -97,8 +93,12 @@
         <v-card-text>{{ confirmMessage }}</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="grey" variant="text" @click="confirmDialog = false">取消</v-btn>
-          <v-btn color="error" variant="tonal" @click="handleConfirm">确认</v-btn>
+          <v-btn color="grey" variant="text" @click="confirmDialog = false"
+            >取消</v-btn
+          >
+          <v-btn color="error" variant="tonal" @click="handleConfirm"
+            >确认</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -133,19 +133,18 @@ export default {
     },
 
     isKvProvider() {
-      return this.currentProvider === 'kv-local' || this.currentProvider === 'kv-server' || this.currentProvider === 'classworkscloud';
-    }
+      return (
+        this.currentProvider === "kv-local" ||
+        this.currentProvider === "kv-server" ||
+        this.currentProvider === "classworkscloud"
+      );
+    },
   },
 
   async created() {
     // 如果是KV本地存储，获取机器ID
-    if (this.currentProvider === 'kv-local') {
-      try {
-        this.machineId = getSetting('device.uuid');
-      } catch (error) {
-        console.error("获取机器ID失败:", error);
-      }
-    }
+
+    this.machineId = getSetting("device.uuid");
   },
 
   methods: {
@@ -159,12 +158,12 @@ export default {
         // Prepare headers including site key if available
         const headers = { Accept: "application/json" };
         if (siteKey) {
-          headers['x-site-key'] = siteKey;
+          headers["x-site-key"] = siteKey;
         }
 
-        const response = await axios.get(`${domain}/api/test`, {
+        const response = await axios.get(`${domain}/check`, {
           method: "GET",
-          headers
+          headers,
         });
 
         if (response.data.status === "success") {
@@ -276,7 +275,7 @@ export default {
 
     async migrateData() {
       this.migrateLoading = true;
-      this.$router.push('/datamigration');
+      this.$router.push("/datamigration");
       this.migrateLoading = false;
     },
 
