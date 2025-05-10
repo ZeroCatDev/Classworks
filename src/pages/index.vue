@@ -625,7 +625,6 @@
 import MessageLog from "@/components/MessageLog.vue";
 import RandomPicker from "@/components/RandomPicker.vue"; // 导入随机点名组件
 import dataProvider from "@/utils/dataProvider";
-import { kvProvider } from "@/utils/providers/kvProvider";
 import {
   getSetting,
   watchSettings,
@@ -635,9 +634,9 @@ import {
 import { useDisplay } from "vuetify";
 import "../styles/index.scss";
 import "../styles/transitions.scss"; // 添加新的样式导入
-import { debounce, throttle } from "@/utils/debounce";
 import "../styles/global.scss";
 import { pinyin } from "pinyin-pro";
+import { debounce, throttle } from "@/utils/debounce";
 
 export default {
   name: "Classworks 作业板",
@@ -811,7 +810,13 @@ export default {
       return getSetting("edit.blockNonTodayAutoSave");
     },
     isToday() {
-      const today = new Date().toISOString().split("T")[0];
+      const today = (() => {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, "0");
+        const dd = String(now.getDate()).padStart(2, "0");
+        return `${yyyy}${mm}${dd}`;
+      })();
       return this.state.dateString === today;
     },
     canAutoSave() {
@@ -1044,7 +1049,7 @@ export default {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
+      return `${year}${month}${day}`;
     },
 
     getToday() {
@@ -1054,17 +1059,6 @@ export default {
     async initializeData() {
       // 尝试从URL读取配置
       const configApplied = await this.parseUrlConfig();
-
-      // 如果没有从URL应用配置，使用本地设置
-      if (!configApplied) {
-        this.provider = getSetting("server.provider");
-        const domain = getSetting("server.domain");
-        const classNum = getSetting("server.classNumber");
-
-        this.dataKey =
-          this.provider === "server" ? `${domain}/${classNum}` : classNum;
-        this.state.classNumber = classNum;
-      }
 
       // 从 URL 获取日期，如果没有则使用今天的日期
       const urlParams = new URLSearchParams(window.location.search);
@@ -1077,7 +1071,13 @@ export default {
       this.state.selectedDate = this.state.dateString;
       this.state.isToday =
         this.formatDate(currentDate) === this.formatDate(today);
+      // 如果没有从URL应用配置，使用本地设置
+      if (!configApplied) {
+        this.provider = getSetting("server.provider");
+        const classNum = getSetting("server.classNumber");
 
+        this.state.classNumber = classNum;
+      }
       await Promise.all([this.downloadData(), this.loadConfig()]);
     },
 
@@ -1087,8 +1087,7 @@ export default {
       try {
         this.loading.download = true;
         const response = await dataProvider.loadData(
-          this.dataKey,
-          this.state.dateString
+          "classworks-data-" + this.state.dateString
         );
 
         if (!response.success) {
@@ -1192,9 +1191,8 @@ export default {
       try {
         this.loading.upload = true;
         const response = await dataProvider.saveData(
-          this.dataKey,
-          this.state.boardData,
-          this.state.dateString
+          "classworks-data-" + this.state.dateString,
+          this.state.boardData
         );
 
         if (!response.success) {
@@ -1210,22 +1208,23 @@ export default {
 
     async loadConfig() {
       try {
-        // 使用新的kvProvider直接加载配置
-        const provider = getSetting("server.provider");
-        const useServer = provider === "kv-server" || provider === "classworkscloud";
-        let response;
+        try {
+          // Try to get student list from the dedicated key
+          const response = await dataProvider.loadData("classworks-list-main");
 
-        if (useServer) {
-          response = await kvProvider.server.loadConfig();
-        } else {
-          response = await kvProvider.local.loadConfig();
+          if (response.success && Array.isArray(response.data)) {
+            // Transform the data into a simple list of names
+            this.state.studentList = response.data.map(
+              (student) => student.name
+            );
+            return;
+          }
+        } catch (error) {
+          console.warn(
+            "Failed to load student list from dedicated key, falling back to config",
+            error
+          );
         }
-
-        if (!response.success) {
-          throw new Error(response.error.message);
-        }
-
-        this.state.studentList = response.data.studentList || [];
       } catch (error) {
         console.error("加载配置失败:", error);
         this.$message.error("加载配置失败", error.message);
@@ -1326,11 +1325,10 @@ export default {
 
     updateBackendUrl() {
       const provider = getSetting("server.provider");
-      const domain = getSetting("server.domain");
       const classNum = getSetting("server.classNumber");
 
       this.provider = provider;
-      this.dataKey = provider === "server" || provider === "classworkscloud" ? `${domain}/${classNum}` : classNum;
+
       this.state.classNumber = classNum;
     },
 

@@ -624,8 +624,27 @@ export default {
         const itemType = this.getItemType(item);
 
         if (itemType === 'config') {
-          // 配置键名: classNumber/classworks-config
-          await db.put("kv", JSON.stringify(value), `classworks-config`);
+          // Handle student list migration
+          if (value.studentList && Array.isArray(value.studentList)) {
+            // Extract studentList from config and save it separately
+            const formattedStudentList = value.studentList.map((name, index) => ({
+              id: index + 1,
+              name
+            }));
+
+            // Store the student list under the new key
+            await db.put("kv", JSON.stringify(formattedStudentList), 'classworks-list-main');
+
+            // Remove studentList from config
+            const configWithoutStudentList = { ...value };
+            delete configWithoutStudentList.studentList;
+
+            // Save the modified config
+            await db.put("kv", JSON.stringify(configWithoutStudentList), `classworks-config`);
+          } else {
+            // Just store the config as is
+            await db.put("kv", JSON.stringify(value), `classworks-config`);
+          }
           return { success: true, message: '配置已迁移' };
         } else {
           // 数据键名: classNumber/classworks-data-YYYYMMDD
@@ -661,10 +680,33 @@ export default {
         const itemType = this.getItemType(item);
 
         if (itemType === 'config') {
-          // 配置
-          await axios.post(`${this.targetServerUrl}/${this.machineId}/classworks-config`, value, {
-            headers: this.getRequestHeaders()
-          });
+          // Handle student list migration
+          if (value.studentList && Array.isArray(value.studentList)) {
+            // Extract studentList from config
+            const formattedStudentList = value.studentList.map((name, index) => ({
+              id: index + 1,
+              name
+            }));
+
+            // Store the student list under the new key
+            await axios.post(`${this.targetServerUrl}/${this.machineId}/classworks-list-main`, formattedStudentList, {
+              headers: this.getRequestHeaders()
+            });
+
+            // Remove studentList from config
+            const configWithoutStudentList = { ...value };
+            delete configWithoutStudentList.studentList;
+
+            // Save the modified config
+            await axios.post(`${this.targetServerUrl}/${this.machineId}/classworks-config`, configWithoutStudentList, {
+              headers: this.getRequestHeaders()
+            });
+          } else {
+            // Just store the config as is
+            await axios.post(`${this.targetServerUrl}/${this.machineId}/classworks-config`, value, {
+              headers: this.getRequestHeaders()
+            });
+          }
           return { success: true, message: '配置已迁移到服务器' };
         } else {
           // 数据

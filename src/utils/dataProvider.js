@@ -15,25 +15,27 @@ export const formatError = (message, code = "UNKNOWN_ERROR") => ({
 // Main data provider with simplified API
 export default {
   // Provider API methods
-  loadData: async (key, date) => {
+  loadData: async (key) => {
     const provider = getSetting("server.provider");
-    const useServer = provider === "kv-server" || provider === "classworkscloud";
+    const useServer =
+      provider === "kv-server" || provider === "classworkscloud";
 
     if (useServer) {
-      return kvProvider.server.loadData(key, date);
+      return kvProvider.server.loadData(key);
     } else {
-      return kvProvider.local.loadData(date);
+      return kvProvider.local.loadData(key);
     }
   },
 
-  saveData: async (key, data, date) => {
+  saveData: async (key, data) => {
     const provider = getSetting("server.provider");
-    const useServer = provider === "kv-server" || provider === "classworkscloud";
+    const useServer =
+      provider === "kv-server" || provider === "classworkscloud";
 
     if (useServer) {
-      return kvProvider.server.saveData(key, data, date);
+      return kvProvider.server.saveData(key, data);
     } else {
-      return kvProvider.local.saveData(data, date);
+      return kvProvider.local.saveData(key, data);
     }
   },
 };

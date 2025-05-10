@@ -190,6 +190,8 @@ import '../styles/settings.scss';
 import { kvProvider } from '@/utils/providers/kvProvider';
 import SettingsExplorer from '@/components/settings/SettingsExplorer.vue';
 import SettingsLinkGenerator from '@/components/SettingsLinkGenerator.vue';
+import dataProvider from '@/utils/dataProvider';
+
 export default {
   name: 'Settings',
   components: {
@@ -376,25 +378,36 @@ export default {
           throw new Error('请先设置班号');
         }
 
-        const provider = getSetting('server.provider');
-        const useServer = provider === 'kv-server' || provider === 'classworkscloud';
-        let response;
 
-        if (useServer) {
-          response = await kvProvider.server.loadConfig();
-        } else {
-          response = await kvProvider.local.loadConfig();
+        try {
+          // Try to get student list from the dedicated key
+          const response = await dataProvider.loadData('classworks-list-main');
+
+          if (response.success && Array.isArray(response.data)) {
+            // Transform the data into a simple list of names
+            this.studentData.list = response.data.map(student => student.name);
+            this.studentData.text = this.studentData.list.join('\n');
+            this.lastSavedData = [...this.studentData.list];
+            this.hasUnsavedChanges = false;
+            return;
+          }
+        } catch (error) {
+          console.warn('Failed to load student list from dedicated key, falling back to config', error);
         }
 
-        if (!response.success) {
-          throw new Error(response.error.message);
-        }
+        // Fall back to retrieving from config if the dedicated key is not available
+        const response = await kvProvider.local.loadConfig();
 
-        if (response.data && Array.isArray(response.data.studentList)) {
+        if (response.success && response.data && Array.isArray(response.data.studentList)) {
           this.studentData.list = response.data.studentList;
           this.studentData.text = response.data.studentList.join('\n');
           this.lastSavedData = [...response.data.studentList];
           this.hasUnsavedChanges = false;
+        } else {
+          // If no student list is found anywhere, initialize with empty list
+          this.studentData.list = [];
+          this.studentData.text = '';
+          this.lastSavedData = [];
         }
       } catch (error) {
         console.error('加载学生列表失败:', error);
@@ -413,22 +426,18 @@ export default {
           throw new Error('请先设置班号');
         }
 
-        const provider = getSetting('server.provider');
-        const useServer = provider === 'kv-server' || provider === 'classworkscloud';
-        let response;
 
-        if (useServer) {
-          response = await kvProvider.server.saveConfig({
-            studentList: this.studentData.list,
-          });
-        } else {
-          response = await kvProvider.local.saveConfig({
-            studentList: this.studentData.list,
-          });
-        }
+        // Convert the list of names to the new format with IDs
+        const formattedStudentList = this.studentData.list.map((name, index) => ({
+          id: index + 1,
+          name
+        }));
+
+        // Save the student list to the dedicated key
+        const response = await dataProvider.saveData("classworks-list-main", formattedStudentList);
 
         if (!response.success) {
-          throw new Error(response.error.message);
+          throw new Error(response.error?.message || "保存失败");
         }
 
         // 更新保存状态
