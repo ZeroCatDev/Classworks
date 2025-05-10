@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" max-width="600" fullscreen-breakpoint="sm">
+  <v-dialog v-model="dialog" max-width="600" fullscreen-breakpoint="sm" persistent>
     <v-card class="random-picker-card">
       <v-card-title class="text-h5 d-flex align-center">
         <v-icon icon="mdi-account-question" class="mr-2" />
@@ -49,7 +49,7 @@
               <div v-if="tempFilters.excludeExcluded">• 已排除不参与学生 ({{ excludedCount }}人)</div>
             </div>
           </v-tooltip><!-- 添加临时过滤选项 -->
-       
+
               <div class="d-flex flex-wrap justify-center gap-2 mt-4">
                 <v-chip :color="tempFilters.excludeLate ? 'warning' : 'default'"
                   :variant="tempFilters.excludeLate ? 'elevated' : 'text'"
@@ -64,7 +64,7 @@
                   {{ tempFilters.excludeAbsent ? '排除' : '包含' }}请假学生
                 </v-chip>
 
-                
+
 
                 <v-chip :color="tempFilters.excludeExcluded ? 'grey' : 'default'"
                   :variant="tempFilters.excludeExcluded ? 'elevated' : 'text'"
