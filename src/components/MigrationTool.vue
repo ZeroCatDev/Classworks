@@ -1,0 +1,698 @@
+<template>
+  <div>
+    <v-card class="mb-6">
+      <v-card-title>迁移设置</v-card-title>
+      <v-card-text>
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="classNumber"
+              label="班级编号"
+              hint="请输入需要迁移的班级编号"
+              persistent-hint
+              prepend-icon="mdi-account-group"
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="machineId"
+              label="设备标识 (UUID)"
+              hint="系统已自动填充设备标识，通常无需修改"
+              persistent-hint
+              prepend-icon="mdi-identifier"
+              readonly
+            ></v-text-field>
+          </v-col>
+        </v-row>
+
+        <v-radio-group v-model="migrationType" class="mt-2">
+          <v-radio value="local" label="本地数据迁移"></v-radio>
+          <v-radio value="server" label="服务器数据迁移"></v-radio>
+        </v-radio-group>
+
+        <div v-if="migrationType === 'server'" class="mt-4">
+          <v-text-field
+            v-model="serverUrl"
+            label="服务器地址"
+            hint="输入服务器域名，例如：https://example.com"
+            persistent-hint
+            prepend-icon="mdi-server"
+          ></v-text-field>
+
+          <v-alert
+            density="compact"
+            type="info"
+            variant="outlined"
+            class="mt-2"
+          >
+            服务器接口格式：<br>
+            - 配置接口：域名/班号/config<br>
+            - 作业数据接口：域名/班号/homework?date=YYYY-MM-DD
+          </v-alert>
+
+          <div class="d-flex align-center mt-4">
+            <v-icon color="warning" class="mr-2">mdi-calendar-range</v-icon>
+            <span class="text-subtitle-1">选择迁移时间范围：</span>
+          </div>
+
+          <v-row class="mt-1">
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="startDate"
+                label="开始日期"
+                type="date"
+                prepend-icon="mdi-calendar-start"
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="endDate"
+                label="结束日期"
+                type="date"
+                prepend-icon="mdi-calendar-end"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </div>
+      </v-card-text>
+    </v-card>
+
+    <!-- 统一的数据显示卡片 -->
+    <v-card class="mb-6">
+      <v-card-title class="d-flex align-center">
+        <span>{{ migrationType === 'local' ? '本地数据库内容' : '服务器数据预览' }}</span>
+        <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          @click="migrationType === 'local' ? scanLocalDatabase() : previewServerData()"
+          :loading="loading || scanning"
+        >
+          {{ migrationType === 'local' ? '扫描数据' : '预览数据' }}
+        </v-btn>
+      </v-card-title>
+      <v-card-text>
+        <v-alert
+          v-if="displayItems.length === 0 && !loading && !scanning"
+          type="info"
+        >
+          {{ migrationType === 'local'
+            ? '尚未扫描本地数据或未找到可迁移的数据。点击"扫描数据"按钮开始扫描。'
+            : '尚未预览服务器数据或未找到可迁移的数据。点击"预览数据"按钮开始查询。'
+          }}
+        </v-alert>
+
+        <v-data-table
+          v-if="displayItems.length > 0"
+          :headers="headers"
+          :items="displayItems"
+          :items-per-page="10"
+          item-value="key"
+          class="elevation-1"
+        >
+          <template #[`item.type`]="{ item }">
+            <v-chip :color="getItemType(item) === 'config' ? 'primary' : 'secondary'" size="small">
+              {{ getItemType(item) === 'config' ? '配置' : '作业数据' }}
+            </v-chip>
+          </template>
+
+          <template #[`item.date`]="{ item }">
+            {{ formatDate(getItemDate(item)) }}
+          </template>
+        </v-data-table>
+
+        <v-alert
+          v-if="displayItems.length > 0"
+          type="info"
+          density="compact"
+          class="mt-2"
+        >
+          系统将迁移表格中显示的所有数据项，迁移前请确认数据完整性。
+        </v-alert>
+
+        <v-skeleton-loader v-if="loading || scanning" type="table"></v-skeleton-loader>
+      </v-card-text>
+    </v-card>
+
+    <v-card class="mb-6">
+      <v-card-title>迁移目标</v-card-title>
+      <v-card-text>
+        <v-radio-group v-model="targetStorage">
+          <v-radio value="kv-local" label="本地 KV 存储"></v-radio>
+          <v-radio value="kv-server" label="服务器 KV 存储"></v-radio>
+        </v-radio-group>
+
+        <div v-if="targetStorage === 'kv-server'" class="mt-4">
+          <v-text-field
+            v-model="targetServerUrl"
+            label="目标服务器地址"
+            hint="输入KV服务器地址，例如：https://example.com/kv-api"
+            persistent-hint
+            prepend-icon="mdi-server-network"
+          ></v-text-field>
+        </div>
+      </v-card-text>
+    </v-card>
+
+    <div class="d-flex justify-end mb-6">
+      <v-btn
+        color="success"
+        @click="startMigration"
+        :loading="migrating"
+        :disabled="!canMigrate"
+      >
+        开始迁移
+      </v-btn>
+    </div>
+
+    <v-dialog v-model="showResult" max-width="600">
+      <v-card>
+        <v-card-title class="d-flex align-center">
+          <v-icon
+            :color="migrationSuccess ? 'success' : 'error'"
+            class="mr-2"
+          >
+            {{ migrationSuccess ? 'mdi-check-circle' : 'mdi-alert-circle' }}
+          </v-icon>
+          <span>{{ migrationSuccess ? '迁移成功' : '迁移失败' }}</span>
+        </v-card-title>
+        <v-card-text>
+          <v-alert
+            v-if="migrationError"
+            type="error"
+            class="mb-4"
+          >
+            {{ migrationError }}
+          </v-alert>
+
+          <div v-if="migrationSuccess">
+            <p>成功迁移 {{ migrationStats.success }} 项数据到 {{ targetStorage === 'kv-local' ? '本地' : '服务器' }} KV 存储。</p>
+            <v-divider class="my-4"></v-divider>
+            <v-list>
+              <v-list-subheader>迁移详情</v-list-subheader>
+              <v-list-item v-for="(item, index) in migrationResults" :key="index">
+                <v-list-item-title>
+                  {{ item.key }}
+                </v-list-item-title>
+                <v-list-item-subtitle>
+                  {{ item.success ? '成功' : '失败' }} {{ item.message }}
+                </v-list-item-subtitle>
+              </v-list-item>
+            </v-list>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            @click="showResult = false"
+          >
+            关闭
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
+</template>
+
+<script>
+import { openDB } from 'idb';
+import axios from '@/axios/axios';
+import { getSetting } from '@/utils/settings';
+
+export default {
+  name: 'MigrationTool',
+  data() {
+    return {
+      classNumber: 'G2405',
+      machineId: '',
+      migrationType: 'server',
+      serverUrl: 'https://class.wuyuan.dev',
+      targetStorage: 'kv-server',
+      targetServerUrl: 'http://localhost:3030',
+      startDate: this.getDateString(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)), // 30 days ago
+      endDate: this.getDateString(new Date()),
+      loading: false,
+      scanning: false,
+      migrating: false,
+      showServerPreview: false,
+      showResult: false,
+      migrationSuccess: false,
+      migrationError: null,
+      migrationStats: {
+        total: 0,
+        success: 0,
+        failed: 0
+      },
+      migrationResults: [],
+      localDbItems: [],
+      serverItems: [],
+      selectedItems: [],
+      headers: [
+        { title: '类型', key: 'type', sortable: true },
+        { title: '键名', key: 'key', sortable: true },
+        { title: '日期', key: 'date', sortable: true },
+        { title: '大小', key: 'size', sortable: true }
+      ]
+    };
+  },
+  computed: {
+    displayItems() {
+      return this.migrationType === 'local' ? this.localDbItems : this.serverItems;
+    },
+    canMigrate() {
+      return (
+        this.classNumber &&
+        this.machineId &&
+        this.displayItems.length > 0 &&
+        (this.targetStorage !== 'kv-server' || this.targetServerUrl)
+      );
+    }
+  },
+  async mounted() {
+    try {
+      await this.initMachineId();
+    } catch (error) {
+      console.error('初始化设备ID失败:', error);
+    }
+  },
+  methods: {
+    // 安全地获取项目类型，处理可能的undefined情况
+    getItemType(item) {
+      if (!item) return '';
+      // 处理直接对象和v-data-table的item对象格式
+      return item.raw ? item.raw.type : item.type;
+    },
+
+    // 安全地获取项目日期，处理可能的undefined情况
+    getItemDate(item) {
+      if (!item) return null;
+      return item.raw ? item.raw.date : item.date;
+    },
+
+    getDateString(date) {
+      return date.toISOString().split('T')[0];
+    },
+
+    // 初始化设备ID
+    async initMachineId() {
+      this.machineId = getSetting("device.uuid");
+    },
+
+    // 获取请求头，包含网站令牌
+    getRequestHeaders() {
+      const headers = { Accept: "application/json" };
+      const siteKey = getSetting("server.siteKey");
+
+      if (siteKey) {
+        headers['x-site-key'] = siteKey;
+      }
+
+      return headers;
+    },
+
+    // 扫描本地数据库
+    async scanLocalDatabase() {
+      if (!this.classNumber) {
+        this.$emit('message', { text: '请先输入班级编号', type: 'error' });
+        return;
+      }
+
+      this.scanning = true;
+      this.localDbItems = [];
+
+      try {
+        // 打开数据库
+        const db = await openDB("ClassworksDB", 2);
+
+        // 检查旧的数据存储
+        if (db.objectStoreNames.contains("homework") && db.objectStoreNames.contains("config")) {
+          // 从旧的作业存储中读取数据
+          const homework = db.transaction("homework", "readonly");
+          const hwStore = homework.objectStore("homework");
+          const hwKeys = await hwStore.getAllKeys();
+
+          // 过滤当前班级的键
+          const classKeys = hwKeys.filter(key => key.startsWith(`homework_${this.classNumber}_`));
+
+          for (const key of classKeys) {
+            const value = await hwStore.get(key);
+
+            // 从键中提取日期: homework_classNumber_YYYY-MM-DD
+            const datePart = key.split('_')[2];
+            let dateObj = null;
+
+            if (datePart) {
+              const [year, month, day] = datePart.split('-');
+              dateObj = new Date(year, month - 1, day);
+            }
+
+            this.localDbItems.push({
+              type: 'homework',
+              key,
+              originalKey: key,
+              date: dateObj,
+              size: this.getDataSize(value) + ' KB',
+              value
+            });
+          }
+
+          // 检查配置
+          const configKey = `config_${this.classNumber}`;
+          const configValue = await db.get("config", configKey);
+
+          if (configValue) {
+            this.localDbItems.push({
+              type: 'config',
+              key: configKey,
+              originalKey: configKey,
+              date: null,
+              size: this.getDataSize(configValue) + ' KB',
+              value: configValue
+            });
+          }
+        }
+
+        // 检查新的KV存储中是否已有数据
+        if (db.objectStoreNames.contains("kv")) {
+          const kvTx = db.transaction("kv", "readonly");
+          const kvStore = kvTx.objectStore("kv");
+          const kvKeys = await kvStore.getAllKeys();
+
+          // 过滤当前班级的键
+          const classKvKeys = kvKeys.filter(key => key.startsWith(`${this.classNumber}/`));
+
+          for (const key of classKvKeys) {
+            const value = await kvStore.get(key);
+
+            // 判断是配置还是作业数据
+            const isConfig = key.includes(`/${this.classNumber}/classworks-config`);
+            let dateObj = null;
+
+            if (!isConfig) {
+              // 从键中提取日期: classNumber/classworks-data-YYYYMMDD
+              const match = key.match(/classworks-data-(\d{4})(\d{2})(\d{2})/);
+              if (match) {
+                const [, year, month, day] = match;
+                dateObj = new Date(year, parseInt(month) - 1, day);
+              }
+            }
+
+            this.localDbItems.push({
+              type: isConfig ? 'config' : 'homework',
+              key,
+              originalKey: key,
+              date: dateObj,
+              size: this.getDataSize(value) + ' KB',
+              value,
+              isKv: true
+            });
+          }
+        }
+      } catch (error) {
+        console.error('扫描本地数据库失败:', error);
+        this.$emit('message', { text: '扫描数据库失败: ' + error.message, type: 'error' });
+      } finally {
+        this.scanning = false;
+      }
+    },
+
+    // 计算数据大小（KB）
+    getDataSize(data) {
+      if (!data) return 0;
+      const str = typeof data === 'string' ? data : JSON.stringify(data);
+      return Math.round((str.length * 2) / 1024 * 100) / 100; // 近似值
+    },
+
+    // 格式化日期显示
+    formatDate(date) {
+      if (!date) return '配置 (无日期)';
+      return date.toLocaleDateString();
+    },
+
+    // 预览服务器数据
+    async previewServerData() {
+      if (!this.serverUrl || !this.classNumber || !this.startDate || !this.endDate) {
+        this.$emit('message', { text: '请填写完整的服务器信息和时间范围', type: 'error' });
+        return;
+      }
+
+      this.loading = true;
+      this.serverItems = [];
+
+      try {
+        // 先获取配置信息
+        try {
+          // 构建配置请求URL: 域名/班号/config
+          const configUrl = `${this.serverUrl}/${this.classNumber}/config`;
+
+          const configRes = await axios.get(configUrl, {
+            headers: this.getRequestHeaders()
+          });
+          if (configRes.data) {
+            this.serverItems.push({
+              type: 'config',
+              key: `config_${this.classNumber}`,
+              originalKey: configUrl,
+              date: null,
+              size: this.getDataSize(configRes.data) + ' KB',
+              value: configRes.data
+            });
+          }
+        } catch (configError) {
+          console.warn('无法获取配置:', configError);
+        }
+
+        // 获取日期范围内的所有数据
+        const start = new Date(this.startDate);
+        const end = new Date(this.endDate);
+        const dateArray = this.getDateArray(start, end);
+
+        for (const date of dateArray) {
+          const dateStr = this.formatDateForServer(date);
+          try {
+            // 构建数据请求URL: 域名/班号/homework?date=YYYY-MM-DD
+            const homeworkUrl = `${this.serverUrl}/${this.classNumber}/homework?date=${dateStr}`;
+
+            const res = await axios.get(homeworkUrl, {
+              headers: this.getRequestHeaders()
+            });
+            if (res.data) {
+              this.serverItems.push({
+                type: 'homework',
+                key: `homework_${this.classNumber}_${dateStr}`,
+                originalKey: homeworkUrl,
+                date,
+                size: this.getDataSize(res.data) + ' KB',
+                value: res.data
+              });
+            }
+          } catch (error) {
+            if (error.response?.status !== 404) {
+              console.warn(`无法获取 ${dateStr} 的数据:`, error);
+            }
+          }
+        }
+
+        this.showServerPreview = true;
+      } catch (error) {
+        console.error('预览服务器数据失败:', error);
+        this.$emit('message', { text: '预览数据失败: ' + error.message, type: 'error' });
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // 获取日期范围内的所有日期
+    getDateArray(start, end) {
+      const dateArray = [];
+      const currentDate = new Date(start);
+
+      while (currentDate <= end) {
+        dateArray.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      return dateArray;
+    },
+
+    // 格式化日期为服务器格式 (YYYY-MM-DD)
+    formatDateForServer(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    },
+
+    // 格式化日期为KV存储格式 (YYYYMMDD)
+    formatDateForKv(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}${month}${day}`;
+    },
+
+    // 开始迁移
+    async startMigration() {
+      if (!this.canMigrate) {
+        this.$emit('message', { text: '无法开始迁移，请检查配置', type: 'error' });
+        return;
+      }
+
+      this.migrating = true;
+      this.migrationResults = [];
+      this.migrationStats = {
+        total: this.displayItems.length,
+        success: 0,
+        failed: 0
+      };
+
+      try {
+        // 处理所有数据项，但先处理配置，再处理作业数据
+        const configItems = this.displayItems.filter(item => this.getItemType(item) === 'config');
+        const dataItems = this.displayItems.filter(item => this.getItemType(item) === 'homework');
+
+        // 先处理配置项
+        for (const item of configItems) {
+          await this.migrateItem(item);
+        }
+
+        // 再处理数据项
+        for (const item of dataItems) {
+          await this.migrateItem(item);
+        }
+
+        this.migrationSuccess = this.migrationStats.failed === 0;
+        this.showResult = true;
+      } catch (error) {
+        console.error('迁移过程出错:', error);
+        this.migrationSuccess = false;
+        this.migrationError = error.message;
+        this.showResult = true;
+      } finally {
+        this.migrating = false;
+      }
+    },
+
+    // 迁移单个数据项
+    async migrateItem(item) {
+      try {
+        let result;
+
+        if (this.targetStorage === 'kv-local') {
+          result = await this.migrateToLocalKv(item);
+        } else {
+          result = await this.migrateToServerKv(item);
+        }
+
+        this.migrationResults.push({
+          key: item.key,
+          success: result.success,
+          message: result.message
+        });
+
+        if (result.success) {
+          this.migrationStats.success++;
+        } else {
+          this.migrationStats.failed++;
+        }
+      } catch (error) {
+        console.error(`迁移 ${item.key} 失败:`, error);
+        this.migrationResults.push({
+          key: item.key,
+          success: false,
+          message: error.message
+        });
+        this.migrationStats.failed++;
+      }
+    },
+
+    // 迁移到本地KV存储
+    async migrateToLocalKv(item) {
+      try {
+        const db = await openDB("ClassworksDB", 2, {
+          upgrade(db) {
+            if (!db.objectStoreNames.contains("kv")) {
+              db.createObjectStore("kv");
+            }
+          }
+        });
+
+        const value = typeof item.value === 'string' ? JSON.parse(item.value) : item.value;
+        const itemType = this.getItemType(item);
+
+        if (itemType === 'config') {
+          // 配置键名: classNumber/classworks-config
+          await db.put("kv", JSON.stringify(value), `${this.classNumber}/classworks-config`);
+          return { success: true, message: '配置已迁移' };
+        } else {
+          // 数据键名: classNumber/classworks-data-YYYYMMDD
+          const itemDate = this.getItemDate(item);
+          let dateStr;
+
+          if (itemDate) {
+            dateStr = this.formatDateForKv(itemDate);
+          } else {
+            // 尝试从键名提取日期
+            const match = item.key.match(/(\d{4})-(\d{2})-(\d{2})/);
+            if (match) {
+              const [, year, month, day] = match;
+              dateStr = `${year}${month}${day}`;
+            } else {
+              return { success: false, message: '无法确定日期格式' };
+            }
+          }
+
+          await db.put("kv", JSON.stringify(value), `${this.classNumber}/classworks-data-${dateStr}`);
+          return { success: true, message: `${dateStr} 数据已迁移` };
+        }
+      } catch (error) {
+        console.error('本地KV迁移失败:', error);
+        return { success: false, message: error.message };
+      }
+    },
+
+    // 迁移到服务器KV存储
+    async migrateToServerKv(item) {
+      try {
+        const value = typeof item.value === 'string' ? JSON.parse(item.value) : item.value;
+        const itemType = this.getItemType(item);
+
+        if (itemType === 'config') {
+          // 配置
+          await axios.post(`${this.targetServerUrl}/${this.machineId}/classworks-config`, value, {
+            headers: this.getRequestHeaders()
+          });
+          return { success: true, message: '配置已迁移到服务器' };
+        } else {
+          // 数据
+          const itemDate = this.getItemDate(item);
+          let dateStr;
+
+          if (itemDate) {
+            dateStr = this.formatDateForKv(itemDate);
+          } else {
+            // 尝试从键名提取日期
+            const match = item.key.match(/(\d{4})-(\d{2})-(\d{2})/);
+            if (match) {
+              const [, year, month, day] = match;
+              dateStr = `${year}${month}${day}`;
+            } else {
+              return { success: false, message: '无法确定日期格式' };
+            }
+          }
+
+          await axios.post(`${this.targetServerUrl}/${this.machineId}/classworks-data-${dateStr}`, value, {
+            headers: this.getRequestHeaders()
+          });
+          return { success: true, message: `${dateStr} 数据已迁移到服务器` };
+        }
+      } catch (error) {
+        console.error('服务器KV迁移失败:', error);
+        return { success: false, message: error.response?.data?.message || error.message };
+      }
+    }
+  }
+};
+</script>

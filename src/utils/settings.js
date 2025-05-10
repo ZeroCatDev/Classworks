@@ -36,14 +36,16 @@ async function requestPersistentStorage() {
  */
 async function initializeStorage() {
   const notificationGranted = await requestNotificationPermission();
-  if (notificationGranted && getSetting("storage.persistOnLoad")) {
+  if (notificationGranted && SettingsManager.getSetting("storage.persistOnLoad")) {
     const persisted = await requestPersistentStorage();
     console.log(`持久性存储状态: ${persisted ? "已启用" : "未启用"}`);
   }
 }
 
 // 在页面加载时初始化
-window.addEventListener("load", initializeStorage);
+if (typeof window !== 'undefined') {
+  window.addEventListener("load", initializeStorage);
+}
 
 /**
  * 配置项定义
@@ -61,10 +63,30 @@ window.addEventListener("load", initializeStorage);
 const SETTINGS_STORAGE_KEY = "Classworks_settings";
 
 /**
+ * 生成UUID v4
+ * @returns {string} 生成的UUID字符串
+ */
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+/**
  * 所有配置项的定义
  * @type {Object.<string, SettingDefinition>}
  */
 const settingsDefinitions = {
+  // 设备标识
+  "device.uuid": {
+    type: "string",
+    default: generateUUID(),
+    description: "设备唯一标识符",
+    icon: "mdi-identifier",
+  },
+
   // 存储设置
   "storage.persistOnLoad": {
     type: "boolean",
@@ -151,10 +173,17 @@ const settingsDefinitions = {
     icon: "mdi-account-group",
     // 设置班级标识，用于区分不同班级的数据
   },
+  "server.siteKey": {
+    type: "string",
+    default: "",
+    description: "网站令牌",
+    icon: "mdi-key-chain",
+    // 用于后端验证请求的令牌，将作为请求头 x-site-key 发送
+  },
   "server.provider": {
     type: "string",
     default: "indexedDB",
-    validate: (value) => ["server", "indexedDB"].includes(value),
+    validate: (value) => ["server", "indexedDB", "kv-local", "kv-server"].includes(value),
     description: "数据提供者",
     icon: "mdi-database",
     // 选择数据存储方式：使用本地IndexedDB或远程服务器
@@ -328,274 +357,309 @@ const settingsDefinitions = {
   },
 };
 
-// 内存中缓存的设置值
-let settingsCache = null;
-
 /**
- * 从localStorage加载所有设置
- * @returns {Object} 所有设置的值
+ * 设置管理器单例类
  */
-function loadSettings() {
-  try {
-    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
-    if (stored) {
-      settingsCache = JSON.parse(stored);
-    } else {
-      // 首次使用或迁移旧数据
-      settingsCache = migrateFromLegacy();
-    }
-  } catch (error) {
-    console.error("加载设置失败:", error);
-    settingsCache = {};
+class SettingsManagerClass {
+  constructor() {
+    this.settingsCache = null;
+    this.isInitialized = false;
   }
 
-  // 确保所有设置项都有值（使用默认值填充）
-  for (const [key, definition] of Object.entries(settingsDefinitions)) {
-    if (!(key in settingsCache)) {
-      settingsCache[key] = definition.default;
-    }
+  /**
+   * 初始化设置管理器
+   */
+  init() {
+    if (this.isInitialized) return;
+    this.loadSettings();
+    this.isInitialized = true;
   }
 
-  return settingsCache;
-}
-
-/**
- * 从旧版本的localStorage迁移数据
- */
-function migrateFromLegacy() {
-  const LEGACY_SETTINGS_KEY = "homeworkpage_settings";
-  const LEGACY_MESSAGE_KEY = "homeworkpage_messages";
-
-  // 尝试从旧版本的设置中迁移
-  const legacySettings = localStorage.getItem(LEGACY_SETTINGS_KEY);
-  if (legacySettings) {
+  /**
+   * 从localStorage加载所有设置
+   * @returns {Object} 所有设置的值
+   */
+  loadSettings() {
     try {
-      const settings = JSON.parse(legacySettings);
-      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
-      // 可选：删除旧的设置
-      localStorage.removeItem(LEGACY_SETTINGS_KEY);
-      return settings;
+      const stored = typeof localStorage !== 'undefined' ? localStorage.getItem(SETTINGS_STORAGE_KEY) : null;
+      if (stored) {
+        this.settingsCache = JSON.parse(stored);
+      } else {
+        // 首次使用或迁移旧数据
+        this.settingsCache = this.migrateFromLegacy();
+      }
     } catch (error) {
-      console.error("迁移旧设置失败:", error);
+      console.error("加载设置失败:", error);
+      this.settingsCache = {};
     }
+
+    // 确保所有设置项都有值（使用默认值填充）
+    for (const [key, definition] of Object.entries(settingsDefinitions)) {
+      if (!(key in this.settingsCache)) {
+        this.settingsCache[key] = definition.default;
+      }
+    }
+
+    return this.settingsCache;
   }
-  // 尝试从旧版本的message中迁移
-  const legacyMessages = localStorage.getItem(LEGACY_MESSAGE_KEY);
-  if (legacyMessages) {
+
+  /**
+   * 从旧版本的localStorage迁移数据
+   */
+  migrateFromLegacy() {
+    if (typeof localStorage === 'undefined') return {};
+
+    const LEGACY_SETTINGS_KEY = "homeworkpage_settings";
+    const LEGACY_MESSAGE_KEY = "homeworkpage_messages";
+
+    // 尝试从旧版本的设置中迁移
+    const legacySettings = localStorage.getItem(LEGACY_SETTINGS_KEY);
+    if (legacySettings) {
+      try {
+        const settings = JSON.parse(legacySettings);
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+        // 可选：删除旧的设置
+        localStorage.removeItem(LEGACY_SETTINGS_KEY);
+        return settings;
+      } catch (error) {
+        console.error("迁移旧设置失败:", error);
+      }
+    }
+    // 尝试从旧版本的message中迁移
+    const legacyMessages = localStorage.getItem(LEGACY_MESSAGE_KEY);
+    if (legacyMessages) {
+      try {
+        const messages = JSON.parse(legacyMessages);
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(messages));
+        // 可选：删除旧的message
+        localStorage.removeItem(LEGACY_MESSAGE_KEY);
+        return messages; // 返回迁移后的消息
+      } catch (error) {
+        console.error("迁移旧消息失败:", error);
+      }
+    }
+
+    // 如果没有旧设置或迁移失败，返回空对象
+    return {};
+  }
+
+  /**
+   * 保存所有设置到localStorage
+   */
+  saveSettings() {
+    if (typeof localStorage === 'undefined') return;
+
     try {
-      const messages = JSON.parse(legacyMessages);
-      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(messages));
-      // 可选：删除旧的message
-      localStorage.removeItem(LEGACY_MESSAGE_KEY);
-      return messages; // 返回迁移后的消息
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(this.settingsCache));
     } catch (error) {
-      console.error("迁移旧消息失败:", error);
+      console.error("保存设置失败:", error);
     }
   }
 
-  // 如果没有旧设置或迁移失败，返回空对象
-  return {};
-}
-
-/**
- * 保存所有设置到localStorage
- */
-function saveSettings() {
-  try {
-    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settingsCache));
-  } catch (error) {
-    console.error("保存设置失败:", error);
-  }
-}
-
-/**
- * 获取设置项的值
- * @param {string} key - 设置项键名
- * @returns {any} 设置项的值
- */
-function getSetting(key) {
-  if (!settingsCache) {
-    loadSettings();
-  }
-
-  const definition = settingsDefinitions[key];
-  if (!definition) {
-    console.warn(`未定义的设置项: ${key}`);
-    return null;
-  }
-
-  // 确保开发者相关设置正确处理
-  if (definition.requireDeveloper) {
-    const devEnabled = settingsCache["developer.enabled"];
-    if (!devEnabled) {
-      return definition.default;
-    }
-  }
-
-  const value = settingsCache[key];
-  return value !== undefined ? value : definition.default;
-}
-
-// 修改 logSettingsChange 函数，优化检查逻辑
-function logSettingsChange(key, oldValue, newValue) {
-  // 确保设置已加载
-  if (!settingsCache) {
-    loadSettings();
-  }
-
-  const shouldLog =
-    settingsCache["developer.enabled"] &&
-    settingsCache["developer.showDebugConfig"];
-
-  if (shouldLog) {
-    console.log(`[Settings] ${key}:`, {
-      old: oldValue,
-      new: newValue,
-      time: new Date().toLocaleTimeString(),
-    });
-  }
-}
-
-/**
- * 设置配置项的值
- * @param {string} key - 设置项键名
- * @param {any} value - 要设置的值
- * @returns {boolean} 是否设置成功
- */
-function setSetting(key, value) {
-  const definition = settingsDefinitions[key];
-  if (!definition) {
-    console.warn(`未定义的设置项: ${key}`);
-    return false;
-  }
-
-  // 添加对开发者选项依赖的检查
-  if (definition.requireDeveloper && !settingsCache["developer.enabled"]) {
-    console.warn(`设置项 ${key} 需要启用开发者选项`);
-    return false;
-  }
-
-  try {
-    const oldValue = settingsCache[key];
-    // 类型转换
-    if (typeof value !== definition.type) {
-      value =
-        definition.type === "boolean"
-          ? Boolean(value)
-          : definition.type === "number"
-          ? Number(value)
-          : String(value);
+  /**
+   * 获取设置项的值
+   * @param {string} key - 设置项键名
+   * @returns {any} 设置项的值
+   */
+  getSetting(key) {
+    if (!this.isInitialized) {
+      this.init();
     }
 
-    // 验证
-    if (definition.validate && !definition.validate(value)) {
-      console.warn(`设置项 ${key} 的值无效`);
+    const definition = settingsDefinitions[key];
+    if (!definition) {
+      console.warn(`未定义的设置项: ${key}`);
+      return null;
+    }
+
+    // 确保开发者相关设置正确处理
+    if (definition.requireDeveloper) {
+      const devEnabled = this.settingsCache["developer.enabled"];
+      if (!devEnabled) {
+        return definition.default;
+      }
+    }
+
+    const value = this.settingsCache[key];
+    return value !== undefined ? value : definition.default;
+  }
+
+  /**
+   * 设置配置项的值
+   * @param {string} key - 设置项键名
+   * @param {any} value - 要设置的值
+   * @returns {boolean} 是否设置成功
+   */
+  setSetting(key, value) {
+    if (!this.isInitialized) {
+      this.init();
+    }
+
+    const definition = settingsDefinitions[key];
+    if (!definition) {
+      console.warn(`未定义的设置项: ${key}`);
       return false;
     }
 
-    if (!settingsCache) {
-      loadSettings();
+    // 添加对开发者选项依赖的检查
+    if (definition.requireDeveloper && !this.settingsCache["developer.enabled"]) {
+      console.warn(`设置项 ${key} 需要启用开发者选项`);
+      return false;
     }
 
-    settingsCache[key] = value;
-    saveSettings();
-    logSettingsChange(key, oldValue, value);
+    try {
+      const oldValue = this.settingsCache[key];
+      // 类型转换
+      if (typeof value !== definition.type) {
+        value =
+          definition.type === "boolean"
+            ? Boolean(value)
+            : definition.type === "number"
+            ? Number(value)
+            : String(value);
+      }
 
-    // 为了保持向后兼容，同时更新旧的localStorage键
-    const legacyKey = definition.legacyKey;
-    if (legacyKey) {
-      localStorage.setItem(legacyKey, value.toString());
+      // 验证
+      if (definition.validate && !definition.validate(value)) {
+        console.warn(`设置项 ${key} 的值无效`);
+        return false;
+      }
+
+      this.settingsCache[key] = value;
+      this.saveSettings();
+      this.logSettingsChange(key, oldValue, value);
+
+      // 为了保持向后兼容，同时更新旧的localStorage键
+      const legacyKey = definition.legacyKey;
+      if (legacyKey && typeof localStorage !== 'undefined') {
+        localStorage.setItem(legacyKey, value.toString());
+      }
+
+      return true;
+    } catch (error) {
+      console.error(`设置配置项 ${key} 失败:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * 记录设置变更
+   */
+  logSettingsChange(key, oldValue, newValue) {
+    const shouldLog =
+      this.settingsCache["developer.enabled"] &&
+      this.settingsCache["developer.showDebugConfig"];
+
+    if (shouldLog) {
+      console.log(`[Settings] ${key}:`, {
+        old: oldValue,
+        new: newValue,
+        time: new Date().toLocaleTimeString(),
+      });
+    }
+  }
+
+  /**
+   * 重置指定设置项到默认值
+   * @param {string} key - 设置项键名
+   */
+  resetSetting(key) {
+    if (!this.isInitialized) {
+      this.init();
     }
 
-    return true;
-  } catch (error) {
-    console.error(`设置配置项 ${key} 失败:`, error);
-    return false;
-  }
-}
-
-/**
- * 重置指定设置项到默认值
- * @param {string} key - 设置项键名
- */
-function resetSetting(key) {
-  const definition = settingsDefinitions[key];
-  if (!definition) {
-    console.warn(`未定义的设置项: ${key}`);
-    return;
-  }
-
-  if (!settingsCache) {
-    loadSettings();
-  }
-
-  settingsCache[key] = definition.default;
-  saveSettings();
-}
-
-/**
- * 重置所有设置项到默认值
- */
-function resetAllSettings() {
-  settingsCache = {};
-  for (const [key, definition] of Object.entries(settingsDefinitions)) {
-    settingsCache[key] = definition.default;
-  }
-  saveSettings();
-}
-
-/**
- * 监听设置变化
- * @param {Function} callback - 当设置改变时调用的回调函数
- * @returns {Function} 取消监听的函数
- */
-function watchSettings(callback) {
-  const handler = (event) => {
-    if (event.key === SETTINGS_STORAGE_KEY) {
-      settingsCache = JSON.parse(event.newValue);
-      callback(settingsCache);
+    const definition = settingsDefinitions[key];
+    if (!definition) {
+      console.warn(`未定义的设置项: ${key}`);
+      return;
     }
-  };
 
-  window.addEventListener("storage", handler);
-  return () => window.removeEventListener("storage", handler);
-}
-
-// 初始化设置
-loadSettings();
-
-/**
- * 获取设置项的定义
- * @param {string} key - 设置项键名
- * @returns {SettingDefinition|null} 设置项的定义或null
- */
-function getSettingDefinition(key) {
-  return settingsDefinitions[key] || null;
-}
-
-/**
- * 将当前配置导出为简单的键值对对象
- * @returns {Object} 包含所有设置的键值对对象
- */
-function exportSettingsAsKeyValue() {
-  if (!settingsCache) {
-    loadSettings();
+    this.settingsCache[key] = definition.default;
+    this.saveSettings();
   }
-  
-  // 创建一个新对象，避免直接返回引用
-  const exportedSettings = {};
-  
-  // 遍历所有设置项
-  for (const key in settingsDefinitions) {
-    // 获取当前值（确保使用getSetting以应用所有规则，如开发者选项依赖）
-    exportedSettings[key] = getSetting(key);
+
+  /**
+   * 重置所有设置项到默认值
+   */
+  resetAllSettings() {
+    this.settingsCache = {};
+    for (const [key, definition] of Object.entries(settingsDefinitions)) {
+      this.settingsCache[key] = definition.default;
+    }
+    this.saveSettings();
   }
-  
-  return exportedSettings;
+
+  /**
+   * 监听设置变化
+   * @param {Function} callback - 当设置改变时调用的回调函数
+   * @returns {Function} 取消监听的函数
+   */
+  watchSettings(callback) {
+    if (typeof window === 'undefined') return () => {};
+
+    const handler = (event) => {
+      if (event.key === SETTINGS_STORAGE_KEY) {
+        this.settingsCache = JSON.parse(event.newValue);
+        callback(this.settingsCache);
+      }
+    };
+
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }
+
+  /**
+   * 获取设置项的定义
+   * @param {string} key - 设置项键名
+   * @returns {SettingDefinition|null} 设置项的定义或null
+   */
+  getSettingDefinition(key) {
+    return settingsDefinitions[key] || null;
+  }
+
+  /**
+   * 将当前配置导出为简单的键值对对象
+   * @returns {Object} 包含所有设置的键值对对象
+   */
+  exportSettingsAsKeyValue() {
+    if (!this.isInitialized) {
+      this.init();
+    }
+
+    // 创建一个新对象，避免直接返回引用
+    const exportedSettings = {};
+
+    // 遍历所有设置项
+    for (const key in settingsDefinitions) {
+      // 获取当前值（确保使用getSetting以应用所有规则，如开发者选项依赖）
+      exportedSettings[key] = this.getSetting(key);
+    }
+
+    return exportedSettings;
+  }
 }
 
+// 创建单例实例
+const SettingsManager = new SettingsManagerClass();
+
+// 在服务器端和客户端都能正常工作的初始化
+if (typeof window !== 'undefined') {
+  SettingsManager.init();
+}
+
+// 为了向后兼容性，提供与原来相同的函数接口
+const getSetting = (key) => SettingsManager.getSetting(key);
+const setSetting = (key, value) => SettingsManager.setSetting(key, value);
+const resetSetting = (key) => SettingsManager.resetSetting(key);
+const resetAllSettings = () => SettingsManager.resetAllSettings();
+const watchSettings = (callback) => SettingsManager.watchSettings(callback);
+const getSettingDefinition = (key) => SettingsManager.getSettingDefinition(key);
+const exportSettingsAsKeyValue = () => SettingsManager.exportSettingsAsKeyValue();
+
+// 导出单例和直接方法
 export {
   settingsDefinitions,
+  SettingsManager,
   getSetting,
   setSetting,
   resetSetting,

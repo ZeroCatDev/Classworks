@@ -17,6 +17,7 @@
     "pinyin-pro": "^3.26.0",
     "roboto-fontface": "*",
     "typewriter-effect": "^2.21.0",
+    "uuid": "^9.0.1",
     "vue": "^3.4.31",
     "vuetify": "^3.8.0"
   },

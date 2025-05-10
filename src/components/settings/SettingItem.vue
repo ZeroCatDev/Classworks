@@ -35,7 +35,7 @@
               @click="adjustValue(stepValue)" />
           </div>
         </div>
-        
+
         <v-menu location="bottom">
           <template v-slot:activator="{ props }">
             <v-btn icon="mdi-dots-vertical" size="small" variant="text" v-bind="props" class="ml-2"
@@ -170,7 +170,9 @@ export default {
         },
         'server.provider': {
           'server': '远程服务器',
-          'indexedDB': '本地存储'
+          'indexedDB': '本地存储',
+          'kv-local': 'KV本地存储',
+          'kv-server': 'KV远程服务器'
         }
       },
       // 默认图标映射，按设置类型
@@ -233,12 +235,12 @@ export default {
       if (this.icon) {
         return this.icon;
       }
-      
+
       // 其次使用定义中的图标
       if (this.definition && this.definition.icon) {
         return this.definition.icon;
       }
-      
+
       // 最后使用基于类型的默认图标
       return this.defaultIcons[this.type] || 'mdi-cog-outline';
     }

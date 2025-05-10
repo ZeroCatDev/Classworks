@@ -2,7 +2,7 @@
   <settings-card title="数据源设置" icon="mdi-database-cog">
     <v-list>
       <!-- 服务器模式设置 -->
-      <template v-if="currentProvider === 'server'">
+      <template v-if="currentProvider === 'server' || currentProvider === 'kv-server'">
         <v-list-item>
           <template #prepend>
             <v-icon icon="mdi-lan-connect" class="mr-3" />
@@ -17,7 +17,7 @@
       </template>
 
       <!-- IndexedDB设置 -->
-      <template v-if="currentProvider === 'indexedDB'">
+      <template v-if="currentProvider === 'indexedDB' || currentProvider === 'kv-local'">
         <v-list-item>
           <template #prepend>
             <v-icon icon="mdi-database" class="mr-3" />
@@ -39,7 +39,32 @@
             <v-btn variant="tonal" @click="exportData"> 导出 </v-btn>
           </template>
         </v-list-item>
+
+        <!-- 显示机器ID，仅对KV本地存储有效 -->
+        <v-list-item v-if="currentProvider === 'kv-local'">
+          <template #prepend>
+            <v-icon icon="mdi-identifier" class="mr-3" />
+          </template>
+          <v-list-item-title>本机唯一标识符</v-list-item-title>
+          <v-list-item-subtitle v-if="machineId">{{ machineId }}</v-list-item-subtitle>
+          <v-list-item-subtitle v-else>正在加载...</v-list-item-subtitle>
+        </v-list-item>
+
+        <!-- 数据迁移，仅对KV本地存储有效 -->
+        <v-list-item v-if="currentProvider === 'kv-local'">
+          <template #prepend>
+            <v-icon icon="mdi-database-import" class="mr-3" />
+          </template>
+          <v-list-item-title>迁移旧数据</v-list-item-title>
+          <v-list-item-subtitle>将旧的存储格式数据转移到新的KV存储</v-list-item-subtitle>
+          <template #append>
+            <v-btn :loading="migrateLoading" variant="tonal" @click="migrateData">
+              迁移
+            </v-btn>
+          </template>
+        </v-list-item>
       </template>
+
       <v-list-item>
         <template #prepend>
           <v-icon icon="mdi-lan-connect" class="mr-3" />
@@ -50,7 +75,22 @@
             查看
           </v-btn>
         </template>
-      </v-list-item> <v-list-item>
+      </v-list-item>
+
+      <v-list-item>
+        <template #prepend>
+          <v-icon icon="mdi-database-sync" class="mr-3" />
+        </template>
+        <v-list-item-title>高级数据迁移工具</v-list-item-title>
+        <v-list-item-subtitle>更强大的数据迁移工具，支持从本地或服务器迁移到KV存储</v-list-item-subtitle>
+        <template #append>
+          <v-btn variant="tonal" color="primary" to="/datamigration">
+            打开
+          </v-btn>
+        </template>
+      </v-list-item>
+
+      <v-list-item>
         <template #prepend>
           <v-icon icon="mdi-lan-connect" class="mr-3" />
         </template>
@@ -82,6 +122,8 @@
 import SettingsCard from "@/components/SettingsCard.vue";
 import { getSetting } from "@/utils/settings";
 import axios from "axios";
+import { getMachineId } from "@/utils/providers/kvProvider";
+
 export default {
   name: "DataProviderSettingsCard",
   components: { SettingsCard },
@@ -94,6 +136,8 @@ export default {
       confirmTitle: "",
       confirmMessage: "",
       confirmAction: null,
+      machineId: null,
+      migrateLoading: false,
     };
   },
 
@@ -101,6 +145,21 @@ export default {
     currentProvider() {
       return getSetting("server.provider");
     },
+
+    isKvProvider() {
+      return this.currentProvider === 'kv-local' || this.currentProvider === 'kv-server';
+    }
+  },
+
+  async created() {
+    // 如果是KV本地存储，获取机器ID
+    if (this.currentProvider === 'kv-local') {
+      try {
+        this.machineId = await getMachineId();
+      } catch (error) {
+        console.error("获取机器ID失败:", error);
+      }
+    }
   },
 
   methods: {
@@ -109,9 +168,17 @@ export default {
       this.serverchecktime = new Date();
       try {
         const domain = getSetting("server.domain");
+        const siteKey = getSetting("server.siteKey");
+
+        // Prepare headers including site key if available
+        const headers = { Accept: "application/json" };
+        if (siteKey) {
+          headers['x-site-key'] = siteKey;
+        }
+
         const response = await axios.get(`${domain}/api/test`, {
           method: "GET",
-          headers: { Accept: "application/json" },
+          headers
         });
 
         if (response.data.status === "success") {
@@ -160,6 +227,13 @@ export default {
         await window.indexedDB.deleteDatabase(DBName);
         this.$message.success("清除成功", "数据库缓存已清除");
         this.confirmDialog = false;
+
+        // 如果是KV提供者，需要刷新页面以生成新的UUID
+        if (this.isKvProvider) {
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        }
       } catch (error) {
         this.$message.error("清除失败", error.message);
       }
@@ -212,6 +286,12 @@ export default {
         console.error("导出失败:", error);
         this.$message.error("导出失败", error.message || "无法导出数据库数据");
       }
+    },
+
+    async migrateData() {
+      this.migrateLoading = true;
+      this.$router.push('/datamigration');
+      this.migrateLoading = false;
     },
 
     handleConfirm() {
