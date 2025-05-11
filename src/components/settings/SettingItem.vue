@@ -1,7 +1,7 @@
 <template>
   <v-list-item class="setting-item" :disabled="disabled">
     <template #prepend>
-      <v-icon :icon="settingIcon"  />
+      <v-icon :icon="settingIcon" />
     </template>
 
     <v-list-item-title class="text-wrap">
@@ -12,34 +12,79 @@
       <span class="text-caption text-grey-darken-1">{{ settingKey }}</span>
     </v-list-item-subtitle>
 
-    <template #append >
+    <template #append>
       <div class="d-flex flex-column flex-sm-row align-center">
         <div v-if="type !== 'string' || hasOptions" class="me-2">
           <!-- 根据设置类型渲染不同的控件 -->
-          <v-switch v-if="type === 'boolean'" v-model="localValue" density="comfortable" hide-details :disabled="disabled"
-            @update:model-value="updateSetting" />
+          <v-switch
+            v-if="type === 'boolean'"
+            v-model="localValue"
+            density="comfortable"
+            hide-details
+            :disabled="disabled"
+            @update:model-value="updateSetting"
+          />
 
-          <v-select v-else-if="type === 'string' && hasOptions" v-model="localValue" :items="selectOptions"
-            density="compact" hide-details :disabled="disabled" class="setting-select" variant="outlined" bg-color="surface"
-            @update:model-value="updateSetting" item-title="title" item-value="value" />
+          <v-select
+            v-else-if="type === 'string' && hasOptions"
+            v-model="localValue"
+            :items="selectOptions"
+            density="compact"
+            hide-details
+            :disabled="disabled"
+            class="setting-select"
+            variant="outlined"
+            bg-color="surface"
+            @update:model-value="updateSetting"
+            item-title="title"
+            item-value="value"
+          />
 
           <div v-else-if="type === 'number'" class="d-flex align-center">
-            <v-btn icon="mdi-minus" size="small" variant="text" :disabled="disabled || localValue <= minValue"
-              @click="adjustValue(-stepValue)" />
+            <v-btn
+              icon="mdi-minus"
+              size="small"
+              variant="text"
+              :disabled="disabled || localValue <= minValue"
+              @click="adjustValue(-stepValue)"
+            />
 
-            <v-text-field v-model.number="localValue" type="number" density="compact" hide-details :min="minValue"
-              :max="maxValue" :step="stepValue" :disabled="disabled" class="mx-2 setting-number-field" style="width: 80px"
-              variant="outlined" bg-color="surface" @update:model-value="updateSetting" />
+            <v-text-field
+              v-model.number="localValue"
+              type="number"
+              density="compact"
+              hide-details
+              :min="minValue"
+              :max="maxValue"
+              :step="stepValue"
+              :disabled="disabled"
+              class="mx-2 setting-number-field"
+              style="width: 80px"
+              variant="outlined"
+              bg-color="surface"
+              @update:model-value="updateSetting"
+            />
 
-            <v-btn icon="mdi-plus" size="small" variant="text" :disabled="disabled || localValue >= maxValue"
-              @click="adjustValue(stepValue)" />
+            <v-btn
+              icon="mdi-plus"
+              size="small"
+              variant="text"
+              :disabled="disabled || localValue >= maxValue"
+              @click="adjustValue(stepValue)"
+            />
           </div>
         </div>
 
         <v-menu location="bottom">
           <template v-slot:activator="{ props }">
-            <v-btn icon="mdi-dots-vertical" size="small" variant="text" v-bind="props" class="ml-2"
-              :disabled="disabled" />
+            <v-btn
+              icon="mdi-dots-vertical"
+              size="small"
+              variant="text"
+              v-bind="props"
+              class="ml-2"
+              :disabled="disabled"
+            />
           </template>
           <v-list density="compact">
             <v-list-item @click="copySettingId">
@@ -72,21 +117,39 @@
 
   <!-- 文本框显示在下方 -->
   <div v-if="type === 'string' && !hasOptions" class="px-4 pb-2 pt-0">
-    <v-text-field v-model="localValue" density="compact" hide-details :disabled="disabled"
-      class="setting-text-field mt-1" variant="outlined" bg-color="surface" @update:model-value="updateSetting" />
+    <v-text-field
+      v-model="localValue"
+      density="compact"
+      hide-details
+      :disabled="disabled"
+      class="setting-text-field mt-1"
+      variant="outlined"
+      bg-color="surface"
+      @update:model-value="updateSetting"
+    />
   </div>
 
   <!-- 消息提示 -->
-  <v-snackbar v-model="showSnackbar" :timeout="2000" color="success" location="top">
+  <v-snackbar
+    v-model="showSnackbar"
+    :timeout="2000"
+    color="success"
+    location="top"
+  >
     {{ snackbarText }}
   </v-snackbar>
 </template>
 
 <script>
-import { getSetting, setSetting, getSettingDefinition, resetSetting } from '@/utils/settings';
+import {
+  getSetting,
+  setSetting,
+  getSettingDefinition,
+  resetSetting,
+} from "@/utils/settings";
 
 export default {
-  name: 'SettingItem',
+  name: "SettingItem",
 
   props: {
     /**
@@ -94,7 +157,7 @@ export default {
      */
     settingKey: {
       type: String,
-      required: true
+      required: true,
     },
 
     /**
@@ -102,7 +165,7 @@ export default {
      */
     icon: {
       type: String,
-      default: null
+      default: null,
     },
 
     /**
@@ -110,7 +173,7 @@ export default {
      */
     disabled: {
       type: Boolean,
-      default: false
+      default: false,
     },
 
     /**
@@ -118,7 +181,7 @@ export default {
      */
     title: {
       type: String,
-      default: null
+      default: null,
     },
 
     /**
@@ -126,8 +189,8 @@ export default {
      */
     description: {
       type: String,
-      default: null
-    }
+      default: null,
+    },
   },
 
   data() {
@@ -141,45 +204,45 @@ export default {
       maxValue: 100,
       stepValue: 1,
       showSnackbar: false,
-      snackbarText: '',
+      snackbarText: "",
       fontFamilies: [
-        { title: 'Arial', value: 'Arial, sans-serif' },
-        { title: 'Calibri', value: 'Calibri, sans-serif' },
-        { title: 'Cambria', value: 'Cambria, serif' },
-        { title: 'Consolas', value: 'Consolas, monospace' },
-        { title: 'Courier New', value: 'Courier New, monospace' },
-        { title: 'Georgia', value: 'Georgia, serif' },
-        { title: 'Helvetica', value: 'Helvetica, sans-serif' },
-        { title: 'Segoe UI', value: 'Segoe UI, sans-serif' },
-        { title: 'Times New Roman', value: 'Times New Roman, serif' },
-        { title: 'Trebuchet MS', value: 'Trebuchet MS, sans-serif' },
-        { title: 'Verdana', value: 'Verdana, sans-serif' },
-        { title: 'Monospace', value: 'monospace' },
-        { title: 'Sans-serif', value: 'sans-serif' },
-        { title: 'Serif', value: 'serif' }
+        { title: "Arial", value: "Arial, sans-serif" },
+        { title: "Calibri", value: "Calibri, sans-serif" },
+        { title: "Cambria", value: "Cambria, serif" },
+        { title: "Consolas", value: "Consolas, monospace" },
+        { title: "Courier New", value: "Courier New, monospace" },
+        { title: "Georgia", value: "Georgia, serif" },
+        { title: "Helvetica", value: "Helvetica, sans-serif" },
+        { title: "Segoe UI", value: "Segoe UI, sans-serif" },
+        { title: "Times New Roman", value: "Times New Roman, serif" },
+        { title: "Trebuchet MS", value: "Trebuchet MS, sans-serif" },
+        { title: "Verdana", value: "Verdana, sans-serif" },
+        { title: "Monospace", value: "monospace" },
+        { title: "Sans-serif", value: "sans-serif" },
+        { title: "Serif", value: "serif" },
       ],
       // 设置项的显示名称映射
       displayValueMappings: {
-        'display.emptySubjectDisplay': {
-          'card': '卡片',
-          'button': '按钮'
+        "display.emptySubjectDisplay": {
+          card: "卡片",
+          button: "按钮",
         },
-        'theme.mode': {
-          'light': '浅色',
-          'dark': '深色'
+        "theme.mode": {
+          light: "浅色",
+          dark: "深色",
         },
-        'server.provider': {
-          'kv-local': 'KV本地存储',
-          'kv-server': 'KV远程服务器',
-          'classworkscloud': 'Classworks云端存储'
-        }
+        "server.provider": {
+          classworkscloud: "Classworks云端存储",
+          "kv-local": "KV本地存储",
+          "kv-server": "KV远程服务器",
+        },
       },
       // 默认图标映射，按设置类型
       defaultIcons: {
-        'boolean': 'mdi-toggle-switch-outline',
-        'number': 'mdi-numeric',
-        'string': 'mdi-form-textbox'
-      }
+        boolean: "mdi-toggle-switch-outline",
+        number: "mdi-numeric",
+        string: "mdi-form-textbox",
+      },
     };
   },
 
@@ -196,7 +259,7 @@ export default {
       }
 
       // 最后使用键名的最后一部分
-      const parts = this.settingKey.split('.');
+      const parts = this.settingKey.split(".");
       return parts[parts.length - 1];
     },
 
@@ -212,8 +275,10 @@ export default {
 
     // 判断是否为字体系列设置
     isFontFamily() {
-      return this.settingKey.toLowerCase().includes('fontfamily') ||
-        this.settingKey.toLowerCase().includes('font.family');
+      return (
+        this.settingKey.toLowerCase().includes("fontfamily") ||
+        this.settingKey.toLowerCase().includes("font.family")
+      );
     },
 
     // 判断当前值是否为默认值
@@ -221,8 +286,11 @@ export default {
       if (!this.definition) return true;
 
       // 对于对象或数组，需要进行深度比较
-      if (typeof this.localValue === 'object' && this.localValue !== null) {
-        return JSON.stringify(this.localValue) === JSON.stringify(this.definition.default);
+      if (typeof this.localValue === "object" && this.localValue !== null) {
+        return (
+          JSON.stringify(this.localValue) ===
+          JSON.stringify(this.definition.default)
+        );
       }
 
       return this.localValue === this.definition.default;
@@ -241,8 +309,8 @@ export default {
       }
 
       // 最后使用基于类型的默认图标
-      return this.defaultIcons[this.type] || 'mdi-cog-outline';
-    }
+      return this.defaultIcons[this.type] || "mdi-cog-outline";
+    },
   },
 
   created() {
@@ -266,7 +334,7 @@ export default {
       this.localValue = getSetting(this.settingKey);
 
       // 处理选项（对于字符串类型的设置）
-      if (this.type === 'string') {
+      if (this.type === "string") {
         // 检查是否有字体设置
         if (this.isFontFamily) {
           this.selectOptions = this.fontFamilies;
@@ -275,10 +343,12 @@ export default {
         // 检查是否有显示值映射
         else if (this.settingKey in this.displayValueMappings) {
           const mapping = this.displayValueMappings[this.settingKey];
-          this.selectOptions = Object.entries(mapping).map(([value, title]) => ({
-            title,
-            value
-          }));
+          this.selectOptions = Object.entries(mapping).map(
+            ([value, title]) => ({
+              title,
+              value,
+            })
+          );
           this.hasOptions = true;
         }
         // 检查是否有验证函数中的选项
@@ -288,13 +358,13 @@ export default {
 
           if (match) {
             const optionsStr = match[1];
-            const options = optionsStr.split(',').map(opt => {
-              const cleaned = opt.trim().replace(/['"]/g, '');
+            const options = optionsStr.split(",").map((opt) => {
+              const cleaned = opt.trim().replace(/['"]/g, "");
               // 检查是否有显示值映射
               const displayValue = this.getDisplayValue(cleaned);
               return {
                 title: displayValue || cleaned,
-                value: cleaned
+                value: cleaned,
               };
             });
 
@@ -307,7 +377,7 @@ export default {
       }
 
       // 处理数字类型的设置
-      if (this.type === 'number' && this.definition.validate) {
+      if (this.type === "number" && this.definition.validate) {
         const validateStr = this.definition.validate.toString();
 
         // 尝试提取最小值
@@ -349,9 +419,9 @@ export default {
       // 确保值的类型正确
       let typedValue = value;
 
-      if (this.type === 'boolean') {
+      if (this.type === "boolean") {
         typedValue = Boolean(value);
-      } else if (this.type === 'number') {
+      } else if (this.type === "number") {
         typedValue = Number(value);
 
         // 确保值在范围内
@@ -363,16 +433,16 @@ export default {
       const success = setSetting(this.settingKey, typedValue);
 
       if (success) {
-        this.$emit('update', this.settingKey, typedValue);
+        this.$emit("update", this.settingKey, typedValue);
       } else {
         // 如果保存失败，恢复原值
         this.localValue = getSetting(this.settingKey);
-        this.$emit('error', this.settingKey);
+        this.$emit("error", this.settingKey);
       }
     },
 
     adjustValue(amount) {
-      if (this.type !== 'number') return;
+      if (this.type !== "number") return;
 
       const newValue = this.localValue + amount;
 
@@ -384,31 +454,33 @@ export default {
 
     // 复制设置ID到剪贴板
     copySettingId() {
-      navigator.clipboard.writeText(this.settingKey)
+      navigator.clipboard
+        .writeText(this.settingKey)
         .then(() => {
-          this.showSnackbarMessage('设置ID已复制到剪贴板');
+          this.showSnackbarMessage("设置ID已复制到剪贴板");
         })
-        .catch(err => {
-          console.error('复制失败:', err);
+        .catch((err) => {
+          console.error("复制失败:", err);
         });
     },
 
     // 复制设置值到剪贴板
     copySettingValue() {
-      let valueText = '';
+      let valueText = "";
 
-      if (typeof this.localValue === 'object' && this.localValue !== null) {
+      if (typeof this.localValue === "object" && this.localValue !== null) {
         valueText = JSON.stringify(this.localValue);
       } else {
         valueText = String(this.localValue);
       }
 
-      navigator.clipboard.writeText(valueText)
+      navigator.clipboard
+        .writeText(valueText)
         .then(() => {
-          this.showSnackbarMessage('设置值已复制到剪贴板');
+          this.showSnackbarMessage("设置值已复制到剪贴板");
         })
-        .catch(err => {
-          console.error('复制失败:', err);
+        .catch((err) => {
+          console.error("复制失败:", err);
         });
     },
 
@@ -418,16 +490,16 @@ export default {
 
       resetSetting(this.settingKey);
       this.localValue = getSetting(this.settingKey);
-      this.showSnackbarMessage('已重置为默认值');
-      this.$emit('update', this.settingKey, this.localValue);
+      this.showSnackbarMessage("已重置为默认值");
+      this.$emit("update", this.settingKey, this.localValue);
     },
 
     // 显示消息提示
     showSnackbarMessage(message) {
       this.snackbarText = message;
       this.showSnackbar = true;
-    }
-  }
+    },
+  },
 };
 </script>
 
