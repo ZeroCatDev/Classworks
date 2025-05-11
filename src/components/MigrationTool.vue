@@ -226,7 +226,7 @@
 <script>
 import { openDB } from "idb";
 import axios from "@/axios/axios";
-import { getSetting } from "@/utils/settings";
+import { getSetting, setSetting } from "@/utils/settings";
 
 export default {
   name: "MigrationTool",
@@ -977,6 +977,12 @@ export default {
 
         this.migrationSuccess = this.migrationStats.failed === 0;
         this.showResult = true;
+        setSetting("server.provider", this.targetStorage);
+        if (this.targetStorage === "kv-server") {
+          setSetting("server.domain", this.targetServerUrl);
+        }
+
+
       } catch (error) {
         console.error("迁移过程出错:", error);
         this.migrationSuccess = false;
