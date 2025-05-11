@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 // 请求通知权限
 async function requestNotificationPermission() {
   if (Notification && Notification.requestPermission) {
@@ -67,17 +68,13 @@ const SETTINGS_STORAGE_KEY = "Classworks_settings";
  * @returns {string} 生成的UUID字符串
  */
 function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
+  return uuidv4();
 }
 
 // 新增: Classworks云端存储的默认设置
 const classworksCloudDefaults = {
-  "server.domain": "http://localhost:3030",
-  "server.siteKey": "123456",
+  "server.domain": "https://kv.wuyuan.dev",
+  "server.siteKey": "",
 };
 
 /**
