@@ -232,12 +232,12 @@ export default {
   name: "MigrationTool",
   data() {
     return {
-      classNumber: "G2405",
+      classNumber: "",
       machineId: "",
       migrationType: "server",
-      serverUrl: "https://class.wuyuan.dev",
+      serverUrl: "",
       targetStorage: "kv-server",
-      targetServerUrl: "http://localhost:3030",
+      targetServerUrl: "https://kv.wuyuan.dev",
       startDate: this.getDateString(
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
       ), // 30 days ago
