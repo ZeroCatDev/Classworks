@@ -38,7 +38,9 @@ export default defineConfig({
         navigateFallback: 'index.html',
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.pathname.startsWith('/assets/'),
+            urlPattern: ({ url, sameOrigin }) => {
+              return sameOrigin && url.pathname.startsWith('/assets/');
+            },
             handler: 'CacheFirst',
             options: {
               cacheName: 'assets-cache',
@@ -52,7 +54,9 @@ export default defineConfig({
             }
           },
           {
-            urlPattern: ({ url }) => url.pathname.startsWith('/pwa/'),
+            urlPattern: ({ url, sameOrigin }) => {
+              return sameOrigin && url.pathname.startsWith('/pwa/');
+            },
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'pwa-cache',
@@ -66,8 +70,9 @@ export default defineConfig({
             }
           },
           {
-            // 匹配除了上述规则外的所有请求
-            urlPattern: ({ url }) => {
+            // 匹配当前域名下除了上述规则外的所有请求
+            urlPattern: ({ url, sameOrigin }) => {
+              if (!sameOrigin) return false;
               const path = url.pathname;
               // 排除已经由其他规则处理的路径
               return !(path.includes('/assets/') || path.includes('/pwa/'));
@@ -85,7 +90,6 @@ export default defineConfig({
               }
             }
           },
-
         ],
         additionalManifestEntries: [],
         clientsClaim: true,
