@@ -62,7 +62,7 @@ export const kvProvider = {
 
         const db = await initDB();
         await db.put("kv", JSON.stringify(data), key);
-        return formatResponse(null, "保存成功");
+        return formatResponse(true, "保存成功");
       } catch (error) {
         return formatError("保存本地数据失败：" + error);
       }
@@ -100,7 +100,7 @@ export const kvProvider = {
         await axios.post(`${serverUrl}/${machineId}/${key}`, data, {
           headers: getHeaders(),
         });
-        return formatResponse(null, "保存成功");
+        return formatResponse(true);
       } catch (error) {
         return formatError(
           error.response?.data?.message || "保存失败",

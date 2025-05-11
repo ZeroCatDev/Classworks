@@ -383,9 +383,9 @@ export default {
           // Try to get student list from the dedicated key
           const response = await dataProvider.loadData('classworks-list-main');
 
-          if (response.success && Array.isArray(response.data)) {
+          if (response.success!=false && Array.isArray(response)) {
             // Transform the data into a simple list of names
-            this.studentData.list = response.data.map(student => student.name);
+            this.studentData.list = response.map(student => student.name);
             this.studentData.text = this.studentData.list.join('\n');
             this.lastSavedData = [...this.studentData.list];
             this.hasUnsavedChanges = false;
@@ -393,21 +393,6 @@ export default {
           }
         } catch (error) {
           console.warn('Failed to load student list from dedicated key, falling back to config', error);
-        }
-
-        // Fall back to retrieving from config if the dedicated key is not available
-        const response = await kvProvider.local.loadConfig();
-
-        if (response.success && response.data && Array.isArray(response.data.studentList)) {
-          this.studentData.list = response.data.studentList;
-          this.studentData.text = response.data.studentList.join('\n');
-          this.lastSavedData = [...response.data.studentList];
-          this.hasUnsavedChanges = false;
-        } else {
-          // If no student list is found anywhere, initialize with empty list
-          this.studentData.list = [];
-          this.studentData.text = '';
-          this.lastSavedData = [];
         }
       } catch (error) {
         console.error('加载学生列表失败:', error);
@@ -436,7 +421,7 @@ export default {
         // Save the student list to the dedicated key
         const response = await dataProvider.saveData("classworks-list-main", formattedStudentList);
 
-        if (!response.success) {
+        if (response.success==false) {
           throw new Error(response.error?.message || "保存失败");
         }
 

@@ -1,6 +1,11 @@
 <template>
-  <v-dialog v-model="dialog" max-width="600" fullscreen-breakpoint="sm" persistent>
-    <v-card class="random-picker-card">
+  <v-dialog
+    v-model="dialog"
+    max-width="600"
+    fullscreen-breakpoint="sm"
+    persistent
+  >
+    <v-card class="random-picker-card" rounded="xl" border>
       <v-card-title class="text-h5 d-flex align-center">
         <v-icon icon="mdi-account-question" class="mr-2" />
         随机点名
@@ -12,23 +17,41 @@
         <div class="text-h6 mb-4">请选择抽取人数</div>
 
         <div class="d-flex justify-center align-center counter-container">
-          <v-btn size="x-large" icon="mdi-minus" variant="tonal" color="primary" :disabled="count <= 1"
-            @click="decrementCount" class="counter-btn" />
+          <v-btn
+            size="x-large"
+            icon="mdi-minus"
+            variant="tonal"
+            color="primary"
+            :disabled="count <= 1"
+            @click="decrementCount"
+            class="counter-btn"
+          />
 
           <div class="count-display mx-8">
             <span class="text-h2 font-weight-bold">{{ count }}</span>
             <span class="text-subtitle-1 ml-2">人</span>
           </div>
 
-          <v-btn size="x-large" icon="mdi-plus" variant="tonal" color="primary" :disabled="count >= maxAllowedCount"
-            @click="incrementCount" class="counter-btn" />
+          <v-btn
+            size="x-large"
+            icon="mdi-plus"
+            variant="tonal"
+            color="primary"
+            :disabled="count >= maxAllowedCount"
+            @click="incrementCount"
+            class="counter-btn"
+          />
         </div>
 
-
-
         <div class="mt-4">
-          <v-btn size="x-large" color="primary" prepend-icon="mdi-dice-multiple" @click="startPicking"
-            :disabled="filteredStudents.length === 0" class="start-btn">
+          <v-btn
+            size="x-large"
+            color="primary"
+            prepend-icon="mdi-dice-multiple"
+            @click="startPicking"
+            :disabled="filteredStudents.length === 0"
+            class="start-btn"
+          >
             开始抽取
           </v-btn>
         </div>
@@ -41,47 +64,75 @@
           当前可抽取学生: {{ filteredStudents.length }}人
           <v-tooltip location="bottom">
             <template v-slot:activator="{ props }">
-              <v-icon v-bind="props" icon="mdi-information-outline" size="small" class="ml-1" />
+              <v-icon
+                v-bind="props"
+                icon="mdi-information-outline"
+                size="small"
+                class="ml-1"
+              />
             </template>
             <div class="pa-2">
-              <div v-if="tempFilters.excludeAbsent">• 已排除请假学生 ({{ absentCount }}人)</div>
-              <div v-if="tempFilters.excludeLate">• 已排除迟到学生 ({{ lateCount }}人)</div>
-              <div v-if="tempFilters.excludeExcluded">• 已排除不参与学生 ({{ excludedCount }}人)</div>
-            </div>
-          </v-tooltip><!-- 添加临时过滤选项 -->
+              <div v-if="tempFilters.excludeAbsent">
+                • 已排除请假学生 ({{ absentCount }}人)
+              </div>
+              <div v-if="tempFilters.excludeLate">
+                • 已排除迟到学生 ({{ lateCount }}人)
+              </div>
+              <div v-if="tempFilters.excludeExcluded">
+                • 已排除不参与学生 ({{ excludedCount }}人)
+              </div>
+            </div> </v-tooltip
+          ><!-- 添加临时过滤选项 -->
 
-              <div class="d-flex flex-wrap justify-center gap-2 mt-4">
-                <v-chip :color="tempFilters.excludeLate ? 'warning' : 'default'"
-                  :variant="tempFilters.excludeLate ? 'elevated' : 'text'"
-                  @click="tempFilters.excludeLate = !tempFilters.excludeLate" prepend-icon="mdi-clock-alert"
-                  class="filter-chip">
-                  {{ tempFilters.excludeLate ? '排除' : '包含' }}迟到学生
-                </v-chip>
-                <v-chip :color="tempFilters.excludeAbsent ? 'error' : 'default'"
-                  :variant="tempFilters.excludeAbsent ? 'elevated' : 'text'"
-                  @click="tempFilters.excludeAbsent = !tempFilters.excludeAbsent" prepend-icon="mdi-account-off"
-                  class="filter-chip">
-                  {{ tempFilters.excludeAbsent ? '排除' : '包含' }}请假学生
-                </v-chip>
+          <div class="d-flex flex-wrap justify-center gap-2 mt-4">
+            <v-chip
+              :color="tempFilters.excludeLate ? 'warning' : 'default'"
+              :variant="tempFilters.excludeLate ? 'elevated' : 'text'"
+              @click="tempFilters.excludeLate = !tempFilters.excludeLate"
+              prepend-icon="mdi-clock-alert"
+              class="filter-chip"
+            >
+              {{ tempFilters.excludeLate ? "排除" : "包含" }}迟到学生
+            </v-chip>
+            <v-chip
+              :color="tempFilters.excludeAbsent ? 'error' : 'default'"
+              :variant="tempFilters.excludeAbsent ? 'elevated' : 'text'"
+              @click="tempFilters.excludeAbsent = !tempFilters.excludeAbsent"
+              prepend-icon="mdi-account-off"
+              class="filter-chip"
+            >
+              {{ tempFilters.excludeAbsent ? "排除" : "包含" }}请假学生
+            </v-chip>
 
-
-
-                <v-chip :color="tempFilters.excludeExcluded ? 'grey' : 'default'"
-                  :variant="tempFilters.excludeExcluded ? 'elevated' : 'text'"
-                  @click="tempFilters.excludeExcluded = !tempFilters.excludeExcluded" prepend-icon="mdi-account-cancel"
-                  class="filter-chip">
-                  {{ tempFilters.excludeExcluded ? '排除' : '包含' }}不参与学生
-                </v-chip>
-         </div>
+            <v-chip
+              :color="tempFilters.excludeExcluded ? 'grey' : 'default'"
+              :variant="tempFilters.excludeExcluded ? 'elevated' : 'text'"
+              @click="
+                tempFilters.excludeExcluded = !tempFilters.excludeExcluded
+              "
+              prepend-icon="mdi-account-cancel"
+              class="filter-chip"
+            >
+              {{ tempFilters.excludeExcluded ? "排除" : "包含" }}不参与学生
+            </v-chip>
+          </div>
         </div>
       </v-card-text>
 
       <v-card-text v-else class="text-center py-6">
         <div v-if="isAnimating" class="animation-container">
           <div class="animation-wrapper">
-            <transition-group name="shuffle" tag="div" class="shuffle-container">
-              <div v-for="(student, index) in animationStudents" :key="student.id" class="student-item"
-                :class="{ 'highlighted': highlightedIndices.includes(index) }">
+            <transition-group
+              name="shuffle"
+              tag="div"
+              class="shuffle-container"
+            >
+              <div
+                v-for="(student, index) in animationStudents"
+                :key="student.id"
+                class="student-item"
+                :class="{ highlighted: highlightedIndices.includes(index) }"
+              >
                 {{ student.name }}
               </div>
             </transition-group>
@@ -90,21 +141,50 @@
 
         <div v-else class="result-container">
           <div class="text-h6 mb-4">抽取结果</div>
-          <v-card v-for="(student, index) in pickedStudents" :key="index" variant="outlined" color="primary"
-            class="mb-2 result-card">
-            <v-card-text class="text-h4 text-center py-4 d-flex align-center justify-center">
+          <v-card
+            v-for="(student, index) in pickedStudents"
+            :key="index"
+            variant="outlined"
+            color="primary"
+            class="mb-2 result-card"
+          >
+            <v-card-text
+              class="text-h4 text-center py-4 d-flex align-center justify-center"
+            >
               {{ student }}
-              <v-btn icon="mdi-refresh" variant="text" size="small" class="ml-2 refresh-btn"
-                @click="refreshSingleStudent(index)" :disabled="remainingStudents.length === 0"
-                :title="remainingStudents.length === 0 ? '没有更多可用学生' : '重新抽取此学生'" />
+              <v-btn
+                icon="mdi-refresh"
+                variant="text"
+                size="small"
+                class="ml-2 refresh-btn"
+                @click="refreshSingleStudent(index)"
+                :disabled="remainingStudents.length === 0"
+                :title="
+                  remainingStudents.length === 0
+                    ? '没有更多可用学生'
+                    : '重新抽取此学生'
+                "
+              />
             </v-card-text>
           </v-card>
 
           <div class="mt-8 d-flex justify-center">
-            <v-btn color="primary" prepend-icon="mdi-refresh" @click="resetPicker" size="large" class="mx-2">
+            <v-btn
+              color="primary"
+              prepend-icon="mdi-refresh"
+              @click="resetPicker"
+              size="large"
+              class="mx-2"
+            >
               重新抽取
             </v-btn>
-            <v-btn color="grey" variant="outlined" @click="dialog = false" size="large" class="mx-2">
+            <v-btn
+              color="grey"
+              variant="outlined"
+              @click="dialog = false"
+              size="large"
+              class="mx-2"
+            >
               关闭
             </v-btn>
           </div>
@@ -115,25 +195,25 @@
 </template>
 
 <script>
-import { getSetting } from '@/utils/settings';
+import { getSetting } from "@/utils/settings";
 
 export default {
-  name: 'RandomPicker',
+  name: "RandomPicker",
   props: {
     studentList: {
       type: Array,
-      required: true
+      required: true,
     },
     attendance: {
       type: Object,
       required: true,
-      default: () => ({ absent: [], late: [], exclude: [] })
-    }
+      default: () => ({ absent: [], late: [], exclude: [] }),
+    },
   },
   data() {
     return {
       dialog: false,
-      count: getSetting('randomPicker.defaultCount'),
+      count: getSetting("randomPicker.defaultCount"),
       isPickingStarted: false,
       isAnimating: false,
       pickedStudents: [],
@@ -143,10 +223,10 @@ export default {
       getSetting,
       // 添加临时过滤选项
       tempFilters: {
-        excludeAbsent: getSetting('randomPicker.excludeAbsent'),
-        excludeLate: getSetting('randomPicker.excludeLate'),
-        excludeExcluded: getSetting('randomPicker.excludeExcluded')
-      }
+        excludeAbsent: getSetting("randomPicker.excludeAbsent"),
+        excludeLate: getSetting("randomPicker.excludeLate"),
+        excludeExcluded: getSetting("randomPicker.excludeExcluded"),
+      },
     };
   },
   computed: {
@@ -165,15 +245,24 @@ export default {
     filteredStudents() {
       if (!this.studentList || !this.studentList.length) return [];
 
-      return this.studentList.filter(student => {
+      return this.studentList.filter((student) => {
         // 根据临时过滤选项过滤学生
-        if (this.tempFilters.excludeAbsent && this.attendance.absent.includes(student)) {
+        if (
+          this.tempFilters.excludeAbsent &&
+          this.attendance.absent.includes(student)
+        ) {
           return false;
         }
-        if (this.tempFilters.excludeLate && this.attendance.late.includes(student)) {
+        if (
+          this.tempFilters.excludeLate &&
+          this.attendance.late.includes(student)
+        ) {
           return false;
         }
-        if (this.tempFilters.excludeExcluded && this.attendance.exclude.includes(student)) {
+        if (
+          this.tempFilters.excludeExcluded &&
+          this.attendance.exclude.includes(student)
+        ) {
           return false;
         }
         return true;
@@ -191,23 +280,25 @@ export default {
 
     // 计算剩余可用学生（排除已抽取的学生）
     remainingStudents() {
-      return this.filteredStudents.filter(student => !this.pickedStudents.includes(student));
-    }
+      return this.filteredStudents.filter(
+        (student) => !this.pickedStudents.includes(student)
+      );
+    },
   },
   watch: {
     dialog(newVal) {
       if (newVal) {
         // 打开对话框时重置状态
-        this.count = getSetting('randomPicker.defaultCount');
+        this.count = getSetting("randomPicker.defaultCount");
         this.isPickingStarted = false;
         this.isAnimating = false;
         this.pickedStudents = [];
 
         // 重置临时过滤选项为设置中的值
         this.tempFilters = {
-          excludeAbsent: getSetting('randomPicker.excludeAbsent'),
-          excludeLate: getSetting('randomPicker.excludeLate'),
-          excludeExcluded: getSetting('randomPicker.excludeExcluded')
+          excludeAbsent: getSetting("randomPicker.excludeAbsent"),
+          excludeLate: getSetting("randomPicker.excludeLate"),
+          excludeExcluded: getSetting("randomPicker.excludeExcluded"),
         };
       } else {
         // 关闭对话框时清除计时器
@@ -219,14 +310,14 @@ export default {
     },
 
     // 监听过滤选项变化，确保count不超过可用学生数
-    'tempFilters': {
+    tempFilters: {
       handler() {
         if (this.count > this.maxAllowedCount) {
           this.count = Math.max(1, this.maxAllowedCount);
         }
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
   methods: {
     open() {
@@ -247,7 +338,7 @@ export default {
 
       this.isPickingStarted = true;
 
-      if (getSetting('randomPicker.animation')) {
+      if (getSetting("randomPicker.animation")) {
         this.startAnimation();
       } else {
         this.finishPicking();
@@ -259,7 +350,7 @@ export default {
       // 创建动画用的学生列表（添加ID以便于动画）
       this.animationStudents = this.filteredStudents.map((name, index) => ({
         id: `student-${index}`,
-        name
+        name,
       }));
 
       // 随机高亮显示
@@ -279,7 +370,9 @@ export default {
         for (let i = 0; i < this.count; i++) {
           let randomIndex;
           do {
-            randomIndex = Math.floor(Math.random() * this.animationStudents.length);
+            randomIndex = Math.floor(
+              Math.random() * this.animationStudents.length
+            );
           } while (indices.includes(randomIndex));
           indices.push(randomIndex);
         }
@@ -289,7 +382,7 @@ export default {
         currentStep++;
 
         // 逐渐增加间隔时间，使动画变慢
-        const nextInterval = intervalTime + (currentStep * 20);
+        const nextInterval = intervalTime + currentStep * 20;
 
         if (currentStep < totalSteps) {
           this.animationTimer = setTimeout(animate, nextInterval);
@@ -308,7 +401,9 @@ export default {
       this.isAnimating = false;
 
       // 随机选择学生
-      const shuffled = [...this.filteredStudents].sort(() => 0.5 - Math.random());
+      const shuffled = [...this.filteredStudents].sort(
+        () => 0.5 - Math.random()
+      );
       this.pickedStudents = shuffled.slice(0, this.count);
     },
     resetPicker() {
@@ -325,23 +420,25 @@ export default {
       if (this.remainingStudents.length === 0) return;
 
       // 从剩余学生中随机选择一个
-      const randomIndex = Math.floor(Math.random() * this.remainingStudents.length);
+      const randomIndex = Math.floor(
+        Math.random() * this.remainingStudents.length
+      );
       const newStudent = this.remainingStudents[randomIndex];
 
       // 替换指定位置的学生
       this.pickedStudents[index] = newStudent;
 
       // 添加动画效果
-      const resultCards = document.querySelectorAll('.result-card');
+      const resultCards = document.querySelectorAll(".result-card");
       if (resultCards[index]) {
-        resultCards[index].classList.add('refresh-animation');
+        resultCards[index].classList.add("refresh-animation");
         setTimeout(() => {
-          resultCards[index].classList.remove('refresh-animation');
+          resultCards[index].classList.remove("refresh-animation");
         }, 500);
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -498,7 +595,6 @@ export default {
 
 // 触摸屏优化
 @media (hover: none) {
-
   .counter-btn,
   .start-btn {
     min-height: 72px;

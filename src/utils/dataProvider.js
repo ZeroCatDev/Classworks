@@ -1,11 +1,7 @@
 import { kvProvider } from "./providers/kvProvider";
 import { getSetting } from "./settings";
 
-export const formatResponse = (data, message = null) => ({
-  success: true,
-  data,
-  message,
-});
+export const formatResponse = (data, message = null) => (data);
 
 export const formatError = (message, code = "UNKNOWN_ERROR") => ({
   success: false,

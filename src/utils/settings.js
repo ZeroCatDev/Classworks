@@ -146,7 +146,12 @@ const settingsDefinitions = {
     description: "是否显示防烧屏忽悠卡片",
     icon: "mdi-monitor-shimmer",
   },
-
+  "display.showListCard": {
+    type: "boolean",
+    default: true,
+    description: "是否显示列表卡片",
+    icon: "mdi-list-box",
+  },
   // 服务器设置（合并了数据提供者设置）
   "server.domain": {
     type: "string",

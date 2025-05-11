@@ -150,6 +150,16 @@
         随机点名
       </v-btn>
       <v-btn
+        v-if="showListCardButton"
+        color="primary-darken-1"
+        prepend-icon="mdi-list-box"
+        size="large"
+        class="ml-2"
+        @click="$router.push('/list')"
+      >
+        列表
+      </v-btn>
+      <v-btn
         v-if="showFullscreenButton"
         :color="state.isFullscreen ? 'blue-grey' : 'blue'"
         :prepend-icon="
@@ -673,8 +683,8 @@ export default {
         snackbarText: "",
         fontSize: getSetting("font.size"),
         datePickerDialog: false,
-        selectedDate: new Date().toISOString().split("T")[0],
-        selectedDateObj: new Date(this.selectedDate),
+        selectedDate: new Date().toISOString().split("T")[0].replace(/-/g, ''),
+        selectedDateObj: new Date(),
         refreshInterval: null,
         subjectOrder: [
           "语文",
@@ -848,6 +858,9 @@ export default {
     },
     showRandomPickerButton() {
       return getSetting("randomPicker.enabled");
+    },
+    showListCardButton() {
+      return getSetting("display.showListCard");
     },
     confirmNonTodaySave() {
       return getSetting("edit.confirmNonTodaySave");
@@ -1066,9 +1079,26 @@ export default {
       const today = this.getToday();
 
       // 确保日期格式正确
-      const currentDate = dateFromUrl ? new Date(dateFromUrl) : today;
+      let currentDate = today;
+      if (dateFromUrl) {
+        // 处理yyyymmdd格式的日期字符串
+        if (/^\d{8}$/.test(dateFromUrl)) {
+          const year = dateFromUrl.substring(0, 4);
+          const month = dateFromUrl.substring(4, 6);
+          const day = dateFromUrl.substring(6, 8);
+          currentDate = new Date(`${year}-${month}-${day}`);
+        } else {
+          currentDate = new Date(dateFromUrl);
+        }
+        // 确保日期有效，无效则使用今天的日期
+        if (isNaN(currentDate.getTime())) {
+          currentDate = today;
+        }
+      }
+
       this.state.dateString = this.formatDate(currentDate);
       this.state.selectedDate = this.state.dateString;
+      this.state.selectedDateObj = currentDate; // 设置日期对象
       this.state.isToday =
         this.formatDate(currentDate) === this.formatDate(today);
       // 如果没有从URL应用配置，使用本地设置
@@ -1090,7 +1120,7 @@ export default {
           "classworks-data-" + this.state.dateString
         );
 
-        if (!response.success) {
+        if (response.success == false) {
           if (response.error.code === "NOT_FOUND") {
             this.state.showNoDataMessage = true;
             this.state.noDataMessage = response.error.message;
@@ -1105,11 +1135,11 @@ export default {
         } else {
           // 确保数据结构完整
           this.state.boardData = {
-            homework: response.data.homework || {},
+            homework: response.homework || {},
             attendance: {
-              absent: response.data.attendance?.absent || [],
-              late: response.data.attendance?.late || [],
-              exclude: response.data.attendance?.exclude || [],
+              absent: response.attendance?.absent || [],
+              late: response.attendance?.late || [],
+              exclude: response.attendance?.exclude || [],
             },
           };
           this.state.synced = true;
@@ -1194,8 +1224,7 @@ export default {
           "classworks-data-" + this.state.dateString,
           this.state.boardData
         );
-
-        if (!response.success) {
+        if (response.success == false) {
           throw new Error(response.error.message);
         }
 
@@ -1212,9 +1241,9 @@ export default {
           // Try to get student list from the dedicated key
           const response = await dataProvider.loadData("classworks-list-main");
 
-          if (response.success && Array.isArray(response.data)) {
+          if (response.success != false && Array.isArray(response)) {
             // Transform the data into a simple list of names
-            this.state.studentList = response.data.map(
+            this.state.studentList = response.map(
               (student) => student.name
             );
             return;
@@ -1390,6 +1419,7 @@ export default {
         if (this.state.dateString !== formattedDate) {
           this.state.dateString = formattedDate;
           this.state.selectedDate = formattedDate;
+          this.state.selectedDateObj = selectedDate;
           this.state.isToday =
             formattedDate === this.formatDate(this.getToday());
 
