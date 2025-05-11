@@ -675,10 +675,8 @@ export default {
 
             // 准备批量导入数据
             const batchData = {
-              keys: {
-                "classworks-list-main": formattedStudentList,
-                "classworks-config": configWithoutStudentList,
-              },
+              "classworks-list-main": formattedStudentList,
+              "classworks-config": configWithoutStudentList,
             };
 
             // 批量导入配置数据
@@ -794,11 +792,10 @@ export default {
 
             // 准备批量导入数据
             const batchData = {
-              keys: {
                 "classworks-list-main": formattedStudentList,
                 "classworks-config": configWithoutStudentList,
-              },
-            };
+              }
+
 
             // 批量导入配置数据
             const configResponse = await axios.post(
@@ -857,7 +854,7 @@ export default {
         for (let i = 0; i < homeworkItems.length; i += batchSize) {
           const batch = homeworkItems.slice(i, i + batchSize);
           const batchPayload = {
-            keys: {},
+
           };
 
           // 准备批量数据
@@ -890,11 +887,11 @@ export default {
             }
 
             // 添加到批量数据
-            batchPayload.keys[`classworks-data-${dateStr}`] = value;
+            batchPayload[`classworks-data-${dateStr}`] = value;
           }
 
           // 发送批量请求
-          if (Object.keys(batchPayload.keys).length > 0) {
+          if (Object(batchPayload).length > 0) {
             const response = await axios.post(
               `${this.targetServerUrl}/${this.machineId}/import/batch-import`,
               batchPayload,
@@ -907,7 +904,7 @@ export default {
             if (response.data) {
               if (response.data.successful > 0) {
                 this.migrationResults.push({
-                  key: `批量数据 (${Object.keys(batchPayload.keys).length}项)`,
+                  key: `批量数据 (${Object(batchPayload).length}项)`,
                   success: true,
                   message: `成功迁移 ${response.data.successful} 项数据到服务器`,
                 });
