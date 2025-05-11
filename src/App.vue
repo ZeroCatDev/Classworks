@@ -1,47 +1,52 @@
 <template>
   <v-app>
     <router-view v-slot="{ Component, route }">
-        <transition name="md3" mode="out-in">
-          <component :is="Component" :key="route.path" />
-        </transition>
-      </router-view>
-          <global-message />
+      <transition name="md3" mode="out-in">
+        <component :is="Component" :key="route.path" />
+      </transition>
+    </router-view>
+    <global-message />
+    <rate-limit-modal />
   </v-app>
 </template>
 
 <script setup>
-import { onMounted, watch } from 'vue';
-import { useTheme } from 'vuetify';
-import { getSetting } from '@/utils/settings';
-import { useRouter, useRoute } from 'vue-router';
-
+import { onMounted, watch } from "vue";
+import { useTheme } from "vuetify";
+import { getSetting } from "@/utils/settings";
+import { useRouter, useRoute } from "vue-router";
+import RateLimitModal from "@/components/RateLimitModal.vue";
+import Clarity from "@microsoft/clarity";
 const theme = useTheme();
 const router = useRouter();
 const route = useRoute();
 
 onMounted(() => {
   // 应用保存的主题设置
-  const savedTheme = getSetting('theme.mode');
+  const savedTheme = getSetting("theme.mode");
   theme.global.name.value = savedTheme;
 
   // 检查存储提供者类型
   checkProviderType();
+  Clarity.identify(getSetting("device.uuid"), getSetting("server.domain"), getSetting("server.provider"), getSetting("server.classNumber")); // only custom-id is required
 });
 
 // 检查存储提供者类型，如果是已废弃的类型则重定向
 function checkProviderType() {
-  const currentProvider = getSetting('server.provider');
+  const currentProvider = getSetting("server.provider");
 
   // 如果是旧的提供者类型且当前不在迁移页面，则重定向到数据迁移页面
-  if ((currentProvider === 'server' || currentProvider === 'indexedDB') &&
-      route.path !== '/datamigration') {
-    console.log('检测到旧的数据提供者类型，正在重定向到数据迁移页面...');
+  if (
+    (currentProvider === "server" || currentProvider === "indexedDB") &&
+    route.path !== "/datamigration"
+  ) {
+    console.log("检测到旧的数据提供者类型，正在重定向到数据迁移页面...");
     router.push({
-      path: '/datamigration',
+      path: "/datamigration",
       query: {
-        reason: 'legacy_provider',
-        provider: currentProvider
-      }
+        reason: "legacy_provider",
+        provider: currentProvider,
+      },
     });
   }
 }
@@ -50,17 +55,17 @@ function checkProviderType() {
 watch(
   () => route.path,
   (newPath) => {
-    if (newPath !== '/datamigration') {
+    if (newPath !== "/datamigration") {
       checkProviderType();
     }
   }
 );
 </script>
 <style>
-
 .md3-enter-active,
 .md3-leave-active {
-  transition: opacity 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .md3-enter-from {
@@ -71,4 +76,5 @@ watch(
 .md3-leave-to {
   opacity: 0;
   transform: translateX(-0.5vw);
-}</style>
+}
+</style>

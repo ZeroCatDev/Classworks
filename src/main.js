@@ -13,7 +13,10 @@ import GlobalMessage from '@/components/GlobalMessage.vue'
 
 // Composables
 import { createApp } from 'vue'
+import Clarity from '@microsoft/clarity';
+const projectId = "rhp8uqoc3l"
 
+Clarity.init(projectId);
 import messageService from './utils/message';
 
 const app = createApp(App)

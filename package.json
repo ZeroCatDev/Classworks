@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
+    "@microsoft/clarity": "^1.0.0",
     "axios": "^1.8.4",
     "idb": "^8.0.2",
     "js-yaml": "^4.1.0",
     "pinyin-pro": "^3.26.0",
+    "ratelimit-header-parser": "^0.1.0",
     "roboto-fontface": "*",
     "typewriter-effect": "^2.21.0",
     "uuid": "^9.0.1",

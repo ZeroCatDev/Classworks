@@ -11,6 +11,9 @@ importers:
       '@mdi/font':
         specifier: 7.4.47
         version: 7.4.47
+      '@microsoft/clarity':
+        specifier: ^1.0.0
+        version: 1.0.0
       axios:
         specifier: ^1.8.4
         version: 1.8.4
@@ -23,6 +26,9 @@ importers:
       pinyin-pro:
         specifier: ^3.26.0
         version: 3.26.0
+      ratelimit-header-parser:
+        specifier: ^0.1.0
+        version: 0.1.0
       roboto-fontface:
         specifier: '*'
         version: 0.10.0
@@ -938,6 +944,9 @@ packages:
 
   '@mdi/font@7.4.47':
     resolution: {integrity: sha512-43MtGpd585SNzHZPcYowu/84Vz2a2g31TvPMTm9uTiCSWzaheQySUcSyUH/46fPnuPQWof2yd0pGBtzee/IQWw==}
+
+  '@microsoft/clarity@1.0.0':
+    resolution: {integrity: sha512-2QY6SmXnqRj6dWhNY8NYCN3e53j4zCFebH4wGnNhdGV1mqAsQwql2fT0w8TISxCvwwfVp8idsWLIdrRHOms1PQ==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -2623,6 +2632,9 @@ packages:
 
   randombytes@2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}
+
+  ratelimit-header-parser@0.1.0:
+    resolution: {integrity: sha512-+gg0VX4h0nBT5JWZfaPNwAV8pWRZa3MAFHLZNUYO5yqw+4IvU64HmPtA3aRapQ2uSP1x3Ta4TZO0k516dtNLZA==}
 
   react-dom@18.3.1:
     resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
@@ -4331,6 +4343,8 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.0
 
   '@mdi/font@7.4.47': {}
+
+  '@microsoft/clarity@1.0.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -6174,6 +6188,8 @@ snapshots:
   randombytes@2.1.0:
     dependencies:
       safe-buffer: 5.2.1
+
+  ratelimit-header-parser@0.1.0: {}
 
   react-dom@18.3.1(react@18.3.1):
     dependencies:
