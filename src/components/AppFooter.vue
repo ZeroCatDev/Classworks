@@ -1,5 +1,5 @@
 <template>
-  <v-footer height="40" app v-if="mobile">
+  <v-footer height="40" app>
     <a
       v-for="item in items"
       :key="item.title"
@@ -12,6 +12,7 @@
       <v-icon :icon="item.icon" :size="item.icon === 'mdi-earth' ? 24 : 16" />
     </a>
 
+  
     <div
       class="text-caption text-disabled"
       style="position: absolute; right: 16px"
@@ -26,6 +27,13 @@
         target="_blank"
       >
         Classworks
+      </a>  <a
+        class="text-decoration-none on-surface"
+        href="https://beiancx.miit.gov.cn"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        浙ICP备2024068645号
       </a>
     </div>
   </v-footer>
