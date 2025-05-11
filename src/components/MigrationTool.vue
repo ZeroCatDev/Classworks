@@ -267,6 +267,7 @@ export default {
     };
   },
   computed: {
+
     displayItems() {
       return this.migrationType === "local"
         ? this.localDbItems
@@ -284,6 +285,9 @@ export default {
   async mounted() {
     try {
       await this.initMachineId();
+      this.classNumber = getSetting("server.classNumber");
+      this.serverUrl = getSetting("server.domain");
+      this.migrationType = getSetting("server.provider");
     } catch (error) {
       console.error("初始化设备ID失败:", error);
     }
