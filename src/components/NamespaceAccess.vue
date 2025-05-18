@@ -26,9 +26,12 @@
       <v-card>
         <v-card-title class="text-h6">输入访问密码</v-card-title>
         <v-card-text>
+          <div v-if="passwordHint" class="text-body-2 mb-4">
+            <v-icon icon="mdi-lightbulb-outline" color="warning" class="mr-1" />
+            提示：{{ passwordHint }}
+          </div>
           <v-text-field
             v-model="password"
-            :type="showPassword ? 'text' : 'password'"
             label="密码"
             variant="outlined"
             :error="!!error"
@@ -67,6 +70,7 @@
 <script>
 import { getSetting, setSetting } from "@/utils/settings";
 import axios from "@/axios/axios";
+
 export default {
   name: "NamespaceAccess",
   data() {
@@ -78,6 +82,7 @@ export default {
       showPassword: false,
       isReadOnly: false,
       accessType: "PUBLIC", // 默认为公开访问
+      passwordHint: null, // 密码提示
     };
   },
   async created() {
@@ -97,6 +102,8 @@ export default {
           ["PRIVATE", "PROTECTED", "PUBLIC"].includes(response.data.accessType)
         ) {
           this.accessType = response.data.accessType;
+          // 保存密码提示
+          this.passwordHint = response.data.passwordHint || null;
         } else {
           //this.$router.push("/settings");
           return;
@@ -132,11 +139,11 @@ export default {
       try {
         const uuid = getSetting("device.uuid");
         const response = await axios.post(
-          `${getSetting("server.domain")}/${uuid}/_check`,
+          `${getSetting("server.domain")}/${uuid}/_checkpassword`,
           { password }
         );
 
-        if (!response.data || response.data.success === false) {
+        if (response.status != 200) {
           throw new Error(response.data?.error?.message || "密码错误");
         }
 
@@ -185,3 +192,11 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.namespace-access {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+</style>

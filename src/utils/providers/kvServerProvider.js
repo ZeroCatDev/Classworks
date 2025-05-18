@@ -70,7 +70,7 @@ export const kvServerProvider = {
     }
   },
 
-  async updatePassword(newPassword, oldPassword) {
+  async updatePassword(newPassword, oldPassword, passwordHint = null) {
     try {
       const serverUrl = getSetting("server.domain");
       const machineId = getSetting("device.uuid");
@@ -78,19 +78,21 @@ export const kvServerProvider = {
       const res = await axios.post(
         `${serverUrl}/${machineId}/_password`,
         {
-          newPassword,
+          password: newPassword,
           oldPassword,
+          passwordHint,
         },
         {
           headers: getHeaders(),
         }
       );
 
-      if (res.status == 200) {
-        setSetting("namespace.password", newPassword);
+      if (res.status === 200) {
+        // 更新本地存储的密码
+        setSetting("namespace.password", newPassword || "");
       }
 
-      return formatResponse(res);
+      return res;
     } catch (error) {
       return formatError(
         error.response?.data?.message || "更新密码失败",
@@ -107,12 +109,8 @@ export const kvServerProvider = {
       const res = await axios.delete(`${serverUrl}/${machineId}/_password`, {
         headers: getHeaders(),
       });
-
-      if (res.status === 200) {
-        setSetting("namespace.password", null); // 清除本地存储的密码
-      }
-
-      return formatResponse(res);
+      setSetting("namespace.password", "");
+      return res;
     } catch (error) {
       return formatError(
         error.response?.data?.message || "删除密码失败",

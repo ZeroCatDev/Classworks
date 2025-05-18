@@ -2,6 +2,8 @@ import axios from "axios";
 import { getSetting } from "@/utils/settings";
 import { parseRateLimit } from "ratelimit-header-parser";
 import RateLimitModal from "@/components/RateLimitModal.vue";
+import { Base64 } from "js-base64";
+
 // 基本配置
 const axiosInstance = axios.create({
   // 可以在这里添加基础配置，例如超时时间等
@@ -14,13 +16,14 @@ axiosInstance.interceptors.request.use(
     // 确保每次请求时都获取最新的 siteKey
     const siteKey = getSetting("server.siteKey");
     if (siteKey) {
-      requestConfig.headers["x-site-key"] = siteKey;
+      requestConfig.headers["x-site-key"] = Base64.encode(siteKey);
     }
 
     // 自动添加命名空间密码
     const namespacePassword = getSetting("namespace.password");
     if (namespacePassword) {
-      requestConfig.headers["x-namespace-password"] = namespacePassword;
+      requestConfig.headers["x-namespace-password"] =
+        Base64.encode(namespacePassword);
     }
 
     return requestConfig;

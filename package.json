@@ -14,6 +14,7 @@
     "@microsoft/clarity": "^1.0.0",
     "axios": "^1.8.4",
     "idb": "^8.0.2",
+    "js-base64": "^3.7.7",
     "js-yaml": "^4.1.0",
     "pinyin-pro": "^3.26.0",
     "ratelimit-header-parser": "^0.1.0",

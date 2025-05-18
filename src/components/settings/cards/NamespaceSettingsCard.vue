@@ -102,19 +102,32 @@
         </template>
         <v-card-title>访问密码</v-card-title>
         <v-card-subtitle class="mt-2">
-          设置访问密码以保护数据安全，留空表示无需密码
+          设置访问密码以保护数据安全，可以将老师、电教的名字、学号等作为密码
         </v-card-subtitle>
       </v-card-item>
       <v-card-text>
         <v-form ref="passwordForm" @submit.prevent="savePassword">
           <v-text-field
+            v-if="namespaceInfo.hasPassword"
+            v-model="passwordForm.oldPassword"
+            label="当前密码"
+            variant="outlined"
+            density="comfortable"
+            hide-details="auto"
+            class="mb-4"
+            :loading="passwordLoading"
+            :rules="[(v) => !!v || '请输入当前密码']"
+          >
+            <template #prepend-inner>
+              <v-icon icon="mdi-lock" />
+            </template>
+          </v-text-field><v-text-field
             v-model="passwordForm.newPassword"
             label="新密码"
             variant="outlined"
             density="comfortable"
             hide-details="auto"
             class="mb-4"
-            type="password"
             :loading="passwordLoading"
           >
             <template #prepend-inner>
@@ -122,14 +135,15 @@
             </template>
           </v-text-field>
 
+
+
           <v-text-field
             v-model="passwordForm.confirmPassword"
             label="确认新密码"
             variant="outlined"
             density="comfortable"
             hide-details="auto"
-            class="mb-6"
-            type="password"
+            class="mb-4"
             :loading="passwordLoading"
             :rules="[
               (v) =>
@@ -144,19 +158,33 @@
           </v-text-field>
 
           <div class="d-flex justify-space-between align-center">
-            <v-btn
-              v-if="namespaceInfo.hasPassword"
-              color="error"
-              variant="tonal"
-              :loading="passwordLoading"
-              @click="showDeleteConfirm = true"
-            >
-              删除密码
-              <template #prepend>
-                <v-icon icon="mdi-lock-remove" />
-              </template>
-            </v-btn>
-            <v-spacer v-else />
+            <div>
+              <v-btn
+                v-if="namespaceInfo.hasPassword"
+                color="error"
+                variant="tonal"
+                :loading="passwordLoading"
+                @click="confirmDeletePassword"
+                class="mr-2"
+              >
+                删除密码
+                <template #prepend>
+                  <v-icon icon="mdi-lock-remove" />
+                </template>
+              </v-btn>
+              <v-btn
+                v-if="namespaceInfo.hasPassword"
+                color="primary"
+                variant="tonal"
+                :loading="hintLoading"
+                @click="openHintDialog"
+              >
+                设置密码提示
+                <template #prepend>
+                  <v-icon icon="mdi-lightbulb-outline" />
+                </template>
+              </v-btn>
+            </div>
 
             <v-btn
               color="primary"
@@ -171,12 +199,62 @@
             </v-btn>
           </div>
         </v-form>
-        <setting-item
+        <!--<setting-item
           setting-key="namespace.password"
           title="访问密码"
-        ></setting-item>
+        ></setting-item>-->
       </v-card-text>
     </v-card>
+
+    <!-- 密码提示设置对话框 -->
+    <v-dialog v-model="showHintDialog" max-width="400">
+      <v-card>
+        <v-card-item>
+          <v-card-title>设置密码提示</v-card-title>
+          <v-card-subtitle class="mt-2">
+            设置一个提示帮助记忆密码
+          </v-card-subtitle>
+        </v-card-item>
+        <v-card-text>
+          <v-text-field
+            v-model="passwordHintForm.hint"
+            label="密码提示"
+            variant="outlined"
+            density="comfortable"
+            hide-details="auto"
+            class="mb-4"
+            :loading="hintLoading"
+            placeholder="例如：我的生日"
+          >
+            <template #prepend-inner>
+              <v-icon icon="mdi-lightbulb-outline" />
+            </template>
+          </v-text-field>
+          <div class="text-caption text-grey">
+            当前提示：{{ namespaceInfo.passwordHint || "未设置" }}
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="grey-darken-1"
+            variant="text"
+            @click="showHintDialog = false"
+            :disabled="hintLoading"
+          >
+            取消
+          </v-btn>
+          <v-btn
+            color="primary"
+            variant="text"
+            :loading="hintLoading"
+            @click="savePasswordHint"
+          >
+            保存
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!-- 删除密码确认对话框 -->
     <v-dialog v-model="showDeleteConfirm" max-width="400">
@@ -208,6 +286,56 @@
       </v-card>
     </v-dialog>
 
+    <!-- 密码验证对话框 -->
+    <v-dialog v-model="showVerifyDialog" max-width="400" persistent>
+      <v-card>
+        <v-card-item>
+          <v-card-title>验证密码</v-card-title>
+          <v-card-subtitle class="mt-2">
+            请输入当前密码以继续操作
+          </v-card-subtitle>
+        </v-card-item>
+        <v-card-text>
+          <v-text-field
+            v-model="verifyForm.password"
+            label="当前密码"
+            variant="outlined"
+            density="comfortable"
+            hide-details="auto"
+            class="mb-4"
+            :loading="verifyLoading"
+            :error="!!verifyForm.error"
+            :error-messages="verifyForm.error"
+            @keyup.enter="verifyPassword"
+          >
+            <template #prepend-inner>
+              <v-icon icon="mdi-lock" />
+            </template>
+          </v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="grey-darken-1"
+            variant="text"
+            @click="cancelVerify"
+            :disabled="verifyLoading"
+          >
+            取消
+          </v-btn>
+          <v-btn
+            color="primary"
+            variant="text"
+            :loading="verifyLoading"
+            :disabled="!verifyForm.password"
+            @click="verifyPassword"
+          >
+            确认
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-snackbar
       v-model="showSnackbar"
       :timeout="3000"
@@ -226,18 +354,38 @@
 import SettingsCard from "@/components/SettingsCard.vue";
 import { kvServerProvider } from "@/utils/providers/kvServerProvider";
 import { getSetting } from "@/utils/settings";
-import SettingItem from "@/components/settings/SettingItem.vue";
+import axios from "@/axios/axios";
+
+// Helper function to get request headers
+const getHeaders = () => {
+  const headers = { Accept: "application/json" };
+  const siteKey = getSetting("server.siteKey");
+  const password = getSetting("namespace.password");
+
+  if (siteKey) {
+    headers["x-site-key"] = siteKey;
+  }
+  if (password) {
+    headers["x-namespace-password"] = password;
+  }
+
+  return headers;
+};
 
 export default {
   name: "NamespaceSettingsCard",
-  components: { SettingsCard, SettingItem },
+  components: { SettingsCard },
 
   data() {
     return {
       loading: false,
       passwordLoading: false,
+      hintLoading: false,
+      verifyLoading: false,
       showSnackbar: false,
       showDeleteConfirm: false,
+      showHintDialog: false,
+      showVerifyDialog: false,
       snackbarText: "",
       snackbarColor: "success",
       namespaceInfo: {
@@ -245,6 +393,7 @@ export default {
         name: "",
         accessType: "PUBLIC",
         hasPassword: false,
+        passwordHint: null,
       },
       namespaceForm: {
         name: "",
@@ -252,7 +401,17 @@ export default {
       },
       passwordForm: {
         newPassword: "",
+        oldPassword: "",
         confirmPassword: "",
+      },
+      passwordHintForm: {
+        hint: "",
+      },
+      verifyForm: {
+        password: "",
+        error: "",
+        action: null, // 'delete' | 'hint'
+        onSuccess: null,
       },
       originalForm: {
         name: "",
@@ -292,14 +451,17 @@ export default {
       if (!this.passwordForm.newPassword) {
         return true; // 允许清空密码
       }
-      return (
-        this.passwordForm.newPassword === this.passwordForm.confirmPassword
-      );
+      const isConfirmMatch = this.passwordForm.newPassword === this.passwordForm.confirmPassword;
+      if (this.namespaceInfo.hasPassword) {
+        return isConfirmMatch && !!this.passwordForm.oldPassword;
+      }
+      return isConfirmMatch;
     },
   },
 
   async created() {
     await this.loadNamespaceInfo();
+    await this.loadPasswordHint();
   },
 
   methods: {
@@ -311,6 +473,7 @@ export default {
           this.namespaceInfo = response.data;
           this.namespaceForm.name = response.data.name;
           this.namespaceForm.accessType = response.data.accessType;
+          this.passwordForm.passwordHint = response.data.passwordHint || "";
           // 保存原始值用于比较
           this.originalForm = { ...this.namespaceForm };
         }
@@ -361,30 +524,41 @@ export default {
 
       this.passwordLoading = true;
       try {
-        const oldPassword = getSetting("namespace.password");
         const response = await kvServerProvider.updatePassword(
-          this.passwordForm.newPassword || null, // 如果为空字符串则发送null
-          oldPassword
+          this.passwordForm.newPassword || null,
+          this.passwordForm.oldPassword || null
         );
 
         if (response.status === 200) {
           this.namespaceInfo.hasPassword = !!this.passwordForm.newPassword;
           this.passwordForm = {
             newPassword: "",
+            oldPassword: "",
             confirmPassword: "",
           };
           this.showSuccess("密码已更新");
           this.$router.push("/");
         } else {
-          console.log(response);
-          throw new Error(response.error.message || "保存失败 #1");
+          throw new Error(response.error?.message || "保存失败");
         }
       } catch (error) {
         console.error("保存密码失败:", error);
-        this.showError(error.message || "保存密码失败");
+        this.showError(error.response?.data?.message || "保存密码失败");
       } finally {
         this.passwordLoading = false;
       }
+    },
+
+    async confirmDeletePassword() {
+      this.verifyForm = {
+        password: "",
+        error: "",
+        action: "delete",
+        onSuccess: () => {
+          this.showDeleteConfirm = true;
+        },
+      };
+      this.showVerifyDialog = true;
     },
 
     async deletePassword() {
@@ -392,22 +566,119 @@ export default {
       try {
         const response = await kvServerProvider.deletePassword();
 
-        if (response.status == 200) {
+        if (response.status === 200) {
           this.namespaceInfo.hasPassword = false;
+          this.namespaceInfo.passwordHint = null;
           this.passwordForm = {
             newPassword: "",
+            oldPassword: "",
             confirmPassword: "",
           };
           this.showDeleteConfirm = false;
           this.showSuccess("密码已删除");
         } else {
-          throw new Error(response.error.message || "删除失败");
+          throw new Error(response.error?.message || "删除失败");
         }
       } catch (error) {
         console.error("删除密码失败:", error);
-        this.showError(error.message || "删除密码失败");
+        this.showError(error.response?.data?.message || "删除密码失败");
       } finally {
         this.passwordLoading = false;
+      }
+    },
+
+    async loadPasswordHint() {
+      try {
+        const serverUrl = getSetting("server.domain");
+        const machineId = getSetting("device.uuid");
+        const response = await axios.get(
+          `${serverUrl}/${machineId}/_hint`,
+          { headers: getHeaders() }
+        );
+
+        if (response.data && response.data.passwordHint !== undefined) {
+          this.namespaceInfo.passwordHint = response.data.passwordHint;
+          this.passwordHintForm.hint = response.data.passwordHint || "";
+        }
+      } catch (error) {
+        console.error("加载密码提示失败:", error);
+        this.showError("加载密码提示失败");
+      }
+    },
+
+    async savePasswordHint() {
+      this.hintLoading = true;
+      try {
+        const serverUrl = getSetting("server.domain");
+        const machineId = getSetting("device.uuid");
+        const response = await axios.put(
+          `${serverUrl}/${machineId}/_hint`,
+          { hint: this.passwordHintForm.hint || null },
+          { headers: getHeaders() }
+        );
+
+        if (response.data) {
+          this.namespaceInfo.passwordHint = response.data.passwordHint;
+          this.showSuccess("密码提示已更新");
+          this.showHintDialog = false;
+        }
+      } catch (error) {
+        console.error("保存密码提示失败:", error);
+        this.showError(error.response?.data?.message || "保存密码提示失败");
+      } finally {
+        this.hintLoading = false;
+      }
+    },
+
+    async openHintDialog() {
+      this.verifyForm = {
+        password: "",
+        error: "",
+        action: "hint",
+        onSuccess: () => {
+          this.showHintDialog = true;
+        },
+      };
+      this.showVerifyDialog = true;
+    },
+
+    cancelVerify() {
+      this.showVerifyDialog = false;
+      this.verifyForm = {
+        password: "",
+        error: "",
+        action: null,
+        onSuccess: null,
+      };
+    },
+
+    async verifyPassword() {
+      if (!this.verifyForm.password) return;
+
+      this.verifyLoading = true;
+      this.verifyForm.error = "";
+
+      try {
+        const response = await axios.post(
+          `${getSetting("server.domain")}/${getSetting("device.uuid")}/_checkpassword`,
+          { password: this.verifyForm.password },
+          { headers: getHeaders() }
+        );
+
+        if (response.status == 200) {
+          // 验证成功，执行对应操作
+          this.showVerifyDialog = false;
+          if (this.verifyForm.onSuccess) {
+            this.verifyForm.onSuccess();
+          }
+        } else {
+          this.verifyForm.error = "密码错误";
+        }
+      } catch (error) {
+        console.error("密码验证失败:", error);
+        this.verifyForm.error = "密码验证失败";
+      } finally {
+        this.verifyLoading = false;
       }
     },
 

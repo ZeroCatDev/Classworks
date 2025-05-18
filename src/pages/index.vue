@@ -649,6 +649,7 @@ import "../styles/transitions.scss"; // 添加新的样式导入
 import "../styles/global.scss";
 import { pinyin } from "pinyin-pro";
 import { debounce, throttle } from "@/utils/debounce";
+import { Base64 } from 'js-base64';
 
 export default {
   name: "Classworks 作业板",
@@ -1815,9 +1816,12 @@ export default {
         if (!configParam) return false;
 
         try {
-          // 解码base64并解析JSON
-          // 使用更安全的base64解码方式，确保支持UTF-8字符（包括中文）
-          const decodedString = this.safeBase64Decode(configParam);
+          // 解码base64为二进制字符串
+          const binaryString = atob(configParam);
+          // 将二进制字符串转换为Uint8Array
+          const bytes = Uint8Array.from(binaryString, c => c.charCodeAt(0));
+          // 将Uint8Array解码为UTF-8字符串
+          const decodedString = new TextDecoder().decode(bytes);
           const decodedConfig = JSON.parse(decodedString);
           console.log("从URL读取配置:", decodedConfig);
 
@@ -2067,30 +2071,7 @@ export default {
     // 安全的Base64解码函数，支持UTF-8字符（包括中文）
     safeBase64Decode(base64String) {
       try {
-        // 替换URL安全base64中的特殊字符
-        const normalizedString = base64String
-          .replace(/-/g, "+")
-          .replace(/_/g, "/");
-
-        // 添加填充字符
-        const paddedString = normalizedString.padEnd(
-          normalizedString.length +
-            ((4 - (normalizedString.length % 4 || 4)) % 4),
-          "="
-        );
-
-        // 解码base64为二进制字符串
-        const binaryString = atob(paddedString);
-
-        // 将二进制字符串转换为Uint8Array
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-
-        // 将Uint8Array解码为UTF-8字符串
-        const decoder = new TextDecoder("utf-8");
-        return decoder.decode(bytes);
+        return Base64.decode(base64String);
       } catch (e) {
         console.error("Base64解码错误:", e);
         throw new Error("无法解码配置数据");
