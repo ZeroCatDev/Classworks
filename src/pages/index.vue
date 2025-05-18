@@ -11,6 +11,7 @@
     <v-spacer />
 
     <template #append>
+      <namespace-access />
       <v-btn
         icon="mdi-format-font-size-decrease"
         variant="text"
@@ -634,6 +635,7 @@
 <script>
 import MessageLog from "@/components/MessageLog.vue";
 import RandomPicker from "@/components/RandomPicker.vue"; // 导入随机点名组件
+import NamespaceAccess from "@/components/NamespaceAccess.vue";
 import dataProvider from "@/utils/dataProvider";
 import {
   getSetting,
@@ -653,6 +655,7 @@ export default {
   components: {
     MessageLog,
     RandomPicker, // 注册随机点名组件
+    NamespaceAccess,
   },
   data() {
     return {

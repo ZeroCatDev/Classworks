@@ -1,7 +1,8 @@
-import { kvProvider } from "./providers/kvProvider";
+import { kvLocalProvider } from "./providers/kvLocalProvider";
+import { kvServerProvider } from "./providers/kvServerProvider";
 import { getSetting } from "./settings";
 
-export const formatResponse = (data, message = null) => (data);
+export const formatResponse = (data) => data;
 
 export const formatError = (message, code = "UNKNOWN_ERROR") => ({
   success: false,
@@ -17,9 +18,9 @@ export default {
       provider === "kv-server" || provider === "classworkscloud";
 
     if (useServer) {
-      return kvProvider.server.loadData(key);
+      return kvServerProvider.loadData(key);
     } else {
-      return kvProvider.local.loadData(key);
+      return kvLocalProvider.loadData(key);
     }
   },
 
@@ -29,9 +30,9 @@ export default {
       provider === "kv-server" || provider === "classworkscloud";
 
     if (useServer) {
-      return kvProvider.server.saveData(key, data);
+      return kvServerProvider.saveData(key, data);
     } else {
-      return kvProvider.local.saveData(key, data);
+      return kvLocalProvider.saveData(key, data);
     }
   },
 };

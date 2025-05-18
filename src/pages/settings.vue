@@ -11,52 +11,158 @@
       <v-app-bar-title class="text-h6">设置</v-app-bar-title>
     </v-app-bar>
 
-    <v-container class="py-4">
-      <v-row>
-        <v-col cols="12" md="6">
+    <v-container fluid>
+      <v-navigation-drawer>
+        <v-list>
+          <v-list-item
+            v-for="tab in settingsTabs"
+            :key="tab.value"
+            @click="settingsTab = tab.value"
+            :active="settingsTab === tab.value"
+            :prepend-icon="tab.icon"
+            class="rounded-e-xl"
+            :color="settingsTab === tab.value ? 'primary' : 'default'"
+          >
+            <v-list-item-title>{{ tab.title }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-navigation-drawer>
+
+      <v-tabs-window
+        v-model="settingsTab"
+        style="width: 100%"
+        direction="vertical"
+      >
+        <v-tabs-window-item value="index">
+          <v-card title="Classworks" subtitle="设置" class="rounded-xl"
+            border
+          >
+            <v-card-text>
+              <v-alert color="error" variant="tonal" icon="mdi-alert-circle"
+               class="rounded-xl"
+                >Classworks
+                是开源免费的软件，官方没有提供任何形式的付费支持服务，源代码仓库地址在
+                <a
+                  href="https://github.com/ZeroCatDev/Classworks"
+                  target="_blank"
+                  >https://github.com/ZeroCatDev/Classworks</a
+                >。如果您通过有偿协助等付费方式取得本应用，在遇到问题时请在与卖家约定的服务框架下，优先向卖家求助。如果卖家没有提供您预期的服务，请退款或通过其它形式积极维护您的合法权益。</v-alert
+              >
+              <v-alert
+                class="mt-4 rounded-xl"
+                color="info"
+                variant="tonal"
+                icon="mdi-information"
+                >请不要使用浏览器清除缓存功能，否则会导致配置丢失。<del
+                  >恶意的操作可能导致您受到贵校教师的处理</del
+                ></v-alert
+              >
+              <v-alert
+                class="mt-4 rounded-xl"
+                color="warning"
+                variant="tonal"
+                icon="mdi-information"
+                ><p>
+                  请不要使用包括但不限于360极速浏览器、360安全浏览器、夸克浏览器、QQ浏览器等浏览器使用
+                  Classworks
+                  ，这些浏览器过时且存在严重的一致性问题。在Windows上，使用新版
+                  Microsoft Edge 浏览器是最推荐的选择。
+                </p>
+                <p style="color: #666">
+                  上述浏览器商标为其所属公司所有，Classworks™
+                  与上述浏览器所属公司暂无竞争关系。
+                </p>
+                <br /><v-btn
+                  href="https://www.microsoft.com/zh-cn/windows/microsoft-edge"
+                  target="_blank"
+                  color="warning"
+                  variant="tonal"
+                  class="text-none rounded-xl"
+                  append-icon="mdi-open-in-new"
+                  >下载 Microsoft Edge（微软边缘浏览器）</v-btn
+                ></v-alert
+              >
+            </v-card-text>
+          </v-card>
+        </v-tabs-window-item>
+
+        <v-tabs-window-item value="server">
           <server-settings-card
             border
             :loading="loading.server"
             @saved="onSettingsSaved"
           />
-        </v-col>
+          <data-provider-settings-card border class="mt-4" />
+        </v-tabs-window-item>
 
-        <v-col cols="12" md="6">
-          <data-provider-settings-card border />
-        </v-col>
-
-        <v-col cols="12" md="6">
-          <edit-settings-card @saved="onSettingsSaved" border/>
-        </v-col>
-
-        <v-col cols="12" md="6">
-          <refresh-settings-card @saved="onSettingsSaved" border/>
-        </v-col>
-
-        <v-col cols="12" md="6">
-          <display-settings-card @saved="onSettingsSaved" border/>
-        </v-col>
-
-        <v-col cols="12" md="6">
-          <theme-settings-card border />
-        </v-col>
-        <v-col cols="12">
-          <settings-link-generator border />
-        </v-col>
-        <!-- 开发者选项卡片 -->
-        <v-col :cols="12" :md="settings.developer.enabled ? 12 : 6">
-          <settings-card
+        <v-tabs-window-item value="namespace">
+          <namespace-settings-card
             border
-            title="开发者选项"
-            icon="mdi-developer-board"
-          >
+            :loading="loading.namespace"
+            @saved="onSettingsSaved"
+          />
+        </v-tabs-window-item>
+
+        <v-tabs-window-item value="share">
+          <settings-link-generator border class="mt-4" />
+        </v-tabs-window-item>
+
+        <v-tabs-window-item value="refresh">
+          <refresh-settings-card
+            border
+            :loading="loading.refresh"
+            @saved="onSettingsSaved"
+          />
+        </v-tabs-window-item>
+
+        <v-tabs-window-item value="edit">
+          <edit-settings-card
+            border
+            :loading="loading.edit"
+            @saved="onSettingsSaved"
+          />
+        </v-tabs-window-item>
+
+        <v-tabs-window-item value="display">
+          <display-settings-card
+            border
+            :loading="loading.display"
+            @saved="onSettingsSaved"
+          />
+        </v-tabs-window-item>
+
+        <v-tabs-window-item value="theme">
+          <theme-settings-card
+            border
+            :loading="loading.theme"
+            @saved="onSettingsSaved"
+          />
+        </v-tabs-window-item>
+
+        <v-tabs-window-item value="student">
+          <student-list-card
+            border
+            :loading="loading.students"
+            :error="studentsError"
+            :is-mobile="isMobile"
+            :unsaved-changes="hasUnsavedChanges"
+            @save="saveStudents"
+            @reload="loadStudents"
+            @update:modelValue="handleStudentDataChange"
+          />
+        </v-tabs-window-item>
+
+        <v-tabs-window-item value="developer"
+          ><settings-card border title="开发者选项" icon="mdi-developer-board">
             <v-list>
               <v-list-item>
                 <template #prepend>
                   <v-icon icon="mdi-code-tags" class="mr-3" />
                 </template>
                 <v-list-item-title>启用开发者选项</v-list-item-title>
-                <v-list-item-subtitle>启用后可以查看和修改开发者设置</v-list-item-subtitle>
+                <v-list-item-subtitle
+                  >启用后可以查看和修改开发者设置</v-list-item-subtitle
+                >
                 <template #append>
                   <v-switch
                     v-model="settings.developer.enabled"
@@ -66,100 +172,33 @@
                   />
                 </template>
               </v-list-item>
-
-              <template v-if="settings.developer.enabled">
-                <v-divider class="my-2" />
-
-                <v-list-item>
-                  <template #prepend>
-                    <v-icon icon="mdi-file-code" class="mr-3" />
-                  </template>
-                  <v-list-item-title>显示调试配置</v-list-item-title>
-                  <v-list-item-subtitle>显示当前的调试配置信息</v-list-item-subtitle>
-                  <template #append>
-                    <v-switch
-                      v-model="settings.developer.showDebugConfig"
-                      density="comfortable"
-                      hide-details
-                    />
-                  </template>
-                </v-list-item>
-
-                <v-expand-transition>
-                  <div v-if="settings.developer.showDebugConfig">
-                    <v-divider class="my-2" />
-                    <v-textarea
-                      v-model="debugConfig"
-                      label="调试配置"
-                      readonly
-                      rows="10"
-                      class="font-monospace mt-2"
-                    />
-                    <div class="d-flex gap-2">
-                      <v-btn
-                        prepend-icon="mdi-refresh"
-                        variant="text"
-                        @click="refreshDebugConfig"
-                      >
-                        刷新
-                      </v-btn>
-                      <v-btn
-                        prepend-icon="mdi-content-copy"
-                        variant="text"
-                        @click="copyDebugConfig"
-                      >
-                        复制
-                      </v-btn>
-                    </div>
-                  </div>
-                </v-expand-transition>
-              </template>
             </v-list>
           </settings-card>
-        </v-col>
-
-        <!-- 学生列表卡片 -->
-        <v-col cols="12">
-          <student-list-card
-            v-model="studentData"
-            :loading="loading.students"
-            :error="studentsError"
-            :is-mobile="isMobile"
-            :unsaved-changes="hasUnsavedChanges"
-            @save="saveStudents"
-            @reload="loadStudents"
-            @update:modelValue="handleStudentDataChange"
+          <developer-settings-card
+            border
+            :loading="loading.developer"
+            @saved="onSettingsSaved"
           />
-        </v-col>
+          <template v-if="settings.developer.enabled">
+            <v-card border class="mt-4 rounded-lg">
+              <v-card-title class="d-flex align-center">
+                <v-icon icon="mdi-cog-outline" class="mr-2" />
+                所有设置
+              </v-card-title>
+              <v-card-subtitle> 浏览和修改所有可用设置 </v-card-subtitle>
+              <v-card-text>
+                <settings-explorer @update="onSettingUpdate" />
+              </v-card-text>
+            </v-card>
+          </template>
+          <v-col v-if="settings.developer.enabled" cols="12"> </v-col>
+        </v-tabs-window-item>
 
-        <!-- 添加回声洞卡片 -->
-        <v-col cols="12">
-          <echo-chamber-card border />
-        </v-col>
-
-        <!-- 关于卡片 -->
-        <v-col cols="12">
+        <v-tabs-window-item value="about">
           <about-card />
-        </v-col>
-
-        <!-- 开发者模式下显示所有设置 -->
-        <v-col v-if="settings.developer.enabled" cols="12">
-          <v-card border>
-            <v-card-title class="d-flex align-center">
-              <v-icon icon="mdi-cog-outline" class="mr-2" />
-              所有设置
-            </v-card-title>
-            <v-card-subtitle>
-              浏览和修改所有可用设置
-            </v-card-subtitle>
-            <v-card-text>
-              <settings-explorer @update="onSettingUpdate" />
-            </v-card-text>
-          </v-card>
-        </v-col>
-
-
-      </v-row>
+          <echo-chamber-card border class="mt-4" />
+        </v-tabs-window-item>
+      </v-tabs-window>
     </v-container>
 
     <!-- 消息记录组件 -->
@@ -168,32 +207,32 @@
 </template>
 
 <script>
-import { useDisplay } from 'vuetify';
-import ServerSettingsCard from '@/components/settings/cards/ServerSettingsCard.vue';
-import EditSettingsCard from '@/components/settings/cards/EditSettingsCard.vue';
-import RefreshSettingsCard from '@/components/settings/cards/RefreshSettingsCard.vue';
-import DisplaySettingsCard from '@/components/settings/cards/DisplaySettingsCard.vue';
-import DataProviderSettingsCard from '@/components/settings/cards/DataProviderSettingsCard.vue';
-import ThemeSettingsCard from '@/components/settings/cards/ThemeSettingsCard.vue';
-import EchoChamberCard from '@/components/settings/cards/EchoChamberCard.vue';
+import { useDisplay } from "vuetify";
+import ServerSettingsCard from "@/components/settings/cards/ServerSettingsCard.vue";
+import EditSettingsCard from "@/components/settings/cards/EditSettingsCard.vue";
+import RefreshSettingsCard from "@/components/settings/cards/RefreshSettingsCard.vue";
+import DisplaySettingsCard from "@/components/settings/cards/DisplaySettingsCard.vue";
+import DataProviderSettingsCard from "@/components/settings/cards/DataProviderSettingsCard.vue";
+import ThemeSettingsCard from "@/components/settings/cards/ThemeSettingsCard.vue";
+import EchoChamberCard from "@/components/settings/cards/EchoChamberCard.vue";
 import {
   getSetting,
   setSetting,
   resetSetting,
-  watchSettings
-} from '@/utils/settings';
-import MessageLog from '@/components/MessageLog.vue';
-import SettingsCard from '@/components/SettingsCard.vue';
-import StudentListCard from '@/components/settings/StudentListCard.vue';
-import AboutCard from '@/components/settings/AboutCard.vue';
-import '../styles/settings.scss';
-import { kvProvider } from '@/utils/providers/kvProvider';
-import SettingsExplorer from '@/components/settings/SettingsExplorer.vue';
-import SettingsLinkGenerator from '@/components/SettingsLinkGenerator.vue';
-import dataProvider from '@/utils/dataProvider';
+  watchSettings,
+} from "@/utils/settings";
+import MessageLog from "@/components/MessageLog.vue";
+import SettingsCard from "@/components/SettingsCard.vue";
+import StudentListCard from "@/components/settings/StudentListCard.vue";
+import AboutCard from "@/components/settings/AboutCard.vue";
+import "../styles/settings.scss";
+import SettingsExplorer from "@/components/settings/SettingsExplorer.vue";
+import SettingsLinkGenerator from "@/components/SettingsLinkGenerator.vue";
+import dataProvider from "@/utils/dataProvider";
+import NamespaceSettingsCard from "@/components/settings/cards/NamespaceSettingsCard.vue";
 
 export default {
-  name: 'Settings',
+  name: "Settings",
   components: {
     ServerSettingsCard,
     EditSettingsCard,
@@ -207,7 +246,8 @@ export default {
     ThemeSettingsCard,
     EchoChamberCard,
     SettingsExplorer,
-    SettingsLinkGenerator
+    SettingsLinkGenerator,
+    NamespaceSettingsCard,
   },
   setup() {
     const { mobile } = useDisplay();
@@ -216,91 +256,155 @@ export default {
   data() {
     const settings = {
       server: {
-        domain: getSetting('server.domain'),
-        classNumber: getSetting('server.classNumber'),
-        provider: getSetting('server.provider')
+        domain: getSetting("server.domain"),
+        classNumber: getSetting("server.classNumber"),
+        provider: getSetting("server.provider"),
+      },
+      namespace: {
+        name: getSetting("namespace.name"),
+        accessType: getSetting("namespace.accessType"),
+        password: getSetting("namespace.password"),
       },
       refresh: {
-        auto: getSetting('refresh.auto'),
-        interval: getSetting('refresh.interval'),
+        auto: getSetting("refresh.auto"),
+        interval: getSetting("refresh.interval"),
       },
       font: {
-        size: getSetting('font.size'),
+        size: getSetting("font.size"),
       },
       edit: {
-        autoSave: getSetting('edit.autoSave'),
-        blockNonTodayAutoSave: getSetting('edit.blockNonTodayAutoSave'),
-        confirmNonTodaySave: getSetting('edit.confirmNonTodaySave'),
-        refreshBeforeEdit: getSetting('edit.refreshBeforeEdit'),
+        autoSave: getSetting("edit.autoSave"),
+        blockNonTodayAutoSave: getSetting("edit.blockNonTodayAutoSave"),
+        confirmNonTodaySave: getSetting("edit.confirmNonTodaySave"),
+        refreshBeforeEdit: getSetting("edit.refreshBeforeEdit"),
       },
       display: {
-        emptySubjectDisplay: getSetting('display.emptySubjectDisplay'),
-        dynamicSort: getSetting('display.dynamicSort'),
-        showRandomButton: getSetting('display.showRandomButton'),
-        showFullscreenButton: getSetting('display.showFullscreenButton')
+        emptySubjectDisplay: getSetting("display.emptySubjectDisplay"),
+        dynamicSort: getSetting("display.dynamicSort"),
+        showRandomButton: getSetting("display.showRandomButton"),
+        showFullscreenButton: getSetting("display.showFullscreenButton"),
       },
       developer: {
-        enabled: getSetting('developer.enabled'),
-        showDebugConfig: getSetting('developer.showDebugConfig')
+        enabled: getSetting("developer.enabled"),
+        showDebugConfig: getSetting("developer.showDebugConfig"),
       },
       message: {
-        showSidebar: getSetting('message.showSidebar'),
-        maxActiveMessages: getSetting('message.maxActiveMessages'),
-        timeout: getSetting('message.timeout'),
-        saveHistory: getSetting('message.saveHistory')
-      }
+        showSidebar: getSetting("message.showSidebar"),
+        maxActiveMessages: getSetting("message.maxActiveMessages"),
+        timeout: getSetting("message.timeout"),
+        saveHistory: getSetting("message.saveHistory"),
+      },
     };
     return {
       settings,
       dataProviders: [
-        { title: '服务器', value: 'server' },
-        { title:'本地数据库',value:'indexedDB'}
+        { title: "服务器", value: "server" },
+        { title: "本地数据库", value: "indexedDB" },
       ],
       studentData: {
         list: [],
-        text: '',
-        advanced: false
+        text: "",
+        advanced: false,
       },
-      newStudent: '',
+      newStudent: "",
       editingIndex: -1,
-      editingName: '',
+      editingName: "",
       deleteDialog: false,
       studentToDelete: null,
       numberDialog: false,
-      newPosition: '',
+      newPosition: "",
       studentToMove: null,
       touchStartTime: 0,
       touchTimeout: null,
       studentsLoading: false,
       studentsError: null,
-      debugConfig: '',
+      debugConfig: "",
       loading: {
         server: false,
-        students: false
+        students: false,
       },
       hasUnsavedChanges: false,
-      lastSavedData: null
-    }
+      lastSavedData: null,
+      settingsTab: "index",
+      settingsTabs: [
+        {
+          title: "首页",
+          icon: "mdi-home",
+          value: "index",
+        },
+        {
+          title: "服务器",
+          icon: "mdi-server",
+          value: "server",
+        },
+        {
+          title: "命名空间",
+          icon: "mdi-database-lock",
+          value: "namespace",
+        },
+        {
+          title: "分享设置",
+          icon: "mdi-share",
+          value: "share",
+        },
+        {
+          title: "刷新",
+          icon: "mdi-refresh",
+          value: "refresh",
+        },
+        {
+          title: "编辑",
+          icon: "mdi-pencil",
+          value: "edit",
+        },
+        {
+          title: "显示",
+          icon: "mdi-eye",
+          value: "display",
+        },
+        {
+          title: "主题",
+          icon: "mdi-theme-light-dark",
+          value: "theme",
+        },
+        {
+          title: "学生列表",
+          icon: "mdi-account-group",
+          value: "student",
+        },
+        {
+          title: "开发者",
+          icon: "mdi-developer-board",
+          value: "developer",
+        },
+        {
+          title: "关于",
+          icon: "mdi-information",
+          value: "about",
+        },
+      ],
+    };
   },
 
   watch: {
-    'settings': {
+    settings: {
       handler(newSettings) {
         this.handleSettingsChange(newSettings);
       },
-      deep: true
+      deep: true,
     },
-    'studentData': {
+    studentData: {
       handler(newData) {
         // 只检查是否有未保存的更改
         if (this.lastSavedData) {
-          this.hasUnsavedChanges = JSON.stringify(newData.list) !== JSON.stringify(this.lastSavedData);
+          this.hasUnsavedChanges =
+            JSON.stringify(newData.list) !== JSON.stringify(this.lastSavedData);
         }
         // 更新文本显示
-        this.studentData.text = newData.list.join('\n');
+        this.studentData.text = newData.list.join("\n");
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
 
   mounted() {
@@ -309,13 +413,6 @@ export default {
       this.loadAllSettings();
     });
     this.loadStudents();
-    this.refreshDebugConfig();
-
-    // 检查开发者选项,如果未启用则关闭相关功能
-    if (!this.settings.developer.enabled) {
-      this.settings.developer.showDebugConfig = false;
-      this.handleSettingsChange(this.settings);
-    }
   },
 
   beforeUnmount() {
@@ -326,8 +423,8 @@ export default {
 
   methods: {
     loadAllSettings() {
-      Object.keys(this.settings).forEach(section => {
-        Object.keys(this.settings[section]).forEach(key => {
+      Object.keys(this.settings).forEach((section) => {
+        Object.keys(this.settings[section]).forEach((key) => {
           this.settings[section][key] = getSetting(`${section}.${key}`);
         });
       });
@@ -348,9 +445,9 @@ export default {
             if (value !== currentValue) {
               const success = setSetting(settingKey, value);
               if (success) {
-                this.showMessage('设置已更新', `${settingKey} 已保存`);
+                this.showMessage("设置已更新", `${settingKey} 已保存`);
               } else {
-                this.showError('保存失败', `${settingKey} 设置失败`);
+                this.showError("保存失败", `${settingKey} 设置失败`);
                 // 回滚到原值
                 this.settings[section][key] = currentValue;
               }
@@ -360,11 +457,11 @@ export default {
       }, 100); // 添加100ms延迟
     },
 
-    showMessage(title, content = '', type = 'success') {
+    showMessage(title, content = "", type = "success") {
       this.$message[type](title, content);
     },
 
-    showError(title, content = '') {
+    showError(title, content = "") {
       this.$message.error(title, content);
     },
 
@@ -372,32 +469,34 @@ export default {
       this.studentsError = null;
       try {
         this.loading.students = true;
-        const classNum = getSetting('server.classNumber');
+        const classNum = getSetting("server.classNumber");
 
         if (!classNum) {
-          throw new Error('请先设置班号');
+          throw new Error("请先设置班号");
         }
-
 
         try {
           // Try to get student list from the dedicated key
-          const response = await dataProvider.loadData('classworks-list-main');
+          const response = await dataProvider.loadData("classworks-list-main");
 
-          if (response.success!=false && Array.isArray(response)) {
+          if (response.success != false && Array.isArray(response)) {
             // Transform the data into a simple list of names
-            this.studentData.list = response.map(student => student.name);
-            this.studentData.text = this.studentData.list.join('\n');
+            this.studentData.list = response.map((student) => student.name);
+            this.studentData.text = this.studentData.list.join("\n");
             this.lastSavedData = [...this.studentData.list];
             this.hasUnsavedChanges = false;
             return;
           }
         } catch (error) {
-          console.warn('Failed to load student list from dedicated key, falling back to config', error);
+          console.warn(
+            "Failed to load student list from dedicated key, falling back to config",
+            error
+          );
         }
       } catch (error) {
-        console.error('加载学生列表失败:', error);
-        this.studentsError = error.message || '加载失败，请检查设置';
-        this.showError('加载失败', this.studentsError);
+        console.error("加载学生列表失败:", error);
+        this.studentsError = error.message || "加载失败，请检查设置";
+        this.showError("加载失败", this.studentsError);
       } finally {
         this.loading.students = false;
       }
@@ -405,39 +504,45 @@ export default {
 
     async saveStudents() {
       try {
-        const classNum = getSetting('server.classNumber');
+        const classNum = getSetting("server.classNumber");
 
         if (!classNum) {
-          throw new Error('请先设置班号');
+          throw new Error("请先设置班号");
         }
 
-
         // Convert the list of names to the new format with IDs
-        const formattedStudentList = this.studentData.list.map((name, index) => ({
-          id: index + 1,
-          name
-        }));
+        const formattedStudentList = this.studentData.list.map(
+          (name, index) => ({
+            id: index + 1,
+            name,
+          })
+        );
 
         // Save the student list to the dedicated key
-        const response = await dataProvider.saveData("classworks-list-main", formattedStudentList);
+        const response = await dataProvider.saveData(
+          "classworks-list-main",
+          formattedStudentList
+        );
 
-        if (response.success==false) {
+        if (response.success == false) {
           throw new Error(response.error?.message || "保存失败");
         }
 
         // 更新保存状态
         this.lastSavedData = [...this.studentData.list];
         this.hasUnsavedChanges = false;
-        this.showMessage('保存成功', '学生列表已更新');
+        this.showMessage("保存成功", "学生列表已更新");
       } catch (error) {
-        console.error('保存学生列表失败:', error);
-        this.showError('保存失败', error.message || '请重试');
+        console.error("保存学生列表失败:", error);
+        this.showError("保存失败", error.message || "请重试");
       }
     },
 
     handleStudentDataChange(newData) {
       // 仅在列表实际发生变化时更新
-      if (JSON.stringify(newData.list) !== JSON.stringify(this.studentData.list)) {
+      if (
+        JSON.stringify(newData.list) !== JSON.stringify(this.studentData.list)
+      ) {
         this.studentData = { ...newData };
         this.hasUnsavedChanges = true;
       }
@@ -450,7 +555,7 @@ export default {
           this.studentData.list[this.editingIndex] = newName;
         }
         this.editingIndex = -1;
-        this.editingName = '';
+        this.editingName = "";
       }
     },
 
@@ -462,15 +567,18 @@ export default {
     confirmDelete(index) {
       this.studentToDelete = {
         index,
-        name: this.studentData.list[index]
+        name: this.studentData.list[index],
       };
       this.deleteDialog = true;
     },
 
     moveStudent(index, direction) {
-      const newIndex = direction === 'up' ? index - 1 : index + 1;
+      const newIndex = direction === "up" ? index - 1 : index + 1;
       if (newIndex >= 0 && newIndex < this.studentData.list.length) {
-        [this.studentData.list[index], this.studentData.list[newIndex]] = [this.studentData.list[newIndex], this.studentData.list[index]];
+        [this.studentData.list[index], this.studentData.list[newIndex]] = [
+          this.studentData.list[newIndex],
+          this.studentData.list[index],
+        ];
       }
     },
 
@@ -494,7 +602,7 @@ export default {
       }
       this.numberDialog = false;
       this.studentToMove = null;
-      this.newPosition = '';
+      this.newPosition = "";
     },
 
     moveToTop(index) {
@@ -509,7 +617,7 @@ export default {
       const student = this.newStudent.trim();
       if (student && !this.studentData.list.includes(student)) {
         this.studentData.list.push(student);
-        this.newStudent = '';
+        this.newStudent = "";
       }
     },
 
@@ -522,41 +630,19 @@ export default {
     },
 
     resetFontSize() {
-      resetSetting('font.size');
-      this.settings.font.size = getSetting('font.size');
-      this.showMessage('字体已重置', '字体大小已恢复默认值');
-    },
-
-    refreshDebugConfig() {
-      const allSettings = {};
-      Object.keys(this.settings).forEach(section => {
-        allSettings[section] = {};
-        Object.keys(this.settings[section]).forEach(key => {
-          allSettings[section][key] = getSetting(`${section}.${key}`);
-        });
-      });
-      this.debugConfig = JSON.stringify(allSettings, null, 2);
-    },
-
-    async copyDebugConfig() {
-      try {
-        await navigator.clipboard.writeText(this.debugConfig);
-        this.showMessage('复制成功', '配置信息已复制到剪贴板');
-      } catch (error) {
-        console.error('复制失败:', error);
-        this.showError('复制失败', '请手动复制');
-      }
+      resetSetting("font.size");
+      this.settings.font.size = getSetting("font.size");
+      this.showMessage("字体已重置", "字体大小已恢复默认值");
     },
 
     handleDeveloperChange(enabled) {
       if (!enabled) {
         // 关闭开发者选项时重置相关设置
-        this.settings.developer.showDebugConfig = false;
         this.settings.message = {
           showSidebar: true,
           maxActiveMessages: 5,
           timeout: 5000,
-          saveHistory: true
+          saveHistory: true,
         };
         // 不需要手动调用 saveSettings，watch 会自动处理
       }
@@ -565,40 +651,39 @@ export default {
     resetDeveloperSettings() {
       this.settings.developer = {
         enabled: false,
-        showDebugConfig: false
       };
       this.settings.message = {
         showSidebar: true,
         maxActiveMessages: 5,
         timeout: 5000,
-        saveHistory: true
+        saveHistory: true,
       };
       this.handleSettingsChange(this.settings);
-      this.showMessage('已重置', '开发者设置已重置为默认值', 'warning');
+      this.showMessage("已重置", "开发者设置已重置为默认值", "warning");
     },
 
     adjustFontSize(direction) {
       const step = 2;
       const size = this.settings.font.size;
-      if (direction === 'up' && size < 100) {
+      if (direction === "up" && size < 100) {
         this.settings.font.size = size + step;
-      } else if (direction === 'down' && size > 16) {
+      } else if (direction === "down" && size > 16) {
         this.settings.font.size = size - step;
       }
       this.handleSettingsChange(this.settings);
     },
 
     onSettingsSaved() {
-      this.showMessage('设置已更新', '您的设置已成功保存');
+      this.showMessage("设置已更新", "您的设置已成功保存");
       // 如果需要，可以在这里重新加载相关数据
     },
 
     onSettingUpdate(key, value) {
       // 处理设置更新
-      this.showMessage('设置已更新', `${key} 已保存为 ${value}`);
-    }
-  }
-}
+      this.showMessage("设置已更新", `${key} 已保存为 ${value}`);
+    },
+  },
+};
 </script>
 
 <style lang="scss">
@@ -606,8 +691,7 @@ export default {
   .v-card {
     transition: transform 0.2s, box-shadow 0.2s;
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
     }
   }
 }

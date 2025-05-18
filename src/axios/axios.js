@@ -16,6 +16,13 @@ axiosInstance.interceptors.request.use(
     if (siteKey) {
       requestConfig.headers["x-site-key"] = siteKey;
     }
+
+    // 自动添加命名空间密码
+    const namespacePassword = getSetting("namespace.password");
+    if (namespacePassword) {
+      requestConfig.headers["x-namespace-password"] = namespacePassword;
+    }
+
     return requestConfig;
   },
   (error) => {

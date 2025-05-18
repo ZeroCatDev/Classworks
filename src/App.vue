@@ -17,11 +17,13 @@ import { getSetting } from "@/utils/settings";
 import { useRouter, useRoute } from "vue-router";
 import RateLimitModal from "@/components/RateLimitModal.vue";
 import Clarity from "@microsoft/clarity";
+import { kvServerProvider } from '@/utils/providers/kvServerProvider';
+
 const theme = useTheme();
 const router = useRouter();
 const route = useRoute();
 
-onMounted(() => {
+onMounted(async () => {
   // 应用保存的主题设置
   const savedTheme = getSetting("theme.mode");
   theme.global.name.value = savedTheme;
@@ -29,6 +31,16 @@ onMounted(() => {
   // 检查存储提供者类型
   checkProviderType();
   Clarity.identify(getSetting("device.uuid"), getSetting("server.domain"), getSetting("server.provider"), getSetting("server.classNumber")); // only custom-id is required
+
+  // 如果使用KV服务器，加载命名空间信息
+  const provider = getSetting('server.provider');
+  if (provider === 'kv-server' || provider === 'classworkscloud') {
+    try {
+      await kvServerProvider.loadNamespaceInfo();
+    } catch (error) {
+      console.error('加载命名空间信息失败:', error);
+    }
+  }
 });
 
 // 检查存储提供者类型，如果是已废弃的类型则重定向

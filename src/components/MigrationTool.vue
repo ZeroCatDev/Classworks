@@ -681,7 +681,7 @@ export default {
 
             // 批量导入配置数据
             const configResponse = await axios.post(
-              `${this.targetServerUrl}/${this.machineId}/import/batch-import`,
+              `${this.targetServerUrl}/${this.machineId}/_batchimport`,
               batchData,
               {
                 headers: this.getRequestHeaders(),
@@ -798,7 +798,7 @@ export default {
 
             // 批量导入配置数据
             const configResponse = await axios.post(
-              `${this.targetServerUrl}/${this.machineId}/import/batch-import`,
+              `${this.targetServerUrl}/${this.machineId}/_batchimport`,
               batchData,
               {
                 headers: this.getRequestHeaders(),
@@ -890,7 +890,7 @@ export default {
           // 发送批量请求
           if (Object.keys(batchPayload).length > 0) {
             const response = await axios.post(
-              `${this.targetServerUrl}/${this.machineId}/import/batch-import`,
+              `${this.targetServerUrl}/${this.machineId}/_batchimport`,
               batchPayload,
               {
                 headers: this.getRequestHeaders(),
