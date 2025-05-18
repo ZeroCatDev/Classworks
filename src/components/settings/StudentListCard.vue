@@ -142,7 +142,7 @@
                       class="text-body-1 flex-grow-1"
                       @click="handleClick(index, student)"
                     >
-                      {{ student }}
+                      {{ student.name }}
                     </span>
 
                     <div
@@ -174,14 +174,14 @@
         <!-- 高级编辑模式 -->
         <div v-else class="pt-2">
           <v-textarea
-            v-model="text"
+            v-model="modelValue.text"
             label="批量编辑学生列表"
             placeholder="每行输入一个学生姓名"
             hint="使用文本编辑模式批量编辑学生名单，保存时会自动去除空行"
             persistent-hint
             variant="outlined"
             rows="10"
-            @input="handleTextInput"
+            @update:model-value="handleTextInput"
           />
         </div>
       </v-expand-transition>
@@ -194,7 +194,7 @@
             size="large"
             :loading="loading"
             :disabled="loading"
-            @click="$emit('save')"
+            @click="saveStudents"
           >
             保存名单
           </v-btn>
@@ -205,7 +205,7 @@
             size="large"
             :loading="loading"
             :disabled="loading"
-            @click="$emit('reload')"
+            @click="loadStudents"
           >
             重载名单
           </v-btn>
@@ -219,6 +219,8 @@
 import UnsavedWarning from "../common/UnsavedWarning.vue";
 import "@/styles/warnings.scss";
 import { pinyin } from "pinyin-pro";
+import dataProvider from "@/utils/dataProvider";
+import { getSetting } from "@/utils/settings";
 
 export default {
   name: "StudentListCard",
@@ -226,19 +228,7 @@ export default {
     UnsavedWarning,
   },
   props: {
-    modelValue: {
-      type: Object,
-      required: true,
-      default: () => ({
-        list: [],
-        text: "",
-        advanced: false,
-      }),
-    },
-    loading: Boolean,
-    error: String,
     isMobile: Boolean,
-    unsavedChanges: Boolean,
   },
 
   data() {
@@ -248,101 +238,200 @@ export default {
         index: -1,
         name: "",
       },
+      modelValue: {
+        list: [],
+        text: "",
+        advanced: false,
+      },
+      loading: false,
+      error: null,
+      lastSavedData: null,
+      unsavedChanges: false,
     };
   },
 
-  emits: ["update:modelValue", "save", "reload"],
-
-  computed: {
-    text: {
-      get() {
-        return this.modelValue.text;
+  watch: {
+    modelValue: {
+      handler(newData) {
+        if (this.lastSavedData) {
+          this.unsavedChanges = JSON.stringify(newData.list) !== JSON.stringify(this.lastSavedData);
+        }
+        if (!this.modelValue.advanced) {
+          this.modelValue.text = newData.list
+            .slice()
+            .sort((a, b) => a.id - b.id)
+            .map(s => s.name)
+            .join("\n");
+        }
       },
-      set(value) {
-        this.handleTextInput(value);
-      },
+      deep: true,
     },
   },
 
+  mounted() {
+    this.loadStudents();
+  },
+
   methods: {
-    // UI 相关方法
+    async loadStudents() {
+      this.error = null;
+      try {
+        this.loading = true;
+        const classNum = getSetting("server.classNumber");
+
+        if (!classNum) {
+          throw new Error("请先设置班号");
+        }
+
+        try {
+          const response = await dataProvider.loadData("classworks-list-main");
+
+          if (response.success != false && Array.isArray(response)) {
+            this.modelValue.list = response.map((item, index) => {
+              if (typeof item === 'string') {
+                return { id: index + 1, name: item };
+              }
+              return {
+                id: item.id || index + 1,
+                name: item.name || item.toString()
+              };
+            });
+
+            this.modelValue.list.sort((a, b) => a.id - b.id);
+            this.modelValue.text = this.modelValue.list.map(s => s.name).join("\n");
+            this.lastSavedData = JSON.parse(JSON.stringify(this.modelValue.list));
+            this.unsavedChanges = false;
+            return;
+          }
+        } catch (error) {
+          console.warn(
+            "Failed to load student list from dedicated key, falling back to config",
+            error
+          );
+        }
+      } catch (error) {
+        console.error("加载学生列表失败:", error);
+        this.error = error.message || "加载失败，请检查设置";
+        this.$message?.error("加载失败", this.error);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async saveStudents() {
+      try {
+        const classNum = getSetting("server.classNumber");
+
+        if (!classNum) {
+          throw new Error("请先设置班号");
+        }
+
+        const formattedList = this.modelValue.list
+          .slice()
+          .sort((a, b) => a.id - b.id)
+          .map((student, index) => ({
+            id: index + 1,
+            name: student.name
+          }));
+
+        const response = await dataProvider.saveData(
+          "classworks-list-main",
+          formattedList
+        );
+
+        if (response.success === false) {
+          throw new Error(response.error?.message || "保存失败");
+        }
+
+        this.modelValue.list = formattedList;
+        this.lastSavedData = JSON.parse(JSON.stringify(formattedList));
+        this.unsavedChanges = false;
+        this.$message?.success("保存成功", "学生列表已更新");
+      } catch (error) {
+        console.error("保存学生列表失败:", error);
+        this.$message?.error("保存失败", error.message || "请重试");
+      }
+    },
+
     toggleAdvanced() {
-      const advanced = !this.modelValue.advanced;
-      this.updateModelValue({
-        advanced,
-        text: advanced ? this.modelValue.list.join("\n") : this.modelValue.text,
-        list: this.modelValue.list,
-      });
+      this.modelValue.advanced = !this.modelValue.advanced;
     },
 
-    updateModelValue(newData) {
-      this.$emit("update:modelValue", {
-        ...this.modelValue,
-        ...newData,
+    handleTextInput(text) {
+      if (!this.modelValue.advanced) return;
+
+      // Split the text into lines and filter out empty lines
+      const lines = text.split("\n").filter((line) => line.trim());
+
+      // Create a map of existing student names to their IDs
+      const currentIds = new Map(this.modelValue.list.map(s => [s.name, s.id]));
+      let maxId = Math.max(0, ...this.modelValue.list.map(s => s.id));
+
+      // Create new list preserving IDs for existing names and generating new IDs for new names
+      const newList = lines.map(name => {
+        name = name.trim();
+        if (currentIds.has(name)) {
+          return { id: currentIds.get(name), name };
+        }
+        return { id: ++maxId, name };
       });
+
+      // Update the list
+      this.modelValue.list = newList;
     },
 
-    // 基础编辑操作
     addStudent() {
       const name = this.newStudentName.trim();
-      if (!name || this.modelValue.list.includes(name)) return;
-
-      const newList = [...this.modelValue.list, name];
-      this.updateModelValue({
-        list: newList,
-        text: newList.join("\n"),
-      });
-      this.newStudentName = "";
-    },
-
-    removeStudent(index) {
-      const newList = this.modelValue.list.filter((_, i) => i !== index);
-      this.updateModelValue({
-        list: newList,
-        text: newList.join("\n"),
-      });
-    },
-
-    moveStudent(index, direction) {
-      const newList = [...this.modelValue.list];
-      let targetIndex;
-
-      if (direction === "top") {
-        targetIndex = 0;
-      } else if (direction === "up") {
-        targetIndex = index - 1;
-      } else {
-        targetIndex = index + 1;
-      }
-
-      if (targetIndex >= 0 && targetIndex < newList.length) {
-        const [student] = newList.splice(index, 1);
-        newList.splice(targetIndex, 0, student);
-
-        this.updateModelValue({
-          list: newList,
-          text: newList.join("\n"),
-        });
+      if (name && !this.modelValue.list.some(s => s.name === name)) {
+        const maxId = Math.max(0, ...this.modelValue.list.map(s => s.id));
+        this.modelValue.list.push({ id: maxId + 1, name });
+        this.newStudentName = "";
       }
     },
 
-    // 文本编辑操作
-    startEdit(index, name) {
-      this.editState = { index, name };
+    startEdit(index, student) {
+      this.editState.index = index;
+      this.editState.name = student.name;
     },
 
     saveEdit() {
-      const { index, name } = this.editState;
-      if (index === -1 || !name.trim()) return;
+      if (this.editState.index !== -1) {
+        const newName = this.editState.name.trim();
+        if (newName && newName !== this.modelValue.list[this.editState.index].name) {
+          this.modelValue.list[this.editState.index].name = newName;
+        }
+        this.editState.index = -1;
+        this.editState.name = "";
+      }
+    },
 
-      const newList = [...this.modelValue.list];
-      newList[index] = name.trim();
+    removeStudent(index) {
+      if (index !== undefined) {
+        this.modelValue.list.splice(index, 1);
+      }
+    },
 
-      this.updateModelValue({
-        list: newList,
-        text: newList.join("\n"),
-      });
-      this.editState = { index: -1, name: "" };
+    moveStudent(index, direction) {
+      if (direction === "top") {
+        if (index > 0) {
+          const student = this.modelValue.list[index];
+          this.modelValue.list.splice(index, 1);
+          this.modelValue.list.unshift(student);
+          this.modelValue.list.forEach((s, i) => s.id = i + 1);
+        }
+      } else {
+        const newIndex = direction === "up" ? index - 1 : index + 1;
+        if (newIndex >= 0 && newIndex < this.modelValue.list.length) {
+          [this.modelValue.list[index], this.modelValue.list[newIndex]] = [
+            this.modelValue.list[newIndex],
+            this.modelValue.list[index],
+          ];
+          [this.modelValue.list[index].id, this.modelValue.list[newIndex].id] = [
+            this.modelValue.list[newIndex].id,
+            this.modelValue.list[index].id,
+          ];
+        }
+      }
     },
 
     handleClick(index, student) {
@@ -351,35 +440,20 @@ export default {
       }
     },
 
-    handleTextInput(value) {
-      const list = value
-        .split("\n")
-        .map((s) => s.trim())
-        .filter((s) => s);
-
-      this.updateModelValue({
-        text: value,
-        list,
-      });
-    },
-
     sortStudentsByPinyin() {
-      const newList = [...this.modelValue.list].sort((a, b) => {
-        const pinyinA = pinyin(a, { toneType: "none" ,mode: 'surname'});
-        const pinyinB = pinyin(b, { toneType: "none",mode: 'surname' });
+      const sorted = [...this.modelValue.list].sort((a, b) => {
+        const pinyinA = pinyin(a.name, { toneType: "none" });
+        const pinyinB = pinyin(b.name, { toneType: "none" });
         return pinyinA.localeCompare(pinyinB);
       });
-
-      this.updateModelValue({
-        list: newList,
-        text: newList.join("\n"),
-      });
+      sorted.forEach((s, i) => s.id = i + 1);
+      this.modelValue.list = sorted;
     },
   },
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .student-card {
   transition: all 0.2s ease;
 }
@@ -389,26 +463,7 @@ export default {
   transition: opacity 0.2s ease;
 }
 
-/* 修改警告样式的选择器和实现 */
-.v-card.unsaved-changes {
-  animation: pulse-warning 2s infinite;
-  border: 2px solid rgb(var(--v-theme-warning)) !important;
-}
-
-@keyframes pulse-warning {
-  0%,
-  100% {
-    border-color: rgba(var(--v-theme-warning), 1) !important;
-  }
-  50% {
-    border-color: rgba(var(--v-theme-warning), 0.5) !important;
-  }
-}
-
-/* 移动端样式 */
-@media (max-width: 600px) {
-  .action-buttons {
-    opacity: 1;
-  }
+.unsaved-changes {
+  border-color: rgb(var(--v-theme-warning)) !important;
 }
 </style>

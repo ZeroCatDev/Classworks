@@ -34,12 +34,13 @@
         direction="vertical"
       >
         <v-tabs-window-item value="index">
-          <v-card title="Classworks" subtitle="设置" class="rounded-xl"
-            border
-          >
+          <v-card title="Classworks" subtitle="设置" class="rounded-xl" border>
             <v-card-text>
-              <v-alert color="error" variant="tonal" icon="mdi-alert-circle"
-               class="rounded-xl"
+              <v-alert
+                color="error"
+                variant="tonal"
+                icon="mdi-alert-circle"
+                class="rounded-xl"
                 >Classworks
                 是开源免费的软件，官方没有提供任何形式的付费支持服务，源代码仓库地址在
                 <a
@@ -140,16 +141,7 @@
         </v-tabs-window-item>
 
         <v-tabs-window-item value="student">
-          <student-list-card
-            border
-            :loading="loading.students"
-            :error="studentsError"
-            :is-mobile="isMobile"
-            :unsaved-changes="hasUnsavedChanges"
-            @save="saveStudents"
-            @reload="loadStudents"
-            @update:modelValue="handleStudentDataChange"
-          />
+          <student-list-card border :is-mobile="isMobile" />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="developer"
@@ -255,7 +247,8 @@ export default {
   },
   data() {
     const provider = getSetting("server.provider");
-    const showNamespaceSettings = provider === "kv-server" || provider === "classworkscloud";
+    const showNamespaceSettings =
+      provider === "kv-server" || provider === "classworkscloud";
 
     const settings = {
       server: {
@@ -340,13 +333,15 @@ export default {
           icon: "mdi-server",
           value: "server",
         },
-        ...(showNamespaceSettings ? [
-          {
-            title: "命名空间",
-            icon: "mdi-database-lock",
-            value: "namespace",
-          }
-        ] : []),
+        ...(showNamespaceSettings
+          ? [
+              {
+                title: "命名空间",
+                icon: "mdi-database-lock",
+                value: "namespace",
+              },
+            ]
+          : []),
         {
           title: "分享设置",
           icon: "mdi-share",
@@ -417,7 +412,6 @@ export default {
     this.unwatchSettings = watchSettings(() => {
       this.loadAllSettings();
     });
-    this.loadStudents();
   },
 
   beforeUnmount() {
@@ -435,9 +429,7 @@ export default {
       });
     },
 
-    // 添加统一的设置处理方法
     handleSettingsChange(newSettings) {
-      // 使用防抖来避免过多更新
       if (this.settingsChangeTimeout) {
         clearTimeout(this.settingsChangeTimeout);
       }
@@ -453,13 +445,12 @@ export default {
                 this.showMessage("设置已更新", `${settingKey} 已保存`);
               } else {
                 this.showError("保存失败", `${settingKey} 设置失败`);
-                // 回滚到原值
                 this.settings[section][key] = currentValue;
               }
             }
           });
         });
-      }, 100); // 添加100ms延迟
+      }, 100);
     },
 
     showMessage(title, content = "", type = "success") {
@@ -468,89 +459,6 @@ export default {
 
     showError(title, content = "") {
       this.$message.error(title, content);
-    },
-
-    async loadStudents() {
-      this.studentsError = null;
-      try {
-        this.loading.students = true;
-        const classNum = getSetting("server.classNumber");
-
-        if (!classNum) {
-          throw new Error("请先设置班号");
-        }
-
-        try {
-          // Try to get student list from the dedicated key
-          const response = await dataProvider.loadData("classworks-list-main");
-
-          if (response.success != false && Array.isArray(response)) {
-            // Transform the data into a simple list of names
-            this.studentData.list = response.map((student) => student.name);
-            this.studentData.text = this.studentData.list.join("\n");
-            this.lastSavedData = [...this.studentData.list];
-            this.hasUnsavedChanges = false;
-            return;
-          }
-        } catch (error) {
-          console.warn(
-            "Failed to load student list from dedicated key, falling back to config",
-            error
-          );
-        }
-      } catch (error) {
-        console.error("加载学生列表失败:", error);
-        this.studentsError = error.message || "加载失败，请检查设置";
-        this.showError("加载失败", this.studentsError);
-      } finally {
-        this.loading.students = false;
-      }
-    },
-
-    async saveStudents() {
-      try {
-        const classNum = getSetting("server.classNumber");
-
-        if (!classNum) {
-          throw new Error("请先设置班号");
-        }
-
-        // Convert the list of names to the new format with IDs
-        const formattedStudentList = this.studentData.list.map(
-          (name, index) => ({
-            id: index + 1,
-            name,
-          })
-        );
-
-        // Save the student list to the dedicated key
-        const response = await dataProvider.saveData(
-          "classworks-list-main",
-          formattedStudentList
-        );
-
-        if (response.success == false) {
-          throw new Error(response.error?.message || "保存失败");
-        }
-
-        // 更新保存状态
-        this.lastSavedData = [...this.studentData.list];
-        this.hasUnsavedChanges = false;
-        this.showMessage("保存成功", "学生列表已更新");
-      } catch (error) {
-        console.error("保存学生列表失败:", error);
-        this.showError("保存失败", error.message || "请重试");
-      }
-    },
-
-    handleStudentDataChange(newData) {
-      // 仅在列表实际发生变化时更新
-      if (
-        JSON.stringify(newData.list) !== JSON.stringify(this.studentData.list)
-      ) {
-        this.studentData = { ...newData };
-        this.hasUnsavedChanges = true;
-      }
     },
 
     saveEdit() {
@@ -585,12 +493,6 @@ export default {
           this.studentData.list[index],
         ];
       }
-    },
-
-    setStudentNumber(index) {
-      this.studentToMove = index;
-      this.newPosition = String(index + 1);
-      this.numberDialog = true;
     },
 
     applyNewPosition() {
@@ -680,11 +582,9 @@ export default {
 
     onSettingsSaved() {
       this.showMessage("设置已更新", "您的设置已成功保存");
-      // 如果需要，可以在这里重新加载相关数据
     },
 
     onSettingUpdate(key, value) {
-      // 处理设置更新
       this.showMessage("设置已更新", `${key} 已保存为 ${value}`);
     },
   },
