@@ -1,8 +1,6 @@
 <template>
   <v-app-bar class="no-select">
-    <template #prepend>
-      <v-app-bar-nav-icon icon="mdi-home" />
-    </template>
+
 
     <v-app-bar-title>
       {{ state.classNumber }} - {{ titleText }}

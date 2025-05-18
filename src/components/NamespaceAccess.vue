@@ -4,8 +4,6 @@
     <v-chip
       v-if="isReadOnly"
       color="warning"
-      size="small"
-      class="mr-2"
       prepend-icon="mdi-lock-outline"
     >
       只读
@@ -26,10 +24,6 @@
       <v-card class="rounded-xl" border hover>
         <v-card-title class="text-h6">输入访问密码</v-card-title>
         <v-card-text>
-          <div v-if="passwordHint" class="text-body-2 mb-4">
-            <v-icon icon="mdi-lightbulb-outline" color="warning" class="mr-1" />
-            提示：{{ passwordHint }}
-          </div>
           <v-text-field
             v-model="password"
             label="密码"
@@ -41,12 +35,15 @@
             :disabled="loading"
             autofocus
           />
+
+          <p v-if="passwordHint">密码提示：{{ passwordHint }}</p>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn
             color="grey"
             variant="text"
+            class="rounded-xl"
             @click="dialog = false"
             :disabled="loading"
           >
@@ -54,6 +51,9 @@
           </v-btn>
           <v-btn
             color="primary"
+            class="rounded-xl"
+            variant="tonal"
+
             @click="checkPassword"
             :loading="loading"
             :disabled="!password"
@@ -113,8 +113,7 @@ export default {
           ["PRIVATE", "PROTECTED", "PUBLIC"].includes(response.data.accessType)
         ) {
           this.accessType = response.data.accessType;
-          // 保存密码提示
-          this.passwordHint = response.data.passwordHint || null;
+
         } else {
           return;
         }
@@ -132,6 +131,13 @@ export default {
             this.setReadOnly(true);
           }
         }
+        const passwordHintresponse = await axios.get(
+          `${getSetting("server.domain")}/${getSetting("device.uuid")}/_hint`
+        );
+        if (passwordHintresponse.data && passwordHintresponse.data.passwordHint) {
+          this.passwordHint = passwordHintresponse.data.passwordHint || null;
+        }
+
       } catch (error) {
         // 处理403错误
         if (error.response && error.response.status === 403) {
@@ -208,5 +214,10 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+.password-hint {
+  max-width: 100%;
+  word-wrap: break-word;
 }
 </style>

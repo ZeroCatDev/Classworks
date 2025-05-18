@@ -12,24 +12,22 @@
       <v-icon :icon="item.icon" :size="item.icon === 'mdi-earth' ? 24 : 16" />
     </a>
 
-  
+
     <div
       class="text-caption text-disabled"
       style="position: absolute; right: 16px"
     >
-      &copy; 2020-{{ new Date().getFullYear() }}
-      <span class="d-none d-sm-inline-block">SunWuyuan</span>
-      —
+
       <a
         class="text-decoration-none on-surface"
-        href="https://github.com/sunwuyuan/classworks-frontend"
+        href="https://github.com/ZeroCatDev/Classworks"
         rel="noopener noreferrer"
         target="_blank"
       >
         Classworks
       </a>  <a
         class="text-decoration-none on-surface"
-        href="https://beiancx.miit.gov.cn"
+        href="https://beian.miit.gov.cn"
         rel="noopener noreferrer"
         target="_blank"
       >
@@ -45,9 +43,9 @@ const { mobile } = useDisplay();
 
 const items = [
   {
-    title: "孙悟远",
+    title: "Classworks",
     icon: `mdi-earth`,
-    href: "https://wuyuan.dev",
+    href: "https://cs.houlangs.com",
   },
   {
     title: "ZeroCat",
@@ -57,7 +55,7 @@ const items = [
   {
     title: "GitHub",
     icon: "mdi-github",
-    href: "https://github.com/sunwuyuan/classworks-frontend",
+    href: "https://github.com/ZeroCatDev/Classworks",
   },
 ];
 </script>
