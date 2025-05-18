@@ -1,9 +1,11 @@
 <template>
   <settings-card
+    v-if="shouldShowCard"
     title="命名空间设置"
     icon="mdi-database-lock"
     :loading="loading"
   >
+    <namespace-access ref="namespaceAccess" />
     <!-- 命名空间标识符 -->
     <v-card variant="tonal" class="rounded-lg mb-4">
       <v-card-item>
@@ -178,10 +180,21 @@
                 variant="tonal"
                 :loading="hintLoading"
                 @click="openHintDialog"
+                class="mr-2"
               >
                 设置密码提示
                 <template #prepend>
                   <v-icon icon="mdi-lightbulb-outline" />
+                </template>
+              </v-btn>
+              <v-btn
+                color="primary"
+                variant="tonal"
+                @click="modifyLocalPassword"
+              >
+                修改本地密码
+                <template #prepend>
+                  <v-icon icon="mdi-key-variant" />
                 </template>
               </v-btn>
             </div>
@@ -352,6 +365,7 @@
 
 <script>
 import SettingsCard from "@/components/SettingsCard.vue";
+import NamespaceAccess from "@/components/NamespaceAccess.vue";
 import { kvServerProvider } from "@/utils/providers/kvServerProvider";
 import { getSetting } from "@/utils/settings";
 import axios from "@/axios/axios";
@@ -374,7 +388,10 @@ const getHeaders = () => {
 
 export default {
   name: "NamespaceSettingsCard",
-  components: { SettingsCard },
+  components: {
+    SettingsCard,
+    NamespaceAccess
+  },
 
   data() {
     return {
@@ -438,6 +455,10 @@ export default {
   },
 
   computed: {
+    shouldShowCard() {
+      const provider = getSetting("server.provider");
+      return provider === "kv-server" || provider === "classworkscloud";
+    },
     deviceUuid() {
       return this.namespaceInfo.uuid;
     },
@@ -460,8 +481,10 @@ export default {
   },
 
   async created() {
-    await this.loadNamespaceInfo();
-    await this.loadPasswordHint();
+    if (this.shouldShowCard) {
+      await this.loadNamespaceInfo();
+      await this.loadPasswordHint();
+    }
   },
 
   methods: {
@@ -692,6 +715,14 @@ export default {
       this.snackbarColor = "error";
       this.snackbarText = message;
       this.showSnackbar = true;
+    },
+
+    modifyLocalPassword() {
+      // 获取NamespaceAccess组件实例并调用方法
+      const namespaceAccess = this.$refs.namespaceAccess;
+      if (namespaceAccess) {
+        namespaceAccess.openPasswordDialog();
+      }
     },
   },
 };

@@ -1,5 +1,5 @@
 <template>
-  <div class="namespace-access">
+  <div class="namespace-access" v-if="shouldShowAccess">
     <!-- 只读状态显示 -->
     <v-chip
       v-if="isReadOnly"
@@ -13,7 +13,7 @@
     <v-btn
       v-if="isReadOnly"
       color="primary"
-      size="small"
+      class="rounded-xl"
       prepend-icon="mdi-lock-open-variant"
       @click="openPasswordDialog"
       :disabled="loading"
@@ -23,7 +23,7 @@
 
     <!-- 密码输入对话框 -->
     <v-dialog v-model="dialog" max-width="400" persistent>
-      <v-card>
+      <v-card class="rounded-xl" border hover>
         <v-card-title class="text-h6">输入访问密码</v-card-title>
         <v-card-text>
           <div v-if="passwordHint" class="text-body-2 mb-4">
@@ -37,7 +37,6 @@
             :error="!!error"
             :error-messages="error"
             @keyup.enter="checkPassword"
-            :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
             @click:append-inner="showPassword = !showPassword"
             :disabled="loading"
             autofocus
@@ -85,11 +84,23 @@ export default {
       passwordHint: null, // 密码提示
     };
   },
+  computed: {
+    shouldShowAccess() {
+      const provider = getSetting("server.provider");
+      return provider === "kv-server" || provider === "classworkscloud";
+    }
+  },
   async created() {
-    await this.checkAccess();
+    if (this.shouldShowAccess) {
+      await this.checkAccess();
+    }
   },
   methods: {
     async checkAccess() {
+      if (!this.shouldShowAccess) {
+        return;
+      }
+
       try {
         // 获取命名空间访问类型
         const response = await axios.get(
@@ -105,7 +116,6 @@ export default {
           // 保存密码提示
           this.passwordHint = response.data.passwordHint || null;
         } else {
-          //this.$router.push("/settings");
           return;
         }
 

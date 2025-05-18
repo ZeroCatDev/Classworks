@@ -254,6 +254,9 @@ export default {
     return { isMobile: mobile };
   },
   data() {
+    const provider = getSetting("server.provider");
+    const showNamespaceSettings = provider === "kv-server" || provider === "classworkscloud";
+
     const settings = {
       server: {
         domain: getSetting("server.domain"),
@@ -337,11 +340,13 @@ export default {
           icon: "mdi-server",
           value: "server",
         },
-        {
-          title: "命名空间",
-          icon: "mdi-database-lock",
-          value: "namespace",
-        },
+        ...(showNamespaceSettings ? [
+          {
+            title: "命名空间",
+            icon: "mdi-database-lock",
+            value: "namespace",
+          }
+        ] : []),
         {
           title: "分享设置",
           icon: "mdi-share",

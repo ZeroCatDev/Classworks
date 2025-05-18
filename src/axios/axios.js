@@ -13,17 +13,21 @@ const axiosInstance = axios.create({
 // 请求拦截器
 axiosInstance.interceptors.request.use(
   (requestConfig) => {
-    // 确保每次请求时都获取最新的 siteKey
-    const siteKey = getSetting("server.siteKey");
-    if (siteKey) {
-      requestConfig.headers["x-site-key"] = Base64.encode(siteKey);
-    }
+    const provider = getSetting("server.provider");
 
-    // 自动添加命名空间密码
-    const namespacePassword = getSetting("namespace.password");
-    if (namespacePassword) {
-      requestConfig.headers["x-namespace-password"] =
-        Base64.encode(namespacePassword);
+    // 只有在 kv-server 或 classworkscloud 模式下才添加请求头
+    if (provider === "kv-server" || provider === "classworkscloud") {
+      // 确保每次请求时都获取最新的 siteKey
+      const siteKey = getSetting("server.siteKey");
+      if (siteKey) {
+        requestConfig.headers["x-site-key"] = Base64.encode(siteKey);
+      }
+
+      // 自动添加命名空间密码
+      const namespacePassword = getSetting("namespace.password");
+      if (namespacePassword) {
+        requestConfig.headers["x-namespace-password"] = Base64.encode(namespacePassword);
+      }
     }
 
     return requestConfig;
