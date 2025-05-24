@@ -360,7 +360,7 @@ const settingsDefinitions = {
   "randomPicker.defaultCount": {
     type: "number",
     default: 1,
-    validate: (value) => value >= 1 && value <= 10,
+    validate: (value) => value >= 1 && value,
     description: "默认抽取人数",
     icon: "mdi-counter",
   },
@@ -381,6 +381,27 @@ const settingsDefinitions = {
     default: true,
     description: "是否排除不参与学生",
     icon: "mdi-account-cancel",
+  },
+  "randomPicker.mode": {
+    type: "string",
+    default: "name",
+    validate: (value) => ["name", "number"].includes(value),
+    description: "随机点名模式",
+    icon: "mdi-format-list-numbered",
+  },
+  "randomPicker.maxNumber": {
+    type: "number",
+    default: 60,
+    validate: (value) => value >= 1 && value,
+    description: "学号模式最大值",
+    icon: "mdi-numeric",
+  },
+  "randomPicker.minNumber": {
+    type: "number",
+    default: 1,
+    validate: (value) => value >= 1 && value,
+    description: "学号模式最小值",
+    icon: "mdi-numeric-negative-1",
   },
 };
 

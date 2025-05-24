@@ -43,6 +43,48 @@
           />
         </div>
 
+        <!-- 添加模式切换 -->
+        <div class="mode-switch-container mt-6">
+          <v-btn-toggle
+            v-model="pickerMode"
+            color="primary"
+            rounded="pill"
+            mandatory
+            class="mode-toggle"
+          >
+            <v-btn value="name" prepend-icon="mdi-account">姓名模式</v-btn>
+            <v-btn value="number" prepend-icon="mdi-numeric">学号模式</v-btn>
+          </v-btn-toggle>
+        </div>
+
+        <!-- 学号范围设置 -->
+        <div v-if="pickerMode === 'number'" class="number-range-container mt-4">
+          <div class="text-subtitle-1 mb-2">学号范围设置</div>
+          <div class="d-flex justify-center align-center gap-4">
+            <v-text-field
+              v-model.number="minNumber"
+              label="最小值"
+              type="number"
+              min="1"
+              max="100"
+              hide-details
+              class="number-input"
+              density="compact"
+            />
+            <span class="mx-2">至</span>
+            <v-text-field
+              v-model.number="maxNumber"
+              label="最大值"
+              type="number"
+              min="1"
+              max="100"
+              hide-details
+              class="number-input"
+              density="compact"
+            />
+          </div>
+        </div>
+
         <div class="mt-4">
           <v-btn
             size="x-large"
@@ -57,12 +99,17 @@
         </div>
 
         <div v-if="filteredStudents.length === 0" class="mt-4 text-error">
-          没有可抽取的学生，请调整过滤选项
+          <template v-if="pickerMode === 'name'">
+            没有可抽取的学生，请调整过滤选项
+          </template>
+          <template v-else>
+            请设置有效的学号范围
+          </template>
         </div>
 
         <div class="mt-4 text-caption">
           当前可抽取学生: {{ filteredStudents.length }}人
-          <v-tooltip location="bottom">
+          <v-tooltip v-if="pickerMode === 'name'" location="bottom">
             <template v-slot:activator="{ props }">
               <v-icon
                 v-bind="props"
@@ -81,10 +128,11 @@
               <div v-if="tempFilters.excludeExcluded">
                 • 已排除不参与学生 ({{ excludedCount }}人)
               </div>
-            </div> </v-tooltip
-          ><!-- 添加临时过滤选项 -->
+            </div>
+          </v-tooltip>
 
-          <div class="d-flex flex-wrap justify-center gap-2 mt-4">
+          <!-- 添加临时过滤选项 -->
+          <div v-if="pickerMode === 'name'" class="d-flex flex-wrap justify-center gap-2 mt-4">
             <v-chip
               :color="tempFilters.excludeLate ? 'warning' : 'default'"
               :variant="tempFilters.excludeLate ? 'elevated' : 'text'"
@@ -107,9 +155,7 @@
             <v-chip
               :color="tempFilters.excludeExcluded ? 'grey' : 'default'"
               :variant="tempFilters.excludeExcluded ? 'elevated' : 'text'"
-              @click="
-                tempFilters.excludeExcluded = !tempFilters.excludeExcluded
-              "
+              @click="tempFilters.excludeExcluded = !tempFilters.excludeExcluded"
               prepend-icon="mdi-account-cancel"
               class="filter-chip"
             >
@@ -195,7 +241,7 @@
 </template>
 
 <script>
-import { getSetting } from "@/utils/settings";
+import { getSetting, setSetting } from "@/utils/settings";
 
 export default {
   name: "RandomPicker",
@@ -227,6 +273,9 @@ export default {
         excludeLate: getSetting("randomPicker.excludeLate"),
         excludeExcluded: getSetting("randomPicker.excludeExcluded"),
       },
+      pickerMode: getSetting("randomPicker.mode"),
+      minNumber: getSetting("randomPicker.minNumber"),
+      maxNumber: getSetting("randomPicker.maxNumber"),
     };
   },
   computed: {
@@ -241,12 +290,25 @@ export default {
       return this.attendance.exclude ? this.attendance.exclude.length : 0;
     },
 
-    // 使用临时过滤选项过滤学生
+    // 添加数字模式的学生列表
+    numberModeStudents() {
+      if (this.pickerMode !== "number") return [];
+      const students = [];
+      for (let i = this.minNumber; i <= this.maxNumber; i++) {
+        students.push(i.toString().padStart(2, "0") + "号");
+      }
+      return students;
+    },
+
+    // 修改 filteredStudents 计算属性
     filteredStudents() {
+      if (this.pickerMode === "number") {
+        return this.numberModeStudents;
+      }
+
       if (!this.studentList || !this.studentList.length) return [];
 
       return this.studentList.filter((student) => {
-        // 根据临时过滤选项过滤学生
         if (
           this.tempFilters.excludeAbsent &&
           this.attendance.absent.includes(student)
@@ -317,6 +379,35 @@ export default {
         }
       },
       deep: true,
+    },
+
+    // 添加模式切换监听
+    pickerMode: {
+      handler(newMode) {
+        setSetting("randomPicker.mode", newMode);
+      },
+    },
+    minNumber: {
+      handler(newValue) {
+        if (newValue > this.maxNumber) {
+          this.minNumber = this.maxNumber;
+        }
+        if (newValue < 1) {
+          this.minNumber = 1;
+        }
+        setSetting("randomPicker.minNumber", this.minNumber);
+      },
+    },
+    maxNumber: {
+      handler(newValue) {
+        if (newValue < this.minNumber) {
+          this.maxNumber = this.minNumber;
+        }
+        if (newValue > 100) {
+          this.maxNumber = 100;
+        }
+        setSetting("randomPicker.maxNumber", this.maxNumber);
+      },
     },
   },
   methods: {
@@ -614,6 +705,47 @@ export default {
   .filter-chip {
     min-height: 40px;
     font-size: 1rem;
+  }
+}
+
+// 添加模式切换样式
+.mode-switch-container {
+  .mode-toggle {
+    border: 1px solid rgba(var(--v-theme-primary), 0.2);
+    border-radius: 50px;
+    padding: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .v-btn {
+      min-width: 120px;
+      height: 40px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+
+      &.v-btn--active {
+        transform: scale(1.02);
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// 添加学号范围设置样式
+.number-range-container {
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 16px;
+  background: rgba(var(--v-theme-surface-variant), 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+
+  .number-input {
+    width: 100px;
+
+    :deep(.v-field) {
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
   }
 }
 </style>
