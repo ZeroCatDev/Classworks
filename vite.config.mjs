@@ -25,45 +25,14 @@ export default defineConfig({
       registerType: 'autoUpdate',
       devOptions: {
         navigateFallback: 'index.html',
-        enabled: true,
+        enabled: false,
         suppressWarnings: true,
       },
 
       lang: 'zh-CN',
-      injectRegister: 'script',
+      injectRegister: 'auto',
       strategies: 'generateSW',
-      registerSW: async () => {
-        if (!('serviceWorker' in navigator)) {
-          console.info('当前环境不支持 ServiceWorker');
-          return;
-        }
 
-        if (window.location.protocol === 'file:') {
-          console.info('在file://协议下ServiceWorker不可用');
-          return;
-        }
-
-        try {
-          const { registerSW } = await import('virtual:pwa-register');
-          const registration = await registerSW({
-            immediate: false,
-            onRegisteredSW() {
-              console.info('ServiceWorker 注册成功');
-            },
-            onRegisterError(error) {
-              console.warn('ServiceWorker 注册失败:', error);
-            }
-          });
-
-          if (registration) {
-            registration.addEventListener('error', (error) => {
-              console.warn('ServiceWorker 发生错误:', error);
-            });
-          }
-        } catch (e) {
-          console.warn('ServiceWorker 初始化失败:', e);
-        }
-      },
 
       workbox: {
         globPatterns: ['*'],
@@ -102,9 +71,11 @@ export default defineConfig({
             }
           },
           {
+            // 匹配当前域名下除了上述规则外的所有请求
             urlPattern: ({ url, sameOrigin }) => {
               if (!sameOrigin) return false;
               const path = url.pathname;
+              // 排除已经由其他规则处理的路径
               return !(path.includes('/assets/') || path.includes('/pwa/'));
             },
             handler: 'NetworkFirst',
@@ -124,9 +95,7 @@ export default defineConfig({
         additionalManifestEntries: [],
         clientsClaim: true,
         skipWaiting: true,
-        cleanupOutdatedCaches: true,
-        navigationPreload: true,
-        importScripts: ['./sw-cache-manager.js'],
+        importScripts: ['/sw-cache-manager.js']
       },
       manifest: {
         name: 'Classworks作业板',
