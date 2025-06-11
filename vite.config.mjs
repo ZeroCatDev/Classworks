@@ -14,6 +14,7 @@ import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: './',
   plugins: [
     VueRouter(),
     Layouts(),
@@ -39,7 +40,7 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: ({ url, sameOrigin }) => {
-              return sameOrigin && url.pathname.startsWith('/assets/');
+              return sameOrigin && url.pathname.endsWith('/assets/');
             },
             handler: 'CacheFirst',
             options: {
@@ -103,28 +104,28 @@ export default defineConfig({
         theme_color: '#212121',
         background_color: '#212121',
         display: 'standalone',
-        start_url: '/',
+        start_url: './',
         edge_side_panel: {
-          default_path: '/',
+          default_path: './',
         },
         icons: [
           {
-            src: '/pwa/image/pwa-64x64.png',
+            src: './pwa/image/pwa-64x64.png',
             sizes: '64x64',
             type: 'image/png'
           },
           {
-            src: '/pwa/image/pwa-192x192.png',
+            src: './pwa/image/pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/pwa/image/pwa-512x512.png',
+            src: './pwa/image/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: '/pwa/image/maskable-icon-512x512.png',
+            src: './pwa/image/maskable-icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
@@ -134,10 +135,10 @@ export default defineConfig({
           {
             name: '随机点名',
             short_name: '随机点名',
-            url: '/#random-picker',
+            url: './#random-picker',
             icons: [
               {
-                src: '/pwa/image/pwa-64x64.png',
+                src: './pwa/image/pwa-64x64.png',
                 sizes: '64x64',
                 type: 'image/png'
               }
