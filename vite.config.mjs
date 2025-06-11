@@ -37,6 +37,12 @@ export default defineConfig({
           console.info('当前环境不支持 ServiceWorker');
           return;
         }
+
+        if (window.location.protocol === 'file:') {
+          console.info('在file://协议下ServiceWorker不可用');
+          return;
+        }
+
         try {
           const { registerSW } = await import('virtual:pwa-register');
           const registration = await registerSW({
@@ -156,8 +162,6 @@ export default defineConfig({
             purpose: 'maskable'
           }
         ],
-        id: 'classworks',
-        scope: './',
         shortcuts: [
           {
             name: '随机点名',
