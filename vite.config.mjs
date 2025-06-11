@@ -13,21 +13,15 @@ import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
-  // 从命令行参数中获取 wallpaper 模式
-  const isWallpaper = mode === 'wallpaper';
-
-  const plugins = [
+export default defineConfig({
+  base: './',
+  plugins: [
     VueRouter(),
     Layouts(),
     Vue({
       template: { transformAssetUrls }
-    })
-  ];
-
-  // 只在非壁纸模式下启用 PWA
-  if (!isWallpaper) {
-    plugins.push(VitePWA({
+    }),
+    VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
         navigateFallback: 'index.html',
@@ -179,10 +173,7 @@ export default defineConfig(({ mode }) => {
           },
         ],
       }
-    }));
-  }
-
-  plugins.push(
+    }),
     // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
     Vuetify({
       autoImport: true,
@@ -208,36 +199,31 @@ export default defineConfig(({ mode }) => {
         enabled: true,
       },
       vueTemplate: true,
-    })
-  );
-
-  return {
-    base: './',
-    plugins,
-    define: { 'process.env': {} },
-    resolve: {
-      alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url))
-      },
-      extensions: [
-        '.js',
-        '.json',
-        '.jsx',
-        '.mjs',
-        '.ts',
-        '.tsx',
-        '.vue',
-      ],
+    }),
+  ],
+  define: { 'process.env': {} },
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
     },
-    server: {
-      port: 3031,
-    },
-    css: {
-      preprocessorOptions: {
-        sass: {
-          api: 'modern-compiler',
-        },
+    extensions: [
+      '.js',
+      '.json',
+      '.jsx',
+      '.mjs',
+      '.ts',
+      '.tsx',
+      '.vue',
+    ],
+  },
+  server: {
+    port: 3031,
+  },
+  css: {
+    preprocessorOptions: {
+      sass: {
+        api: 'modern-compiler',
       },
     },
-  }
+  },
 })
