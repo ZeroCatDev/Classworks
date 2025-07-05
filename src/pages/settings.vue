@@ -156,6 +156,9 @@
         <v-tabs-window-item value="randomPicker">
           <random-picker-card border :is-mobile="isMobile" />
         </v-tabs-window-item>
+        <v-tabs-window-item value="homework">
+          <homework-template-card border />
+        </v-tabs-window-item>
         <v-tabs-window-item value="developer"
           ><settings-card border title="开发者选项" icon="mdi-developer-board">
             <v-list>
@@ -234,6 +237,7 @@ import SettingsExplorer from "@/components/settings/SettingsExplorer.vue";
 import SettingsLinkGenerator from "@/components/SettingsLinkGenerator.vue";
 import NamespaceSettingsCard from "@/components/settings/cards/NamespaceSettingsCard.vue";
 import RandomPickerCard from "@/components/settings/cards/RandomPickerCard.vue";
+import HomeworkTemplateCard from '@/components/settings/cards/HomeworkTemplateCard.vue';
 export default {
   name: "Settings",
   components: {
@@ -252,6 +256,7 @@ export default {
     SettingsLinkGenerator,
     NamespaceSettingsCard,
     RandomPickerCard,
+    HomeworkTemplateCard,
   },
   setup() {
     const { mobile } = useDisplay();
@@ -388,6 +393,11 @@ export default {
           title: "随机点名",
           icon: "mdi-dice-multiple",
           value: "randomPicker",
+        },
+        {
+          title: "作业模板",
+          icon: "mdi-book-edit",
+          value: "homework",
         },
         {
           title: "开发者",

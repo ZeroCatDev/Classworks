@@ -241,27 +241,13 @@
     </v-col>
   </div>
 
-  <v-dialog
+  <homework-edit-dialog
     v-model="state.dialogVisible"
-    width="500"
-    @click:outside="handleClose"
-  >
-    <v-card border>
-      <v-card-title>{{ state.dialogTitle }}</v-card-title>
-      <v-card-subtitle>
-        {{ autoSave ? "喵？喵呜！" : "写完后点击上传谢谢喵" }}
-      </v-card-subtitle>
-      <v-card-text>
-        <v-textarea
-          ref="inputRef"
-          v-model="state.textarea"
-          auto-grow
-          placeholder="使用换行表示分条"
-          rows="5"
-        />
-      </v-card-text>
-    </v-card>
-  </v-dialog>
+    :title="state.dialogTitle"
+    :initial-content="state.textarea"
+    :auto-save="autoSave"
+    @save="handleHomeworkSave"
+  />
 
   <v-snackbar v-model="state.snackbar" :timeout="2000">
     {{ state.snackbarText }}
@@ -622,6 +608,7 @@ import RandomPicker from "@/components/RandomPicker.vue";
 import NamespaceAccess from "@/components/NamespaceAccess.vue";
 import FloatingToolbar from "@/components/FloatingToolbar.vue";
 import FloatingICP from "@/components/FloatingICP.vue";
+import HomeworkEditDialog from "@/components/HomeworkEditDialog.vue";
 import dataProvider from "@/utils/dataProvider";
 import {
   getSetting,
@@ -645,6 +632,7 @@ export default {
     NamespaceAccess,
     FloatingToolbar,
     FloatingICP,
+    HomeworkEditDialog,
   },
   data() {
     return {
@@ -1241,11 +1229,20 @@ export default {
         subject;
       this.state.textarea = this.state.boardData.homework[subject].content;
       this.state.dialogVisible = true;
-      this.$nextTick(() => {
-        if (this.$refs.inputRef) {
-          this.$refs.inputRef.focus();
-        }
-      });
+    },
+
+    async handleHomeworkSave(content) {
+      if (!this.currentEditSubject) return;
+
+      this.state.boardData.homework[this.currentEditSubject] = {
+        content: content,
+      };
+
+      this.state.synced = false;
+
+      if (this.autoSave) {
+        await this.trySave(true);
+      }
     },
 
     splitPoint(content) {

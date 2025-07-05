@@ -133,7 +133,7 @@ export const kvServerProvider = {
       if (error.response?.status === 404) {
         return formatError("数据不存在", "NOT_FOUND");
       }
-
+      console.log(error);
       return formatError(
         error.response?.data?.message || "服务器连接失败",
         "NETWORK_ERROR"
@@ -150,6 +150,7 @@ export const kvServerProvider = {
       });
       return formatResponse(true);
     } catch (error) {
+      console.log(error);
       return formatError(
         error.response?.data?.message || "保存失败",
         "SAVE_ERROR"
