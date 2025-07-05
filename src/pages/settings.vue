@@ -232,7 +232,6 @@ import AboutCard from "@/components/settings/AboutCard.vue";
 import "../styles/settings.scss";
 import SettingsExplorer from "@/components/settings/SettingsExplorer.vue";
 import SettingsLinkGenerator from "@/components/SettingsLinkGenerator.vue";
-import dataProvider from "@/utils/dataProvider";
 import NamespaceSettingsCard from "@/components/settings/cards/NamespaceSettingsCard.vue";
 import RandomPickerCard from "@/components/settings/cards/RandomPickerCard.vue";
 export default {

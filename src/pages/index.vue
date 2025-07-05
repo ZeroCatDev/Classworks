@@ -1,7 +1,5 @@
 <template>
   <v-app-bar class="no-select">
-
-
     <v-app-bar-title>
       {{ state.classNumber }} - {{ titleText }}
     </v-app-bar-title>
@@ -9,37 +7,7 @@
     <v-spacer />
 
     <template #append>
-      <namespace-access />
-      <v-btn
-        icon="mdi-format-font-size-decrease"
-        variant="text"
-        @click="zoom('out')"
-      />
-      <v-btn
-        icon="mdi-format-font-size-increase"
-        variant="text"
-        @click="zoom('up')"
-      />
-      <v-menu v-model="state.datePickerDialog" :close-on-content-click="false">
-        <template #activator="{ props }">
-          <v-btn icon="mdi-calendar" variant="text" v-bind="props" />
-        </template>
-        <v-card border>
-          <v-date-picker
-            v-model="state.selectedDateObj"
-            :model-value="state.selectedDateObj"
-            color="primary"
-            @update:model-value="handleDateSelect"
-          />
-        </v-card>
-      </v-menu>
-      <v-btn
-        icon="mdi-refresh"
-        variant="text"
-        :loading="loading.download"
-        @click="downloadData"
-      />
-      <v-btn
+      <namespace-access />      <v-btn
         icon="mdi-bell"
         variant="text"
         :badge="unreadCount || undefined"
@@ -559,6 +527,24 @@
 
   <message-log ref="messageLog" />
 
+  <!-- 添加悬浮工具栏 -->
+  <floating-toolbar
+    :loading="loading.download"
+    :unread-count="unreadCount"
+    :selected-date="state.selectedDateObj"
+    :is-today="isToday"
+    @zoom="zoom"
+    @refresh="downloadData"
+    @open-messages="$refs.messageLog.drawer = true"
+    @open-settings="$router.push('/settings')"
+    @date-select="handleDateSelect"
+    @prev-day="navigateDay(-1)"
+    @next-day="navigateDay(1)"
+  />
+
+  <!-- 添加ICP备案悬浮组件 -->
+  <FloatingICP />
+
   <!-- 添加确认对话框 -->
   <v-dialog v-model="confirmDialog.show" max-width="400">
     <v-card>
@@ -627,13 +613,15 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </v-dialog><br/><br/><br/><br/><br/><br/>
 </template>
 
 <script>
 import MessageLog from "@/components/MessageLog.vue";
-import RandomPicker from "@/components/RandomPicker.vue"; // 导入随机点名组件
+import RandomPicker from "@/components/RandomPicker.vue";
 import NamespaceAccess from "@/components/NamespaceAccess.vue";
+import FloatingToolbar from "@/components/FloatingToolbar.vue";
+import FloatingICP from "@/components/FloatingICP.vue";
 import dataProvider from "@/utils/dataProvider";
 import {
   getSetting,
@@ -643,7 +631,7 @@ import {
 } from "@/utils/settings";
 import { useDisplay } from "vuetify";
 import "../styles/index.scss";
-import "../styles/transitions.scss"; // 添加新的样式导入
+import "../styles/transitions.scss";
 import "../styles/global.scss";
 import { pinyin } from "pinyin-pro";
 import { debounce, throttle } from "@/utils/debounce";
@@ -653,8 +641,10 @@ export default {
   name: "Classworks 作业板",
   components: {
     MessageLog,
-    RandomPicker, // 注册随机点名组件
+    RandomPicker,
     NamespaceAccess,
+    FloatingToolbar,
+    FloatingICP,
   },
   data() {
     return {
@@ -675,7 +665,7 @@ export default {
         dialogVisible: false,
         dialogTitle: "",
         textarea: "",
-        dateString: "", // 从 state 内统一管理日期
+        dateString: "",
         synced: false,
         attendDialogVisible: false,
         contentStyle: { "font-size": `${getSetting("font.size")}px` },
@@ -736,7 +726,6 @@ export default {
       },
       attendanceSearch: "",
       attendanceFilter: [],
-      // 添加URL配置确认对话框
       urlConfigDialog: {
         show: false,
         config: null,
@@ -744,7 +733,6 @@ export default {
         validSettings: {},
         confirmHandler: null,
         cancelHandler: null,
-        // 添加图标映射数据
         icons: {},
       },
     };
@@ -832,15 +820,12 @@ export default {
       return this.state.dateString === today;
     },
     canAutoSave() {
-      // 只考虑自动保存开关和非当天限制
       return this.autoSave && (!this.blockNonTodayAutoSave || this.isToday);
     },
     needConfirmSave() {
-      // 只在非今天且开启了确认选项时需要确认
       return !this.isToday && this.confirmNonTodaySave;
     },
     shouldShowBlockedMessage() {
-      // 只在非今天且开启了自动保存和禁止非当天自动保存时提示
       return !this.isToday && this.autoSave && this.blockNonTodayAutoSave;
     },
     refreshBeforeEdit() {
@@ -882,7 +867,6 @@ export default {
     filteredStudents() {
       let students = [...this.state.studentList];
 
-      // 应用搜索过滤
       if (this.attendanceSearch) {
         const searchTerm = this.attendanceSearch.toLowerCase();
         students = students.filter((student) =>
@@ -890,7 +874,6 @@ export default {
         );
       }
 
-      // 应用状态过滤
       if (this.attendanceFilter && this.attendanceFilter.length > 0) {
         students = students.filter((student) => {
           const index = this.state.studentList.indexOf(student);
@@ -915,7 +898,6 @@ export default {
       return students;
     },
     extractedSurnames() {
-      // 从学生名单中提取姓氏并统计数量
       if (!this.state.studentList || this.state.studentList.length === 0) {
         return [];
       }
@@ -924,7 +906,6 @@ export default {
 
       this.state.studentList.forEach((student) => {
         if (student && student.length > 0) {
-          // 中文姓名通常姓在前，取第一个字作为姓氏
           const surname = student.charAt(0);
           if (surnameMap.has(surname)) {
             surnameMap.set(surname, surnameMap.get(surname) + 1);
@@ -934,7 +915,6 @@ export default {
         }
       });
 
-      // 转换为数组并按拼音排序
       return Array.from(surnameMap.entries())
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => {
@@ -965,9 +945,7 @@ export default {
   },
 
   created() {
-    // 创建防抖的上传函数
     this.debouncedUpload = debounce(this.uploadData, 2000);
-    // 创建节流的重排函数
     this.throttledReflow = throttle(() => {
       if (this.$refs.gridContainer) {
         this.optimizeGridLayout(this.sortedItems);
@@ -984,7 +962,6 @@ export default {
         this.updateSettings();
       });
 
-      // 监听全屏变化事件
       document.addEventListener(
         "fullscreenchange",
         this.fullscreenChangeHandler
@@ -1002,10 +979,8 @@ export default {
         this.fullscreenChangeHandler
       );
 
-      // 检查URL哈希值，如果包含#pick则自动打开随机点名
       this.checkHashForRandomPicker();
 
-      // 添加哈希变化监听器
       window.addEventListener("hashchange", this.checkHashForRandomPicker);
     } catch (err) {
       console.error("初始化失败:", err);
@@ -1018,11 +993,9 @@ export default {
       this.unwatchSettings();
     }
     if (this.state.refreshInterval) {
-      // 注意刷新间隔存放在 state 内
       clearInterval(this.state.refreshInterval);
     }
 
-    // 移除全屏变化事件监听
     document.removeEventListener(
       "fullscreenchange",
       this.fullscreenChangeHandler
@@ -1040,12 +1013,10 @@ export default {
       this.fullscreenChangeHandler
     );
 
-    // 移除哈希变化监听器
     window.removeEventListener("hashchange", this.checkHashForRandomPicker);
   },
 
   methods: {
-    // 添加新的日期辅助方法
     ensureDate(dateInput) {
       if (dateInput instanceof Date) {
         return dateInput;
@@ -1056,7 +1027,7 @@ export default {
           return date;
         }
       }
-      return new Date(); // 如果无法解析，返回当前日期
+      return new Date();
     },
 
     formatDate(dateInput) {
@@ -1072,18 +1043,14 @@ export default {
     },
 
     async initializeData() {
-      // 尝试从URL读取配置
       const configApplied = await this.parseUrlConfig();
 
-      // 从 URL 获取日期，如果没有则使用今天的日期
       const urlParams = new URLSearchParams(window.location.search);
       const dateFromUrl = urlParams.get("date");
       const today = this.getToday();
 
-      // 确保日期格式正确
       let currentDate = today;
       if (dateFromUrl) {
-        // 处理yyyymmdd格式的日期字符串
         if (/^\d{8}$/.test(dateFromUrl)) {
           const year = dateFromUrl.substring(0, 4);
           const month = dateFromUrl.substring(4, 6);
@@ -1092,7 +1059,6 @@ export default {
         } else {
           currentDate = new Date(dateFromUrl);
         }
-        // 确保日期有效，无效则使用今天的日期
         if (isNaN(currentDate.getTime())) {
           currentDate = today;
         }
@@ -1100,10 +1066,9 @@ export default {
 
       this.state.dateString = this.formatDate(currentDate);
       this.state.selectedDate = this.state.dateString;
-      this.state.selectedDateObj = currentDate; // 设置日期对象
+      this.state.selectedDateObj = currentDate;
       this.state.isToday =
         this.formatDate(currentDate) === this.formatDate(today);
-      // 如果没有从URL应用配置，使用本地设置
       if (!configApplied) {
         this.provider = getSetting("server.provider");
         const classNum = getSetting("server.classNumber");
@@ -1126,7 +1091,6 @@ export default {
           if (response.error.code === "NOT_FOUND") {
             this.state.showNoDataMessage = true;
             this.state.noDataMessage = response.error.message;
-            // 确保数据结构完整
             this.state.boardData = {
               homework: {},
               attendance: { absent: [], late: [], exclude: [] },
@@ -1135,7 +1099,6 @@ export default {
             throw new Error(response.error.message);
           }
         } else {
-          // 确保数据结构完整
           this.state.boardData = {
             homework: response.homework || {},
             attendance: {
@@ -1149,7 +1112,6 @@ export default {
           this.$message.success("下载成功", "数据已更新");
         }
       } catch (error) {
-        // 发生错误时也要确保数据结构完整
         this.state.boardData = {
           homework: {},
           attendance: { absent: [], late: [], exclude: [] },
@@ -1161,7 +1123,6 @@ export default {
     },
 
     async trySave(isAutoSave = false) {
-      // 如果是自动保存但不满足自动保存条件
       if (isAutoSave && !this.canAutoSave) {
         if (this.shouldShowBlockedMessage) {
           this.showMessage(
@@ -1173,7 +1134,6 @@ export default {
         return false;
       }
 
-      // 如果需要确认且不是自动保存
       if (!isAutoSave && this.needConfirmSave) {
         try {
           await this.showConfirmDialog();
@@ -1182,7 +1142,6 @@ export default {
         }
       }
 
-      // 尝试保存
       try {
         await this.uploadData();
         return true;
@@ -1199,16 +1158,13 @@ export default {
       const originalContent =
         this.state.boardData.homework[this.currentEditSubject]?.content || "";
 
-      // 如果内容发生变化(包括清空)，就视为修改
       if (content !== originalContent.trim()) {
-        // 无论内容是否为空，都保留科目结构
         this.state.boardData.homework[this.currentEditSubject] = {
           content: content,
         };
 
         this.state.synced = false;
 
-        // 处理自动保存
         if (this.autoSave) {
           await this.trySave(true);
         }
@@ -1240,11 +1196,9 @@ export default {
     async loadConfig() {
       try {
         try {
-          // Try to get student list from the dedicated key
           const response = await dataProvider.loadData("classworks-list-main");
 
           if (response.success != false && Array.isArray(response)) {
-            // Transform the data into a simple list of names
             this.state.studentList = response.map(
               (student) => student.name
             );
@@ -1277,7 +1231,6 @@ export default {
       }
 
       this.currentEditSubject = subject;
-      // 如果是新科目，需要创建对应的精简数据结构
       if (!this.state.boardData.homework[subject]) {
         this.state.boardData.homework[subject] = {
           content: "",
@@ -1371,7 +1324,6 @@ export default {
       }
       if (autoRefresh) {
         this.state.refreshInterval = setInterval(() => {
-          // 检查是否应该跳过刷新
           if (!this.shouldSkipRefresh()) {
             this.downloadData();
           }
@@ -1379,27 +1331,19 @@ export default {
       }
     },
 
-    // 新增方法：检查是否应该跳过自动刷新
     shouldSkipRefresh() {
-      // 如果对话框打开，跳过刷新
       if (this.state.dialogVisible) return true;
 
-      // 如果出勤对话框打开，跳过刷新
       if (this.state.attendanceDialog) return true;
 
-      // 如果确认对话框打开，跳过刷新
       if (this.confirmDialog.show) return true;
 
-      // 如果日期选择器打开，跳过刷新
       if (this.state.datePickerDialog) return true;
 
-      // 如果正在上传或下载数据，跳过刷新
       if (this.loading.upload || this.loading.download) return true;
 
-      // 如果数据未同步（有未保存的更改），跳过刷新
       if (!this.state.synced) return true;
 
-      // 没有特殊状态，可以刷新
       return false;
     },
 
@@ -1417,7 +1361,6 @@ export default {
         const selectedDate = this.ensureDate(newDate);
         const formattedDate = this.formatDate(selectedDate);
 
-        // 只有当日期真正改变时才更新
         if (this.state.dateString !== formattedDate) {
           this.state.dateString = formattedDate;
           this.state.selectedDate = formattedDate;
@@ -1425,7 +1368,6 @@ export default {
           this.state.isToday =
             formattedDate === this.formatDate(this.getToday());
 
-          // 使用 replace 而不是 push 来避免创建新的历史记录
           this.$router
             .replace({
               query: { date: formattedDate },
@@ -1440,11 +1382,9 @@ export default {
     },
 
     optimizeGridLayout(items) {
-      // 设置最大列数
       const maxColumns = Math.min(3, Math.floor(window.innerWidth / 300));
       if (maxColumns <= 1) return items;
 
-      // 使用贪心算法分配
       const columns = Array.from({ length: maxColumns }, () => ({
         height: 0,
         items: [],
@@ -1459,7 +1399,6 @@ export default {
         columns[shortestColumn].height += item.rowSpan;
       });
 
-      // 展平结果并添加顺序
       return columns
         .flatMap((col) => col.items)
         .map((item, index) => ({
@@ -1566,7 +1505,6 @@ export default {
 
     setPresent(index) {
       const student = this.state.studentList[index];
-      // 从所有状态列表中移除该学生
       this.state.boardData.attendance.absent =
         this.state.boardData.attendance.absent.filter(
           (name) => name !== student
@@ -1582,27 +1520,21 @@ export default {
 
     setAbsent(index) {
       const student = this.state.studentList[index];
-      // 先从所有状态列表中移除该学生
       this.setPresent(index);
-      // 然后添加到请假列表
       this.state.boardData.attendance.absent.push(student);
       this.state.synced = false;
     },
 
     setLate(index) {
       const student = this.state.studentList[index];
-      // 先从所有状态列表中移除该学生
       this.setPresent(index);
-      // 然后添加到迟到列表
       this.state.boardData.attendance.late.push(student);
       this.state.synced = false;
     },
 
     setExclude(index) {
       const student = this.state.studentList[index];
-      // 先从所有状态列表中移除该学生
       this.setPresent(index);
-      // 然后添加到不参与列表
       this.state.boardData.attendance.exclude.push(student);
       this.state.synced = false;
     },
@@ -1679,19 +1611,16 @@ export default {
       }
     },
 
-    // 点击上传按钮时调用
     async manualUpload() {
       return this.trySave(false);
     },
 
     async handleAttendanceDialogClose(newValue) {
       if (!newValue && !this.state.synced) {
-        // 对话框关闭且数据未同步时尝试保存
         await this.trySave(true);
       }
     },
 
-    // 全屏相关方法
     toggleFullscreen() {
       if (!this.state.isFullscreen) {
         this.enterFullscreen();
@@ -1805,7 +1734,6 @@ export default {
       }
     },
 
-    // 添加URL配置解析功能
     parseUrlConfig() {
       try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -1814,24 +1742,18 @@ export default {
         if (!configParam) return false;
 
         try {
-          // 解码base64为二进制字符串
           const binaryString = atob(configParam);
-          // 将二进制字符串转换为Uint8Array
           const bytes = Uint8Array.from(binaryString, c => c.charCodeAt(0));
-          // 将Uint8Array解码为UTF-8字符串
           const decodedString = new TextDecoder().decode(bytes);
           const decodedConfig = JSON.parse(decodedString);
           console.log("从URL读取配置:", decodedConfig);
 
-          // 准备配置变更列表和有效配置项
           const changes = [];
           const validSettings = {};
           const icons = {};
 
-          // 处理特殊配置项
           this.processSpecialSettings(decodedConfig, changes, validSettings);
 
-          // 处理标准配置项
           this.processStandardSettings(
             decodedConfig,
             changes,
@@ -1839,13 +1761,11 @@ export default {
             icons
           );
 
-          // 如果没有有效变更，直接返回
           if (Object.keys(validSettings).length === 0) {
             console.log("URL配置与当前配置相同，无需应用");
             return false;
           }
 
-          // 显示确认对话框
           return new Promise((resolve) => {
             this.urlConfigDialog = {
               show: true,
@@ -1875,9 +1795,7 @@ export default {
       }
     },
 
-    // 处理特殊配置项
     processSpecialSettings(decodedConfig, changes, validSettings) {
-      // 处理班级号配置
       if (decodedConfig.classNumber !== undefined) {
         const current = getSetting("server.classNumber");
         if (decodedConfig.classNumber !== current) {
@@ -1897,7 +1815,6 @@ export default {
         }
       }
 
-      // 处理日期配置
       if (decodedConfig.date !== undefined) {
         if (decodedConfig.date !== this.state.dateString) {
           changes.push({
@@ -1912,7 +1829,6 @@ export default {
         }
       }
 
-      // 处理科目列表配置
       if (decodedConfig.subjects && Array.isArray(decodedConfig.subjects)) {
         changes.push({
           key: "subjects",
@@ -1926,21 +1842,16 @@ export default {
       }
     },
 
-    // 处理标准配置项
     processStandardSettings(decodedConfig, changes, validSettings, icons) {
       Object.entries(decodedConfig).forEach(([key, value]) => {
-        // 跳过已处理的特殊配置项
         if (["classNumber", "date", "subjects"].includes(key)) {
           return;
         }
 
-        // 尝试查找设置定义
         let settingKey = key;
         let definition = settingsDefinitions[key];
 
-        // 如果没有找到定义，尝试添加前缀
         if (!definition && !key.includes(".")) {
-          // 常见前缀列表
           const prefixes = [
             "server.",
             "display.",
@@ -1960,15 +1871,12 @@ export default {
           }
         }
 
-        // 如果找到了定义
         if (definition) {
-          // 验证类型和值
           let typedValue = this.convertValueToCorrectType(
             value,
             definition.type
           );
 
-          // 验证值是否有效
           if (definition.validate && !definition.validate(typedValue)) {
             console.warn(`URL配置项 ${settingKey} 的值无效: ${value}`);
             return;
@@ -1988,7 +1896,6 @@ export default {
             icons[settingKey] = definition.icon || "mdi-cog";
           }
         } else {
-          // 未知配置项，尝试作为自定义配置处理
           changes.push({
             key: key,
             name: this.getSettingDisplayName(key),
@@ -2003,7 +1910,6 @@ export default {
       });
     },
 
-    // 将值转换为正确类型
     convertValueToCorrectType(value, type) {
       if (type === "boolean") {
         return Boolean(value);
@@ -2014,7 +1920,6 @@ export default {
       }
     },
 
-    // 格式化设置值显示
     formatSettingValue(value) {
       if (typeof value === "boolean") {
         return value ? "开启" : "关闭";
@@ -2024,20 +1929,15 @@ export default {
       return value.toString();
     },
 
-    // 获取设置显示名称
     getSettingDisplayName(key) {
-      // 从key中提取最后一部分作为显示名
       const parts = key.split(".");
       const lastPart = parts[parts.length - 1];
 
-      // 根据常见key返回中文名
       const nameMap = {
-        // 服务器设置
         provider: "数据提供方",
         domain: "服务器域名",
         classNumber: "班级编号",
 
-        // 显示设置
         emptySubjectDisplay: "空科目显示方式",
         dynamicSort: "动态排序",
         showRandomButton: "随机按钮",
@@ -2046,19 +1946,15 @@ export default {
         enhancedTouchMode: "增强触摸模式",
         showAntiScreenBurnCard: "防烧屏卡片",
 
-        // 主题设置
         mode: "主题模式",
 
-        // 字体设置
         size: "字体大小",
 
-        // 编辑设置
         autoSave: "自动保存",
         blockNonTodayAutoSave: "禁止自动保存非当日",
         refreshBeforeEdit: "编辑前刷新",
         confirmNonTodaySave: "非当日保存确认",
 
-        // 刷新设置
         auto: "自动刷新",
         interval: "刷新间隔",
       };
@@ -2066,7 +1962,6 @@ export default {
       return nameMap[lastPart] || lastPart;
     },
 
-    // 安全的Base64解码函数，支持UTF-8字符（包括中文）
     safeBase64Decode(base64String) {
       try {
         return Base64.decode(base64String);
@@ -2077,7 +1972,6 @@ export default {
     },
 
     applyUrlConfig(validSettings) {
-      // 应用所有有效的配置项
       for (const [key, value] of Object.entries(validSettings)) {
         if (key === "date") {
           this.handleDateSelect(value);
@@ -2089,19 +1983,22 @@ export default {
           continue;
         }
 
-        // 应用标准设置项
         setSetting(key, value);
 
-        // 更新相关状态
         if (key === "server.classNumber") {
           this.state.classNumber = value;
         }
       }
 
-      // 更新后端URL和其他可能受到配置影响的属性
       this.updateBackendUrl();
       this.$message.success("URL配置已应用", "已从URL加载配置");
       return true;
+    },
+
+    navigateDay(offset) {
+      const currentDate = new Date(this.state.selectedDateObj);
+      currentDate.setDate(currentDate.getDate() + offset);
+      this.handleDateSelect(currentDate);
     },
   },
 };

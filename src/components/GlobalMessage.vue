@@ -3,7 +3,7 @@
     v-model="snackbar"
     :color="colors[message?.type] || colors.info"
     :timeout="2000"
-    location="bottom"
+    location="top right"
     multi-line
     variant="tonal"
   >
