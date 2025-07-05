@@ -1,21 +1,18 @@
 # Classworks
 
-![GitHub](https://img.shields.io/github/license/ClassworksDev/Classworks?style=flat-square)
-![GitHub stars](https://img.shields.io/github/stars/ClassworksDev/Classworks?style=flat-square)
-![GitHub forks](https://img.shields.io/github/forks/ClassworksDev/Classworks?style=flat-square)
-![GitHub issues](https://img.shields.io/github/issues/ClassworksDev/Classworks?style=flat-square)
+![GitHub](https://img.shields.io/github/license/ZeroCatDev/Classworks?style=flat-square)
+![GitHub stars](https://img.shields.io/github/stars/ZeroCatDev/Classworks?style=flat-square)
+![GitHub forks](https://img.shields.io/github/forks/ZeroCatDev/Classworks?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/ZeroCatDev/Classworks?style=flat-square)
 ![Classworks](./images/banner.png)
 
-基于 Vue 3 + Vuetify 的现代化作业管理系统前端项目
+适用于班级大屏的作业板小工具
 
-## ✨ 特性
+请打开 [https://cs.houlangs.com](https://cs.houlangs.com) 立刻使用
 
-- 🎯 TypeScript 支持
-- 🎨 基于 Vuetify 3 的精美 UI
-- 📱 响应式设计，完美适配多端
-- ⚡️ Vite 提供的极速开发体验
-- 🔑 完善的权限管理系统
-- 🎉 丰富的组件和功能模块
+## 交流
+
+QQ：[964979747](https://qm.qq.com/q/4RX45b1Oac)
 
 ## 📦 快速开始
 
@@ -28,7 +25,7 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com:ClassworksDev/Classworks.git
+git clone https://github.com:ZeroCatDev/Classworks.git
 cd Classworks
 
 # 安装依赖
@@ -41,31 +38,19 @@ pnpm run dev
 pnpm run build
 ```
 
-## 📂 项目结构
-
-```
-Classworks/
-├── src/           # 源代码
-├── public/        # 静态资源
-├── components/    # 通用组件
-├── views/         # 页面
-├── store/         # 状态管理
-└── utils/         # 工具函数
-```
 
 ## 🤝 参与贡献
 
-我们非常欢迎社区的贡献！如果你想参与项目开发，请：
+Classworks 非常欢迎你的加入！[提一个 Issue](https://github.com/ZeroCatDev/Classworks/issues/new) 或者提交一个 Pull Request。对于小白问题，最好在 qq 群里问，我们会尽量回答。
 
-1. 阅读[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md)
-2. [提交 Issue](https://github.com/ZeroCatDev/ZeroCat/issues/new) 或 Pull Request
-3. 遵循 [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/) 行为规范
+ZeroCat 的项目 遵循 [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/) 行为规范
+<br/>孙悟元 希望你遵循 [提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md)
 
 ## 👥 联系我们
 
 - QQ交流群：964979747
-- 开发者：[@SunWuyuan](https://github.com/sunwuyuan)
-- 官网：[ZeroCat](https://zerocat.houlangs.com)
+- 开发者：[@SunWuyuan](https://github.com/Sunwuyuan)
+- 官网：[ZeroCat](https://zerocat.dev)
 
 ## 🙏 致谢
 
@@ -73,4 +58,8 @@ Classworks/
 
 ## 📄 开源协议
 
-本项目采用 MIT 许可证
+ZeroCat 社区项目遵循 [AGPL-3.0 许可证](LICENSE)。
+
+
+版权所有 (C) 2020-2024 孙悟元。
+Copyright (C) 2020-2024  Sun Wuyuan.
