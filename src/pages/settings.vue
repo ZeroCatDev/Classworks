@@ -2,17 +2,27 @@
   <div class="settings-page">
     <v-app-bar elevation="1">
       <template #prepend>
+
         <v-btn
           icon="mdi-arrow-left"
           variant="text"
           @click="$router.push('/')"
+        /> <v-btn
+          icon="mdi-menu"
+          variant="text"
+          @click="drawer = !drawer"
+          class="d-md-none"
         />
       </template>
       <v-app-bar-title class="text-h6">设置</v-app-bar-title>
     </v-app-bar>
 
     <v-container fluid>
-      <v-navigation-drawer>
+      <v-navigation-drawer
+        v-model="drawer"
+        :permanent="!isMobile"
+        :temporary="isMobile"
+      >
         <v-list>
           <v-list-item
             v-for="tab in settingsTabs"
@@ -391,6 +401,7 @@ export default {
           value: "about",
         },
       ],
+      drawer: false,
     };
   },
 
@@ -400,6 +411,12 @@ export default {
         this.handleSettingsChange(newSettings);
       },
       deep: true,
+    },
+    isMobile: {
+      handler(newValue) {
+        this.drawer = !newValue;
+      },
+      immediate: true
     },
     studentData: {
       handler(newData) {
@@ -420,6 +437,8 @@ export default {
     this.unwatchSettings = watchSettings(() => {
       this.loadAllSettings();
     });
+    // 初始化抽屉状态，在非移动设备上默认打开
+    this.drawer = !this.isMobile;
   },
 
   beforeUnmount() {
