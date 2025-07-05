@@ -62,9 +62,9 @@
           <v-btn-group divided variant="outlined">
             <v-btn
               v-for="subject in unusedSubjects"
-              :key="subject.key"
+              :key="subject.name"
               :disabled="isEditingDisabled"
-              @click="openDialog(subject.key)"
+              @click="openDialog(subject.name)"
             >
               <v-icon start> mdi-plus </v-icon>
               {{ subject.name }}
@@ -75,11 +75,11 @@
           <TransitionGroup name="v-list">
             <v-card
               v-for="subject in unusedSubjects"
-              :key="subject.key"
+              :key="subject.name"
               border
               class="empty-subject-card"
               :disabled="isEditingDisabled"
-              @click="openDialog(subject.key)"
+              @click="openDialog(subject.name)"
             >
               <v-card-title class="text-subtitle-1">
                 {{ subject.name }}
@@ -635,6 +635,19 @@ export default {
     HomeworkEditDialog,
   },
   data() {
+    const defaultSubjects = [
+      { name: "语文", order: 0 },
+      { name: "数学", order: 1 },
+      { name: "英语", order: 2 },
+      { name: "物理", order: 3 },
+      { name: "化学", order: 4 },
+      { name: "生物", order: 5 },
+      { name: "政治", order: 6 },
+      { name: "历史", order: 7 },
+      { name: "地理", order: 8 },
+      { name: "其他", order: 9 }
+    ];
+
     return {
       dataKey: "",
       provider: "",
@@ -666,34 +679,11 @@ export default {
         selectedDate: new Date().toISOString().split("T")[0].replace(/-/g, ''),
         selectedDateObj: new Date(),
         refreshInterval: null,
-        subjectOrder: [
-          "语文",
-          "数学",
-          "英语",
-          "物理",
-          "化学",
-          "生物",
-          "政治",
-          "历史",
-          "地理",
-          "其他",
-        ],
         showNoDataMessage: false,
         noDataMessage: "",
         isToday: false,
         attendanceDialog: false,
-        availableSubjects: [
-          { key: "语文", name: "语文" },
-          { key: "数学", name: "数学" },
-          { key: "英语", name: "英语" },
-          { key: "物理", name: "物理" },
-          { key: "化学", name: "化学" },
-          { key: "生物", name: "生物" },
-          { key: "政治", name: "政治" },
-          { key: "历史", name: "历史" },
-          { key: "地理", name: "地理" },
-          { key: "其他", name: "其他" },
-        ],
+        availableSubjects: defaultSubjects,
         isFullscreen: false,
       },
       loading: {
@@ -750,7 +740,7 @@ export default {
     sortedItems() {
       const key = `${JSON.stringify(
         this.state.boardData.homework
-      )}_${this.state.subjectOrder.join()}_${this.dynamicSort}`;
+      )}_${this.subjectOrder.join()}_${this.dynamicSort}`;
       if (this.sortedItemsCache.key === key) {
         return this.sortedItemsCache.value;
       }
@@ -760,10 +750,10 @@ export default {
         .map(([key, value]) => ({
           key,
           name:
-            this.state.availableSubjects.find((s) => s.key === key)?.name ||
+            this.state.availableSubjects.find((s) => s.name === key)?.name ||
             key,
           content: value.content,
-          order: this.state.subjectOrder.indexOf(key),
+          order: this.subjectOrder.indexOf(key),
           rowSpan: Math.ceil(
             (value.content.split("\n").filter((line) => line.trim()).length +
               1) *
@@ -783,9 +773,9 @@ export default {
       const usedKeys = Object.keys(this.state.boardData.homework).filter(
         (key) => this.state.boardData.homework[key].content?.trim()
       );
-      return this.state.availableSubjects.filter(
-        (subject) => !usedKeys.includes(subject.key)
-      );
+      return this.state.availableSubjects
+        .filter(subject => !usedKeys.includes(subject.name))
+        .sort((a, b) => a.order - b.order);
     },
     emptySubjects() {
       if (this.emptySubjectDisplay !== "button") return [];
@@ -910,6 +900,11 @@ export default {
           const pinyinB = pinyin(b.name, { toneType: "none", mode: "surname" });
           return pinyinA.localeCompare(pinyinB);
         });
+    },
+    subjectOrder() {
+      return [...this.state.availableSubjects]
+        .sort((a, b) => a.order - b.order)
+        .map(subject => subject.name);
     },
   },
 
@@ -1183,6 +1178,7 @@ export default {
 
     async loadConfig() {
       try {
+        // 加载学生列表
         try {
           const response = await dataProvider.loadData("classworks-list-main");
 
@@ -1190,13 +1186,24 @@ export default {
             this.state.studentList = response.map(
               (student) => student.name
             );
-            return;
           }
         } catch (error) {
           console.warn(
             "Failed to load student list from dedicated key, falling back to config",
             error
           );
+        }
+
+        // 加载科目配置
+        try {
+          const subjectsResponse = await dataProvider.loadData("classworks-config-subject");
+          if (subjectsResponse && Array.isArray(subjectsResponse)) {
+            // 更新科目列表
+            this.state.availableSubjects = subjectsResponse;
+          }
+        } catch (error) {
+          console.warn("Failed to load subject configuration:", error);
+          // 保持默认科目列表
         }
       } catch (error) {
         console.error("加载配置失败:", error);
@@ -1225,7 +1232,7 @@ export default {
         };
       }
       this.state.dialogTitle =
-        this.state.availableSubjects.find((s) => s.key === subject)?.name ||
+        this.state.availableSubjects.find((s) => s.name === subject)?.name ||
         subject;
       this.state.textarea = this.state.boardData.homework[subject].content;
       this.state.dialogVisible = true;
@@ -1404,44 +1411,6 @@ export default {
         }));
     },
 
-    fixedGridLayout(items) {
-      const rowSubjects = [
-        ["语文", "数学", "英语"],
-        ["物理", "化学", "生物"],
-        ["政治", "历史", "地理", "其他"],
-      ];
-      return items
-        .sort((a, b) => {
-          const getRowIndex = (subject) => {
-            for (let i = 0; i < rowSubjects.length; i++) {
-              if (rowSubjects[i].includes(subject)) {
-                return i;
-              }
-            }
-            return rowSubjects.length;
-          };
-          const getColumnIndex = (subject) => {
-            for (const row of rowSubjects) {
-              const index = row.indexOf(subject);
-              if (index !== -1) return index;
-            }
-            return 999;
-          };
-          const rowA = getRowIndex(a.key);
-          const rowB = getRowIndex(b.key);
-          if (rowA !== rowB) {
-            return rowA - rowB;
-          }
-          const colA = getColumnIndex(a.key);
-          const colB = getColumnIndex(b.key);
-          return colA - colB;
-        })
-        .map((item, index) => ({
-          ...item,
-          order: index,
-          rowSpan: item.content ? 2 : 1,
-        }));
-    },
 
     setAllPresent() {
       this.state.boardData.attendance = {
