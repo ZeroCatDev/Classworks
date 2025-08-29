@@ -157,4 +157,69 @@ export const kvServerProvider = {
       );
     }
   },
+
+  /**
+   * 获取键名列表
+   * @param {Object} options - 查询选项
+   * @param {string} options.sortBy - 排序字段，默认为 "key"
+   * @param {string} options.sortDir - 排序方向，"asc" 或 "desc"，默认为 "asc"
+   * @param {number} options.limit - 每页返回的记录数，默认为 100
+   * @param {number} options.skip - 跳过的记录数，默认为 0
+   * @returns {Promise<Object>} 包含键名列表和分页信息的响应对象
+   * 
+   * 返回值示例:
+   * {
+   *   keys: ["key1", "key2", "key3"],
+   *   total_rows: 150,
+   *   current_page: {
+   *     limit: 10,
+   *     skip: 0,
+   *     count: 10
+   *   },
+   *   load_more: "/api/kv/namespace/_keys?sortBy=key&sortDir=asc&limit=10&skip=10"
+   * }
+   */
+  async loadKeys(options = {}) {
+    try {
+      const serverUrl = getSetting("server.domain");
+      const machineId = getSetting("device.uuid");
+      
+      // 设置默认参数
+      const {
+        sortBy = "key",
+        sortDir = "asc",
+        limit = 100,
+        skip = 0
+      } = options;
+      
+      // 构建查询参数
+      const params = new URLSearchParams({
+        sortBy,
+        sortDir,
+        limit: limit.toString(),
+        skip: skip.toString()
+      });
+      
+      const res = await axios.get(`${serverUrl}/${machineId}/_keys?${params}`, {
+        headers: getHeaders(),
+      });
+      
+      return formatResponse(res.data);
+    } catch (error) {
+      if (error.response?.status === 404) {
+        return formatError("命名空间不存在", "NOT_FOUND");
+      }
+      if (error.response?.status === 403) {
+        return formatError("无权限访问此命名空间", "PERMISSION_DENIED");
+      }
+      if (error.response?.status === 401) {
+        return formatError("认证失败", "UNAUTHORIZED");
+      }
+      console.log(error);
+      return formatError(
+        error.response?.data?.message || "获取键名列表失败",
+        "NETWORK_ERROR"
+      );
+    }
+  },
 };

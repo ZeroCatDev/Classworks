@@ -104,6 +104,7 @@
             @saved="onSettingsSaved"
           />
           <data-provider-settings-card border class="mt-4" />
+<kv-database-card border class="mt-4" />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="namespace">
@@ -241,6 +242,7 @@ import NamespaceSettingsCard from "@/components/settings/cards/NamespaceSettings
 import RandomPickerCard from "@/components/settings/cards/RandomPickerCard.vue";
 import HomeworkTemplateCard from "@/components/settings/cards/HomeworkTemplateCard.vue";
 import SubjectManagementCard from "@/components/settings/cards/SubjectManagementCard.vue";
+import KvDatabaseCard from "@/components/settings/cards/KvDatabaseCard.vue";
 export default {
   name: "Settings",
   components: {
@@ -261,6 +263,7 @@ export default {
     RandomPickerCard,
     HomeworkTemplateCard,
     SubjectManagementCard,
+    KvDatabaseCard,
   },
   setup() {
     const { mobile } = useDisplay();

@@ -1194,20 +1194,23 @@ export default {
           );
         }
 
-        // 加载科目配置
-        try {
-          const subjectsResponse = await dataProvider.loadData("classworks-config-subject");
-          if (subjectsResponse && Array.isArray(subjectsResponse)) {
-            // 更新科目列表
-            this.state.availableSubjects = subjectsResponse;
-          }
-        } catch (error) {
-          console.warn("Failed to load subject configuration:", error);
-          // 保持默认科目列表
-        }
+        await this.loadSubjects();
       } catch (error) {
         console.error("加载配置失败:", error);
         this.$message.error("加载配置失败", error.message);
+      }
+    },
+
+    async loadSubjects() {
+      try {
+        const subjectsResponse = await dataProvider.loadData("classworks-config-subject");
+        if (subjectsResponse && Array.isArray(subjectsResponse)) {
+          // 更新科目列表
+          this.state.availableSubjects = subjectsResponse;
+        }
+      } catch (error) {
+        console.warn("Failed to load subject configuration:", error);
+        // 保持默认科目列表
       }
     },
 
@@ -1358,7 +1361,7 @@ export default {
       this.updateBackendUrl();
     },
 
-    handleDateSelect(newDate) {
+    async handleDateSelect(newDate) {
       if (!newDate) return;
 
       try {
@@ -1377,7 +1380,12 @@ export default {
               query: { date: formattedDate },
             })
             .catch(() => {});
-          this.downloadData();
+
+          // Load both data and subjects in parallel
+          await Promise.all([
+            this.downloadData(),
+            this.loadSubjects()
+          ]);
         }
       } catch (error) {
         console.error("Date processing error:", error);
