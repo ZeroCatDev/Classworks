@@ -83,6 +83,13 @@
               title="编辑"
             />
             <v-btn
+              icon="mdi-cloud-download"
+              size="small"
+              color="primary"
+              @click="getCloudUrl(item)"
+              title="获取云端地址"
+            />
+            <v-btn
               icon="mdi-delete"
               size="small"
               color="error"
@@ -228,6 +235,100 @@
       </v-card>
     </v-dialog>
 
+    <!-- 云端地址对话框 -->
+    <v-dialog v-model="cloudUrlDialog" max-width="800px">
+      <v-card>
+        <v-card-title class="d-flex align-center">
+          <v-icon icon="mdi-cloud-download" class="mr-2" />
+          获取云端访问地址
+          <v-spacer />
+          <v-btn icon="mdi-close" variant="text" @click="cloudUrlDialog = false" />
+        </v-card-title>
+
+        <v-card-subtitle v-if="selectedCloudItem">
+          键名: <code>{{ selectedCloudItem.key }}</code>
+        </v-card-subtitle>
+
+        <v-card-text>
+          <v-alert v-if="cloudUrlError" type="error" variant="tonal" class="mb-4">
+            {{ cloudUrlError }}
+          </v-alert>
+
+          <v-alert v-if="cloudUrlResult && cloudUrlResult.success" type="success" variant="tonal" class="mb-4">
+            <v-alert-title>云端地址获取成功</v-alert-title>
+            <div class="mt-2">
+              <div v-if="cloudUrlResult.migrated" class="mb-2">
+                <v-icon icon="mdi-database-arrow-up" class="mr-1" color="success" />
+                数据已从本地迁移到云端
+              </div>
+              <div v-if="cloudUrlResult.configured" class="mb-2">
+                <v-icon icon="mdi-cog" class="mr-1" color="info" />
+                云端配置已自动设置
+              </div>
+            </div>
+          </v-alert>
+
+          <v-text-field
+            v-if="cloudUrlResult && cloudUrlResult.url"
+            :model-value="cloudUrlResult.url"
+            label="云端访问地址"
+            variant="outlined"
+            readonly
+            class="font-monospace"
+            append-inner-icon="mdi-content-copy"
+            @click:append-inner="copyCloudUrl"
+          />
+
+          <v-expansion-panels v-if="cloudUrlResult && cloudUrlResult.url" class="mt-4">
+            <v-expansion-panel>
+              <v-expansion-panel-title>
+                <v-icon icon="mdi-cog" class="mr-2" />
+                高级选项
+              </v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <v-checkbox
+                  v-model="cloudUrlOptions.migrateFromLocal"
+                  label="从本地迁移数据到云端"
+                  density="compact"
+                />
+                <v-checkbox
+                  v-model="cloudUrlOptions.autoConfigureCloud"
+                  label="自动配置云端默认设置"
+                  density="compact"
+                />
+                <v-btn
+                  @click="refreshCloudUrl"
+                  variant="tonal"
+                  color="primary"
+                  :loading="gettingCloudUrl"
+                  class="mt-2"
+                >
+                  <v-icon icon="mdi-refresh" class="mr-1" />
+                  重新获取
+                </v-btn>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn @click="cloudUrlDialog = false" variant="text">
+            关闭
+          </v-btn>
+          <v-btn
+            v-if="cloudUrlResult && cloudUrlResult.url"
+            @click="openCloudUrl"
+            variant="tonal"
+            color="primary"
+          >
+            <v-icon icon="mdi-open-in-new" class="mr-1" />
+            在新窗口打开
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- 删除确认对话框 -->
     <v-dialog v-model="deleteDialog" max-width="400px">
       <v-card>
@@ -289,11 +390,22 @@ export default {
       editDialog: false,
       deleteDialog: false,
       createDialog: false,
+      cloudUrlDialog: false,
 
       // 选中的项目
       selectedItem: null,
       editingItem: null,
       itemToDelete: null,
+      selectedCloudItem: null,
+
+      // 云端地址相关
+      gettingCloudUrl: false,
+      cloudUrlResult: null,
+      cloudUrlError: null,
+      cloudUrlOptions: {
+        migrateFromLocal: true,
+        autoConfigureCloud: true
+      },
 
       // 编辑数据
       editingData: '',
@@ -596,6 +708,67 @@ export default {
         this.$message.success('数据已复制到剪贴板');
       } catch (error) {
         this.$message.error('复制失败', error.message);
+      }
+    },
+
+    async getCloudUrl(item) {
+      this.selectedCloudItem = item;
+      this.cloudUrlResult = null;
+      this.cloudUrlError = null;
+      this.cloudUrlDialog = true;
+      
+      await this.fetchCloudUrl();
+    },
+
+    async fetchCloudUrl() {
+      if (!this.selectedCloudItem) return;
+      
+      this.gettingCloudUrl = true;
+      this.cloudUrlError = null;
+      
+      try {
+        const result = await dataProvider.getKeyCloudUrl(
+          this.selectedCloudItem.key,
+          this.cloudUrlOptions
+        );
+        
+        if (result.success) {
+          this.cloudUrlResult = result;
+          this.$message.success('云端地址获取成功');
+        } else {
+          this.cloudUrlError = result.error?.message || '获取云端地址失败';
+          this.$message.error('获取失败', this.cloudUrlError);
+        }
+      } catch (error) {
+        this.cloudUrlError = error.message || '获取云端地址时发生错误';
+        this.$message.error('获取失败', this.cloudUrlError);
+      } finally {
+        this.gettingCloudUrl = false;
+      }
+    },
+
+    async refreshCloudUrl() {
+      await this.fetchCloudUrl();
+    },
+
+    async copyCloudUrl() {
+      if (!this.cloudUrlResult?.url) return;
+      
+      try {
+        await navigator.clipboard.writeText(this.cloudUrlResult.url);
+        this.$message.success('云端地址已复制到剪贴板');
+      } catch (error) {
+        this.$message.error('复制失败', error.message);
+      }
+    },
+
+    openCloudUrl() {
+      if (!this.cloudUrlResult?.url) return;
+      
+      try {
+        window.open(this.cloudUrlResult.url, '_blank');
+      } catch (error) {
+        this.$message.error('打开链接失败', error.message);
       }
     }
   }

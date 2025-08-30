@@ -117,6 +117,16 @@
         随机点名
       </v-btn>
       <v-btn
+        v-if="showExamScheduleButton"
+        color="green"
+        prepend-icon="mdi-calendar-check"
+        size="large"
+        class="ml-2"
+        @click="$router.push('/examschedule')"
+      >
+        考试看板
+      </v-btn>
+      <v-btn
         v-if="showListCardButton"
         color="primary-darken-1"
         prepend-icon="mdi-list-box"
@@ -838,6 +848,9 @@ export default {
     },
     showFullscreenButton() {
       return getSetting("display.showFullscreenButton");
+    },
+    showExamScheduleButton() {
+      return getSetting("display.showExamScheduleButton");
     },
     showAntiScreenBurnCard() {
       return getSetting("display.showAntiScreenBurnCard");

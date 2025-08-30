@@ -22,7 +22,8 @@
         <v-divider class="my-2" />
         <setting-item :setting-key="'display.showAntiScreenBurnCard'" />
 
-
+        <v-divider class="my-2" />
+        <setting-item :setting-key="'display.showExamScheduleButton'" />
 
       </v-list>
   </settings-card>

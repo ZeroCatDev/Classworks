@@ -170,6 +170,13 @@ const settingsDefinitions = {
     description: "是否显示列表卡片",
     icon: "mdi-list-box",
   },
+  "display.showExamScheduleButton": {
+    type: "boolean",
+    default: true,
+    description: "是否显示考试看板",
+    icon: "mdi-calendar-check",
+    // 控制是否在主页显示考试看板按钮，指向考试安排页面
+  },
   // 服务器设置（合并了数据提供者设置）
   "server.domain": {
     type: "string",
