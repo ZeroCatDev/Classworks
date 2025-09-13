@@ -575,7 +575,7 @@ export default {
     /**
      * 配置打开成功回调
      */
-    onConfigOpened(data) {
+    onConfigOpened() {
       this.success = '配置已在新窗口中打开'
       setTimeout(() => {
         this.success = ''

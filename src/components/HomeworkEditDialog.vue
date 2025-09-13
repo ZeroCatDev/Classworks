@@ -236,7 +236,7 @@ export default {
       currentLine: "",
       currentLineStart: 0,
       currentLineEnd: 0,
-      quickTexts: ["课", "题", "T", "P"]
+      quickTexts: ["课", "题", "例","变","T", "P"]
     };
   },
   computed: {
