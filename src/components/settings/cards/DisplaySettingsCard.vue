@@ -20,6 +20,9 @@
         <setting-item :setting-key="'display.enhancedTouchMode'" />
 
         <v-divider class="my-2" />
+        <setting-item :setting-key="'display.showQuickTools'" />
+
+        <v-divider class="my-2" />
         <setting-item :setting-key="'display.showAntiScreenBurnCard'" />
 
         <v-divider class="my-2" />
