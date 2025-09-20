@@ -102,7 +102,7 @@
           </div>
 
           <!-- Quick Tools Section -->
-          <div class="quick-tools ml-4" style="min-width: 180px;">
+          <div class="quick-tools ml-4" style="min-width: 180px;" v-if="showQuickTools">
             <!-- Numeric Keypad -->
             <div class="numeric-keypad mb-4">
               <div class="keypad-row">
@@ -207,6 +207,7 @@
 
 <script>
 import dataProvider from "@/utils/dataProvider";
+import { getSetting } from "@/utils/settings";
 
 export default {
   name: "HomeworkEditDialog",
@@ -270,6 +271,9 @@ export default {
         return null;
       }
       return this.templateData.commonSubject.books;
+    },
+    showQuickTools() {
+      return getSetting("display.showQuickTools");
     }
   },
   watch: {
