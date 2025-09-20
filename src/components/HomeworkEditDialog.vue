@@ -201,6 +201,11 @@
           </div>
         </div>
       </v-card-text>
+
+      <div class="text-center text-body-2 text-disabled mb-5">
+        点击空白处完成编辑
+      </div>
+
     </v-card>
   </v-dialog>
 </template>
