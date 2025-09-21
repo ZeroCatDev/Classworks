@@ -34,6 +34,8 @@ jobs:
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_BASE_URL: ${{ vars.ANTHROPIC_BASE_URL }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
@@ -47,7 +49,8 @@ jobs:
             Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
 
             Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
-          
+            
+            When commenting, always use Chinese for description.
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/sdk#command-line for available options
           claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
