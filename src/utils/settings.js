@@ -221,7 +221,7 @@ const settingsDefinitions = {
   },
   "server.provider": {
     type: "string",
-    default: "kv-local",
+    default: "classworkscloud",
     validate: (value) =>
       ["kv-local", "kv-server", "classworkscloud"].includes(value),
     description: "数据提供者",
