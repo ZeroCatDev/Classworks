@@ -102,7 +102,7 @@
           </div>
 
           <!-- Quick Tools Section -->
-          <div class="quick-tools ml-4" style="min-width: 180px;">
+          <div class="quick-tools ml-4" style="min-width: 180px;" v-if="showQuickTools">
             <!-- Numeric Keypad -->
             <div class="numeric-keypad mb-4">
               <div class="keypad-row">
@@ -201,12 +201,18 @@
           </div>
         </div>
       </v-card-text>
+
+      <div class="text-center text-body-2 text-disabled mb-5">
+        点击空白处完成编辑
+      </div>
+
     </v-card>
   </v-dialog>
 </template>
 
 <script>
 import dataProvider from "@/utils/dataProvider";
+import { getSetting } from "@/utils/settings";
 
 export default {
   name: "HomeworkEditDialog",
@@ -270,6 +276,9 @@ export default {
         return null;
       }
       return this.templateData.commonSubject.books;
+    },
+    showQuickTools() {
+      return getSetting("display.showQuickTools");
     }
   },
   watch: {

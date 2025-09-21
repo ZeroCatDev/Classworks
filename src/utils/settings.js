@@ -177,6 +177,12 @@ const settingsDefinitions = {
     icon: "mdi-calendar-check",
     // 控制是否在主页显示考试看板按钮，指向考试安排页面
   },
+  "display.showQuickTools": {
+    type: "boolean",
+    default: true,
+    description: "是否显示快捷键盘",
+    icon: "mdi-dialpad",
+  },
   // 服务器设置（合并了数据提供者设置）
   "server.domain": {
     type: "string",
