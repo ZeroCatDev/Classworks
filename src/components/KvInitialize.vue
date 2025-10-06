@@ -88,7 +88,7 @@ const shouldInitialize = () => {
 
 const goToAuthorize = () => {
   const authDomain = getSetting("server.authDomain");
-  const appId = import.meta.env.VITE_APP_ID || "1";
+  const appId = "d158067f53627d2b98babe8bffd2fd7d";
   const currentDomain = window.location.origin;
   const callbackUrl = encodeURIComponent(`${currentDomain}/authorize`);
 
