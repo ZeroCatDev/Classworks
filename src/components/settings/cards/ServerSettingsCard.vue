@@ -1,9 +1,33 @@
 <template>
-  <settings-card title="数据源设置" icon="mdi-database" :loading="loading">
+  <settings-card
+    title="数据源设置"
+    icon="mdi-database"
+    :loading="loading"
+  >
     <v-form>
-      <setting-item setting-key="server.provider" title="数据提供者" />
+      <!-- 使用双向绑定来替代 setting-key -->
+      <v-select
+        v-model="serverSettings.provider"
+        :items="[
+          { title: 'Classworks云端存储', value: 'classworkscloud' },
+          { title: 'KV本地存储', value: 'kv-local' },
+          { title: 'KV远程服务器', value: 'kv-server' }
+        ]"
+        label="数据提供者"
+        variant="outlined"
+        density="comfortable"
+        item-title="title"
+        item-value="value"
+        prepend-icon="mdi-database"
+        class="mb-3"
+      />
 
-      <v-alert v-if="isKvProvider" type="info" variant="tonal" class="my-2">
+      <v-alert
+        v-if="isKvProvider"
+        type="info"
+        variant="tonal"
+        class="my-2"
+      >
         <v-alert-title>KV 存储系统</v-alert-title>
         <p>KV存储系统使用本机唯一标识符(UUID)来区分不同设备的数据。</p>
         <p v-if="currentProvider === 'kv-server'">
@@ -12,49 +36,113 @@
         </p>
       </v-alert>
 
-      <v-alert v-if="isClassworksCloud" type="info" color="success" variant="tonal" class="my-2">
+      <v-alert
+        v-if="isClassworksCloud"
+        type="info"
+        color="success"
+        variant="tonal"
+        class="my-2"
+      >
         <v-alert-title>Classworks云端存储</v-alert-title>
         <p>Classworks云端存储是官方提供的存储解决方案，自动配置了最优的访问设置。</p>
         <p>使用此选项时，服务器域名和网站令牌将自动配置，无需手动设置。</p>
       </v-alert>
 
-      <v-divider class="my-2" />
-      <setting-item setting-key="server.domain" title="服务器域名" :disabled="isClassworksCloud" />
-      <v-divider class="my-2" />
-      <setting-item setting-key="server.classNumber" title="班号" />
-      <v-divider class="my-2" />
-      <setting-item setting-key="server.siteKey" title="网站令牌" :disabled="isClassworksCloud">
-        <template #description>
-          用于后端验证请求的安全令牌。如需要，请从系统管理员获取。
-        </template>
-      </setting-item>
-      <v-alert v-if="useServer" type="info" variant="tonal" class="my-2">
-        <v-icon icon="mdi-information-outline" class="mr-2"></v-icon>
-        <span>网站令牌将作为 <code>x-site-key</code> 请求头发送给服务器，用于验证请求的合法性。如果您的服务器需要此验证，请在上方输入有效的令牌。</span>
-      </v-alert>
-      <v-divider class="my-2" />
-      <setting-item setting-key="device.uuid" title="设备UUID" />
+      <v-divider
+        class="my-2"
+      />
+
+      <!-- For classworkscloud show kv token and namespace info card -->
+      <div v-if="isClassworksCloud">
+        <v-text-field
+          v-model="serverSettings.kvToken"
+          label="KV 授权令牌"
+          variant="outlined"
+          density="comfortable"
+          prepend-icon="mdi-shield-key"
+          class="mb-2"
+          hint="令牌用于云端存储授权"
+          persistent-hint
+        />
+
+
+
+        <cloud-namespace-info-card
+          :visible="isClassworksCloud"
+          class="mt-4"
+        />
+      </div>
+
+      <!-- For kv-server show domain + kv token -->
+      <div v-else-if="currentProvider === 'kv-server'">
+        <v-text-field
+          v-model="serverSettings.domain"
+          label="服务器域名"
+          variant="outlined"
+          density="comfortable"
+          prepend-icon="mdi-web"
+          class="mb-2"
+          hint="例如: https://example.com (不需要路径)"
+          persistent-hint
+        />
+
+        <v-text-field
+          v-model="serverSettings.kvToken"
+          label="KV 授权令牌"
+          variant="outlined"
+          density="comfortable"
+          prepend-icon="mdi-shield-key"
+          class="mb-2"
+          hint="令牌用于服务器验证"
+          persistent-hint
+        />
+      </div>
+
+      <!-- For kv-local show only class number -->
+      <div v-else-if="currentProvider === 'kv-local'">
+        <v-text-field
+          v-model="serverSettings.classNumber"
+          label="班级编号"
+          variant="outlined"
+          density="comfortable"
+          prepend-icon="mdi-account-group"
+          class="mb-2"
+          hint="例如: 高三八班"
+          persistent-hint
+        />
+      </div>
     </v-form>
   </settings-card>
 </template>
 
 <script>
 import SettingsCard from "@/components/SettingsCard.vue";
-import SettingItem from "@/components/settings/SettingItem.vue";
-import { getSetting } from "@/utils/settings";
+import CloudNamespaceInfoCard from "./CloudNamespaceInfoCard.vue";
+import { getSetting, setSetting, watchSettings } from "@/utils/settings";
 
 export default {
   name: "ServerSettingsCard",
-  components: { SettingsCard, SettingItem },
+  components: { SettingsCard, CloudNamespaceInfoCard },
   props: {
     loading: Boolean,
   },
   data() {
-    return {};
+    return {
+      unwatch: null,
+      // 保存所有相关设置
+      serverSettings: {
+        provider: getSetting("server.provider"),
+        domain: getSetting("server.domain"),
+        classNumber: getSetting("server.classNumber"),
+        kvToken: getSetting("server.kvToken"),
+      },
+      // 用于监听设置变化时刷新 UI
+      settingsChangeTimeout: null
+    };
   },
   computed: {
     currentProvider() {
-      return getSetting("server.provider");
+      return this.serverSettings.provider;
     },
     isKvProvider() {
       return this.currentProvider === 'kv-local' || this.currentProvider === 'kv-server';
@@ -65,6 +153,70 @@ export default {
     useServer() {
       return this.currentProvider === 'server' || this.currentProvider === 'kv-server' || this.currentProvider === 'classworkscloud';
     }
+  },
+  watch: {
+    // 监视 serverSettings 的深层变化
+    serverSettings: {
+      handler() {
+        // 使用防抖处理，避免频繁刷新
+        if (this.settingsChangeTimeout) {
+          clearTimeout(this.settingsChangeTimeout);
+        }
+        // 延迟保存，提供更好的用户体验
+        this.settingsChangeTimeout = setTimeout(() => {
+          this.saveAllSettings();
+        }, 100);
+      },
+      deep: true
+    }
+  },
+  mounted() {
+    // 加载所有设置
+    this.loadAllSettings();
+
+    // 订阅全局设置变更事件
+    this.unwatch = watchSettings(() => {
+      // 当设置从其他地方（如其他标签页、其他组件）改变时，刷新本地状态
+      this.loadAllSettings();
+      // 可选：强制重新渲染组件
+      this.$forceUpdate && this.$forceUpdate();
+    });
+  },
+  beforeUnmount() {
+    if (this.unwatch) this.unwatch();
+  },
+  methods: {
+    // 从全局设置加载所有设置到本地
+    loadAllSettings() {
+      this.serverSettings = {
+        provider: getSetting("server.provider"),
+        domain: getSetting("server.domain"),
+        classNumber: getSetting("server.classNumber"),
+        kvToken: getSetting("server.kvToken"),
+      };
+    },
+
+    // 保存所有本地设置到全局
+    saveAllSettings() {
+      Object.entries(this.serverSettings).forEach(([key, value]) => {
+        const settingKey = `server.${key}`;
+        const currentValue = getSetting(settingKey);
+
+        // 只有当值发生变化时才进行设置
+        if (value !== currentValue) {
+          const success = setSetting(settingKey, value);
+          if (success) {
+            console.log(`设置已更新: ${settingKey} = ${value}`);
+          } else {
+            console.error(`设置失败: ${settingKey}`);
+            // 如果设置失败，恢复值
+            this.serverSettings[key] = currentValue;
+          }
+        }
+      });
+    },
+
+
   }
 };
 </script>

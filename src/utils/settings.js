@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 // 请求通知权限
 async function requestNotificationPermission() {
   if (Notification && Notification.requestPermission) {
@@ -66,17 +65,11 @@ if (typeof window !== "undefined") {
 // 存储所有设置的localStorage键名
 const SETTINGS_STORAGE_KEY = "Classworks_settings";
 
-/**
- * 生成UUID v4
- * @returns {string} 生成的UUID字符串
- */
-function generateUUID() {
-  return uuidv4();
-}
 
 // 新增: Classworks云端存储的默认设置
 const classworksCloudDefaults = {
   "server.domain": "https://kv.wuyuan.dev",
+  //"server.domain": "http://localhost:3030",
   "server.siteKey": "",
 };
 
@@ -88,24 +81,9 @@ const settingsDefinitions = {
   // 设备标识
   "device.uuid": {
     type: "string",
-    default: generateUUID(),
+    default: '00000000-0000-4000-8000-000000000000',
     description: "设备唯一标识符",
     icon: "mdi-identifier",
-  },
-
-  // 命名空间设置
-  "namespace.password": {
-    type: "string",
-    default: "",
-    description: "命名空间访问密码",
-    icon: "mdi-key",
-  },
-  "namespace.accessType": {
-    type: "string",
-    default: "readwrite",
-    description: "访问权限类型",
-    icon: "mdi-shield-lock",
-    validate: (value) => ["readonly", "readwrite"].includes(value),
   },
 
   // 存储设置
@@ -213,9 +191,35 @@ const settingsDefinitions = {
     icon: "mdi-key-chain",
     // 用于后端验证请求的令牌，将作为请求头 x-site-key 发送
   },
+  "server.kvToken": {
+    type: "string",
+    default: "",
+    description: "KV授权令牌",
+    icon: "mdi-shield-key",
+    // 用于KV服务器认证的令牌，将作为请求头 x-app-token 发送
+  },
+  "server.authDomain": {
+    type: "string",
+    default: "https://kv.houlang.cloud",
+    description: "授权服务器域名",
+    icon: "mdi-shield-account",
+    validate: (value) => {
+      // 如果值为空，直接通过
+      if (!value) return true;
+      // 验证URL格式
+      try {
+        new URL(value);
+        return true;
+      } catch (e) {
+        console.error("授权域名格式无效:", e);
+        return false;
+      }
+    },
+    // 用于CSKV授权跳转的服务器域名
+  },
   "server.provider": {
     type: "string",
-    default: "kv-local",
+    default: "classworkscloud",
     validate: (value) =>
       ["kv-local", "kv-server", "classworkscloud"].includes(value),
     description: "数据提供者",

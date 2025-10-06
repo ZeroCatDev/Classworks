@@ -7,7 +7,7 @@
     <v-spacer />
 
     <template #append>
-      <namespace-access />      <v-btn
+      <v-btn
         icon="mdi-bell"
         variant="text"
         :badge="unreadCount || undefined"
@@ -615,7 +615,6 @@
 <script>
 import MessageLog from "@/components/MessageLog.vue";
 import RandomPicker from "@/components/RandomPicker.vue";
-import NamespaceAccess from "@/components/NamespaceAccess.vue";
 import FloatingToolbar from "@/components/FloatingToolbar.vue";
 import FloatingICP from "@/components/FloatingICP.vue";
 import HomeworkEditDialog from "@/components/HomeworkEditDialog.vue";
@@ -639,7 +638,6 @@ export default {
   components: {
     MessageLog,
     RandomPicker,
-    NamespaceAccess,
     FloatingToolbar,
     FloatingICP,
     HomeworkEditDialog,

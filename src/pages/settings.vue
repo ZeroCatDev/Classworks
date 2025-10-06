@@ -104,16 +104,9 @@
             @saved="onSettingsSaved"
           />
           <data-provider-settings-card border class="mt-4" />
-<kv-database-card border class="mt-4" />
+          <kv-database-card border class="mt-4" />
         </v-tabs-window-item>
 
-        <v-tabs-window-item value="namespace">
-          <namespace-settings-card
-            border
-            :loading="loading.namespace"
-            @saved="onSettingsSaved"
-          />
-        </v-tabs-window-item>
         <v-tabs-window-item value="student">
           <student-list-card border :is-mobile="isMobile" />
         </v-tabs-window-item>
@@ -238,7 +231,6 @@ import AboutCard from "@/components/settings/AboutCard.vue";
 import "../styles/settings.scss";
 import SettingsExplorer from "@/components/settings/SettingsExplorer.vue";
 import SettingsLinkGenerator from "@/components/SettingsLinkGenerator.vue";
-import NamespaceSettingsCard from "@/components/settings/cards/NamespaceSettingsCard.vue";
 import RandomPickerCard from "@/components/settings/cards/RandomPickerCard.vue";
 import HomeworkTemplateCard from "@/components/settings/cards/HomeworkTemplateCard.vue";
 import SubjectManagementCard from "@/components/settings/cards/SubjectManagementCard.vue";
@@ -259,7 +251,6 @@ export default {
     EchoChamberCard,
     SettingsExplorer,
     SettingsLinkGenerator,
-    NamespaceSettingsCard,
     RandomPickerCard,
     HomeworkTemplateCard,
     SubjectManagementCard,
@@ -271,19 +262,12 @@ export default {
   },
   data() {
     const provider = getSetting("server.provider");
-    const showNamespaceSettings =
-      provider === "kv-server" || provider === "classworkscloud";
 
     const settings = {
       server: {
         domain: getSetting("server.domain"),
         classNumber: getSetting("server.classNumber"),
         provider: getSetting("server.provider"),
-      },
-      namespace: {
-        name: getSetting("namespace.name"),
-        accessType: getSetting("namespace.accessType"),
-        password: getSetting("namespace.password"),
       },
       refresh: {
         auto: getSetting("refresh.auto"),
@@ -357,15 +341,6 @@ export default {
           icon: "mdi-server",
           value: "server",
         },
-        ...(showNamespaceSettings
-          ? [
-              {
-                title: "命名空间",
-                icon: "mdi-database-lock",
-                value: "namespace",
-              },
-            ]
-          : []),
         {
           title: "科目",
           icon: "mdi-book-edit",

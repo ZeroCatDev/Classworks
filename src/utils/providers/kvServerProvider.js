@@ -1,18 +1,19 @@
 import axios from "@/axios/axios";
 import { formatResponse, formatError } from "../dataProvider";
-import { getSetting, setSetting } from "../settings";
+import { getSetting } from "../settings";
 
-// Helper function to get request headers with site key and password if available
+// Helper function to get request headers with kvtoken
 const getHeaders = () => {
   const headers = { Accept: "application/json" };
+  const kvToken = getSetting("server.kvToken");
   const siteKey = getSetting("server.siteKey");
-  const password = getSetting("namespace.password");
 
-  if (siteKey) {
+  // 优先使用新的kvToken
+  if (kvToken) {
+    headers["x-app-token"] = kvToken;
+  } else if (siteKey) {
+    // 向后兼容旧的siteKey
     headers["x-site-key"] = siteKey;
-  }
-  if (password) {
-    headers["x-namespace-password"] = password;
   }
 
   return headers;
@@ -21,30 +22,18 @@ const getHeaders = () => {
 export const kvServerProvider = {
   async loadNamespaceInfo() {
     try {
+      // 使用 Classworks Cloud 或者用户配置的服务器域名
+      const provider = getSetting("server.provider");
       const serverUrl = getSetting("server.domain");
-      const machineId = getSetting("device.uuid");
 
-      const res = await axios.get(`${serverUrl}/${machineId}/_info`, {
+      const res = await axios.get(`${serverUrl}/kv/_info`, {
         headers: getHeaders(),
       });
 
-      const { name, accessType } = res.data;
-
-      // 如果name为null，使用班级号作为名称并更新
-      if (name === null) {
-        const classNumber = getSetting("server.classNumber");
-        await this.updateNamespaceInfo({ name: classNumber });
-        // 重新加载命名空间信息
-        return await this.loadNamespaceInfo();
-      }
-
-      // 更新本地访问权限设置
-      if (accessType) {
-        setSetting("namespace.accessType", accessType);
-      }
-
-      return formatResponse(res);
+      // 直接返回新格式 API 数据，包含 device 和 account 信息
+      return formatResponse(res.data);
     } catch (error) {
+      console.error("获取命名空间信息失败:", error);
       return formatError(
         error.response?.data?.message || "获取命名空间信息失败",
         "NAMESPACE_ERROR"
@@ -55,9 +44,8 @@ export const kvServerProvider = {
   async updateNamespaceInfo(data) {
     try {
       const serverUrl = getSetting("server.domain");
-      const machineId = getSetting("device.uuid");
 
-      const res = await axios.put(`${serverUrl}/${machineId}/_info`, data, {
+      const res = await axios.put(`${serverUrl}/kv/_info`, data, {
         headers: getHeaders(),
       });
 
@@ -70,61 +58,11 @@ export const kvServerProvider = {
     }
   },
 
-  async updatePassword(newPassword, oldPassword, passwordHint = null) {
-    try {
-      const serverUrl = getSetting("server.domain");
-      const machineId = getSetting("device.uuid");
-
-      const res = await axios.post(
-        `${serverUrl}/${machineId}/_password`,
-        {
-          password: newPassword,
-          oldPassword,
-          passwordHint,
-        },
-        {
-          headers: getHeaders(),
-        }
-      );
-
-      if (res.status === 200) {
-        // 更新本地存储的密码
-        setSetting("namespace.password", newPassword || "");
-      }
-
-      return res;
-    } catch (error) {
-      return formatError(
-        error.response?.data?.message || "更新密码失败",
-        "PASSWORD_ERROR"
-      );
-    }
-  },
-
-  async deletePassword() {
-    try {
-      const serverUrl = getSetting("server.domain");
-      const machineId = getSetting("device.uuid");
-
-      const res = await axios.delete(`${serverUrl}/${machineId}/_password`, {
-        headers: getHeaders(),
-      });
-      setSetting("namespace.password", "");
-      return res;
-    } catch (error) {
-      return formatError(
-        error.response?.data?.message || "删除密码失败",
-        "PASSWORD_ERROR"
-      );
-    }
-  },
-
   async loadData(key) {
     try {
       const serverUrl = getSetting("server.domain");
-      const machineId = getSetting("device.uuid");
 
-      const res = await axios.get(`${serverUrl}/${machineId}/${key}`, {
+      const res = await axios.get(`${serverUrl}/kv/${key}`, {
         headers: getHeaders(),
       });
 
@@ -144,8 +82,7 @@ export const kvServerProvider = {
   async saveData(key, data) {
     try {
       const serverUrl = getSetting("server.domain");
-      const machineId = getSetting("device.uuid");
-      await axios.post(`${serverUrl}/${machineId}/${key}`, data, {
+      await axios.post(`${serverUrl}/kv/${key}`, data, {
         headers: getHeaders(),
       });
       return formatResponse(true);
@@ -166,7 +103,7 @@ export const kvServerProvider = {
    * @param {number} options.limit - 每页返回的记录数，默认为 100
    * @param {number} options.skip - 跳过的记录数，默认为 0
    * @returns {Promise<Object>} 包含键名列表和分页信息的响应对象
-   * 
+   *
    * 返回值示例:
    * {
    *   keys: ["key1", "key2", "key3"],
@@ -182,8 +119,7 @@ export const kvServerProvider = {
   async loadKeys(options = {}) {
     try {
       const serverUrl = getSetting("server.domain");
-      const machineId = getSetting("device.uuid");
-      
+
       // 设置默认参数
       const {
         sortBy = "key",
@@ -191,7 +127,7 @@ export const kvServerProvider = {
         limit = 100,
         skip = 0
       } = options;
-      
+
       // 构建查询参数
       const params = new URLSearchParams({
         sortBy,
@@ -199,11 +135,11 @@ export const kvServerProvider = {
         limit: limit.toString(),
         skip: skip.toString()
       });
-      
-      const res = await axios.get(`${serverUrl}/${machineId}/_keys?${params}`, {
+
+      const res = await axios.get(`${serverUrl}/kv/_keys?${params}`, {
         headers: getHeaders(),
       });
-      
+
       return formatResponse(res.data);
     } catch (error) {
       if (error.response?.status === 404) {
