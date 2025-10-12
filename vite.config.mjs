@@ -7,6 +7,7 @@ import Vue from '@vitejs/plugin-vue'
 import VueRouter from 'unplugin-vue-router/vite'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import { VitePWA } from 'vite-plugin-pwa'
+import { TDesignResolver } from 'unplugin-vue-components/resolvers'
 
 // Utilities
 import { defineConfig } from 'vite'
@@ -154,7 +155,13 @@ export default defineConfig({
         configFile: 'src/styles/settings.scss',
       },
     }),
-    Components(),
+    Components({
+      resolvers: [
+        TDesignResolver({
+          library: 'vue-next'
+        })
+      ]
+    }),
     Fonts({
       google: {
         families: [{

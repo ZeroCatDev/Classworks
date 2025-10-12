@@ -15,6 +15,9 @@ import GlobalMessage from '@/components/GlobalMessage.vue'
 import { createApp } from 'vue'
 import Clarity from '@microsoft/clarity';
 const projectId = "rhp8uqoc3l"
+import TDesign from 'tdesign-vue-next'
+import 'tdesign-vue-next/es/style/index.css'
+import '@examaware-cs/player/dist/player.css'
 
 Clarity.init(projectId);
 import messageService from './utils/message';
@@ -22,7 +25,7 @@ import messageService from './utils/message';
 const app = createApp(App)
 
 registerPlugins(app)
-
+app.use(TDesign)
 app.use(messageService);
 
 app.component('GlobalMessage', GlobalMessage)

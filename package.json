@@ -10,6 +10,8 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
+    "@examaware-cs/core": "^1.0.0",
+    "@examaware-cs/player": "^1.0.2",
     "@mdi/font": "7.4.47",
     "@microsoft/clarity": "^1.0.0",
     "axios": "^1.11.0",
@@ -19,6 +21,7 @@
     "pinyin-pro": "^3.27.0",
     "ratelimit-header-parser": "^0.1.0",
     "roboto-fontface": "*",
+    "tdesign-vue-next": "^1.17.1",
     "typewriter-effect": "^2.21.0",
     "uuid": "^9.0.1",
     "vue": "^3.5.20",

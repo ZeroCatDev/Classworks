@@ -225,7 +225,7 @@
 
 <script>
 import { openDB } from "idb";
-import axios from "@/axios/axios";
+import axios from "@/assets/fonts/axios/axios";
 import { getSetting, setSetting } from "@/utils/settings";
 
 export default {
@@ -237,7 +237,7 @@ export default {
       migrationType: "server",
       serverUrl: "",
       targetStorage: "kv-server",
-      targetServerUrl: "https://kv.wuyuan.dev",
+      targetServerUrl: "https://kv-service.wuyuan.dev",
       startDate: this.getDateString(
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
       ), // 30 days ago

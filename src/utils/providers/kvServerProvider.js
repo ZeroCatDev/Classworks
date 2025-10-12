@@ -23,7 +23,6 @@ export const kvServerProvider = {
   async loadNamespaceInfo() {
     try {
       // 使用 Classworks Cloud 或者用户配置的服务器域名
-      const provider = getSetting("server.provider");
       const serverUrl = getSetting("server.domain");
 
       const res = await axios.get(`${serverUrl}/kv/_info`, {

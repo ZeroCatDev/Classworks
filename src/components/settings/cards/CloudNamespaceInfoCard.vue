@@ -74,7 +74,7 @@
           <br/><br/>Classworks KV 的全域管理员是 <a href="https://wuyuan.dev" target="_blank">孙悟元</a></v-card-text
         ><v-card-actions
           ><v-btn
-            href="https://kv.wuyuan.dev"
+            href="https://kv.houlang.cloud"
             class="text-none"
             append-icon="mdi-open-in-new"
             target="_blank"
