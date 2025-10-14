@@ -1,5 +1,8 @@
 <template>
-  <settings-card title="编辑设置" icon="mdi-cog">
+  <settings-card
+    title="编辑设置"
+    icon="mdi-cog"
+  >
     <v-list>
       <setting-item :setting-key="'edit.autoSave'" />
 
@@ -15,7 +18,6 @@
 
       <v-divider class="my-2" />
       <setting-item :setting-key="'edit.refreshBeforeEdit'" />
-
     </v-list>
   </settings-card>
 </template>

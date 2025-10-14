@@ -14,14 +14,24 @@
         :badge-color="unreadCount ? 'error' : undefined"
         @click="$refs.messageLog.drawer = true"
       />
-      <v-btn icon="mdi-cog" variant="text" @click="$router.push('/settings')" />
+      <v-btn
+        icon="mdi-cog"
+        variant="text"
+        @click="$router.push('/settings')"
+      />
     </template>
   </v-app-bar>
   <div class="d-flex">
     <!-- 主要内容区域 -->
-    <v-container class="main-window flex-grow-1 no-select" fluid>
+    <v-container
+      class="main-window flex-grow-1 no-select"
+      fluid
+    >
       <!-- 有内容的科目卡片 -->
-      <div ref="gridContainer" class="grid-masonry">
+      <div
+        ref="gridContainer"
+        class="grid-masonry"
+      >
         <TransitionGroup name="grid">
           <div
             v-for="item in sortedItems"
@@ -59,19 +69,27 @@
       <!-- 单独显示空科目 -->
       <div class="empty-subjects mt-4">
         <template v-if="emptySubjectDisplay === 'button'">
-          <v-btn-group divided variant="outlined">
+          <v-btn-group
+            divided
+            variant="outlined"
+          >
             <v-btn
               v-for="subject in unusedSubjects"
               :key="subject.name"
               :disabled="isEditingDisabled"
               @click="openDialog(subject.name)"
             >
-              <v-icon start> mdi-plus </v-icon>
+              <v-icon start>
+                mdi-plus
+              </v-icon>
               {{ subject.name }}
             </v-btn>
           </v-btn-group>
         </template>
-        <div v-else class="empty-subjects-grid">
+        <div
+          v-else
+          class="empty-subjects-grid"
+        >
           <TransitionGroup name="v-list">
             <v-card
               v-for="subject in unusedSubjects"
@@ -85,8 +103,15 @@
                 {{ subject.name }}
               </v-card-title>
               <v-card-text class="text-center">
-                <v-icon size="small" color="grey"> mdi-plus </v-icon>
-                <div class="text-caption text-grey">点击添加作业</div>
+                <v-icon
+                  size="small"
+                  color="grey"
+                >
+                  mdi-plus
+                </v-icon>
+                <div class="text-caption text-grey">
+                  点击添加作业
+                </div>
               </v-card-text>
             </v-card>
           </TransitionGroup>
@@ -102,7 +127,12 @@
       >
         上传
       </v-btn>
-      <v-btn v-else color="success" size="large" @click="showSyncMessage">
+      <v-btn
+        v-else
+        color="success"
+        size="large"
+        @click="showSyncMessage"
+      >
         同步完成
       </v-btn>
       <v-btn
@@ -157,7 +187,11 @@
         variant="tonal"
       >
         <v-card-title class="text-subtitle-1">
-          <v-icon start icon="mdi-shield-check" size="small" />
+          <v-icon
+            start
+            icon="mdi-shield-check"
+            size="small"
+          />
           屏幕保护技术已启用
         </v-card-title>
         <v-card-text class="text-body-2">
@@ -168,7 +202,7 @@
             *研究显示动态像素偏移技术可以修复屏幕坏点，起到保护屏幕的作用，数据来自实验室。<a
               href="https://patentscope.wipo.int/search/zh/detail.jsf?docId=CN232281523&_cid=P20-M8L0YX-67061-1"
               target="_blank"
-              >专利号CN108648692
+            >专利号CN108648692
             </a>
           </p>
           <p class="text-caption text-grey">
@@ -187,66 +221,73 @@
     >
       <h1>出勤</h1>
       <h2>
-        <snap style="white-space: nowrap"> 应到 </snap>:
+        <snap style="white-space: nowrap">
+          应到
+        </snap>:
         <snap style="white-space: nowrap">
           {{
             state.studentList.length -
-            state.boardData.attendance.exclude.length
+              state.boardData.attendance.exclude.length
           }}人
         </snap>
       </h2>
       <h2>
-        <snap style="white-space: nowrap"> 实到 </snap>:
+        <snap style="white-space: nowrap">
+          实到
+        </snap>:
         <snap style="white-space: nowrap">
           {{
             state.studentList.length -
-            state.boardData.attendance.absent.length -
-            state.boardData.attendance.late.length -
-            state.boardData.attendance.exclude.length
+              state.boardData.attendance.absent.length -
+              state.boardData.attendance.late.length -
+              state.boardData.attendance.exclude.length
           }}人
         </snap>
       </h2>
       <h2>
-        <snap style="white-space: nowrap"> 请假 </snap>:
+        <snap style="white-space: nowrap">
+          请假
+        </snap>:
         <snap style="white-space: nowrap">
           {{ state.boardData.attendance.absent.length }}人
         </snap>
       </h2>
       <h3
-        class="gray-text"
         v-for="(name, index) in state.boardData.attendance.absent"
         :key="'absent-' + index"
+        class="gray-text"
       >
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
-        ><span style="white-space: nowrap">{{ name }}</span>
+        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name }}</span>
       </h3>
       <h2>
-        <snap style="white-space: nowrap">迟到</snap>:
+        <snap style="white-space: nowrap">
+          迟到
+        </snap>:
         <snap style="white-space: nowrap">
           {{ state.boardData.attendance.late.length }}人
         </snap>
       </h2>
       <h3
-        class="gray-text"
         v-for="(name, index) in state.boardData.attendance.late"
         :key="'late-' + index"
+        class="gray-text"
       >
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
-        ><span style="white-space: nowrap">{{ name }}</span>
+        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name }}</span>
       </h3>
       <h2>
-        <snap style="white-space: nowrap">不参与</snap>:
+        <snap style="white-space: nowrap">
+          不参与
+        </snap>:
         <snap style="white-space: nowrap">
           {{ state.boardData.attendance.exclude.length }}人
         </snap>
       </h2>
       <h3
-        class="gray-text"
         v-for="(name, index) in state.boardData.attendance.exclude"
         :key="'exclude-' + index"
+        class="gray-text"
       >
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
-        ><span style="white-space: nowrap">{{ name }}</span>
+        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name }}</span>
       </h3>
     </v-col>
   </div>
@@ -259,7 +300,10 @@
     @save="handleHomeworkSave"
   />
 
-  <v-snackbar v-model="state.snackbar" :timeout="2000">
+  <v-snackbar
+    v-model="state.snackbar"
+    :timeout="2000"
+  >
     {{ state.snackbarText }}
   </v-snackbar>
 
@@ -271,10 +315,17 @@
   >
     <v-card>
       <v-card-title class="d-flex align-center">
-        <v-icon icon="mdi-account-group" class="mr-2" />
+        <v-icon
+          icon="mdi-account-group"
+          class="mr-2"
+        />
         出勤状态管理
         <v-spacer />
-        <v-chip color="primary" size="small" class="ml-2">
+        <v-chip
+          color="primary"
+          size="small"
+          class="ml-2"
+        >
           {{ state.dateString }}
         </v-chip>
       </v-card-title>
@@ -282,7 +333,10 @@
       <v-card-text>
         <!-- 批量操作和搜索 -->
         <v-row class="mb-4">
-          <v-col cols="12" md="12">
+          <v-col
+            cols="12"
+            md="12"
+          >
             <v-text-field
               v-model="attendanceSearch"
               prepend-inner-icon="mdi-magnify"
@@ -324,11 +378,11 @@
                 attendanceFilter.includes('present') ? 'elevated' : 'tonal'
               "
               class="px-2 filter-chip"
-              @click="toggleFilter('present')"
               prepend-icon="mdi-account-check"
               :append-icon="
                 attendanceFilter.includes('present') ? 'mdi-check' : ''
               "
+              @click="toggleFilter('present')"
             >
               到课
             </v-chip>
@@ -340,11 +394,11 @@
                 attendanceFilter.includes('absent') ? 'elevated' : 'tonal'
               "
               class="px-2 filter-chip"
-              @click="toggleFilter('absent')"
               prepend-icon="mdi-account-off"
               :append-icon="
                 attendanceFilter.includes('absent') ? 'mdi-check' : ''
               "
+              @click="toggleFilter('absent')"
             >
               请假
             </v-chip>
@@ -355,11 +409,11 @@
                 attendanceFilter.includes('late') ? 'elevated' : 'tonal'
               "
               class="px-2 filter-chip"
-              @click="toggleFilter('late')"
               prepend-icon="mdi-clock-alert"
               :append-icon="
                 attendanceFilter.includes('late') ? 'mdi-check' : ''
               "
+              @click="toggleFilter('late')"
             >
               迟到
             </v-chip>
@@ -370,11 +424,11 @@
                 attendanceFilter.includes('exclude') ? 'elevated' : 'tonal'
               "
               class="px-2 filter-chip"
-              @click="toggleFilter('exclude')"
               prepend-icon="mdi-account-cancel"
               :append-icon="
                 attendanceFilter.includes('exclude') ? 'mdi-check' : ''
               "
+              @click="toggleFilter('exclude')"
             >
               不参与
             </v-chip>
@@ -391,7 +445,10 @@
             md="6"
             lg="4"
           >
-            <v-card class="student-card" border>
+            <v-card
+              class="student-card"
+              border
+            >
               <v-card-text class="d-flex align-center pa-2">
                 <div class="flex-grow-1">
                   <div class="d-flex align-center">
@@ -404,11 +461,15 @@
                       size="24"
                       class="mr-2"
                     >
-                      <v-icon size="small">{{
-                        getStudentStatusIcon(state.studentList.indexOf(student))
-                      }}</v-icon>
+                      <v-icon size="small">
+                        {{
+                          getStudentStatusIcon(state.studentList.indexOf(student))
+                        }}
+                      </v-icon>
                     </v-avatar>
-                    <div class="text-subtitle-1">{{ student }}</div>
+                    <div class="text-subtitle-1">
+                      {{ student }}
+                    </div>
                   </div>
                 </div>
                 <div class="attendance-actions">
@@ -421,8 +482,8 @@
                     icon="mdi-account-check"
                     size="small"
                     variant="text"
-                    @click="setPresent(state.studentList.indexOf(student))"
                     :title="'设为到课'"
+                    @click="setPresent(state.studentList.indexOf(student))"
                   />
                   <v-btn
                     :color="
@@ -433,8 +494,8 @@
                     icon="mdi-account-off"
                     size="small"
                     variant="text"
-                    @click="setAbsent(state.studentList.indexOf(student))"
                     :title="'设为请假'"
+                    @click="setAbsent(state.studentList.indexOf(student))"
                   />
                   <v-btn
                     :color="
@@ -445,8 +506,8 @@
                     icon="mdi-clock-alert"
                     size="small"
                     variant="text"
-                    @click="setLate(state.studentList.indexOf(student))"
                     :title="'设为迟到'"
+                    @click="setLate(state.studentList.indexOf(student))"
                   />
                   <v-btn
                     :color="
@@ -457,8 +518,8 @@
                     icon="mdi-account-cancel"
                     size="small"
                     variant="text"
-                    @click="setExclude(state.studentList.indexOf(student))"
                     :title="'设为不参与'"
+                    @click="setExclude(state.studentList.indexOf(student))"
                   />
                 </div>
               </v-card-text>
@@ -466,10 +527,19 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="12" md="12">
-            <v-card variant="tonal" color="primary" class="mb-4">
+          <v-col
+            cols="12"
+            md="12"
+          >
+            <v-card
+              variant="tonal"
+              color="primary"
+              class="mb-4"
+            >
               <v-card-text>
-                <div class="text-subtitle-2 mb-2">批量操作</div>
+                <div class="text-subtitle-2 mb-2">
+                  批量操作
+                </div>
                 <v-btn-group>
                   <v-btn
                     color="success"
@@ -504,8 +574,8 @@
                 </v-btn-group>
               </v-card-text>
             </v-card>
-          </v-col></v-row
-        >
+          </v-col>
+        </v-row>
       </v-card-text>
 
       <v-divider />
@@ -513,8 +583,13 @@
       <v-card-actions>
         <v-spacer />
 
-        <v-btn color="primary" @click="saveAttendance">
-          <v-icon start>mdi-content-save</v-icon>
+        <v-btn
+          color="primary"
+          @click="saveAttendance"
+        >
+          <v-icon start>
+            mdi-content-save
+          </v-icon>
           保存
         </v-btn>
       </v-card-actions>
@@ -542,18 +617,32 @@
   <FloatingICP />
 
   <!-- 添加确认对话框 -->
-  <v-dialog v-model="confirmDialog.show" max-width="400">
+  <v-dialog
+    v-model="confirmDialog.show"
+    max-width="400"
+  >
     <v-card>
-      <v-card-title class="text-h6"> 确认保存 </v-card-title>
+      <v-card-title class="text-h6">
+        确认保存
+      </v-card-title>
       <v-card-text>
         您正在修改 {{ state.dateString }} 的数据，确定要保存吗？
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="grey" variant="text" @click="confirmDialog.reject">
+        <v-btn
+          color="grey"
+          variant="text"
+          @click="confirmDialog.reject"
+        >
           取消
         </v-btn>
-        <v-btn color="primary" @click="confirmDialog.resolve"> 确认保存 </v-btn>
+        <v-btn
+          color="primary"
+          @click="confirmDialog.resolve"
+        >
+          确认保存
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -566,9 +655,14 @@
   />
 
   <!-- 添加URL配置确认对话框 -->
-  <v-dialog v-model="urlConfigDialog.show" max-width="500">
+  <v-dialog
+    v-model="urlConfigDialog.show"
+    max-width="500"
+  >
     <v-card>
-      <v-card-title class="text-h6"> 确认应用URL配置 </v-card-title>
+      <v-card-title class="text-h6">
+        确认应用URL配置
+      </v-card-title>
       <v-card-text>
         <p>以下配置将应用于当前班级：</p>
         <v-list density="compact">
@@ -577,17 +671,30 @@
             :key="change.key"
           >
             <template #prepend>
-              <v-icon :icon="change.icon" size="small" class="mr-2" />
+              <v-icon
+                :icon="change.icon"
+                size="small"
+                class="mr-2"
+              />
             </template>
             <v-list-item-title class="d-flex align-center">
               <span class="text-subtitle-1">{{ change.name }}</span>
-              <v-tooltip activator="parent" location="top">{{
-                change.description || change.key
-              }}</v-tooltip>
+              <v-tooltip
+                activator="parent"
+                location="top"
+              >
+                {{
+                  change.description || change.key
+                }}
+              </v-tooltip>
             </v-list-item-title>
             <v-list-item-subtitle>
               <span class="text-grey-darken-1">{{ change.oldValue }}</span>
-              <v-icon icon="mdi-arrow-right" size="small" class="mx-1" />
+              <v-icon
+                icon="mdi-arrow-right"
+                size="small"
+                class="mx-1"
+              />
               <span class="text-primary font-weight-medium">{{
                 change.newValue
               }}</span>
@@ -604,12 +711,15 @@
         >
           取消
         </v-btn>
-        <v-btn color="primary" @click="urlConfigDialog.confirmHandler">
+        <v-btn
+          color="primary"
+          @click="urlConfigDialog.confirmHandler"
+        >
           确认应用
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog><br/><br/><br/><br/><br/><br/>
+  </v-dialog><br><br><br><br><br><br>
 </template>
 
 <script>

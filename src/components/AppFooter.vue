@@ -1,5 +1,8 @@
 <template>
-  <v-footer height="40" app>
+  <v-footer
+    height="40"
+    app
+  >
     <a
       v-for="item in items"
       :key="item.title"
@@ -9,7 +12,10 @@
       rel="noopener noreferrer"
       target="_blank"
     >
-      <v-icon :icon="item.icon" :size="item.icon === 'mdi-earth' ? 24 : 16" />
+      <v-icon
+        :icon="item.icon"
+        :size="item.icon === 'mdi-earth' ? 24 : 16"
+      />
     </a>
 
 
@@ -17,7 +23,6 @@
       class="text-caption text-disabled"
       style="position: absolute; right: 16px"
     >
-
       <a
         class="text-decoration-none on-surface"
         href="https://github.com/ZeroCatDev/Classworks"

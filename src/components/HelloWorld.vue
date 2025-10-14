@@ -11,9 +11,13 @@
       />
 
       <div class="text-center">
-        <div class="text-body-2 font-weight-light mb-n1">Welcome to</div>
+        <div class="text-body-2 font-weight-light mb-n1">
+          Welcome to
+        </div>
 
-        <h1 class="text-h2 font-weight-bold">Vuetify</h1>
+        <h1 class="text-h2 font-weight-bold">
+          Vuetify
+        </h1>
       </div>
 
       <div class="py-4" />
@@ -33,7 +37,9 @@
             </template>
 
             <template #title>
-              <h2 class="text-h5 font-weight-bold">Get started</h2>
+              <h2 class="text-h5 font-weight-bold">
+                Get started
+              </h2>
             </template>
 
             <template #subtitle>

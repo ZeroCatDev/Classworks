@@ -23,8 +23,8 @@
           size="large"
           prepend-icon="mdi-refresh"
           :loading="loading"
-          @click="loadConfig"
           class="mr-2"
+          @click="loadConfig"
         >
           重新加载
         </v-btn>
@@ -38,12 +38,12 @@
         >
           保存
         </v-btn>
-      <v-btn
+        <v-btn
           variant="text"
           prepend-icon="mdi-restore"
           :loading="loading"
-          @click="resetToDefault"
           class="mr-2"
+          @click="resetToDefault"
         >
           重置为默认
         </v-btn>
@@ -58,18 +58,24 @@
     </div>
 
     <!-- 添加新科目 -->
-    <v-card class="mb-4" variant="outlined">
+    <v-card
+      class="mb-4"
+      variant="outlined"
+    >
       <v-card-text>
         <v-row>
-          <v-col cols="12" sm="6">
+          <v-col
+            cols="12"
+            sm="6"
+          >
             <v-text-field
               v-model="newSubjectName"
               label="科目名称"
               variant="outlined"
               density="comfortable"
               :rules="[v => !!v || '科目名称不能为空']"
-              @keyup.enter="addSubject"
               append-inner-icon="mdi-plus"
+              @keyup.enter="addSubject"
               @click:append-inner="addSubject"
             />
           </v-col>
@@ -85,7 +91,7 @@
             v-for="(subject, index) in subjects"
             :key="subject.order"
           >
-            <template v-slot:prepend>
+            <template #prepend>
               <div class="d-flex flex-column align-center mr-2">
                 <v-btn
                   icon="mdi-chevron-up"
@@ -114,7 +120,7 @@
               />
             </v-list-item-title>
 
-            <template v-slot:append>
+            <template #append>
               <v-btn
                 icon="mdi-delete"
                 variant="text"

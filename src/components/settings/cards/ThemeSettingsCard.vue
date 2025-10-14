@@ -1,9 +1,15 @@
 <template>
-  <settings-card title="主题设置" icon="mdi-palette">
+  <settings-card
+    title="主题设置"
+    icon="mdi-palette"
+  >
     <v-list>
       <v-list-item>
         <template #prepend>
-          <v-icon icon="mdi-theme-light-dark" class="mr-3" />
+          <v-icon
+            icon="mdi-theme-light-dark"
+            class="mr-3"
+          />
         </template>
         <v-list-item-title>主题模式</v-list-item-title>
         <v-list-item-subtitle>选择明亮或暗黑主题</v-list-item-subtitle>
@@ -14,11 +20,17 @@
             color="primary"
           >
             <v-btn value="light">
-              <v-icon icon="mdi-white-balance-sunny" class="mr-2" />
+              <v-icon
+                icon="mdi-white-balance-sunny"
+                class="mr-2"
+              />
               明亮
             </v-btn>
             <v-btn value="dark">
-              <v-icon icon="mdi-moon-waning-crescent" class="mr-2" />
+              <v-icon
+                icon="mdi-moon-waning-crescent"
+                class="mr-2"
+              />
               暗黑
             </v-btn>
           </v-btn-toggle>
@@ -37,6 +49,11 @@ export default {
   name: 'ThemeSettingsCard',
   components: { SettingsCard },
 
+  setup() {
+    const theme = useTheme();
+    return { theme };
+  },
+
   data() {
     return {
       localTheme: getSetting('theme.mode')
@@ -48,11 +65,6 @@ export default {
       setSetting('theme.mode', newValue);
       this.updateTheme(newValue);
     }
-  },
-
-  setup() {
-    const theme = useTheme();
-    return { theme };
   },
 
   methods: {

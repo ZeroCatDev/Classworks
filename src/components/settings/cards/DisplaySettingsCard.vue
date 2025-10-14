@@ -1,34 +1,37 @@
 <template>
-  <settings-card title="显示设置" icon="mdi-monitor" border>
-      <v-list>
-        <setting-item :setting-key="'display.emptySubjectDisplay'" />
+  <settings-card
+    title="显示设置"
+    icon="mdi-monitor"
+    border
+  >
+    <v-list>
+      <setting-item :setting-key="'display.emptySubjectDisplay'" />
         
 
-        <v-divider class="my-2" />
-        <setting-item :setting-key="'display.dynamicSort'" />
+      <v-divider class="my-2" />
+      <setting-item :setting-key="'display.dynamicSort'" />
 
-        <v-divider class="my-2" />
-        <setting-item :setting-key="'display.showRandomButton'" />
+      <v-divider class="my-2" />
+      <setting-item :setting-key="'display.showRandomButton'" />
 
-        <v-divider class="my-2" />
-        <setting-item :setting-key="'display.showFullscreenButton'" />
+      <v-divider class="my-2" />
+      <setting-item :setting-key="'display.showFullscreenButton'" />
 
-        <v-divider class="my-2" />
-        <setting-item :setting-key="'display.cardHoverEffect'" />
+      <v-divider class="my-2" />
+      <setting-item :setting-key="'display.cardHoverEffect'" />
 
-        <v-divider class="my-2" />
-        <setting-item :setting-key="'display.enhancedTouchMode'" />
+      <v-divider class="my-2" />
+      <setting-item :setting-key="'display.enhancedTouchMode'" />
 
-        <v-divider class="my-2" />
-        <setting-item :setting-key="'display.showQuickTools'" />
+      <v-divider class="my-2" />
+      <setting-item :setting-key="'display.showQuickTools'" />
 
-        <v-divider class="my-2" />
-        <setting-item :setting-key="'display.showAntiScreenBurnCard'" />
+      <v-divider class="my-2" />
+      <setting-item :setting-key="'display.showAntiScreenBurnCard'" />
 
-        <v-divider class="my-2" />
-        <setting-item :setting-key="'display.showExamScheduleButton'" />
-
-      </v-list>
+      <v-divider class="my-2" />
+      <setting-item :setting-key="'display.showExamScheduleButton'" />
+    </v-list>
   </settings-card>
 </template>
 
