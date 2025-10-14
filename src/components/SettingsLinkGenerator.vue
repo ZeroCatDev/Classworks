@@ -1,7 +1,14 @@
 <template>
-  <v-card border class="settings-link-generator mb-4">
+  <v-card
+    border
+    class="settings-link-generator mb-4"
+  >
     <v-card-title class="text-h6">
-      <v-icon start icon="mdi-link-variant" class="mr-2" />
+      <v-icon
+        start
+        icon="mdi-link-variant"
+        class="mr-2"
+      />
       设置分享
     </v-card-title>
 
@@ -49,7 +56,10 @@
 
       <!-- 选择摘要和链接 -->
       <div class="d-flex align-center mt-3 mb-3 flex-wrap gap-2">
-        <v-chip color="primary" class="mr-2">
+        <v-chip
+          color="primary"
+          class="mr-2"
+        >
           已选 {{ selectedItems.length }} 项设置
         </v-chip>
 
@@ -83,18 +93,18 @@
 
           <v-expansion-panel-text>
             <v-data-table
+              v-model="selectedItems"
               :items-per-page="settingItems.length"
               :headers="headers"
               :items="filteredItems"
               item-value="key"
-              v-model="selectedItems"
               show-select
               density="compact"
               class="rounded setting-table"
-              @update:selected="handleSelectionChange"
               :sort-by="[{ key: 'isChanged', order: 'desc' }]"
+              @update:selected="handleSelectionChange"
             >
-              <template v-slot:top>
+              <template #top>
                 <v-text-field
                   v-model="search"
                   label="搜索设置"
@@ -102,12 +112,16 @@
                   single-line
                   hide-details
                   class="mb-4"
-                ></v-text-field>
+                />
               </template>
 
               <template #[`item.description`]="{ item }">
                 <div class="d-flex align-center">
-                  <v-icon size="small" :icon="item.icon" class="mr-2"></v-icon>
+                  <v-icon
+                    size="small"
+                    :icon="item.icon"
+                    class="mr-2"
+                  />
                   {{ item.description }}
                 </div>
               </template>
@@ -286,6 +300,16 @@ export default {
     },
   },
 
+  watch: {
+    // 监听选择变化，自动生成链接
+    selectedItems: {
+      handler() {
+        this.autoGenerateLink();
+      },
+      deep: true,
+    },
+  },
+
   methods: {
     /**
      * 处理表格选择变化
@@ -442,16 +466,6 @@ export default {
     getSettingDescription(key) {
       const setting = this.settingItems.find((item) => item.key === key);
       return setting ? setting.description : key;
-    },
-  },
-
-  watch: {
-    // 监听选择变化，自动生成链接
-    selectedItems: {
-      handler() {
-        this.autoGenerateLink();
-      },
-      deep: true,
     },
   },
 };

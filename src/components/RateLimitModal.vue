@@ -1,21 +1,39 @@
 <template>
-  <v-dialog v-model="isVisible" max-width="500" persistent>
+  <v-dialog
+    v-model="isVisible"
+    max-width="500"
+    persistent
+  >
     <v-card class="rate-limit-modal">
       <v-card-title class="text-center pa-4 bg-error text-white">
-        <v-icon icon="mdi-clock-alert-outline" size="large" class="mr-2" />
+        <v-icon
+          icon="mdi-clock-alert-outline"
+          size="large"
+          class="mr-2"
+        />
         请求频率超限
       </v-card-title>
 
       <v-card-text class="pa-6">
-        <div class="text-body-1 mb-4">您的请求过于频繁，请稍后再试。</div>
+        <div class="text-body-1 mb-4">
+          您的请求过于频繁，请稍后再试。
+        </div>
 
-        <v-card flat class="mb-4" v-if="activeRequests.length > 0">
+        <v-card
+          v-if="activeRequests.length > 0"
+          flat
+          class="mb-4"
+        >
           <v-card-text>
             <v-list
               v-for="(request, index) in activeRequests"
               :key="index"
               class="mb-4"
-              ><v-list-item prepend-icon="mdi-web" color="primary">
+            >
+              <v-list-item
+                prepend-icon="mdi-web"
+                color="primary"
+              >
                 <v-list-item-title>
                   等待时间:
                   <span class="text-primary font-weight-bold">{{
@@ -25,12 +43,12 @@
                 <v-list-item-subtitle>
                   {{ request.method }} {{ request.path }}
                 </v-list-item-subtitle>
-              </v-list-item></v-list
-            >
+              </v-list-item>
+            </v-list>
             <v-divider
               v-if="index < activeRequests.length - 1"
               class="my-3"
-            ></v-divider>
+            />
           </v-card-text>
         </v-card>
 
@@ -40,8 +58,14 @@
       </v-card-text>
 
       <v-card-actions class="pa-4 pt-0">
-        <v-spacer></v-spacer>
-        <v-btn color="primary" variant="tonal" @click="close"> 我知道了 </v-btn>
+        <v-spacer />
+        <v-btn
+          color="primary"
+          variant="tonal"
+          @click="close"
+        >
+          我知道了
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

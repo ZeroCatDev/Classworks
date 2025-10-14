@@ -3,24 +3,38 @@
     <v-row>
       <v-col cols="12">
         <div class="d-flex align-center mb-6">
-          <v-icon size="x-large" color="primary" class="mr-3"
-            >mdi-database-sync</v-icon
+          <v-icon
+            size="x-large"
+            color="primary"
+            class="mr-3"
           >
+            mdi-database-sync
+          </v-icon>
           <div>
-            <h1 class="text-h4">数据迁移工具</h1>
+            <h1 class="text-h4">
+              数据迁移工具
+            </h1>
             <div class="text-subtitle-1 text-grey">
               将现有数据迁移至 KV 存储系统
             </div>
           </div>
         </div>
 
-        <v-card class="mb-6" variant="tonal" color="info" density="compact">
+        <v-card
+          class="mb-6"
+          variant="tonal"
+          color="info"
+          density="compact"
+        >
           <v-card-text class="d-flex align-center">
-            <v-icon color="info" class="mr-2">mdi-information-outline</v-icon>
-            <span
-              >使用此工具可以将数据从旧存储系统迁移到新的 KV
-              存储系统，选择本地或云端迁移，以确保数据不会丢失。</span
+            <v-icon
+              color="info"
+              class="mr-2"
             >
+              mdi-information-outline
+            </v-icon>
+            <span>使用此工具可以将数据从旧存储系统迁移到新的 KV
+              存储系统，选择本地或云端迁移，以确保数据不会丢失。</span>
           </v-card-text>
         </v-card>
 
@@ -29,12 +43,20 @@
     </v-row>
 
     <!-- 一键迁移对话框 -->
-    <v-dialog v-model="showMigrationDialog" max-width="500" persistent>
+    <v-dialog
+      v-model="showMigrationDialog"
+      max-width="500"
+      persistent
+    >
       <v-card>
         <v-card-title class="text-h5 d-flex align-center">
-          <v-icon color="primary" size="large" class="mr-3"
-            >mdi-database-sync</v-icon
+          <v-icon
+            color="primary"
+            size="large"
+            class="mr-3"
           >
+            mdi-database-sync
+          </v-icon>
           一键数据迁移
         </v-card-title>
         <v-card-text class="mt-4">
@@ -62,7 +84,7 @@
           </v-alert>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn
             color="grey-darken-1"
             variant="text"
@@ -74,11 +96,16 @@
             color="primary"
             size="large"
             variant="elevated"
-            @click="startAutoMigration"
             :loading="isAutoMigrating"
             :disabled="isAutoMigrating"
+            @click="startAutoMigration"
           >
-            <v-icon left class="mr-2">mdi-database-export</v-icon>
+            <v-icon
+              left
+              class="mr-2"
+            >
+              mdi-database-export
+            </v-icon>
             开始一键迁移
           </v-btn>
         </v-card-actions>

@@ -1,16 +1,22 @@
 <template>
-  <settings-card title="数据源设置" icon="mdi-database-cog">
+  <settings-card
+    title="数据源设置"
+    icon="mdi-database-cog"
+  >
     <v-list>
       <!-- 服务器模式设置 -->
       <template
         v-if="
           currentProvider === 'kv-server' ||
-          currentProvider === 'classworkscloud'
+            currentProvider === 'classworkscloud'
         "
       >
         <v-list-item>
           <template #prepend>
-            <v-icon icon="mdi-lan-connect" class="mr-3" />
+            <v-icon
+              icon="mdi-lan-connect"
+              class="mr-3"
+            />
           </template>
           <v-list-item-title>检查服务器连接</v-list-item-title>
           <template #append>
@@ -21,84 +27,132 @@
             >
               测试连接
             </v-btn>
-          </template> </v-list-item
-        ><!-- 数据迁移，仅对KV本地存储有效 -->
+          </template>
+        </v-list-item><!-- 数据迁移，仅对KV本地存储有效 -->
       </template>
 
       <!-- 本地存储设置 -->
       <template v-if="currentProvider === 'kv-local'">
         <v-list-item>
           <template #prepend>
-            <v-icon icon="mdi-database" class="mr-3" />
+            <v-icon
+              icon="mdi-database"
+              class="mr-3"
+            />
           </template>
           <v-list-item-title>清除数据库缓存</v-list-item-title>
-          <v-list-item-subtitle
-            >这将清除所有本地数据库中的数据</v-list-item-subtitle
-          >
+          <v-list-item-subtitle>
+            这将清除所有本地数据库中的数据
+          </v-list-item-subtitle>
           <template #append>
-            <v-btn color="error" variant="tonal" @click="confirmClearIndexedDB">
+            <v-btn
+              color="error"
+              variant="tonal"
+              @click="confirmClearIndexedDB"
+            >
               清除
             </v-btn>
           </template>
         </v-list-item>
         <v-list-item>
           <template #prepend>
-            <v-icon icon="mdi-database-export" class="mr-3" />
+            <v-icon
+              icon="mdi-database-export"
+              class="mr-3"
+            />
           </template>
           <v-list-item-title>导出数据库</v-list-item-title>
           <template #append>
-            <v-btn variant="tonal" @click="exportData"> 导出 </v-btn>
+            <v-btn
+              variant="tonal"
+              @click="exportData"
+            >
+              导出
+            </v-btn>
           </template>
         </v-list-item>
       </template>
       <v-list-item>
         <template #prepend>
-          <v-icon icon="mdi-database-import" class="mr-3" />
+          <v-icon
+            icon="mdi-database-import"
+            class="mr-3"
+          />
         </template>
         <v-list-item-title>迁移旧数据</v-list-item-title>
-        <v-list-item-subtitle
-          >将旧的存储格式数据转移到新的KV存储</v-list-item-subtitle
-        >
+        <v-list-item-subtitle>
+          将旧的存储格式数据转移到新的KV存储
+        </v-list-item-subtitle>
         <template #append>
-          <v-btn :loading="migrateLoading" variant="tonal" @click="migrateData">
+          <v-btn
+            :loading="migrateLoading"
+            variant="tonal"
+            @click="migrateData"
+          >
             迁移
           </v-btn>
-        </template> </v-list-item
-      ><!-- 显示机器ID -->
+        </template>
+      </v-list-item><!-- 显示机器ID -->
       <v-list-item>
         <template #prepend>
-          <v-icon icon="mdi-identifier" class="mr-3" />
+          <v-icon
+            icon="mdi-identifier"
+            class="mr-3"
+          />
         </template>
         <v-list-item-title>本机唯一标识符</v-list-item-title>
-        <v-list-item-subtitle v-if="machineId">{{
-          machineId
-        }}</v-list-item-subtitle>
-        <v-list-item-subtitle v-else>正在加载...</v-list-item-subtitle>
+        <v-list-item-subtitle v-if="machineId">
+          {{
+            machineId
+          }}
+        </v-list-item-subtitle>
+        <v-list-item-subtitle v-else>
+          正在加载...
+        </v-list-item-subtitle>
       </v-list-item>
       <v-list-item>
         <template #prepend>
-          <v-icon icon="mdi-lan-connect" class="mr-3" />
+          <v-icon
+            icon="mdi-lan-connect"
+            class="mr-3"
+          />
         </template>
         <v-list-item-title>查看本地缓存</v-list-item-title>
         <template #append>
-          <v-btn variant="tonal" to="/cachemanagement"> 查看 </v-btn>
+          <v-btn
+            variant="tonal"
+            to="/cachemanagement"
+          >
+            查看
+          </v-btn>
         </template>
       </v-list-item>
     </v-list>
 
     <!-- 确认对话框 -->
-    <v-dialog v-model="confirmDialog" max-width="400">
+    <v-dialog
+      v-model="confirmDialog"
+      max-width="400"
+    >
       <v-card>
         <v-card-title>{{ confirmTitle }}</v-card-title>
         <v-card-text>{{ confirmMessage }}</v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="grey" variant="text" @click="confirmDialog = false"
-            >取消</v-btn
+          <v-spacer />
+          <v-btn
+            color="grey"
+            variant="text"
+            @click="confirmDialog = false"
           >
-          <v-btn color="error" variant="tonal" @click="handleConfirm"
-            >确认</v-btn
+            取消
+          </v-btn>
+          <v-btn
+            color="error"
+            variant="tonal"
+            @click="handleConfirm"
           >
+            确认
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

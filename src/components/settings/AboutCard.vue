@@ -2,24 +2,41 @@
   <v-card border>
     <v-card-item>
       <template #prepend>
-        <v-icon icon="mdi-information" size="large" class="mr-2" />
+        <v-icon
+          icon="mdi-information"
+          size="large"
+          class="mr-2"
+        />
       </template>
-      <v-card-title class="text-h6">关于</v-card-title>
+      <v-card-title class="text-h6">
+        关于
+      </v-card-title>
     </v-card-item>
 
     <v-card-text>
       <v-row>
-        <v-col cols="12" md="8" class="mx-auto">
+        <v-col
+          cols="12"
+          md="8"
+          class="mx-auto"
+        >
           <div class="d-flex flex-column align-start">
-            <v-avatar size="120" class="mb-4">
+            <v-avatar
+              size="120"
+              class="mb-4"
+            >
               <v-img
                 src="https://github.com/SunWuyuan.png"
                 alt="Sunwuyuan"
               />
             </v-avatar>
 
-            <h2 class="text-h5 mb-2">Classworks</h2>
-            <p class="text-body-1 mb-4">适用于班级大屏的作业板小工具</p>
+            <h2 class="text-h5 mb-2">
+              Classworks
+            </h2>
+            <p class="text-body-1 mb-4">
+              适用于班级大屏的作业板小工具
+            </p>
 
             <div class="d-flex gap-2 flex-wrap mb-6">
               <v-btn
@@ -58,9 +75,11 @@
               </v-btn>
             </div>
 
-            <v-divider class="mb-4 w-100"></v-divider>
+            <v-divider class="mb-4 w-100" />
 
-            <h3 class="text-h6 mb-2">备注与致谢</h3>
+            <h3 class="text-h6 mb-2">
+              备注与致谢
+            </h3>
             <v-list class="mb-4 bg-transparent">
               <v-list-item
                 href="https://github.com/EnderWolf006/HomeworkBoard"
@@ -99,7 +118,7 @@
                   新一代，开源，编程社区
                 </v-list-item-subtitle>
               </v-list-item>
-              <v-divider class="ma-1"></v-divider>
+              <v-divider class="ma-1" />
               <v-list-item
                 href="https://github.com/HUSX100/IslandCaller"
                 target="_blank"
@@ -142,11 +161,14 @@
               transition="dialog-bottom-transition"
               fullscreen
             >
-              <v-card
-                ><v-toolbar>
-                  <v-btn icon="mdi-close" @click="showDeps = false"></v-btn>
+              <v-card>
+                <v-toolbar>
+                  <v-btn
+                    icon="mdi-close"
+                    @click="showDeps = false"
+                  />
                   <v-toolbar-title>使用的第三方库</v-toolbar-title>
-                  <v-spacer></v-spacer>
+                  <v-spacer />
                 </v-toolbar>
                 <v-card-text>
                   <v-list>

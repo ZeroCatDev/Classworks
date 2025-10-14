@@ -4,8 +4,14 @@
     <kv-initialize />
     <!-- 正常路由 -->
     <router-view v-slot="{ Component, route }">
-      <transition name="md3" mode="out-in">
-        <component :is="Component" :key="route.path" />
+      <transition
+        name="md3"
+        mode="out-in"
+      >
+        <component
+          :is="Component"
+          :key="route.path"
+        />
       </transition>
     </router-view>
     <global-message />

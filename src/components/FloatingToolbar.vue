@@ -6,45 +6,52 @@
       rounded="xl"
       :class="{ 'toolbar-expanded': isExpanded }"
     >
-
-
-      <v-btn-group variant="text" class="toolbar-buttons">
-        <v-btn
-        icon="mdi-chevron-left"
+      <v-btn-group
         variant="text"
-        @click="$emit('prev-day')"
-        :title="'查看昨天'"
-        class="toolbar-btn"
-        v-ripple
-      />
+        class="toolbar-buttons"
+      >
         <v-btn
+          v-ripple
+          icon="mdi-chevron-left"
+          variant="text"
+          :title="'查看昨天'"
+          class="toolbar-btn"
+          @click="$emit('prev-day')"
+        />
+        <v-btn
+          v-ripple
           icon="mdi-format-font-size-decrease"
           variant="text"
-          @click="$emit('zoom', 'out')"
           :title="'缩小字体'"
           class="toolbar-btn"
-          v-ripple
+          @click="$emit('zoom', 'out')"
         />
         <v-btn
+          v-ripple
           icon="mdi-format-font-size-increase"
           variant="text"
-          @click="$emit('zoom', 'up')"
           :title="'放大字体'"
           class="toolbar-btn"
-          v-ripple
+          @click="$emit('zoom', 'up')"
         />
-        <v-menu location="top" :close-on-content-click="false">
+        <v-menu
+          location="top"
+          :close-on-content-click="false"
+        >
           <template #activator="{ props }">
             <v-btn
+              v-ripple
               icon="mdi-calendar"
               variant="text"
               v-bind="props"
               :title="'选择日期'"
               class="toolbar-btn"
-              v-ripple
             />
           </template>
-          <v-card border class="date-picker-card">
+          <v-card
+            border
+            class="date-picker-card"
+          >
             <v-date-picker
               :model-value="selectedDate"
               color="primary"
@@ -53,27 +60,25 @@
           </v-card>
         </v-menu>
         <v-btn
+          v-ripple
           icon="mdi-refresh"
           variant="text"
           :loading="loading"
-          @click="$emit('refresh')"
           :title="'刷新数据'"
           class="toolbar-btn"
-          v-ripple
+          @click="$emit('refresh')"
         />
 
-       <v-btn
-        v-if="!isToday"
-        icon="mdi-chevron-right"
-        variant="text"
-        @click="$emit('next-day')"
-        :title="'查看明天'"
-        class="toolbar-btn"
-        v-ripple
-      />
+        <v-btn
+          v-if="!isToday"
+          v-ripple
+          icon="mdi-chevron-right"
+          variant="text"
+          :title="'查看明天'"
+          class="toolbar-btn"
+          @click="$emit('next-day')"
+        />
       </v-btn-group>
-
-
     </v-card>
   </v-slide-y-transition>
 </template>

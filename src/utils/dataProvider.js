@@ -94,6 +94,7 @@ export default {
    * 1. 如果用户选择本地存储，则将本地键数据读取并存储到云端
    * 2. 如果云端配置为空或错误则自动改成classworksCloudDefaults的配置
    * 3. 根据网站验证情况（私有则添加token，公开或受保护则不需要）拼接键的get路径并返回
+   * 4. Token优先使用kvToken（KV授权令牌），若不存在则使用siteKey（网站令牌）作为后备
    *
    * @param {string} key - 要获取地址的键名
    * @param {Object} options - 选项配置
@@ -175,6 +176,7 @@ export default {
     try {
       let serverUrl = getSetting("server.domain");
       let siteKey = getSetting("server.siteKey");
+      let kvToken = getSetting("server.kvToken");
       const machineId = getSetting("device.uuid");
       let configured = false;
 
@@ -242,9 +244,11 @@ export default {
         const { accessType } = namespaceInfo;
 
         // 如果是私有访问，添加token参数
-        if (accessType === 'private' && siteKey) {
+        // 优先使用kvToken，若不存在则使用siteKey
+        const token = kvToken || siteKey;
+        if (accessType === 'private' && token) {
           const urlObj = new URL(url);
-          urlObj.searchParams.set('token', siteKey);
+          urlObj.searchParams.set('token', token);
           url = urlObj.toString();
         }
         // 公开或受保护访问不需要token参数

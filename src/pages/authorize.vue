@@ -1,7 +1,17 @@
 <template>
-  <v-container class="fill-height" fluid>
-    <v-row align="center" justify="center">
-      <v-col cols="12" sm="8" md="6">
+  <v-container
+    class="fill-height"
+    fluid
+  >
+    <v-row
+      align="center"
+      justify="center"
+    >
+      <v-col
+        cols="12"
+        sm="8"
+        md="6"
+      >
         <v-card>
           <v-card-title class="text-h5">
             {{ status === 'processing' ? '正在处理授权...' : status === 'success' ? '授权成功' : '授权失败' }}
@@ -12,12 +22,17 @@
               indeterminate
               color="primary"
               class="mb-4"
-            ></v-progress-linear>
+            />
             <p>{{ message }}</p>
           </v-card-text>
           <v-card-actions v-if="status !== 'processing'">
-            <v-spacer></v-spacer>
-            <v-btn color="primary" @click="goToHome">返回首页</v-btn>
+            <v-spacer />
+            <v-btn
+              color="primary"
+              @click="goToHome"
+            >
+              返回首页
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-col>

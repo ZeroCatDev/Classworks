@@ -1,261 +1,347 @@
-<template><v-app-bar elevation="1">
-  <template #prepend>
-    <v-btn
-      icon="mdi-arrow-left"
-      variant="text"
-      @click="$router.push('/')"
-    />
-  </template>
-  <v-app-bar-title class="text-h6" v-if="list && !isRenaming">{{ list.name }}</v-app-bar-title>
-  <v-app-bar-title class="text-h6" v-else>列表</v-app-bar-title>
-</v-app-bar>
+<template>
+  <v-app-bar elevation="1">
+    <template #prepend>
+      <v-btn
+        icon="mdi-arrow-left"
+        variant="text"
+        @click="$router.push('/')"
+      />
+    </template>
+    <v-app-bar-title
+      v-if="list && !isRenaming"
+      class="text-h6"
+    >
+      {{ list.name }}
+    </v-app-bar-title>
+    <v-app-bar-title
+      v-else
+      class="text-h6"
+    >
+      列表
+    </v-app-bar-title>
+  </v-app-bar>
   <v-container>
-
-      <div class="d-flex align-center mb-4">
+    <div class="d-flex align-center mb-4">
+      <v-btn
+        icon
+        class="mr-2"
+        to="/list"
+        border
+      >
+        <v-icon>mdi-arrow-left</v-icon>
+      </v-btn>
+      <h1 v-if="list && !isRenaming">
+        {{ list.name }}
         <v-btn
           icon
-          class="mr-2"
-          to="/list"
+          size="small"
           border
+          @click="startRenaming"
         >
-          <v-icon>mdi-arrow-left</v-icon>
+          <v-icon>mdi-pencil</v-icon>
         </v-btn>
-        <h1 v-if="list && !isRenaming">
-          {{ list.name }}
-          <v-btn icon size="small" @click="startRenaming" border>
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
-        </h1>
-        <div v-else-if="list && isRenaming" class="d-flex align-center">
-          <v-text-field
-            v-model="newListName"
-            label="列表名称"
-            hide-details
-            density="compact"
-            class="mr-2"
-            style="min-width: 200px;"
-            autofocus
-            @keyup.enter="saveListName"
-          ></v-text-field>
-          <v-btn color="primary" size="small" class="mr-2" @click="saveListName">
-            <v-icon>mdi-check</v-icon>
-          </v-btn>
-          <v-btn color="error" size="small" @click="cancelRenaming">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </div>
-        <h1 v-else>
-          加载中...
-        </h1>
-      </div>
-
-
-      <v-card class="mb-5" border rounded="xl">
-        <v-card-title class="d-flex align-center">
-          项目列表
-          <v-spacer />
-          <v-btn-toggle
-            v-model="sortType"
-            mandatory
-          >
-            <v-btn value="default">
-              <v-icon>mdi-sort-alphabetical-ascending</v-icon>
-            </v-btn>
-            <v-btn value="completed">
-              <v-icon>mdi-check-circle-outline</v-icon>
-            </v-btn>
-          </v-btn-toggle>
-        </v-card-title>
-        <v-card-text v-if="sortedItems.length === 0">
-          暂无项目，请添加新项目
-        </v-card-text>
-        <v-list
-          v-else
-          select-strategy="leaf"
+      </h1>
+      <div
+        v-else-if="list && isRenaming"
+        class="d-flex align-center"
+      >
+        <v-text-field
+          v-model="newListName"
+          label="列表名称"
+          hide-details
+          density="compact"
+          class="mr-2"
+          style="min-width: 200px;"
+          autofocus
+          @keyup.enter="saveListName"
+        />
+        <v-btn
+          color="primary"
+          size="small"
+          class="mr-2"
+          @click="saveListName"
         >
-          <v-list-item
-            v-for="(item, index) in sortedItems"
-            :key="item.id"
-            :class="{ 'text-decoration-line-through': item.completed }"
-            @click="openItemDetails(item)"
-          >
-            <template #prepend>
-              <v-list-item-action start>
-                <v-checkbox-btn
-                  :model-value="item.completed"
-                  @update:model-value="updateItemStatus(item.id, $event)"
-                  @click.stop
-                />
-              </v-list-item-action>
-            </template>
-            {{ item.name }}
-            <v-list-item-subtitle>{{ item.description }}</v-list-item-subtitle>
-            <template #append>
-              {{ index + 1 }}
-            </template>
-          </v-list-item>
-        </v-list>
-        <v-card-actions v-if="sortedItems.length > 0">
+          <v-icon>mdi-check</v-icon>
+        </v-btn>
+        <v-btn
+          color="error"
+          size="small"
+          @click="cancelRenaming"
+        >
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </div>
+      <h1 v-else>
+        加载中...
+      </h1>
+    </div>
+
+
+    <v-card
+      class="mb-5"
+      border
+      rounded="xl"
+    >
+      <v-card-title class="d-flex align-center">
+        项目列表
+        <v-spacer />
+        <v-btn-toggle
+          v-model="sortType"
+          mandatory
+        >
+          <v-btn value="default">
+            <v-icon>mdi-sort-alphabetical-ascending</v-icon>
+          </v-btn>
+          <v-btn value="completed">
+            <v-icon>mdi-check-circle-outline</v-icon>
+          </v-btn>
+        </v-btn-toggle>
+      </v-card-title>
+      <v-card-text v-if="sortedItems.length === 0">
+        暂无项目，请添加新项目
+      </v-card-text>
+      <v-list
+        v-else
+        select-strategy="leaf"
+      >
+        <v-list-item
+          v-for="(item, index) in sortedItems"
+          :key="item.id"
+          :class="{ 'text-decoration-line-through': item.completed }"
+          @click="openItemDetails(item)"
+        >
+          <template #prepend>
+            <v-list-item-action start>
+              <v-checkbox-btn
+                :model-value="item.completed"
+                @update:model-value="updateItemStatus(item.id, $event)"
+                @click.stop
+              />
+            </v-list-item-action>
+          </template>
+          {{ item.name }}
+          <v-list-item-subtitle>{{ item.description }}</v-list-item-subtitle>
+          <template #append>
+            {{ index + 1 }}
+          </template>
+        </v-list-item>
+      </v-list>
+      <v-card-actions v-if="sortedItems.length > 0">
+        <v-spacer />
+        <v-btn
+          color="error"
+          prepend-icon="mdi-delete-sweep"
+          :disabled="!hasCompletedItems"
+          @click="confirmDeleteCompleted"
+        >
+          删除已完成项目
+        </v-btn>
+      </v-card-actions>
+    </v-card><v-card
+      class="mb-5"
+      border
+      rounded="xl"
+    >
+      <v-card-title>添加新项目</v-card-title>
+      <v-card-text>
+        <v-text-field
+          v-model="newItemName"
+          label="项目名称"
+          :rules="[(v) => !!v || '名称不能为空']"
+        />
+        <v-btn
+          color="primary"
+          :disabled="!newItemName"
+          @click="addItem"
+        >
+          添加
+        </v-btn>
+      </v-card-text>
+    </v-card>
+
+    <v-card
+      class="mb-5"
+      border
+      rounded="xl"
+    >
+      <v-card-title>列表排序</v-card-title>
+      <v-card-text>
+        <v-text-field
+          v-model="sortSeed"
+          label="排序种子 (任意数字或文本)"
+          hint="输入相同的种子值可以得到相同的排序结果"
+          persistent-hint
+          class="mb-3"
+        />
+        <v-btn
+          color="primary"
+          class="mr-2"
+          @click="randomSort"
+        >
+          随机排序
+        </v-btn>
+        <v-btn
+          variant="text"
+          @click="resetSort"
+        >
+          撤销
+        </v-btn>
+      </v-card-text>
+    </v-card>
+
+    <!-- 确认删除对话框 -->
+    <v-dialog
+      v-model="deleteDialog.show"
+      max-width="500"
+    >
+      <v-card
+        border
+        rounded="xl"
+      >
+        <v-card-title>{{ deleteDialog.title }}</v-card-title>
+        <v-card-text>{{ deleteDialog.text }}</v-card-text>
+        <v-card-actions>
           <v-spacer />
+          <v-btn
+            color="primary"
+            variant="text"
+            @click="deleteDialog.show = false"
+          >
+            取消
+          </v-btn>
           <v-btn
             color="error"
-            prepend-icon="mdi-delete-sweep"
-            @click="confirmDeleteCompleted"
-            :disabled="!hasCompletedItems"
+            variant="text"
+            @click="confirmDelete"
           >
-            删除已完成项目
+            确认删除
           </v-btn>
         </v-card-actions>
-      </v-card><v-card class="mb-5" border rounded="xl">
-        <v-card-title>添加新项目</v-card-title>
-        <v-card-text>
-          <v-text-field
-            v-model="newItemName"
-            label="项目名称"
-            :rules="[(v) => !!v || '名称不能为空']"
-          />
-          <v-btn
-            color="primary"
-            :disabled="!newItemName"
-            @click="addItem"
-          >
-            添加
-          </v-btn>
-        </v-card-text>
       </v-card>
+    </v-dialog>
 
-      <v-card class="mb-5" border rounded="xl">
-        <v-card-title>列表排序</v-card-title>
+    <!-- 项目详情对话框 -->
+    <v-dialog
+      v-model="itemDialog.show"
+      max-width="600"
+    >
+      <v-card
+        border
+        rounded="xl"
+      >
+        <v-card-title>
+          <span v-if="!itemDialog.isEditing">项目详情</span>
+          <span v-else>编辑项目</span>
+        </v-card-title>
+
         <v-card-text>
-          <v-text-field
-            v-model="sortSeed"
-            label="排序种子 (任意数字或文本)"
-            hint="输入相同的种子值可以得到相同的排序结果"
-            persistent-hint
-            class="mb-3"
-          />
-          <v-btn
-            color="primary"
-            class="mr-2"
-            @click="randomSort"
-          >
-            随机排序
-          </v-btn>
-          <v-btn
-            variant="text"
-            @click="resetSort"
-          >
-            撤销
-          </v-btn>
-        </v-card-text>
-      </v-card>
+          <div v-if="!itemDialog.isEditing && itemDialog.item">
+            <v-list>
+              <v-list-item>
+                <v-list-item-title class="text-subtitle-1 font-weight-bold">
+                  {{ itemDialog.item.name }}
+                </v-list-item-title>
+                <v-list-item-subtitle>{{ itemDialog.item.id }}</v-list-item-subtitle>
+              </v-list-item>
 
-      <!-- 确认删除对话框 -->
-      <v-dialog v-model="deleteDialog.show" max-width="500">
-        <v-card border rounded="xl">
-          <v-card-title>{{ deleteDialog.title }}</v-card-title>
-          <v-card-text>{{ deleteDialog.text }}</v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" variant="text" @click="deleteDialog.show = false">
+              <v-list-item>
+                <v-list-item-title class="text-subtitle-1 font-weight-bold">
+                  状态
+                </v-list-item-title>
+                <v-list-item-subtitle>
+                  <v-chip
+                    :color="itemDialog.item.completed ? 'success' : 'warning'"
+                    size="small"
+                  >
+                    {{ itemDialog.item.completed ? '已完成' : '未完成' }}
+                  </v-chip>
+                </v-list-item-subtitle>
+              </v-list-item>
+
+              <v-list-item v-if="itemDialog.item.description">
+                <v-list-item-title class="text-subtitle-1 font-weight-bold">
+                  描述
+                </v-list-item-title>
+                <v-list-item-subtitle>{{ itemDialog.item.description }}</v-list-item-subtitle>
+              </v-list-item>
+            </v-list>
+          </div>
+
+          <div
+            v-else-if="itemDialog.isEditing && itemDialog.item"
+            class="pa-2"
+          >
+            <v-text-field
+              v-model="itemDialog.editedItem.name"
+              label="名称"
+              variant="outlined"
+              class="mb-3"
+            />
+
+            <v-textarea
+              v-model="itemDialog.editedItem.description"
+              label="描述"
+              variant="outlined"
+              rows="3"
+              class="mb-3"
+            />
+
+
+            <v-switch
+              v-model="itemDialog.editedItem.completed"
+              label="已完成"
+              color="success"
+              hide-details
+            />
+          </div>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+
+          <template v-if="!itemDialog.isEditing">
+            <v-btn
+              color="primary"
+              variant="text"
+              @click="startEditingItem"
+            >
+              编辑
+            </v-btn>
+            <v-btn
+              color="error"
+              variant="text"
+              @click="confirmDeleteItem(itemDialog.item?.id)"
+            >
+              删除
+            </v-btn>
+            <v-btn
+              color="secondary"
+              variant="text"
+              @click="itemDialog.show = false"
+            >
+              关闭
+            </v-btn>
+          </template>
+
+          <template v-else>
+            <v-btn
+              color="success"
+              variant="text"
+              @click="saveItemChanges"
+            >
+              保存
+            </v-btn>
+            <v-btn
+              color="secondary"
+              variant="text"
+              @click="cancelEditingItem"
+            >
               取消
             </v-btn>
-            <v-btn color="error" variant="text" @click="confirmDelete">
-              确认删除
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
-      <!-- 项目详情对话框 -->
-      <v-dialog v-model="itemDialog.show" max-width="600">
-        <v-card border rounded="xl">
-          <v-card-title>
-            <span v-if="!itemDialog.isEditing">项目详情</span>
-            <span v-else>编辑项目</span>
-          </v-card-title>
-
-          <v-card-text>
-            <div v-if="!itemDialog.isEditing && itemDialog.item">
-              <v-list>
-                <v-list-item>
-                  <v-list-item-title class="text-subtitle-1 font-weight-bold">{{ itemDialog.item.name }}</v-list-item-title>
-                  <v-list-item-subtitle>{{ itemDialog.item.id }}</v-list-item-subtitle>
-                </v-list-item>
-
-                <v-list-item>
-                  <v-list-item-title class="text-subtitle-1 font-weight-bold">状态</v-list-item-title>
-                  <v-list-item-subtitle>
-                    <v-chip
-                      :color="itemDialog.item.completed ? 'success' : 'warning'"
-                      size="small"
-                    >
-                      {{ itemDialog.item.completed ? '已完成' : '未完成' }}
-                    </v-chip>
-                  </v-list-item-subtitle>
-                </v-list-item>
-
-                <v-list-item v-if="itemDialog.item.description">
-                  <v-list-item-title class="text-subtitle-1 font-weight-bold">描述</v-list-item-title>
-                  <v-list-item-subtitle>{{ itemDialog.item.description }}</v-list-item-subtitle>
-                </v-list-item>
-
-              </v-list>
-            </div>
-
-            <div v-else-if="itemDialog.isEditing && itemDialog.item" class="pa-2">
-              <v-text-field
-                v-model="itemDialog.editedItem.name"
-                label="名称"
-                variant="outlined"
-                class="mb-3"
-              ></v-text-field>
-
-              <v-textarea
-                v-model="itemDialog.editedItem.description"
-                label="描述"
-                variant="outlined"
-                rows="3"
-                class="mb-3"
-              ></v-textarea>
-
-
-              <v-switch
-                v-model="itemDialog.editedItem.completed"
-                label="已完成"
-                color="success"
-                hide-details
-              ></v-switch>
-            </div>
-          </v-card-text>
-
-          <v-card-actions>
-            <v-spacer></v-spacer>
-
-            <template v-if="!itemDialog.isEditing">
-              <v-btn color="primary" variant="text" @click="startEditingItem">
-                编辑
-              </v-btn>
-              <v-btn color="error" variant="text" @click="confirmDeleteItem(itemDialog.item?.id)">
-                删除
-              </v-btn>
-              <v-btn color="secondary" variant="text" @click="itemDialog.show = false">
-                关闭
-              </v-btn>
-            </template>
-
-            <template v-else>
-              <v-btn color="success" variant="text" @click="saveItemChanges">
-                保存
-              </v-btn>
-              <v-btn color="secondary" variant="text" @click="cancelEditingItem">
-                取消
-              </v-btn>
-            </template>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
+          </template>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 

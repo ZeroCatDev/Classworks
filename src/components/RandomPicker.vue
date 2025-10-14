@@ -5,16 +5,32 @@
     fullscreen-breakpoint="sm"
     persistent
   >
-    <v-card class="random-picker-card" rounded="xl" border>
+    <v-card
+      class="random-picker-card"
+      rounded="xl"
+      border
+    >
       <v-card-title class="text-h5 d-flex align-center">
-        <v-icon icon="mdi-account-question" class="mr-2" />
+        <v-icon
+          icon="mdi-account-question"
+          class="mr-2"
+        />
         随机点名
         <v-spacer />
-        <v-btn icon="mdi-close" variant="text" @click="dialog = false" />
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="dialog = false"
+        />
       </v-card-title>
 
-      <v-card-text v-if="!isPickingStarted" class="text-center py-6">
-        <div class="text-h6 mb-4">请选择抽取人数</div>
+      <v-card-text
+        v-if="!isPickingStarted"
+        class="text-center py-6"
+      >
+        <div class="text-h6 mb-4">
+          请选择抽取人数
+        </div>
 
         <div class="d-flex justify-center align-center counter-container">
           <v-btn
@@ -23,8 +39,8 @@
             variant="tonal"
             color="primary"
             :disabled="count <= 1"
-            @click="decrementCount"
             class="counter-btn"
+            @click="decrementCount"
           />
 
           <div class="count-display mx-8">
@@ -38,8 +54,8 @@
             variant="tonal"
             color="primary"
             :disabled="count >= maxAllowedCount"
-            @click="incrementCount"
             class="counter-btn"
+            @click="incrementCount"
           />
         </div>
 
@@ -52,14 +68,29 @@
             mandatory
             class="mode-toggle"
           >
-            <v-btn value="name" prepend-icon="mdi-account">姓名模式</v-btn>
-            <v-btn value="number" prepend-icon="mdi-numeric">学号模式</v-btn>
+            <v-btn
+              value="name"
+              prepend-icon="mdi-account"
+            >
+              姓名模式
+            </v-btn>
+            <v-btn
+              value="number"
+              prepend-icon="mdi-numeric"
+            >
+              学号模式
+            </v-btn>
           </v-btn-toggle>
         </div>
 
         <!-- 学号范围设置 -->
-        <div v-if="pickerMode === 'number'" class="number-range-container mt-4">
-          <div class="text-subtitle-1 mb-2">学号范围设置</div>
+        <div
+          v-if="pickerMode === 'number'"
+          class="number-range-container mt-4"
+        >
+          <div class="text-subtitle-1 mb-2">
+            学号范围设置
+          </div>
           <div class="d-flex justify-center align-center gap-4">
             <v-text-field
               v-model.number="minNumber"
@@ -90,15 +121,18 @@
             size="x-large"
             color="primary"
             prepend-icon="mdi-dice-multiple"
-            @click="startPicking"
             :disabled="filteredStudents.length === 0"
             class="start-btn"
+            @click="startPicking"
           >
             开始抽取
           </v-btn>
         </div>
 
-        <div v-if="filteredStudents.length === 0" class="mt-4 text-error">
+        <div
+          v-if="filteredStudents.length === 0"
+          class="mt-4 text-error"
+        >
           <template v-if="pickerMode === 'name'">
             没有可抽取的学生，请调整过滤选项
           </template>
@@ -109,8 +143,11 @@
 
         <div class="mt-4 text-caption">
           当前可抽取学生: {{ filteredStudents.length }}人
-          <v-tooltip v-if="pickerMode === 'name'" location="bottom">
-            <template v-slot:activator="{ props }">
+          <v-tooltip
+            v-if="pickerMode === 'name'"
+            location="bottom"
+          >
+            <template #activator="{ props }">
               <v-icon
                 v-bind="props"
                 icon="mdi-information-outline"
@@ -132,22 +169,25 @@
           </v-tooltip>
 
           <!-- 添加临时过滤选项 -->
-          <div v-if="pickerMode === 'name'" class="d-flex flex-wrap justify-center gap-2 mt-4">
+          <div
+            v-if="pickerMode === 'name'"
+            class="d-flex flex-wrap justify-center gap-2 mt-4"
+          >
             <v-chip
               :color="tempFilters.excludeLate ? 'warning' : 'default'"
               :variant="tempFilters.excludeLate ? 'elevated' : 'text'"
-              @click="tempFilters.excludeLate = !tempFilters.excludeLate"
               prepend-icon="mdi-clock-alert"
               class="filter-chip"
+              @click="tempFilters.excludeLate = !tempFilters.excludeLate"
             >
               {{ tempFilters.excludeLate ? "排除" : "包含" }}迟到学生
             </v-chip>
             <v-chip
               :color="tempFilters.excludeAbsent ? 'error' : 'default'"
               :variant="tempFilters.excludeAbsent ? 'elevated' : 'text'"
-              @click="tempFilters.excludeAbsent = !tempFilters.excludeAbsent"
               prepend-icon="mdi-account-off"
               class="filter-chip"
+              @click="tempFilters.excludeAbsent = !tempFilters.excludeAbsent"
             >
               {{ tempFilters.excludeAbsent ? "排除" : "包含" }}请假学生
             </v-chip>
@@ -155,9 +195,9 @@
             <v-chip
               :color="tempFilters.excludeExcluded ? 'grey' : 'default'"
               :variant="tempFilters.excludeExcluded ? 'elevated' : 'text'"
-              @click="tempFilters.excludeExcluded = !tempFilters.excludeExcluded"
               prepend-icon="mdi-account-cancel"
               class="filter-chip"
+              @click="tempFilters.excludeExcluded = !tempFilters.excludeExcluded"
             >
               {{ tempFilters.excludeExcluded ? "排除" : "包含" }}不参与学生
             </v-chip>
@@ -165,8 +205,14 @@
         </div>
       </v-card-text>
 
-      <v-card-text v-else class="text-center py-6">
-        <div v-if="isAnimating" class="animation-container">
+      <v-card-text
+        v-else
+        class="text-center py-6"
+      >
+        <div
+          v-if="isAnimating"
+          class="animation-container"
+        >
           <div class="animation-wrapper">
             <transition-group
               name="shuffle"
@@ -185,8 +231,13 @@
           </div>
         </div>
 
-        <div v-else class="result-container">
-          <div class="text-h6 mb-4">抽取结果</div>
+        <div
+          v-else
+          class="result-container"
+        >
+          <div class="text-h6 mb-4">
+            抽取结果
+          </div>
           <v-card
             v-for="(student, index) in pickedStudents"
             :key="index"
@@ -203,13 +254,13 @@
                 variant="text"
                 size="small"
                 class="ml-2 refresh-btn"
-                @click="refreshSingleStudent(index)"
                 :disabled="remainingStudents.length === 0"
                 :title="
                   remainingStudents.length === 0
                     ? '没有更多可用学生'
                     : '重新抽取此学生'
                 "
+                @click="refreshSingleStudent(index)"
               />
             </v-card-text>
           </v-card>
@@ -218,18 +269,18 @@
             <v-btn
               color="primary"
               prepend-icon="mdi-refresh"
-              @click="resetPicker"
               size="large"
               class="mx-2"
+              @click="resetPicker"
             >
               重新抽取
             </v-btn>
             <v-btn
               color="grey"
               variant="outlined"
-              @click="dialog = false"
               size="large"
               class="mx-2"
+              @click="dialog = false"
             >
               关闭
             </v-btn>
