@@ -7,6 +7,7 @@
     <v-spacer />
 
     <template #append>
+      <v-btn icon="mdi-chat" variant="text" @click="isChatOpen = true" />
       <v-btn
         icon="mdi-bell"
         variant="text"
@@ -17,7 +18,10 @@
       <v-btn icon="mdi-cog" variant="text" @click="$router.push('/settings')" />
     </template>
   </v-app-bar>
-  <div class="d-flex">
+  <!-- 初始化选择卡片，仅在首页且需要授权时显示；不影响顶栏 -->
+  <init-service-chooser v-if="shouldShowInit" @done="settingsTick++" />
+
+  <div v-if="!shouldShowInit" class="d-flex">
     <!-- 主要内容区域 -->
     <v-container class="main-window flex-grow-1 no-select" fluid>
       <!-- 有内容的科目卡片 -->
@@ -36,6 +40,7 @@
               border
               height="100%"
               class="glow-track"
+              :class="{ 'glow-highlight': highlightedCards[item.key] }"
               @click="!isEditingDisabled && openDialog(item.key)"
               @mousemove="handleMouseMove"
               @touchmove="handleTouchMove"
@@ -59,7 +64,7 @@
       <!-- 单独显示空科目 -->
       <div class="empty-subjects mt-4">
         <template v-if="emptySubjectDisplay === 'button'">
-          <v-btn-group divided variant="outlined">
+          <v-btn-group divided variant="tonal">
             <v-btn
               v-for="subject in unusedSubjects"
               :key="subject.name"
@@ -180,6 +185,7 @@
 
     <!-- 出勤统计区域 -->
     <v-col
+    v-ripple="{ class: `text-${['primary','secondary','info','success','warning','error'][Math.floor(Math.random()*6)]}` }"
       v-if="state.studentList && state.studentList.length"
       class="attendance-area no-select"
       cols="1"
@@ -541,6 +547,9 @@
   <!-- 添加ICP备案悬浮组件 -->
   <FloatingICP />
 
+  <!-- 设备聊天室（右下角浮窗） -->
+  <ChatWidget v-model="isChatOpen" :show-button="false" />
+
   <!-- 添加确认对话框 -->
   <v-dialog v-model="confirmDialog.show" max-width="400">
     <v-card>
@@ -608,8 +617,8 @@
           确认应用
         </v-btn>
       </v-card-actions>
-    </v-card>
-  </v-dialog><br/><br/><br/><br/><br/><br/>
+    </v-card> </v-dialog
+  ><br /><br /><br /><br /><br /><br />
 </template>
 
 <script>
@@ -617,7 +626,9 @@ import MessageLog from "@/components/MessageLog.vue";
 import RandomPicker from "@/components/RandomPicker.vue";
 import FloatingToolbar from "@/components/FloatingToolbar.vue";
 import FloatingICP from "@/components/FloatingICP.vue";
+import ChatWidget from "@/components/ChatWidget.vue";
 import HomeworkEditDialog from "@/components/HomeworkEditDialog.vue";
+import InitServiceChooser from "@/components/InitServiceChooser.vue";
 import dataProvider from "@/utils/dataProvider";
 import {
   getSetting,
@@ -631,7 +642,15 @@ import "../styles/transitions.scss";
 import "../styles/global.scss";
 import { pinyin } from "pinyin-pro";
 import { debounce, throttle } from "@/utils/debounce";
-import { Base64 } from 'js-base64';
+import { Base64 } from "js-base64";
+import {
+  getSocket,
+  on as socketOn,
+  off as socketOff,
+  joinToken,
+  leaveAll,
+  onConnect as onSocketConnect,
+} from "@/utils/socketClient";
 
 export default {
   name: "Classworks 作业板",
@@ -641,6 +660,8 @@ export default {
     FloatingToolbar,
     FloatingICP,
     HomeworkEditDialog,
+    InitServiceChooser,
+    ChatWidget,
   },
   data() {
     const defaultSubjects = [
@@ -653,7 +674,7 @@ export default {
       { name: "政治", order: 6 },
       { name: "历史", order: 7 },
       { name: "地理", order: 8 },
-      { name: "其他", order: 9 }
+      { name: "其他", order: 9 },
     ];
 
     return {
@@ -684,7 +705,7 @@ export default {
         snackbarText: "",
         fontSize: getSetting("font.size"),
         datePickerDialog: false,
-        selectedDate: new Date().toISOString().split("T")[0].replace(/-/g, ''),
+        selectedDate: new Date().toISOString().split("T")[0].replace(/-/g, ""),
         selectedDateObj: new Date(),
         refreshInterval: null,
         showNoDataMessage: false,
@@ -721,6 +742,18 @@ export default {
         cancelHandler: null,
         icons: {},
       },
+      settingsTick: 0,
+      isChatOpen: false,
+      highlightedCards: {}, // 记录哪些卡片需要高亮
+      // 实时刷新信息
+      realtimeInfo: {
+        show: false,
+        time: "",
+        key: "",
+      },
+      $offKvChanged: null,
+      $offConnect: null,
+      debouncedRealtimeRefresh: null,
     };
   },
 
@@ -782,7 +815,7 @@ export default {
         (key) => this.state.boardData.homework[key].content?.trim()
       );
       return this.state.availableSubjects
-        .filter(subject => !usedKeys.includes(subject.name))
+        .filter((subject) => !usedKeys.includes(subject.name))
         .sort((a, b) => a.order - b.order);
     },
     emptySubjects() {
@@ -853,6 +886,16 @@ export default {
     showAntiScreenBurnCard() {
       return getSetting("display.showAntiScreenBurnCard");
     },
+    shouldShowInit() {
+      const provider = getSetting("server.provider");
+      const isKv = provider === "kv-server" || provider === "classworkscloud";
+      const token = getSetting("server.kvToken");
+      // 仅首页
+      const onHome = this.$route?.path === "/";
+      // 依赖 settingsTick 使其在设置变更时重新计算
+      void this.settingsTick;
+      return onHome && isKv && (!token || token === "");
+    },
     filteredStudents() {
       let students = [...this.state.studentList];
 
@@ -915,7 +958,7 @@ export default {
     subjectOrder() {
       return [...this.state.availableSubjects]
         .sort((a, b) => a.order - b.order)
-        .map(subject => subject.name);
+        .map((subject) => subject.name);
     },
   },
 
@@ -976,6 +1019,9 @@ export default {
       this.checkHashForRandomPicker();
 
       window.addEventListener("hashchange", this.checkHashForRandomPicker);
+
+      // 实时频道：加入设备房间并监听键变化
+      this.setupRealtimeChannel();
     } catch (err) {
       console.error("初始化失败:", err);
       this.showError("初始化失败，请刷新页面重试");
@@ -1008,6 +1054,15 @@ export default {
     );
 
     window.removeEventListener("hashchange", this.checkHashForRandomPicker);
+
+    // 退出设备房间并清理监听
+    try {
+      if (this.$offKvChanged) this.$offKvChanged();
+      if (this.$offConnect) this.$offConnect();
+      leaveAll();
+    } catch (e) {
+      void e;
+    }
   },
 
   methods: {
@@ -1194,9 +1249,7 @@ export default {
           const response = await dataProvider.loadData("classworks-list-main");
 
           if (response.success != false && Array.isArray(response)) {
-            this.state.studentList = response.map(
-              (student) => student.name
-            );
+            this.state.studentList = response.map((student) => student.name);
           }
         } catch (error) {
           console.warn(
@@ -1214,7 +1267,9 @@ export default {
 
     async loadSubjects() {
       try {
-        const subjectsResponse = await dataProvider.loadData("classworks-config-subject");
+        const subjectsResponse = await dataProvider.loadData(
+          "classworks-config-subject"
+        );
         if (subjectsResponse && Array.isArray(subjectsResponse)) {
           // 更新科目列表
           this.state.availableSubjects = subjectsResponse;
@@ -1370,6 +1425,8 @@ export default {
       this.state.contentStyle = { "font-size": `${this.state.fontSize}px` };
       this.setupAutoRefresh();
       this.updateBackendUrl();
+      // 触发依赖刷新（例如 shouldShowInit）
+      this.settingsTick++;
     },
 
     async handleDateSelect(newDate) {
@@ -1393,10 +1450,7 @@ export default {
             .catch(() => {});
 
           // Load both data and subjects in parallel
-          await Promise.all([
-            this.downloadData(),
-            this.loadSubjects()
-          ]);
+          await Promise.all([this.downloadData(), this.loadSubjects()]);
         }
       } catch (error) {
         console.error("Date processing error:", error);
@@ -1430,6 +1484,80 @@ export default {
         }));
     },
 
+    // 实时频道：加入设备房间并监听键变化
+    setupRealtimeChannel() {
+      try {
+        const token = getSetting("server.kvToken");
+        if (!token) {
+          console.warn("未配置 KV Token，无法加入实时频道");
+          return;
+        }
+
+        // Ensure socket created
+        getSocket();
+        joinToken(token);
+
+        // Re-join on reconnect
+        this.$offConnect = onSocketConnect(() => joinToken(token));
+
+        // Debounce refresh to avoid storms
+        if (!this.debouncedRealtimeRefresh) {
+          this.debouncedRealtimeRefresh = debounce(async () => {
+            const oldHomework = JSON.parse(
+              JSON.stringify(this.state.boardData.homework)
+            );
+            await this.downloadData();
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, "0");
+            const mm = String(now.getMinutes()).padStart(2, "0");
+            const ss = String(now.getSeconds()).padStart(2, "0");
+
+            // 使用消息记录工具发送通知
+            this.$message?.info(
+              "数据已更新",
+              `已于 ${hh}:${mm}:${ss} 自动刷新`
+            ); // 检测哪些科目发生了变化
+            const changed = {};
+            for (const key in this.state.boardData.homework) {
+              const oldContent = oldHomework[key]?.content || "";
+              const newContent =
+                this.state.boardData.homework[key]?.content || "";
+              if (oldContent !== newContent) {
+                changed[key] = true;
+              }
+            }
+            // 删除的科目也算变化
+            for (const key in oldHomework) {
+              if (!this.state.boardData.homework[key]) {
+                changed[key] = true;
+              }
+            }
+
+            // 设置高亮
+            this.highlightedCards = changed;
+            // 3秒后移除高亮
+            setTimeout(() => {
+              this.highlightedCards = {};
+            }, 10000);
+          }, 800);
+        }
+
+        const handler = (msg) => {
+          // Expect msg = { uuid, key, action, created?, updatedAt?, deletedAt?, batch? }
+          if (!msg) return;
+          // We only care about current date key changes
+          const expectedKey = `classworks-data-${this.state.dateString}`;
+          if (msg.key !== expectedKey) return;
+          if (msg.action !== "upsert" && msg.action !== "delete") return;
+          // Trigger a debounced refresh
+          this.debouncedRealtimeRefresh?.(msg.key);
+        };
+
+        this.$offKvChanged = socketOn("kv-key-changed", handler);
+      } catch (e) {
+        console.warn("实时频道初始化失败", e);
+      }
+    },
 
     setAllPresent() {
       this.state.boardData.attendance = {
@@ -1728,7 +1856,7 @@ export default {
 
         try {
           const binaryString = atob(configParam);
-          const bytes = Uint8Array.from(binaryString, c => c.charCodeAt(0));
+          const bytes = Uint8Array.from(binaryString, (c) => c.charCodeAt(0));
           const decodedString = new TextDecoder().decode(bytes);
           const decodedConfig = JSON.parse(decodedString);
           console.log("从URL读取配置:", decodedConfig);

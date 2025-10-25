@@ -94,7 +94,7 @@ const goToAuthorize = () => {
 
   const uuid =
     getSetting("device.uuid") || "00000000-0000-4000-8000-000000000000";
-  let authorizeUrl = `${authDomain}/authorize?app_id=${appId}&mode=callback&callback_url=${callbackUrl}`;
+  let authorizeUrl = `${authDomain}/authorize?app_id=${appId}&mode=callback&callback_url=${callbackUrl}&remark=Classworks 自动授权 来自${window.location.hostname} ${new Date().toLocaleString()}`;
 
   // 如果UUID不是默认值，附加编码后的 uuid 参数用于迁移
   if (uuid !== "00000000-0000-4000-8000-000000000000") {

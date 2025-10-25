@@ -183,7 +183,7 @@ export default {
         if (autoConfigureCloud) {
           // 使用classworksCloudDefaults配置
           const classworksCloudDefaults = {
-            "server.domain": "https://kv.wuyuan.dev",
+            "server.domain": "http://localhost:3030",
             "server.siteKey": "",
           };
 

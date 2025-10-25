@@ -43,7 +43,31 @@
         style="width: 100%"
         direction="vertical"
       >
-        <v-tabs-window-item value="index">
+        <v-tabs-window-item value="index"
+          ><v-card class="service-card gradient-right clickable" elevation="8">
+            <v-card-item>
+              <div class="card-title">
+                <div>
+                  <div class="text-h6">Classworks KV</div>
+                  <div class="text-caption text-medium-emphasis">
+                    云原生键值数据库
+                  </div>
+                </div>
+              </div>
+            </v-card-item>
+            <v-card-text>
+              <div class="mt-4">
+                <v-btn
+                  variant="text"
+                  class="text-none"
+                  append-icon="mdi-arrow-right"
+                  rounded="xl"
+                >
+                  打开 Classworks KV
+                </v-btn>
+              </div>
+            </v-card-text>
+          </v-card>
           <v-card title="Classworks" subtitle="设置" class="rounded-xl" border>
             <v-card-text>
               <v-alert
@@ -145,7 +169,6 @@
             @saved="onSettingsSaved"
           />
         </v-tabs-window-item>
-
 
         <v-tabs-window-item value="randomPicker">
           <random-picker-card border :is-mobile="isMobile" />

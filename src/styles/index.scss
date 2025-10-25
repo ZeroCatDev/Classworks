@@ -28,6 +28,27 @@
   }
 }
 
+// 数据更新高亮效果
+.glow-highlight {
+  animation: glow-pulse 3s ease-in-out;
+  box-shadow: 0 0 20px rgba(33, 150, 243, 0.6),
+              0 0 40px rgba(33, 150, 243, 0.4),
+              0 0 60px rgba(33, 150, 243, 0.2) !important;
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(33, 150, 243, 0.6),
+                0 0 40px rgba(33, 150, 243, 0.4),
+                0 0 60px rgba(33, 150, 243, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(33, 150, 243, 0.8),
+                0 0 60px rgba(33, 150, 243, 0.6),
+                0 0 90px rgba(33, 150, 243, 0.4);
+  }
+}
+
 // 添加卡片悬浮效果
 .grid-item .v-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -294,80 +315,6 @@
     opacity: 1;
     transform: scale(1.02);
   }
-
-  
-// 添加卡片发光效果
-.glow-track {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%),
-        rgba(255, 255, 255, 0.15) 0%,
-        rgba(255, 255, 255, 0) 70%);
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  &:hover::before {
-    opacity: 1;
-  }
-}
-
-// 添加卡片悬浮效果
-.grid-item .v-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
-  }
-
-  &:active {
-    transform: translateY(-2px);
-  }
-}
-
-// 添加空科目卡片样式
-.empty-subject-card {
-  transition: all 0.3s ease;
-  opacity: 0.8;
-
-  &:hover {
-    opacity: 1;
-    transform: translateY(-4px);
-  }
-}
-
-// 修改防烧屏提示卡片，使用 tonal 样式减少信息密度
-.anti-burn-card {
-  animation: subtle-glow 4s infinite alternate;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  }
-}
-
-@keyframes subtle-glow {
-  0% {
-    box-shadow: 0 0 5px rgba(33, 150, 243, 0.1);
-  }
-
-  100% {
-    box-shadow: 0 0 15px rgba(33, 150, 243, 0.3);
-  }
-}
 
 // 出勤管理对话框样式
 .attendance-stat {
