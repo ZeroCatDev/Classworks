@@ -74,7 +74,7 @@
           <br/><br/>Classworks KV 的全域管理员是 <a href="https://wuyuan.dev" target="_blank">孙悟元</a></v-card-text
         ><v-card-actions
           ><v-btn
-            href="https://kv.houlang.cloud"
+            :href="defaultAuthServer"
             class="text-none"
             append-icon="mdi-open-in-new"
             target="_blank"
@@ -130,7 +130,7 @@
 
 <script>
 import { kvServerProvider } from "@/utils/providers/kvServerProvider";
-import { setSetting } from "@/utils/settings";
+import { setSetting, getSetting } from "@/utils/settings";
 
 export default {
   name: "CloudNamespaceInfoCard",
@@ -146,6 +146,7 @@ export default {
       loading: false,
       hasNamespaceInfo: false,
       showReinitDialog: false, // 确认对话框显示状态
+      defaultAuthServer: getSetting('server.authDomain'),
     };
   },
   watch: {

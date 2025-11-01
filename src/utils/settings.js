@@ -68,7 +68,7 @@ const SETTINGS_STORAGE_KEY = "Classworks_settings";
 
 // 新增: Classworks云端存储的默认设置
 const classworksCloudDefaults = {
-  "server.domain": "https://kv.wuyuan.dev",
+  "server.domain": import.meta.env.VITE_DEFAULT_KV_SERVER || "https://kv.wuyuan.dev",
   //"server.domain": "http://localhost:3030",
   "server.siteKey": "",
 };
@@ -206,7 +206,7 @@ const settingsDefinitions = {
   },
   "server.authDomain": {
     type: "string",
-    default: "https://kv.houlang.cloud",
+    default: import.meta.env.VITE_DEFAULT_AUTH_SERVER || "https://kv.houlang.cloud",
     description: "授权服务器域名",
     icon: "mdi-shield-account",
     validate: (value) => {

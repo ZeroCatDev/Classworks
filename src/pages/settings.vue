@@ -11,7 +11,7 @@
           icon="mdi-menu"
           variant="text"
           @click="drawer = !drawer"
-          class="d-md-none"
+
         />
       </template>
       <v-app-bar-title class="text-h6">设置</v-app-bar-title>
