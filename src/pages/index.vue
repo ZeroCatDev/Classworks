@@ -609,7 +609,7 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog><br/><br/><br/><br/><br/><br/>
+  </v-dialog><br/><br/><br/>
 </template>
 
 <script>

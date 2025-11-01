@@ -60,6 +60,10 @@ html {
   scroll-behavior: smooth;
 }
 
+.v-app-bar {
+  position: fixed !important;
+}
+
 // 触摸友好的列表项
 .touch-list-item {
   min-height: 56px;
