@@ -164,12 +164,6 @@
     }
   }
 
-  /* 确保容器高度不超过视口 */
-  .main-window {
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
-  }
-
   /* 优化滚动条样式 */
   .main-window::-webkit-scrollbar {
     width: 8px;
