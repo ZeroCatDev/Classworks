@@ -225,7 +225,7 @@
 
 <script>
 import { openDB } from "idb";
-import axios from "@/assets/fonts/axios/axios";
+import axios from "@/axios/axios";
 import { getSetting, setSetting } from "@/utils/settings";
 
 export default {

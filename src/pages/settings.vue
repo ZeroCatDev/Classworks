@@ -62,6 +62,7 @@
                   class="text-none"
                   append-icon="mdi-arrow-right"
                   rounded="xl"
+                  @click="openClassworksKV"
                 >
                   打开 Classworks KV
                 </v-btn>
@@ -464,6 +465,9 @@ export default {
   },
 
   methods: {
+    openClassworksKV() {
+      window.open(getSetting("server.authDomain"), "_blank");
+    },
     loadAllSettings() {
       Object.keys(this.settings).forEach((section) => {
         Object.keys(this.settings[section]).forEach((key) => {

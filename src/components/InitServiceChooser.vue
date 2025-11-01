@@ -6,149 +6,201 @@
     <div class="init-container">
       <div class="init-header">
         <div class="title">
-          选择要使用的服务
+          欢迎使用 Classworks
         </div>
         <div class="subtitle">
-          左侧为 Classworks 管理端，右侧为 Classworks KV 控制台
+          请选择你的使用方式
         </div>
       </div>
 
-      <div class="card-row">
-        <!-- 左：Classworks 卡片（展开操作） -->
+      <!-- 主要选择卡片 -->
+      <div class="main-card-row">
+        <!-- 初次使用 -->
         <v-card
-          class="service-card gradient-left"
-          elevation="8"
+          class="main-service-card gradient-new clickable"
+          elevation="4"
+          @click="showGuideDialog = true"
         >
           <v-card-item>
-            <div class="card-title">
-              <div>
-                <div class="text-h6">
-                  Classworks
+            <div class="card-horizontal-layout">
+              <div class="card-icon-wrapper">
+                <v-icon
+                  size="48"
+                  color="primary"
+                >
+                  mdi-new-box
+                </v-icon>
+              </div>
+              <div class="card-content">
+                <div class="text-h6 font-weight-bold">
+                  初次使用
                 </div>
-                <div class="text-caption text-medium-emphasis">
-                  适用于班级大屏的作业板工具
+                <div class="text-body-2 text-medium-emphasis mt-1">
+                  了解 Classworks KV 并开始使用
                 </div>
               </div>
             </div>
           </v-card-item>
-          <v-card-text>
-            <div class="action-grid">
-              <v-btn
-                color="primary"
-                prepend-icon="mdi-flash"
-                @click="handleAutoAuthorize"
-              >
-                开始使用
-              </v-btn>
-              <v-btn
-                color="secondary"
-                variant="tonal"
-                prepend-icon="mdi-key"
-                @click="showManual = !showManual"
-              >
-                输入 Token
-              </v-btn>
-              <v-btn
-                variant="text"
-                prepend-icon="mdi-laptop"
-                @click="useLocalMode"
-              >
-                使用本地模式
-              </v-btn>
-            </div>
-
-            <v-expand-transition>
-              <div
-                v-show="showManual"
-                class="mt-4"
-              >
-                <v-text-field
-                  v-model="manualToken"
-                  label="KV 授权 Token"
-                  placeholder="粘贴从授权页面获取的 Token"
-                  hide-details
-                  clearable
-                />
-                <v-alert
-                  v-if="verifyError"
-                  type="error"
-                  variant="tonal"
-                  class="mt-2"
-                >
-                  {{ verifyError }}
-                </v-alert>
-                <div class="d-flex mt-2">
-                  <v-spacer />
-                  <v-btn
-                    :disabled="!manualToken || verifying"
-                    :loading="verifying"
-                    color="primary"
-                    @click="saveManualToken"
-                  >
-                    保存 Token
-                  </v-btn>
-                </div>
-              </div>
-            </v-expand-transition>
-          </v-card-text>
         </v-card>
 
-        <!-- 右：Classworks KV 卡片（跳转 /kv） -->
+        <!-- 已注册设备 -->
         <v-card
-          class="service-card gradient-right clickable"
-          elevation="8"
-          @click="goKv"
+          class="main-service-card gradient-registered clickable"
+          elevation="4"
+          @click="showDeviceAuthDialog = true"
         >
           <v-card-item>
-            <div class="card-title">
-              <div>
-                <div class="text-h6">
+            <div class="card-horizontal-layout">
+              <div class="card-icon-wrapper">
+                <v-icon
+                  size="48"
+                  color="success"
+                >
+                  mdi-account-check
+                </v-icon>
+              </div>
+              <div class="card-content">
+                <div class="text-h6 font-weight-bold">
+                  已注册
+                </div>
+                <div class="text-body-2 text-medium-emphasis mt-1">
+                  使用设备 Namespace 登录
+                </div>
+              </div>
+            </div>
+          </v-card-item>
+        </v-card>
+
+        <!-- Classworks KV 控制台 -->
+        <v-card
+          class="main-service-card clickable"
+          elevation="4"
+          @click="openClassworksKV"
+        >
+          <v-card-item>
+            <div class="card-horizontal-layout">
+              <div class="card-icon-wrapper">
+                <v-icon
+                  size="48"
+                  color="info"
+                >
+                  mdi-database-cog
+                </v-icon>
+              </div>
+              <div class="card-content">
+                <div class="text-h6 font-weight-bold">
                   Classworks KV
                 </div>
-                <div class="text-caption text-medium-emphasis">
-                  云原生键值数据库
+                <div class="text-body-2 text-medium-emphasis mt-1">
+                  打开云端控制台管理数据
                 </div>
               </div>
             </div>
           </v-card-item>
-          <v-card-text>
-            <div class="mt-4">
-              <v-btn
-                variant="text"
-                class="text-none"
-                append-icon="mdi-arrow-right"
-                rounded="xl"
-                @click.stop="goKv"
-              >
-                打开 Classworks KV
-              </v-btn>
-            </div>
-          </v-card-text>
         </v-card>
       </div>
+  <div class="options-buttons">
+          <v-btn
+            variant="tonal"
+            prepend-icon="mdi-laptop"
+            size="small"
+            @click="useLocalMode"
+          >
+            使用本地模式
+          </v-btn>
+          <v-btn
+            variant="tonal"
+            prepend-icon="mdi-flash"
+            size="small"
+            @click="handleAutoAuthorize"
+          >
+            授权码式授权（弃用）
+          </v-btn>
+          <v-btn
+            variant="tonal"
+            prepend-icon="mdi-key"
+            size="small"
+            @click="showTokenDialog = true"
+          >
+            输入 Token
+          </v-btn>
+          <v-btn
+            variant="tonal"
+            prepend-icon="mdi-code-tags"
+            size="small"
+            @click="showAlternativeCodeDialog = true"
+          >
+            输入替代代码
+          </v-btn>
+        </div>
+
 
       <div class="footer-hint">
         完成授权后可使用作业同步、考试看板等在线功能。
       </div>
     </div>
+
+    <!-- 对话框 -->
+    <v-dialog
+      v-model="showGuideDialog"
+      max-width="600"
+    >
+      <FirstTimeGuide @close="showGuideDialog = false" />
+    </v-dialog>
+
+    <v-dialog
+      v-model="showDeviceAuthDialog"
+      max-width="500"
+    >
+      <DeviceAuthDialog
+        :show-cancel="true"
+        @success="handleAuthSuccess"
+        @cancel="showDeviceAuthDialog = false"
+      />
+    </v-dialog>
+
+    <v-dialog
+      v-model="showTokenDialog"
+      max-width="500"
+    >
+      <TokenInputDialog
+        :show-cancel="true"
+        @success="handleTokenSuccess"
+        @cancel="showTokenDialog = false"
+      />
+    </v-dialog>
+
+    <v-dialog
+      v-model="showAlternativeCodeDialog"
+      max-width="500"
+    >
+      <AlternativeCodeDialog
+        :show-cancel="true"
+        @submit="handleAlternativeCodeSubmit"
+        @cancel="showAlternativeCodeDialog = false"
+      />
+    </v-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { getSetting, setSetting } from '@/utils/settings'
-import axios from '@/axios/axios'
+import DeviceAuthDialog from './auth/DeviceAuthDialog.vue'
+import TokenInputDialog from './auth/TokenInputDialog.vue'
+import AlternativeCodeDialog from './auth/AlternativeCodeDialog.vue'
+import FirstTimeGuide from './auth/FirstTimeGuide.vue'
 
-const router = useRouter()
 const emit = defineEmits(['done'])
 
 // 控制显示：仅首页且无 kvToken（且 provider 不是 kv-local）显示
 const visible = ref(false)
-const showManual = ref(false)
-const manualToken = ref('')
-const verifying = ref(false)
-const verifyError = ref('')
+
+// 对话框控制
+const showGuideDialog = ref(false)
+const showDeviceAuthDialog = ref(false)
+const showTokenDialog = ref(false)
+const showAlternativeCodeDialog = ref(false)
 
 const provider = computed(() => getSetting('server.provider'))
 const isKvProvider = computed(() => provider.value === 'kv-server' || provider.value === 'classworkscloud')
@@ -179,37 +231,22 @@ const handleAutoAuthorize = () => {
   window.location.href = url
 }
 
-const saveManualToken = async () => {
-  if (!manualToken.value || verifying.value) return
-  verifyError.value = ''
-  verifying.value = true
-  try {
-    const serverUrl = getSetting('server.domain')
-    if (!serverUrl) throw new Error('未配置服务器域名')
+const handleAuthSuccess = () => {
+  showDeviceAuthDialog.value = false
+  evaluateVisibility()
+  emit('done')
+}
 
-    await axios.get(`${serverUrl}/kv/_info`, {
-      headers: {
-        Accept: 'application/json',
-        'x-app-token': manualToken.value,
-      },
-    })
+const handleTokenSuccess = () => {
+  showTokenDialog.value = false
+  evaluateVisibility()
+  emit('done')
+}
 
-    // 验证通过再保存
-    setSetting('server.kvToken', manualToken.value)
-    evaluateVisibility()
-    emit('done')
-  } catch (err) {
-    const status = err?.response?.status
-    if (status === 401 || status === 403) {
-      verifyError.value = 'Token 无效或无权限，请确认后重试'
-    } else if (status === 404) {
-      verifyError.value = '命名空间不存在或服务器未就绪'
-    } else {
-      verifyError.value = err?.response?.data?.message || err?.message || '验证失败，请稍后重试'
-    }
-  } finally {
-    verifying.value = false
-  }
+const handleAlternativeCodeSubmit = (code) => {
+  console.log('替代代码:', code)
+  // TODO: 实现替代代码逻辑
+  showAlternativeCodeDialog.value = false
 }
 
 const useLocalMode = () => {
@@ -220,23 +257,137 @@ const useLocalMode = () => {
   emit('done')
 }
 
-const goKv = () => {
-  router.push('/kv')
+const openClassworksKV = () => {
+  window.open(getSetting('server.authDomain'), '_blank')
 }
 </script>
 
 <style scoped>
-.init-overlay { position: relative; }
-.init-container { max-width: 1080px; margin: 24px auto; padding: 8px 16px; }
-.init-header .title { font-size: 20px; font-weight: 600; }
-.init-header .subtitle { margin-top: 4px; font-size: 13px; opacity: .75; }
-.card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-.service-card { min-height: 220px; }
-.card-title { display: flex; align-items: center; }
-.clickable { cursor: pointer; }
-.gradient-left { background: linear-gradient(135deg, rgba(103,80,164,.18), rgba(103,80,164,0) 60%); }
-.gradient-right { background: linear-gradient(135deg, rgba(0,184,212,.18), rgba(0,184,212,0) 60%); }
-.action-grid { display: grid; grid-template-columns: repeat(3, max-content); gap: 12px; align-items: center; }
-.footer-hint { margin-top: 12px; font-size: 12px; opacity: .7; }
-@media (max-width: 900px) { .card-row { grid-template-columns: 1fr; } }
+.init-overlay {
+  position: relative;
+}
+
+.init-container {
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 8px 16px;
+}
+
+.init-header .title {
+  font-size: 28px;
+  font-weight: 700;
+  text-align:left;
+  margin-bottom: 8px;
+}
+
+.init-header .subtitle {
+  font-size: 14px;
+  opacity: .75;
+  text-align: left;
+}
+
+/* 主要卡片 */
+.main-card-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.main-service-card {
+  min-height: 100px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.main-service-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+.main-service-card .v-card-item {
+  padding: 20px 24px;
+}
+
+.card-horizontal-layout {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.card-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.card-content {
+  flex: 1;
+  text-align: left;
+}
+
+.gradient-new {
+  background: linear-gradient(135deg, rgba(33,150,243,.12), rgba(103,80,164,0.08) 60%);
+  border: 2px solid rgba(33,150,243,.2);
+}
+
+.gradient-registered {
+  background: linear-gradient(135deg, rgba(76,175,80,.12), rgba(0,184,212,0.08) 60%);
+  border: 2px solid rgba(76,175,80,.2);
+}
+
+.gradient-kv {
+  background: linear-gradient(135deg, rgba(0,184,212,.12), rgba(33,150,243,0.08) 60%);
+  border: 2px solid rgba(0,184,212,.2);
+}
+
+/* 其他选项 */
+.alternative-options {
+  margin-top: 40px;
+  padding: 20px;
+  background: rgba(var(--v-theme-surface-variant), 0.3);
+  border-radius: 12px;
+}
+
+.options-title {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.8;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.options-buttons {
+  margin-top: 24px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.footer-hint {
+  margin-top: 24px;
+  font-size: 13px;
+  opacity: .7;
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .card-horizontal-layout {
+    gap: 16px;
+  }
+
+  .card-icon-wrapper .v-icon {
+    font-size: 40px !important;
+  }
+
+  .options-buttons {
+    flex-direction: column;
+  }
+
+  .options-buttons .v-btn {
+    width: 100%;
+  }
+}
 </style>

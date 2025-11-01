@@ -7,6 +7,30 @@
     <v-spacer />
 
     <template #append>
+      <!-- 只读 Token 警告 -->
+      <v-chip
+        v-if="tokenDisplayInfo.readonly"
+        color="warning"
+        variant="tonal"
+        class="mx-2"
+        prepend-icon="mdi-lock-alert"
+      >
+        只读
+      </v-chip>
+
+      <!-- 学生名称显示 chip（始终蓝色） -->
+      <v-chip
+        v-if="tokenDisplayInfo.show"
+        color="primary"
+        variant="tonal"
+        class="mx-2"
+        prepend-icon="mdi-account"
+        :style="{ cursor: tokenDisplayInfo.disabled ? 'default' : 'pointer' }"
+        @click="handleTokenChipClick"
+      >
+        {{ tokenDisplayInfo.text }}
+      </v-chip>
+
       <v-btn icon="mdi-chat" variant="text" @click="isChatOpen = true" />
       <v-btn
         icon="mdi-bell"
@@ -20,6 +44,13 @@
   </v-app-bar>
   <!-- 初始化选择卡片，仅在首页且需要授权时显示；不影响顶栏 -->
   <init-service-chooser v-if="shouldShowInit" @done="settingsTick++" />
+
+  <!-- 学生姓名管理组件 -->
+  <StudentNameManager
+    v-if="!shouldShowInit"
+    ref="studentNameManager"
+    @token-info-updated="updateTokenDisplayInfo"
+  />
 
   <div v-if="!shouldShowInit" class="d-flex">
     <!-- 主要内容区域 -->
@@ -629,6 +660,7 @@ import FloatingICP from "@/components/FloatingICP.vue";
 import ChatWidget from "@/components/ChatWidget.vue";
 import HomeworkEditDialog from "@/components/HomeworkEditDialog.vue";
 import InitServiceChooser from "@/components/InitServiceChooser.vue";
+import StudentNameManager from "@/components/StudentNameManager.vue";
 import dataProvider from "@/utils/dataProvider";
 import {
   getSetting,
@@ -662,6 +694,7 @@ export default {
     HomeworkEditDialog,
     InitServiceChooser,
     ChatWidget,
+    StudentNameManager,
   },
   data() {
     const defaultSubjects = [
@@ -745,6 +778,16 @@ export default {
       settingsTick: 0,
       isChatOpen: false,
       highlightedCards: {}, // 记录哪些卡片需要高亮
+      // Token 显示信息（统一显示 token 信息和学生姓名）
+      tokenDisplayInfo: {
+        show: false,
+        readonly: false, // 是否是只读 token
+        text: '',
+        color: 'primary',
+        variant: 'tonal',
+        icon: 'mdi-account',
+        disabled: false
+      },
       // 实时刷新信息
       realtimeInfo: {
         show: false,
@@ -999,6 +1042,24 @@ export default {
         this.updateSettings();
       });
 
+      // 连接学生姓名管理组件
+      this.$nextTick(() => {
+        const studentNameManager = this.$refs.studentNameManager;
+        if (studentNameManager) {
+          this.studentNameInfo.name = studentNameManager.currentStudentName;
+          this.studentNameInfo.isStudent = studentNameManager.isStudentToken;
+          this.studentNameInfo.openDialog = () => studentNameManager.openDialog();
+
+          // 监听学生姓名变化
+          this.$watch(() => studentNameManager.currentStudentName, (newName) => {
+            this.studentNameInfo.name = newName;
+          });
+          this.$watch(() => studentNameManager.isStudentToken, (isStudent) => {
+            this.studentNameInfo.isStudent = isStudent;
+          });
+        }
+      });
+
       document.addEventListener(
         "fullscreenchange",
         this.fullscreenChangeHandler
@@ -1022,6 +1083,11 @@ export default {
 
       // 实时频道：加入设备房间并监听键变化
       this.setupRealtimeChannel();
+
+      // 初始化 Token 显示信息
+      this.$nextTick(() => {
+        this.updateTokenDisplayInfo();
+      });
     } catch (err) {
       console.error("初始化失败:", err);
       this.showError("初始化失败，请刷新页面重试");
@@ -1066,6 +1132,51 @@ export default {
   },
 
   methods: {
+    // 更新 Token 显示信息
+    updateTokenDisplayInfo() {
+      const manager = this.$refs.studentNameManager
+      if (!manager || !manager.hasToken) {
+        this.tokenDisplayInfo.show = false
+        this.tokenDisplayInfo.readonly = false
+        return
+      }
+
+      const displayName = manager.displayName
+      const isReadOnly = manager.isReadOnly
+      const isStudent = manager.isStudentToken
+
+      // 设置只读状态（对所有类型的 token 都显示）
+      this.tokenDisplayInfo.readonly = isReadOnly
+
+      // 只有学生类型的 token 才显示名称 chip
+      if (!isStudent) {
+        this.tokenDisplayInfo.show = false
+        return
+      }
+
+      // 设置学生名称显示（始终蓝色）
+      this.tokenDisplayInfo.text = displayName
+      this.tokenDisplayInfo.color = 'primary'
+      this.tokenDisplayInfo.icon = 'mdi-account'
+      this.tokenDisplayInfo.disabled = isReadOnly // 只读时不可点击
+      this.tokenDisplayInfo.show = true
+    },
+
+    // 处理 Token Chip 点击
+    handleTokenChipClick() {
+      console.log('Token chip clicked')
+      const manager = this.$refs.studentNameManager
+      console.log('Manager:', manager)
+      console.log('Is student token:', manager?.isStudentToken)
+
+      if (manager && manager.isStudentToken) {
+        console.log('Opening dialog...')
+        manager.openDialog()
+      } else {
+        console.log('Cannot open dialog - conditions not met')
+      }
+    },
+
     ensureDate(dateInput) {
       if (dateInput instanceof Date) {
         return dateInput;
