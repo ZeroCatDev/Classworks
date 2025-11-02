@@ -6,6 +6,8 @@
 
 // Plugins
 import { registerPlugins } from '@/plugins'
+import { createPinia } from 'pinia'
+const pinia = createPinia()
 
 // Components
 import App from './App.vue'
@@ -15,9 +17,9 @@ import GlobalMessage from '@/components/GlobalMessage.vue'
 import { createApp } from 'vue'
 import Clarity from '@microsoft/clarity';
 const projectId = "rhp8uqoc3l"
-import TDesign from 'tdesign-vue-next'
-import 'tdesign-vue-next/es/style/index.css'
-import '@examaware-cs/player/dist/player.css'
+//import TDesign from 'tdesign-vue-next'
+//import 'tdesign-vue-next/es/style/index.css'
+//import '@examaware-cs/player/dist/player.css'
 
 Clarity.init(projectId);
 import messageService from './utils/message';
@@ -25,8 +27,9 @@ import messageService from './utils/message';
 const app = createApp(App)
 
 registerPlugins(app)
-app.use(TDesign)
+//app.use(TDesign)
 app.use(messageService);
+app.use(pinia)
 
 app.component('GlobalMessage', GlobalMessage)
 

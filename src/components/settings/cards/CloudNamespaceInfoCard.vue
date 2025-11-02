@@ -65,16 +65,16 @@
             </div>
           </div>
         </v-card-text> </v-card
-      ><v-card title="Classworks KV" subtitle="云原生键值数据库" border hover
+      ><v-card title="Classworks KV" subtitle="文档形键值数据库" border hover
         ><v-card-text
           >Classworks KV
-          是厚浪云推出的云原生键值数据库，其是一个开放的云应用平台，为各种应用提供存储服务。此设备正在使用其服务，如果您希望管理设备信息，请前往
+          是厚浪云推出的文档形键值数据库，其是一个开放的云应用平台，为各种应用提供存储服务。此设备正在使用其服务，如果您希望管理设备信息，请前往
           Classworks KV
           的网站，如果您在服务推出前就在使用 Classworks，您的数据已被自动迁移。
           <br/><br/>Classworks KV 的全域管理员是 <a href="https://wuyuan.dev" target="_blank">孙悟元</a></v-card-text
         ><v-card-actions
           ><v-btn
-            href="https://kv.houlang.cloud"
+            :href="defaultAuthServer"
             class="text-none"
             append-icon="mdi-open-in-new"
             target="_blank"
@@ -102,15 +102,35 @@
         刷新设备信息
       </v-btn>
 
-      <v-btn color="primary" @click="reinitializeCloudStorage">
+      <v-btn color="error" variant="outlined" @click="showReinitDialog = true">
         重新初始化云端存储
       </v-btn>
     </v-card-actions>
+
+    <!-- 重新初始化确认对话框 -->
+    <v-dialog v-model="showReinitDialog" max-width="500">
+      <v-card>
+        <v-card-title>确认重新初始化</v-card-title>
+        <v-card-text>
+          <v-alert type="warning" variant="tonal" class="mb-3">
+            <v-alert-title>警告</v-alert-title>
+            此操作将清除当前的云端存储配置（包括 Token），您需要重新进行授权。
+          </v-alert>
+          <p>您确定要重新初始化云端存储吗？</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="showReinitDialog = false">取消</v-btn>
+          <v-btn color="error" @click="confirmReinitialize">确认</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
 <script>
 import { kvServerProvider } from "@/utils/providers/kvServerProvider";
+import { setSetting, getSetting } from "@/utils/settings";
 
 export default {
   name: "CloudNamespaceInfoCard",
@@ -125,6 +145,8 @@ export default {
       namespaceInfo: {},
       loading: false,
       hasNamespaceInfo: false,
+      showReinitDialog: false, // 确认对话框显示状态
+      defaultAuthServer: getSetting('server.authDomain'),
     };
   },
   watch: {
@@ -168,13 +190,16 @@ export default {
     async reloadInfo() {
       await this.fetchNamespaceInfo();
     },
-    reinitializeCloudStorage() {
-      // 触发 KvInitialize 组件的重新初始化
-      try {
-        window.dispatchEvent(new CustomEvent("kvinit:open"));
-      } catch (e) {
-        console.error("重新初始化云端存储失败:", e);
-      }
+    confirmReinitialize() {
+      // 删除 token 配置（设置为空字符串以触发 shouldShowInit）
+      setSetting('server.kvToken', '');
+      setSetting('device.uuid', '');
+
+      // 关闭对话框
+      this.showReinitDialog = false;
+
+      // 返回主页（将触发 InitServiceChooser 组件显示）
+      this.$router.push('/');
     },
   },
 };

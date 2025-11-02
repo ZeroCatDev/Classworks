@@ -172,4 +172,3 @@ dist
 vite.config.*.timestamp-*.mjs
 *.timestamp-*
 
-kv-admin

@@ -11,7 +11,7 @@
           icon="mdi-menu"
           variant="text"
           @click="drawer = !drawer"
-          class="d-md-none"
+
         />
       </template>
       <v-app-bar-title class="text-h6">设置</v-app-bar-title>
@@ -43,7 +43,32 @@
         style="width: 100%"
         direction="vertical"
       >
-        <v-tabs-window-item value="index">
+        <v-tabs-window-item value="index"
+          ><v-card class="service-card gradient-right clickable" elevation="8">
+            <v-card-item>
+              <div class="card-title">
+                <div>
+                  <div class="text-h6">Classworks KV</div>
+                  <div class="text-caption text-medium-emphasis">
+                    文档形键值数据库
+                  </div>
+                </div>
+              </div>
+            </v-card-item>
+            <v-card-text>
+              <div class="mt-4">
+                <v-btn
+                  variant="text"
+                  class="text-none"
+                  append-icon="mdi-arrow-right"
+                  rounded="xl"
+                  @click="openClassworksKV"
+                >
+                  打开 Classworks KV
+                </v-btn>
+              </div>
+            </v-card-text>
+          </v-card>
           <v-card title="Classworks" subtitle="设置" class="rounded-xl" border>
             <v-card-text>
               <v-alert
@@ -145,7 +170,6 @@
             @saved="onSettingsSaved"
           />
         </v-tabs-window-item>
-
 
         <v-tabs-window-item value="randomPicker">
           <random-picker-card border :is-mobile="isMobile" />
@@ -441,6 +465,9 @@ export default {
   },
 
   methods: {
+    openClassworksKV() {
+      window.open(getSetting("server.authDomain"), "_blank");
+    },
     loadAllSettings() {
       Object.keys(this.settings).forEach((section) => {
         Object.keys(this.settings[section]).forEach((key) => {

@@ -72,9 +72,9 @@
         md="6"
       >
         <v-card>
-          <v-card-title>KvInitialize 预览</v-card-title>
+          <v-card-title>初始化组件已替换</v-card-title>
           <v-card-text>
-            <kv-initialize />
+            已迁移为首页内联的 InitServiceChooser 组件。
           </v-card-text>
         </v-card>
       </v-col>
@@ -84,7 +84,6 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import KvInitialize from '@/components/KvInitialize.vue'
 import { getSetting, setSetting } from '@/utils/settings'
 import { kvServerProvider } from '@/utils/providers/kvServerProvider'
 

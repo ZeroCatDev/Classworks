@@ -1,77 +1,52 @@
 <template>
-  <v-slide-x-transition>
-    <v-card
-      class="floating-icp"
-      elevation="2"
-      rounded="pill"
-      variant="tonal"
-      color="surface-variant"
-      @mouseenter="isHovered = true"
-      @mouseleave="isHovered = false"
-    >
-      <v-btn
-        variant="text"
-        class="icp-button"
-        href="https://beian.miit.gov.cn/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <v-icon
-          icon="mdi-shield-check"
-          size="small"
-          :class="{ 'rotate-icon': isHovered }"
-          class="mr-1"
-        />
-        <span class="text-caption">浙ICP备2024068645号</span>
-      </v-btn>
-    </v-card>
-  </v-slide-x-transition>
+  <a
+    class="floating-icp-link"
+    href="https://beian.miit.gov.cn/"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="浙ICP备2024068645号"
+  >
+    浙ICP备2024068645号
+  </a>
 </template>
 
 <script>
 export default {
   name: 'FloatingICP',
-  data() {
-    return {
-      isHovered: false
-    }
-  }
 }
+
 </script>
 
 <style scoped>
-.floating-icp {
+.floating-icp-link {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  right: 4px;
+  bottom: 0;
   z-index: 100;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  color: rgb(107, 107, 107);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transition: none !important;
 }
 
-.floating-icp:hover {
-  transform: translateX(-4px);
-}
-
-.icp-button {
-  padding: 0 16px;
-  height: 32px;
-  min-width: unset;
-}
-
-.rotate-icon {
-  transform: rotate(360deg);
-  transition: transform 0.6s ease;
+.floating-icp-link:hover,
+.floating-icp-link:focus,
+.floating-icp-link:active {
+  color: rgb(65, 65, 65);
+  text-decoration: none;
+  outline: none;
 }
 
 @media (max-width: 600px) {
-  .floating-icp {
+  .floating-icp-link {
     right: 16px;
-    bottom: 80px; /* 避免与其他悬浮组件重叠 */
-  }
-
-  .icp-button {
-    padding: 0 12px;
+    bottom: 0;
+    font-size: 14px;
   }
 }
 </style>

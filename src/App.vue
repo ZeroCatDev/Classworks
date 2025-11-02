@@ -1,11 +1,15 @@
 <template>
   <v-app>
-    <!-- KvInitialize 组件自行决定是否展示或执行跳转 -->
-    <kv-initialize />
     <!-- 正常路由 -->
     <router-view v-slot="{ Component, route }">
-      <transition name="md3" mode="out-in">
-        <component :is="Component" :key="route.path" />
+      <transition
+        name="md3"
+        mode="out-in"
+      >
+        <component
+          :is="Component"
+          :key="route.path"
+        />
       </transition>
     </router-view>
     <global-message />
@@ -18,9 +22,7 @@ import { onMounted } from "vue";
 import { useTheme } from "vuetify";
 import { getSetting } from "@/utils/settings";
 import RateLimitModal from "@/components/RateLimitModal.vue";
-import KvInitialize from "@/components/KvInitialize.vue";
 import Clarity from "@microsoft/clarity";
-
 const theme = useTheme();
 
 onMounted(() => {
