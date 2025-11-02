@@ -100,14 +100,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { getSetting, setSetting } from '@/utils/settings'
 import axios from '@/axios/axios'
 
-defineProps({
+const props = defineProps({
   showCancel: {
     type: Boolean,
     default: false
+  },
+  preconfig: {
+    type: Object,
+    default: null
   }
 })
 
@@ -119,6 +123,30 @@ const form = ref({
 })
 const authenticating = ref(false)
 const error = ref('')
+
+// 监听预配置数据变化
+watch(
+  () => props.preconfig,
+  (newPreconfig) => {
+    if (newPreconfig) {
+      console.log('应用预配置数据:', newPreconfig)
+      form.value.namespace = newPreconfig.namespace || ''
+      form.value.password = newPreconfig.password || ''
+
+      // 如果启用自动执行且有命名空间，自动尝试认证
+      if (newPreconfig.autoExecute && newPreconfig.namespace) {
+        console.log('检测到自动执行标志且有命名空间，自动执行认证')
+        // 延迟一下确保UI已更新
+        setTimeout(() => {
+          authenticate()
+        }, 300)
+      } else if (newPreconfig.namespace) {
+        console.log('预配置数据已填入，等待手动认证')
+      }
+    }
+  },
+  { immediate: true, deep: true }
+)
 
 const authenticate = async () => {
   if (!form.value.namespace || authenticating.value) return

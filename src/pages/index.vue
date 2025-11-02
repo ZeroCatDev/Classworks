@@ -43,7 +43,11 @@
     </template>
   </v-app-bar>
   <!-- 初始化选择卡片，仅在首页且需要授权时显示；不影响顶栏 -->
-  <init-service-chooser v-if="shouldShowInit" @done="settingsTick++" />
+  <init-service-chooser
+    v-if="shouldShowInit"
+    :preconfig="preconfigData"
+    @done="settingsTick++"
+  />
 
   <!-- 学生姓名管理组件 -->
   <StudentNameManager
@@ -797,6 +801,13 @@ export default {
       $offKvChanged: null,
       $offConnect: null,
       debouncedRealtimeRefresh: null,
+      // 预配数据
+      preconfigData: {
+        namespace: null,
+        authCode: null,
+        autoOpen: false,
+        autoExecute: false
+      },
     };
   },
 
@@ -1203,6 +1214,9 @@ export default {
     },
 
     async initializeData() {
+      // 解析预配数据
+      this.parsePreconfigData();
+
       const configApplied = await this.parseUrlConfig();
 
       const urlParams = new URLSearchParams(window.location.search);
@@ -2231,6 +2245,64 @@ export default {
       const currentDate = new Date(this.state.selectedDateObj);
       currentDate.setDate(currentDate.getDate() + offset);
       this.handleDateSelect(currentDate);
+    },
+
+    // 解析预配数据
+    parsePreconfigData() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const namespace = urlParams.get("namespace");
+        const authCode = urlParams.get("authCode") || urlParams.get("auth_code");
+        const autoExecute = urlParams.get("autoExecute") || urlParams.get("auto_execute");
+
+        if (namespace) {
+          this.preconfigData.namespace = namespace;
+          this.preconfigData.authCode = authCode;
+          this.preconfigData.autoOpen = true;
+          // 解析自动执行参数，支持 true/false、1/0、yes/no
+          this.preconfigData.autoExecute = this.parseBoolean(autoExecute);
+
+          console.log("检测到预配数据:", {
+            namespace: this.preconfigData.namespace,
+            hasAuthCode: !!this.preconfigData.authCode,
+            autoExecute: this.preconfigData.autoExecute
+          });
+
+          // 清理URL参数，避免重复处理
+          this.cleanupUrlParams(['namespace', 'authCode', 'auth_code', 'autoExecute', 'auto_execute']);
+        }
+      } catch (error) {
+        console.error("解析预配数据失败:", error);
+      }
+    },
+
+    // 解析布尔值参数
+    parseBoolean(value) {
+      if (!value) return false;
+      const lowerValue = value.toLowerCase();
+      return lowerValue === 'true' || lowerValue === '1' || lowerValue === 'yes';
+    },
+
+    // 清理URL参数
+    cleanupUrlParams(params) {
+      try {
+        const url = new URL(window.location);
+        let hasChanged = false;
+
+        params.forEach(param => {
+          if (url.searchParams.has(param)) {
+            url.searchParams.delete(param);
+            hasChanged = true;
+          }
+        });
+
+        if (hasChanged) {
+          // 使用 replaceState 避免创建新的历史记录
+          window.history.replaceState({}, document.title, url.toString());
+        }
+      } catch (error) {
+        console.error("清理URL参数失败:", error);
+      }
     },
   },
 };

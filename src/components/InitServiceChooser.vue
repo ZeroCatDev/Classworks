@@ -153,7 +153,9 @@
       max-width="500"
     >
       <DeviceAuthDialog
+        ref="deviceAuthDialog"
         :show-cancel="true"
+        :preconfig="deviceAuthPreconfig"
         @success="handleAuthSuccess"
         @cancel="showDeviceAuthDialog = false"
       />
@@ -184,12 +186,24 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { getSetting, setSetting } from '@/utils/settings'
 import DeviceAuthDialog from './auth/DeviceAuthDialog.vue'
 import TokenInputDialog from './auth/TokenInputDialog.vue'
 import AlternativeCodeDialog from './auth/AlternativeCodeDialog.vue'
 import FirstTimeGuide from './auth/FirstTimeGuide.vue'
+
+const props = defineProps({
+  preconfig: {
+    type: Object,
+    default: () => ({
+      namespace: null,
+      authCode: null,
+      autoOpen: false,
+      autoExecute: false
+    })
+  }
+})
 
 const emit = defineEmits(['done'])
 
@@ -202,9 +216,24 @@ const showDeviceAuthDialog = ref(false)
 const showTokenDialog = ref(false)
 const showAlternativeCodeDialog = ref(false)
 
+// 设备认证对话框引用
+const deviceAuthDialog = ref(null)
+
 const provider = computed(() => getSetting('server.provider'))
 const isKvProvider = computed(() => provider.value === 'kv-server' || provider.value === 'classworkscloud')
 const kvToken = computed(() => getSetting('server.kvToken'))
+
+// 设备认证预配置数据
+const deviceAuthPreconfig = computed(() => {
+  if (props.preconfig?.namespace) {
+    return {
+      namespace: props.preconfig.namespace,
+      password: props.preconfig.authCode || '',
+      autoExecute: props.preconfig.autoExecute || false
+    }
+  }
+  return null
+})
 
 const evaluateVisibility = () => {
   const path = window.location.pathname
@@ -212,6 +241,21 @@ const evaluateVisibility = () => {
   const need = isKvProvider.value && (!kvToken.value || kvToken.value === '')
   visible.value = onHome && need
 }
+
+// 监听预配数据变化，自动打开设备认证对话框
+watch(
+  () => props.preconfig,
+  (newPreconfig) => {
+    if (newPreconfig?.autoOpen && newPreconfig?.namespace && visible.value) {
+      console.log('检测到预配数据，自动打开设备认证对话框')
+      // 延迟一下确保组件已完全挂载
+      setTimeout(() => {
+        showDeviceAuthDialog.value = true
+      }, 500)
+    }
+  },
+  { immediate: true, deep: true }
+)
 
 onMounted(() => {
   evaluateVisibility()
@@ -231,8 +275,16 @@ const handleAutoAuthorize = () => {
   window.location.href = url
 }
 
-const handleAuthSuccess = () => {
+const handleAuthSuccess = (tokenData) => {
   showDeviceAuthDialog.value = false
+  console.log('认证成功:', tokenData)
+
+  // 如果是通过预配数据成功的，显示成功消息
+  if (props.preconfig?.namespace) {
+    // 可以在这里添加成功提示
+    console.log(`预配数据认证成功: ${props.preconfig.namespace}`)
+  }
+
   evaluateVisibility()
   emit('done')
 }
