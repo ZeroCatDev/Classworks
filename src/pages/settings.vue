@@ -50,7 +50,7 @@
                 <div>
                   <div class="text-h6">Classworks KV</div>
                   <div class="text-caption text-medium-emphasis">
-                    云原生键值数据库
+                    文档形键值数据库
                   </div>
                 </div>
               </div>

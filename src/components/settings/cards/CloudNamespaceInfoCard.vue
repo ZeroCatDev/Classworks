@@ -65,10 +65,10 @@
             </div>
           </div>
         </v-card-text> </v-card
-      ><v-card title="Classworks KV" subtitle="云原生键值数据库" border hover
+      ><v-card title="Classworks KV" subtitle="文档形键值数据库" border hover
         ><v-card-text
           >Classworks KV
-          是厚浪云推出的云原生键值数据库，其是一个开放的云应用平台，为各种应用提供存储服务。此设备正在使用其服务，如果您希望管理设备信息，请前往
+          是厚浪云推出的文档形键值数据库，其是一个开放的云应用平台，为各种应用提供存储服务。此设备正在使用其服务，如果您希望管理设备信息，请前往
           Classworks KV
           的网站，如果您在服务推出前就在使用 Classworks，您的数据已被自动迁移。
           <br/><br/>Classworks KV 的全域管理员是 <a href="https://wuyuan.dev" target="_blank">孙悟元</a></v-card-text
