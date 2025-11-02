@@ -44,11 +44,11 @@
         direction="vertical"
       >
         <v-tabs-window-item value="index"
-          ><v-card class="service-card gradient-right clickable" elevation="8">
+          ><v-card class="service-card gradient-right clickable mb-4" elevation="8" rounded="xl" border hover  @click="openClassworksKV" color="primary" variant="tonal">
             <v-card-item>
               <div class="card-title">
                 <div>
-                  <div class="text-h6">Classworks KV</div>
+                  <div class="text-h6">在寻找 Classworks KV ？</div>
                   <div class="text-caption text-medium-emphasis">
                     文档形键值数据库
                   </div>
@@ -69,7 +69,7 @@
               </div>
             </v-card-text>
           </v-card>
-          <v-card title="Classworks" subtitle="设置" class="rounded-xl" border>
+          <v-card title="Classworks" subtitle="设置" class="rounded-xl mb-4" border>
             <v-card-text>
               <v-alert
                 color="error"
@@ -106,7 +106,7 @@
                 </p>
                 <p style="color: #666">
                   上述浏览器商标为其所属公司所有，Classworks™
-                  与上述浏览器所属公司暂无竞争关系。
+                  与上述浏览器所属公司无竞争关系。
                 </p>
                 <br /><v-btn
                   href="https://www.microsoft.com/zh-cn/windows/microsoft-edge"
@@ -119,7 +119,7 @@
                 ></v-alert
               >
             </v-card-text>
-          </v-card>
+          </v-card><about-card />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="server">

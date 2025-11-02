@@ -1,5 +1,5 @@
 <template>
-  <v-card border>
+  <v-card border rounded="xl" hover>
     <v-card-item>
       <template #prepend>
         <v-icon icon="mdi-information" size="large" class="mr-2" />
@@ -13,8 +13,8 @@
           <div class="d-flex flex-column align-start">
             <v-avatar size="120" class="mb-4">
               <v-img
-                src="https://github.com/SunWuyuan.png"
-                alt="Sunwuyuan"
+                src="../../assets/cslogo.png"
+                alt="Classworks"
               />
             </v-avatar>
 
