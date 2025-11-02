@@ -376,7 +376,7 @@ export default {
           value: "student",
         },
         {
-          title: "分享设置",
+          title: "预配链接",
           icon: "mdi-share",
           value: "share",
         },

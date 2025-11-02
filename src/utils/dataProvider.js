@@ -232,23 +232,11 @@ export default {
           // 迁移失败不影响URL生成，继续执行
         }
       }
-
+      // 获取认证token
+      const authtoken = getSetting("server.kvToken");
       // 构建云端访问URL
-      let url = `${serverUrl}/${machineId}/${key}`;
+      let url = `${serverUrl}/kv/${key}?token=${authtoken}`;
 
-      // 根据网站验证情况添加token参数
-      const namespaceInfo = await kvServerProvider.loadNamespaceInfo();
-      if (namespaceInfo && namespaceInfo.success !== false) {
-        const { accessType } = namespaceInfo;
-
-        // 如果是私有访问，添加token参数
-        if (accessType === 'private' && siteKey) {
-          const urlObj = new URL(url);
-          urlObj.searchParams.set('token', siteKey);
-          url = urlObj.toString();
-        }
-        // 公开或受保护访问不需要token参数
-      }
 
       return {
         success: true,
