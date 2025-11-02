@@ -1251,10 +1251,13 @@ export default {
           if (response.error.code === "NOT_FOUND") {
             this.state.showNoDataMessage = true;
             this.state.noDataMessage = response.error.message;
-            this.state.boardData = {
-              homework: {},
-              attendance: { absent: [], late: [], exclude: [] },
-            };
+            // 只有当前没有数据时才设置为空，避免覆盖已有的本地数据
+            if (!this.state.boardData || (!this.state.boardData.homework && !this.state.boardData.attendance)) {
+              this.state.boardData = {
+                homework: {},
+                attendance: { absent: [], late: [], exclude: [] },
+              };
+            }
           } else {
             throw new Error(response.error.message);
           }
@@ -1272,11 +1275,16 @@ export default {
           this.$message.success("下载成功", "数据已更新");
         }
       } catch (error) {
-        this.state.boardData = {
-          homework: {},
-          attendance: { absent: [], late: [], exclude: [] },
-        };
+        // 数据加载失败时不覆盖现有数据，只显示错误信息
+        console.error("数据加载失败:", error);
         this.$message.error("下载失败", error.message);
+        // 如果当前没有任何数据，才初始化为空数据
+        if (!this.state.boardData || (!this.state.boardData.homework && !this.state.boardData.attendance)) {
+          this.state.boardData = {
+            homework: {},
+            attendance: { absent: [], late: [], exclude: [] },
+          };
+        }
       } finally {
         this.loading.download = false;
       }
