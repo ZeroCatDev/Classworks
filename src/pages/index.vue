@@ -649,7 +649,7 @@
         </v-btn>
       </v-card-actions>
     </v-card> </v-dialog
-  ><br /><br /><br /><br /><br /><br />
+  ><br /><br /><br />
 </template>
 
 <script>
