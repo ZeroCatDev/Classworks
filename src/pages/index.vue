@@ -1,7 +1,7 @@
 <template>
   <v-app-bar class="no-select">
     <v-app-bar-title>
-      {{ state.classNumber }} - {{ titleText }}
+      {{ titleText }}
     </v-app-bar-title>
 
     <v-spacer />
@@ -672,6 +672,7 @@ import {
   setSetting,
   settingsDefinitions,
 } from "@/utils/settings";
+import { kvServerProvider } from "@/utils/providers/kvServerProvider";
 import { useDisplay } from "vuetify";
 import "../styles/index.scss";
 import "../styles/transitions.scss";
@@ -682,7 +683,6 @@ import { Base64 } from "js-base64";
 import {
   getSocket,
   on as socketOn,
-  off as socketOff,
   joinToken,
   leaveAll,
   onConnect as onSocketConnect,
@@ -720,6 +720,9 @@ export default {
       useDisplay: useDisplay,
       state: {
         classNumber: "",
+        // 当前命名空间/设备信息（从云端加载）
+        namespaceInfo: null,
+        deviceName: "",
         studentList: [],
         boardData: {
           homework: {},
@@ -816,6 +819,12 @@ export default {
       return useDisplay().mobile.value;
     },
     titleText() {
+      // 优先展示当前设备名称（如果已从云端获取）
+      const deviceName =
+        this.state.namespaceInfo?.device?.name ||
+          this.state.classNumber ||
+        "高三八班";
+
       const today = this.getToday();
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
@@ -825,11 +834,11 @@ export default {
       const yesterdayStr = this.formatDate(yesterday);
 
       if (currentDateStr === todayStr) {
-        return "今天的作业";
+        return deviceName +" - 今天的作业";
       } else if (currentDateStr === yesterdayStr) {
-        return "昨天的作业";
+        return deviceName + " - 昨天的作业";
       } else {
-        return `${currentDateStr}的作业`;
+        return `${deviceName} - ${currentDateStr}的作业`;
       }
     },
     sortedItems() {
@@ -1048,6 +1057,8 @@ export default {
     try {
       this.updateBackendUrl();
       await this.initializeData();
+      // 拉取设备/命名空间信息用于标题显示
+      await this.loadDeviceInfo();
       this.setupAutoRefresh();
       this.unwatchSettings = watchSettings(() => {
         this.updateSettings();
@@ -1143,6 +1154,26 @@ export default {
   },
 
   methods: {
+    // 加载设备/命名空间信息（仅云端模式）
+    async loadDeviceInfo() {
+      try {
+        const provider = getSetting("server.provider");
+        const useServer = provider === "kv-server" || provider === "classworkscloud";
+        if (!useServer) return;
+
+        const res = await kvServerProvider.loadNamespaceInfo();
+        if (res && res.success === false) return; // 忽略错误
+
+        this.state.namespaceInfo = res || null;
+        // 兜底填充设备名，避免重复解析
+        this.state.deviceName =
+          res?.account?.deviceName ||
+          "";
+      } catch (e) {
+        console.warn("加载设备信息失败:", e);
+      }
+    },
+
     // 更新 Token 显示信息
     updateTokenDisplayInfo() {
       const manager = this.$refs.studentNameManager
@@ -1558,6 +1589,8 @@ export default {
       this.state.contentStyle = { "font-size": `${this.state.fontSize}px` };
       this.setupAutoRefresh();
       this.updateBackendUrl();
+      // 设置更新时尝试刷新设备名称（例如 Token 或域名变更）
+      this.loadDeviceInfo();
       // 触发依赖刷新（例如 shouldShowInit）
       this.settingsTick++;
     },
