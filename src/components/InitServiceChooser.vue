@@ -99,40 +99,41 @@
           </v-card-item>
         </v-card>
       </div>
-  <div class="options-buttons">
-          <v-btn
-            variant="tonal"
-            prepend-icon="mdi-laptop"
-            size="small"
-            @click="useLocalMode"
-          >
-            使用本地模式
-          </v-btn>
-          <v-btn
-            variant="tonal"
-            prepend-icon="mdi-flash"
-            size="small"
-            @click="handleAutoAuthorize"
-          >
-            授权码式授权（弃用）
-          </v-btn>
-          <v-btn
-            variant="tonal"
-            prepend-icon="mdi-key"
-            size="small"
-            @click="showTokenDialog = true"
-          >
-            输入 Token
-          </v-btn>
-          <v-btn
-            variant="tonal"
-            prepend-icon="mdi-code-tags"
-            size="small"
-            @click="showAlternativeCodeDialog = true"
-          >
-            输入替代代码
-          </v-btn>
-        </div>
+
+      <div class="options-buttons">
+        <v-btn
+          variant="tonal"
+          prepend-icon="mdi-laptop"
+          size="small"
+          @click="useLocalMode"
+        >
+          使用本地模式
+        </v-btn>
+        <v-btn
+          variant="tonal"
+          prepend-icon="mdi-flash"
+          size="small"
+          @click="handleAutoAuthorize"
+        >
+          授权码式授权（弃用）
+        </v-btn>
+        <v-btn
+          variant="tonal"
+          prepend-icon="mdi-key"
+          size="small"
+          @click="showTokenDialog = true"
+        >
+          输入 Token
+        </v-btn>
+        <v-btn
+          variant="tonal"
+          prepend-icon="mdi-code-tags"
+          size="small"
+          @click="showAlternativeCodeDialog = true"
+        >
+          输入替代代码
+        </v-btn>
+      </div>
 
 
       <div class="footer-hint">
@@ -145,7 +146,10 @@
       v-model="showGuideDialog"
       max-width="600"
     >
-      <FirstTimeGuide @close="showGuideDialog = false" />
+      <FirstTimeGuide
+        @close="showGuideDialog = false"
+        @success="handleGuideSuccess"
+      />
     </v-dialog>
 
     <v-dialog
@@ -273,6 +277,13 @@ const handleAutoAuthorize = () => {
     url += `&uuid=${encodeURIComponent(uuid)}`
   }
   window.location.href = url
+}
+
+const handleGuideSuccess = (tokenData) => {
+  showGuideDialog.value = false
+  console.log('渐进式注册成功:', tokenData)
+  evaluateVisibility()
+  emit('done')
 }
 
 const handleAuthSuccess = (tokenData) => {

@@ -140,141 +140,7 @@
           </div>
         </v-card>
 
-        <!-- 工作流程说明 -->
-        <v-card
-          variant="outlined"
-          class="pa-5 mb-4"
-        >
-          <h4 class="text-h6 mb-4">
-            <v-icon
-              color="primary"
-              class="mr-2"
-            >
-              mdi-information
-            </v-icon>
-            工作流程
-          </h4>
 
-          <v-timeline
-            side="end"
-            density="compact"
-            line-thickness="2"
-          >
-            <v-timeline-item
-              dot-color="primary"
-              size="small"
-            >
-              <div class="text-body-2">
-                <strong>步骤 1:</strong> 在 Classworks 应用中编辑作业
-              </div>
-            </v-timeline-item>
-
-            <v-timeline-item
-              dot-color="success"
-              size="small"
-            >
-              <div class="text-body-2">
-                <strong>步骤 2:</strong> 数据自动上传到 Classworks KV
-              </div>
-            </v-timeline-item>
-
-            <v-timeline-item
-              dot-color="info"
-              size="small"
-            >
-              <div class="text-body-2">
-                <strong>步骤 3:</strong> 其他设备从 Classworks KV 同步数据
-              </div>
-            </v-timeline-item>
-
-            <v-timeline-item
-              dot-color="warning"
-              size="small"
-            >
-              <div class="text-body-2">
-                <strong>步骤 4:</strong> 所有设备显示相同的作业内容
-              </div>
-            </v-timeline-item>
-          </v-timeline>
-        </v-card>
-
-        <!-- 优势说明 -->
-        <v-row>
-          <v-col
-            cols="12"
-            md="4"
-          >
-            <v-card
-              variant="tonal"
-              color="blue"
-              class="pa-4 h-100"
-            >
-              <v-icon
-                size="40"
-                color="blue-darken-2"
-                class="mb-2"
-              >
-                mdi-devices
-              </v-icon>
-              <h5 class="text-subtitle-1 font-weight-bold mb-2">
-                多设备访问
-              </h5>
-              <p class="text-body-2">
-                在教室、办公室、家中的任何设备上访问相同的数据
-              </p>
-            </v-card>
-          </v-col>
-
-          <v-col
-            cols="12"
-            md="4"
-          >
-            <v-card
-              variant="tonal"
-              color="green"
-              class="pa-4 h-100"
-            >
-              <v-icon
-                size="40"
-                color="green-darken-2"
-                class="mb-2"
-              >
-                mdi-sync
-              </v-icon>
-              <h5 class="text-subtitle-1 font-weight-bold mb-2">
-                实时同步
-              </h5>
-              <p class="text-body-2">
-                修改后立即同步，所有设备保持数据一致
-              </p>
-            </v-card>
-          </v-col>
-
-          <v-col
-            cols="12"
-            md="4"
-          >
-            <v-card
-              variant="tonal"
-              color="orange"
-              class="pa-4 h-100"
-            >
-              <v-icon
-                size="40"
-                color="orange-darken-2"
-                class="mb-2"
-              >
-                mdi-shield-lock
-              </v-icon>
-              <h5 class="text-subtitle-1 font-weight-bold mb-2">
-                安全可靠
-              </h5>
-              <p class="text-body-2">
-                通过密码和命名空间隔离，保护班级数据安全
-              </p>
-            </v-card>
-          </v-col>
-        </v-row>
       </div>
 
       <!-- 步骤 3: 询问使用场景 -->
@@ -387,6 +253,32 @@
         </div>
 
         <v-card
+          variant="tonal"
+          class="pa-6 mb-6"
+        >
+          <div class="d-flex flex-column flex-sm-row align-center">
+            <div class="flex-grow-1">
+              <h4 class="text-h6 font-weight-bold mb-2">
+                自动注册设备
+              </h4>
+              <p class="text-body-2 mb-3 text-medium-emphasis">
+                通过引导式流程自动创建设备、获取令牌并完成初始化。适合首次体验或快速部署多终端。
+              </p>
+              <v-btn
+                color="primary"
+                size="large"
+                variant="elevated"
+                prepend-icon="mdi-flash"
+                @click="goToProgressiveStep"
+              >
+                自动注册
+              </v-btn>
+            </div>
+          </div>
+        </v-card>
+        <div class="mb-6">
+          也可以手动前往 Classworks KV 控制台获取认证信息：</div>
+        <v-card
           :variant="kvserverurl=='https://kv.houlang.cloud'? 'elevated' : 'outlined'"
           :color=" kvserverurl=='https://kv.houlang.cloud'? 'primary' : 'error' "
           class="pa-6  mb-6"
@@ -398,6 +290,7 @@
           >
             mdi-open-in-new
           </v-icon>
+
           <h4 class="text-h6  font-weight-bold">
             请访问 {{ kvserverurl=='https://kv.houlang.cloud'? 'Classworks KV' : '自定义的 Classworks KV 实例 ' }} 控制台
           </h4>
@@ -409,33 +302,6 @@
           </h6>
         </v-card>
 
-        <v-card
-          variant="tonal"
-          color="info"
-          class="pa-5"
-        >
-          <div class="text-body-1 mb-3">
-            <v-icon
-              size="20"
-              class="mr-2"
-            >
-              mdi-information
-            </v-icon>
-            在控制台完成以下操作：
-          </div>
-          <div class="text-body-2 mb-2">
-            1. 注册或登录账号
-          </div>
-          <div class="text-body-2 mb-2">
-            2. 创建班级空间
-          </div>
-          <div class="text-body-2 mb-2">
-            3. 获取命名空间和密码
-          </div>
-          <div class="text-body-2">
-            4. 返回这里输入认证信息
-          </div>
-        </v-card>
 
         <!-- 常见问题 -->
         <v-expansion-panels
@@ -511,6 +377,166 @@
           </v-expansion-panel>
         </v-expansion-panels>
       </div>
+
+      <!-- 步骤 5: 渐进式注册完整流程 -->
+      <div
+        v-show="currentStep === 5"
+        class="step-content"
+      >
+        <div class="text-center mb-6">
+          <v-avatar
+            size="80"
+            color="primary"
+            variant="tonal"
+            class="mb-4"
+          >
+            <v-icon size="48">
+              mdi-rocket-launch
+            </v-icon>
+          </v-avatar>
+          <h3 class="text-h5 font-weight-bold mb-2">
+            渐进式注册
+          </h3>
+          <p class="text-body-2 text-medium-emphasis">
+            您可以暂时不配置 Classworks KV
+          </p>
+        </div>
+
+        <v-progress-linear
+          :model-value="progressValue"
+          height="8"
+          color="primary"
+          rounded
+          class="mb-6"
+        />
+
+
+
+        <v-row>
+          <v-col
+            cols="12"
+          >
+            <v-card
+              variant="tonal"
+              :color="statusColor"
+            >
+              <v-card-item>
+                <div class="d-flex align-center mb-3">
+                  <v-icon
+                    :color="statusColor"
+                    class="mr-2"
+                    size="32"
+                  >
+                    {{ statusIcon }}
+                  </v-icon>
+                  <div class="text-h6 font-weight-medium">
+                    {{ statusTitle }}
+                  </div>
+                </div>
+                <div
+                  v-if="deviceInfo"
+                  class="text-body-2 mb-2"
+                >
+                  <div class="mb-2">
+                    <strong>设备名称：</strong>{{ deviceInfo.deviceName }}
+                  </div>
+                  <div>
+                    <strong>设备 UUID：</strong>
+                    <code class="device-code">{{ deviceInfo.uuid }}</code>
+                  </div>
+                </div>
+                <div
+                  v-if="progressiveStatus === 'error'"
+                  class="text-body-2 text-error"
+                >
+                  {{ progressiveError }}
+                </div>
+              </v-card-item>
+            </v-card>
+          </v-col>
+
+          <v-col
+            cols="12"
+          >
+            <v-card variant="outlined">
+              <v-card-item>
+                <div class="text-subtitle-2 font-weight-medium mb-3">
+                  过程日志
+                </div>
+                <div class="log-box">
+                  <div
+                    v-for="(log, i) in logs"
+                    :key="i"
+                    class="text-caption log-line"
+                  >
+                    {{ log.time }} · {{ log.message }}
+                  </div>
+                  <div
+                    v-if="!logs.length"
+                    class="text-caption text-medium-emphasis"
+                  >
+                    等待开始…
+                  </div>
+                </div>
+              </v-card-item>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <v-btn
+            v-if="progressiveStatus === 'idle'"
+            color="primary"
+            size="large"
+            prepend-icon="mdi-play"
+            @click="startProgressiveRegister"
+          >
+            开始创建
+          </v-btn>
+
+          <v-btn
+            v-if="progressiveStatus === 'error'"
+            color="error"
+            variant="outlined"
+            prepend-icon="mdi-refresh"
+            @click="retryProgressiveRegister"
+          >
+            重试
+          </v-btn>
+
+          <v-btn
+            v-if="progressiveStatus === 'registering'"
+            color="primary"
+            variant="tonal"
+            :loading="true"
+            prepend-icon="mdi-progress-clock"
+          >
+            正在执行…
+          </v-btn>
+
+          <v-btn
+            v-if="progressiveStatus === 'success'"
+            color="success"
+            size="large"
+            variant="elevated"
+            prepend-icon="mdi-check-circle"
+            @click="applyTokenAndClose"
+          >
+            应用令牌并关闭
+          </v-btn>
+
+          <v-btn
+            v-if="progressiveStatus === 'success'"
+            color="primary"
+            size="large"
+            variant="outlined"
+            prepend-icon="mdi-open-in-new"
+            @click="openAuthPage"
+          >
+            前往绑定账户
+          </v-btn>
+        </div>
+      </div>
     </v-card-text>
 
     <!-- 底部操作按钮 -->
@@ -528,7 +554,7 @@
       </v-btn>
       <v-spacer />
       <v-btn
-        v-if="currentStep < 4"
+        v-if="currentStep < totalSteps && currentStep !== 4"
         :disabled="currentStep === 3 && !storageType"
         size="large"
         color="primary"
@@ -541,7 +567,7 @@
         </v-icon>
       </v-btn>
       <v-btn
-        v-else
+        v-if="currentStep === totalSteps || currentStep === 4"
         size="large"
         color="primary"
         variant="elevated"
@@ -554,13 +580,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { getSetting } from '@/utils/settings'
-const emit = defineEmits(['close'])
+import { ref, computed } from 'vue'
+import { getSetting, setSetting } from '@/utils/settings'
+import axios from '@/axios/axios'
+import { v4 as uuidv4 } from 'uuid'
+const emit = defineEmits(['close', 'success'])
 const kvserverurl = getSetting('server.authDomain')
 const currentStep = ref(1)
-const totalSteps = 4
+const totalSteps = 5
 const storageType = ref('')
+
+// 渐进式注册相关状态
+const progressiveStatus = ref('idle') // 'idle' | 'registering' | 'success' | 'error'
+const progressiveError = ref('')
+const deviceInfo = ref(null)
+const tokenData = ref(null) // 保存获取到的 token 数据
+const logs = ref([])
+const stepStates = ref({ 1: false, 2: false, 3: false, 4: false })
 
 const nextStep = () => {
   if (currentStep.value < totalSteps) {
@@ -586,6 +622,147 @@ const finish = () => {
 const openKVSite = () => {
   window.open(kvserverurl, '_blank')
 }
+
+// 渐进式注册相关方法
+const goToProgressiveStep = () => {
+  currentStep.value = 5
+}
+
+// 计算属性
+const progressValue = computed(() => {
+  const done = Object.values(stepStates.value).filter(Boolean).length
+  return (done / 4) * 100
+})
+
+const statusColor = computed(() => {
+  return progressiveStatus.value === 'success'
+    ? 'success'
+    : progressiveStatus.value === 'error'
+    ? 'error'
+    : 'primary'
+})
+
+const statusIcon = computed(() => {
+  return progressiveStatus.value === 'success'
+    ? 'mdi-check-circle'
+    : progressiveStatus.value === 'error'
+    ? 'mdi-alert-circle'
+    : progressiveStatus.value === 'registering'
+    ? 'mdi-progress-clock'
+    : 'mdi-rocket-launch'
+})
+
+const statusTitle = computed(() => {
+  return progressiveStatus.value === 'success'
+    ? '完成！设备已创建'
+    : progressiveStatus.value === 'error'
+    ? '创建失败'
+    : progressiveStatus.value === 'registering'
+    ? '正在执行…'
+    : '准备开始'
+})
+
+const addLog = (message) => {
+  const now = new Date()
+  const hh = String(now.getHours()).padStart(2, '0')
+  const mm = String(now.getMinutes()).padStart(2, '0')
+  const ss = String(now.getSeconds()).padStart(2, '0')
+  logs.value.push({ time: `${hh}:${mm}:${ss}`, message })
+}
+
+
+const generateDeviceName = () => {
+  return `Classworks`
+}
+
+// 主流程
+const startProgressiveRegister = async () => {
+  if (progressiveStatus.value === 'registering') return
+
+  progressiveStatus.value = 'registering'
+  progressiveError.value = ''
+  logs.value = []
+  stepStates.value = { 1: false, 2: false, 3: false, 4: false }
+
+  try {
+    addLog('正在生成设备信息…')
+    const uuid = uuidv4()
+    const deviceName = generateDeviceName()
+    const serverUrl = getSetting('server.domain')
+    stepStates.value[1] = true
+
+    addLog('向服务器注册设备…')
+    const response = await axios.post(`${serverUrl}/devices`, { uuid, deviceName })
+    void response
+    stepStates.value[2] = true
+
+    // 保存设备信息
+    deviceInfo.value = { uuid, deviceName, createdAt: new Date().toISOString(), registered: true }
+    localStorage.setItem('Classworks_progressive_device', JSON.stringify(deviceInfo.value))
+
+    addLog('获取访问令牌…')
+    try {
+      const tokenResp = await axios.post(`${serverUrl}/apps/auth/token`, {
+        namespace: uuid,
+        password: '',
+        appId: 'd158067f53627d2b98babe8bffd2fd7d',
+      })
+      if (tokenResp.data && tokenResp.data.token) {
+        // 保存 token 数据供后续使用
+        tokenData.value = tokenResp.data
+        setSetting('server.kvToken', tokenResp.data.token)
+
+        // 如果返回了 device 信息，保存 uuid
+        if (tokenResp.data.device?.uuid) {
+          setSetting('device.uuid', tokenResp.data.device.uuid)
+        }
+
+        addLog('已获取 Token 并写入配置')
+      } else {
+        addLog('未返回 Token，您可以稍后在授权页完成配置')
+      }
+    } catch (tokenErr) {
+      console.warn('自动获取 Token 失败:', tokenErr)
+      addLog('自动获取 Token 失败，可在授权页手动完成')
+    }
+    stepStates.value[3] = true
+
+    addLog('完成！您可以应用令牌或前往授权页面继续配置')
+    stepStates.value[4] = true
+    progressiveStatus.value = 'success'
+  } catch (error) {
+    console.error('设备注册失败:', error)
+    progressiveError.value = error.response?.data?.message || error.message || '网络连接失败'
+    addLog('失败：' + progressiveError.value)
+    progressiveStatus.value = 'error'
+  }
+}
+
+const retryProgressiveRegister = () => {
+  progressiveStatus.value = 'idle'
+  progressiveError.value = ''
+  logs.value = []
+  stepStates.value = { 1: false, 2: false, 3: false, 4: false }
+}
+
+const openAuthPage = () => {
+  const info = deviceInfo.value
+  if (!info?.uuid) return
+  const authDomain = getSetting('server.authDomain')
+  const url = `${authDomain}/?uuid=${encodeURIComponent(info.uuid)}&tolinktoaccount=true`
+  window.open(url, '_blank')
+}
+
+// 应用令牌并关闭（触发 success 事件让父组件更新）
+const applyTokenAndClose = () => {
+  if (tokenData.value) {
+    // 触发 success 事件，传递 token 数据，类似 DeviceAuthDialog
+    emit('success', tokenData.value)
+  }
+  // 关闭引导
+  emit('close')
+}
+
 </script>
 
 <style scoped>
@@ -667,5 +844,51 @@ const openKVSite = () => {
     transform: rotate(90deg);
     margin: 20px 0;
   }
+}
+
+/* 渐进式注册卡片样式 */
+.progressive-register-card {
+  transition: all 0.3s ease;
+  border: 2px solid transparent !important;
+}
+
+.progressive-register-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+}
+
+.progressive-register-card .card-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.progressive-register-card .card-actions {
+  flex-shrink: 0;
+}
+
+.progressive-register-card code {
+  background: rgba(0,0,0,0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+/* 渐进式注册页面样式 */
+.log-box {
+  height: 140px;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.log-line + .log-line {
+  margin-top: 4px;
+}
+
+.device-code {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
 }
 </style>

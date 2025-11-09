@@ -17,16 +17,16 @@ axiosInstance.interceptors.request.use(
 
     // 只有在 kv-server 或 classworkscloud 模式下才添加请求头
     if (provider === "kv-server" || provider === "classworkscloud") {
-      // 确保每次请求时都获取最新的 siteKey
-      const siteKey = getSetting("server.siteKey");
-      if (siteKey) {
-        requestConfig.headers["x-site-key"] = Base64.encode(siteKey);
-      }
-
-      // 自动添加命名空间密码
-      const namespacePassword = getSetting("namespace.password");
-      if (namespacePassword) {
-        requestConfig.headers["x-namespace-password"] = Base64.encode(namespacePassword);
+      // 优先使用新的 kvToken
+      const kvToken = getSetting("server.kvToken");
+      if (kvToken) {
+        requestConfig.headers["x-app-token"] = kvToken;
+      } else {
+        // 向后兼容旧的 siteKey
+        const siteKey = getSetting("server.siteKey");
+        if (siteKey) {
+          requestConfig.headers["x-site-key"] = Base64.encode(siteKey);
+        }
       }
     }
 
