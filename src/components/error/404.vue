@@ -1,7 +1,7 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="align-centerfill-height mx-auto" max-width="900">
-      <v-img class="mb-4" height="150" src="@/assets/logo.svg" />
+      <v-img class="mb-4" height="150" src="@/assets/logo.svg"/>
 
       <div class="text-center">
         <div class="text-body-2 font-weight-light mb-n1">出现了错误</div>
@@ -9,7 +9,7 @@
         <h1 class="text-h2 font-weight-bold">404</h1>
       </div>
 
-      <div class="py-4" />
+      <div class="py-4"/>
 
       <v-row>
         <v-col cols="12">
@@ -21,7 +21,7 @@
             variant="outlined"
           >
             <template #image>
-              <v-img position="top right" />
+              <v-img position="top right"/>
             </template>
 
             <template #title>
@@ -33,11 +33,11 @@
             </template>
 
             <v-overlay
-              opacity=".12"
-              scrim="primary"
               contained
               model-value
+              opacity=".12"
               persistent
+              scrim="primary"
             />
           </v-card>
         </v-col>
@@ -46,18 +46,18 @@
           <v-card
             class="py-4"
             color="surface-variant"
-            to="/"
             prepend-icon="mdi-home"
             rounded="lg"
             title="返回首页"
+            to="/"
             variant="text"
           >
             <v-overlay
-              opacity=".06"
-              scrim="primary"
               contained
               model-value
+              opacity=".06"
               persistent
+              scrim="primary"
             />
           </v-card>
         </v-col>
@@ -66,18 +66,18 @@
           <v-card
             class="py-4"
             color="surface-variant"
-            @click="this.$router.back()"
             prepend-icon="mdi-arrow-left-drop-circle"
             rounded="lg"
             title="返回上一页"
             variant="text"
+            @click="this.$router.back()"
           >
             <v-overlay
-              opacity=".06"
-              scrim="primary"
               contained
               model-value
+              opacity=".06"
               persistent
+              scrim="primary"
             />
           </v-card>
         </v-col>

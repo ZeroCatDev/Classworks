@@ -8,20 +8,20 @@
     variant="tonal"
   >
     <div class="d-flex align-center">
-      <v-icon :icon="icons[message?.type] || icons.info" class="mr-2" />
+      <v-icon :icon="icons[message?.type] || icons.info" class="mr-2"/>
       <div>
         <div class="text-subtitle-2 font-weight-medium">{{ message?.title }}</div>
         <div v-if="message?.content" class="text-body-2">{{ message?.content }}</div>
       </div>
     </div>
     <template #actions>
-      <v-btn variant="text" icon="mdi-close" @click="snackbar = false" />
+      <v-btn icon="mdi-close" variant="text" @click="snackbar = false"/>
     </template>
   </v-snackbar>
 </template>
 
 <script>
-import { defineComponent, ref, onBeforeUnmount, nextTick } from 'vue';
+import {defineComponent, ref, onBeforeUnmount, nextTick} from 'vue';
 import messageService from '@/utils/message';
 
 export default defineComponent({
@@ -56,7 +56,7 @@ export default defineComponent({
 
     onBeforeUnmount(() => unsubscribe?.());
 
-    return { snackbar, message, icons, colors };
+    return {snackbar, message, icons, colors};
   }
 });
 </script>

@@ -1,8 +1,8 @@
 <template>
   <settings-card
-    title="数据源设置"
-    icon="mdi-database"
     :loading="loading"
+    icon="mdi-database"
+    title="数据源设置"
   >
     <v-form>
       <!-- 使用双向绑定来替代 setting-key -->
@@ -13,20 +13,20 @@
           { title: 'KV本地存储', value: 'kv-local' },
           { title: 'KV远程服务器', value: 'kv-server' }
         ]"
-        label="数据提供者"
-        variant="outlined"
+        class="mb-3"
         density="comfortable"
         item-title="title"
         item-value="value"
+        label="数据提供者"
         prepend-icon="mdi-database"
-        class="mb-3"
+        variant="outlined"
       />
 
       <v-alert
         v-if="isKvProvider"
+        class="my-2"
         type="info"
         variant="tonal"
-        class="my-2"
       >
         <v-alert-title>KV 存储系统</v-alert-title>
         <p>KV存储系统使用本机唯一标识符(UUID)来区分不同设备的数据。</p>
@@ -38,10 +38,10 @@
 
       <v-alert
         v-if="isClassworksCloud"
-        type="info"
-        color="success"
-        variant="tonal"
         class="my-2"
+        color="success"
+        type="info"
+        variant="tonal"
       >
         <v-alert-title>Classworks云端存储</v-alert-title>
         <p>Classworks云端存储是官方提供的存储解决方案，自动配置了最优的访问设置。</p>
@@ -56,15 +56,14 @@
       <div v-if="isClassworksCloud">
         <v-text-field
           v-model="serverSettings.kvToken"
-          label="KV 授权令牌"
-          variant="outlined"
-          density="comfortable"
-          prepend-icon="mdi-shield-key"
           class="mb-2"
+          density="comfortable"
           hint="令牌用于云端存储授权"
+          label="KV 授权令牌"
           persistent-hint
+          prepend-icon="mdi-shield-key"
+          variant="outlined"
         />
-
 
 
         <cloud-namespace-info-card
@@ -77,24 +76,24 @@
       <div v-else-if="currentProvider === 'kv-server'">
         <v-text-field
           v-model="serverSettings.domain"
-          label="服务器域名"
-          variant="outlined"
-          density="comfortable"
-          prepend-icon="mdi-web"
           class="mb-2"
+          density="comfortable"
           hint="例如: https://example.com (不需要路径)"
+          label="服务器域名"
           persistent-hint
+          prepend-icon="mdi-web"
+          variant="outlined"
         />
 
         <v-text-field
           v-model="serverSettings.kvToken"
-          label="KV 授权令牌"
-          variant="outlined"
-          density="comfortable"
-          prepend-icon="mdi-shield-key"
           class="mb-2"
+          density="comfortable"
           hint="令牌用于服务器验证"
+          label="KV 授权令牌"
           persistent-hint
+          prepend-icon="mdi-shield-key"
+          variant="outlined"
         />
       </div>
 
@@ -102,13 +101,13 @@
       <div v-else-if="currentProvider === 'kv-local'">
         <v-text-field
           v-model="serverSettings.classNumber"
-          label="班级编号"
-          variant="outlined"
-          density="comfortable"
-          prepend-icon="mdi-account-group"
           class="mb-2"
+          density="comfortable"
           hint="例如: 高三八班"
+          label="班级编号"
           persistent-hint
+          prepend-icon="mdi-account-group"
+          variant="outlined"
         />
       </div>
     </v-form>
@@ -118,11 +117,11 @@
 <script>
 import SettingsCard from "@/components/SettingsCard.vue";
 import CloudNamespaceInfoCard from "./CloudNamespaceInfoCard.vue";
-import { getSetting, setSetting, watchSettings } from "@/utils/settings";
+import {getSetting, setSetting, watchSettings} from "@/utils/settings";
 
 export default {
   name: "ServerSettingsCard",
-  components: { SettingsCard, CloudNamespaceInfoCard },
+  components: {SettingsCard, CloudNamespaceInfoCard},
   props: {
     loading: Boolean,
   },

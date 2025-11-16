@@ -1,10 +1,10 @@
 import axios from "@/axios/axios";
-import { formatResponse, formatError } from "../dataProvider";
-import { getSetting } from "../settings";
+import {formatResponse, formatError} from "../dataProvider";
+import {getSetting} from "../settings";
 
 // Helper function to get request headers with kvtoken
 const getHeaders = () => {
-  const headers = { Accept: "application/json" };
+  const headers = {Accept: "application/json"};
   const kvToken = getSetting("server.kvToken");
   const siteKey = getSetting("server.siteKey");
 

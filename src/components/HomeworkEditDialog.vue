@@ -1,6 +1,6 @@
 # 创建新的作业编辑对话框组件
 <template>
-  <v-dialog v-model="dialogVisible" width="auto" max-width="900" @click:outside="handleClose">
+  <v-dialog v-model="dialogVisible" max-width="900" width="auto" @click:outside="handleClose">
     <v-card border>
       <v-card-title>{{ title }}</v-card-title>
       <v-card-subtitle>
@@ -15,9 +15,9 @@
               auto-grow
               placeholder="使用换行表示分条"
               rows="5"
+              width="480"
               @click="updateCurrentLine"
               @keyup="updateCurrentLine"
-            width="480"
             />
 
             <!-- Template Buttons Section -->
@@ -29,9 +29,9 @@
                 <template v-if="subjectBooks">
                   <div v-for="(pages, book) in subjectBooks" :key="book" class="button-group">
                     <v-chip
-                      class="ma-1 book-chip"
                       :color="isBookSelected(book) ? 'success' : 'default'"
                       :variant="isBookSelected(book) ? 'elevated' : 'flat'"
+                      class="ma-1 book-chip"
                       @click="handleBookClick(book)"
                     >
                       {{ book }}
@@ -42,9 +42,9 @@
                       <v-chip
                         v-for="page in pages"
                         :key="page"
-                        class="ma-1"
                         :color="isPageSelected(book, page) ? 'info' : 'default'"
                         :variant="isPageSelected(book, page) ? 'elevated' : 'flat'"
+                        class="ma-1"
                         @click="handlePageClick(book, page)"
                       >
                         {{ page }}
@@ -57,9 +57,9 @@
                 <template v-if="commonBooks">
                   <div v-for="(pages, book) in commonBooks" :key="book" class="button-group">
                     <v-chip
-                      class="ma-1 book-chip"
                       :color="isBookSelected(book) ? 'success' : 'default'"
                       :variant="isBookSelected(book) ? 'elevated' : 'flat'"
+                      class="ma-1 book-chip"
                       @click="handleBookClick(book)"
                     >
                       {{ book }}
@@ -70,9 +70,9 @@
                       <v-chip
                         v-for="page in pages"
                         :key="page"
-                        class="ma-1"
                         :color="isPageSelected(book, page) ? 'info' : 'default'"
                         :variant="isPageSelected(book, page) ? 'elevated' : 'flat'"
+                        class="ma-1"
                         @click="handlePageClick(book, page)"
                       >
                         {{ page }}
@@ -102,16 +102,16 @@
           </div>
 
           <!-- Quick Tools Section -->
-          <div class="quick-tools ml-4" style="min-width: 180px;" v-if="showQuickTools">
+          <div v-if="showQuickTools" class="quick-tools ml-4" style="min-width: 180px;">
             <!-- Numeric Keypad -->
             <div class="numeric-keypad mb-4">
               <div class="keypad-row">
                 <v-btn
                   v-for="n in 3"
                   :key="n"
+                  class="keypad-btn"
                   size="small"
                   variant="tonal"
-                  class="keypad-btn"
                   @click="insertAtCursor(String(n))"
                 >
                   {{ n }}
@@ -121,9 +121,9 @@
                 <v-btn
                   v-for="n in 3"
                   :key="n"
+                  class="keypad-btn"
                   size="small"
                   variant="tonal"
-                  class="keypad-btn"
                   @click="insertAtCursor(String(n + 3))"
                 >
                   {{ n + 3 }}
@@ -133,9 +133,9 @@
                 <v-btn
                   v-for="n in 3"
                   :key="n"
+                  class="keypad-btn"
                   size="small"
                   variant="tonal"
-                  class="keypad-btn"
                   @click="insertAtCursor(String(n + 6))"
                 >
                   {{ n + 6 }}
@@ -143,26 +143,26 @@
               </div>
               <div class="keypad-row">
                 <v-btn
+                  class="keypad-btn"
                   size="small"
                   variant="tonal"
-                  class="keypad-btn"
                   @click="insertAtCursor('-')"
                 >
                   -
                 </v-btn>
                 <v-btn
+                  class="keypad-btn"
                   size="small"
                   variant="tonal"
-                  class="keypad-btn"
                   @click="insertAtCursor('0')"
                 >
                   0
                 </v-btn>
                 <v-btn
-                  size="small"
-                  variant="tonal"
                   class="keypad-btn"
                   color="error"
+                  size="small"
+                  variant="tonal"
                   @click="deleteLastChar"
                 >
                   ←
@@ -170,16 +170,17 @@
               </div>
               <div class="keypad-row">
                 <v-btn
+                  class="keypad-btn space-btn"
                   size="small"
                   variant="tonal"
-                  class="keypad-btn space-btn"
                   @click="insertAtCursor(' ')"
                 >
                   空格
-                </v-btn><v-btn
+                </v-btn>
+                <v-btn
+                  class="keypad-btn space-btn"
                   size="small"
                   variant="tonal"
-                  class="keypad-btn space-btn"
                   @click="insertAtCursor('\n')"
                 >
                   换行
@@ -212,7 +213,7 @@
 
 <script>
 import dataProvider from "@/utils/dataProvider";
-import { getSetting } from "@/utils/settings";
+import {getSetting} from "@/utils/settings";
 
 export default {
   name: "HomeworkEditDialog",
@@ -242,7 +243,7 @@ export default {
       currentLine: "",
       currentLineStart: 0,
       currentLineEnd: 0,
-      quickTexts: ["课", "题", "例","变","T", "P"]
+      quickTexts: ["课", "题", "例", "变", "T", "P"]
     };
   },
   computed: {
@@ -391,8 +392,8 @@ export default {
             currentLineContent.slice(0, lastIndex) +
             currentLineContent.slice(lastIndex + page.length);
           this.content = this.content.slice(0, start) +
-                        newLineContent.trim() +
-                        this.content.slice(end);
+            newLineContent.trim() +
+            this.content.slice(end);
         }
       } else {
         // 在当前行末尾插入
@@ -400,10 +401,10 @@ export default {
         const end = this.currentLineEnd;
         const currentLineContent = this.content.slice(start, end);
         this.content = this.content.slice(0, start) +
-                      currentLineContent.trim() +
-                      (currentLineContent.trim().length > 0 ? ' ' : '') +
-                      page +
-                      this.content.slice(end);
+          currentLineContent.trim() +
+          (currentLineContent.trim().length > 0 ? ' ' : '') +
+          page +
+          this.content.slice(end);
       }
       this.$nextTick(() => {
         const textarea = this.$refs.inputRef.$el.querySelector('textarea');
@@ -490,7 +491,6 @@ export default {
   flex-direction: column;
   gap: 12px;
 }
-
 
 
 .book-chip {

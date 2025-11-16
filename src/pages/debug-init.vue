@@ -26,18 +26,18 @@
                 label="server.authDomain"
               />
             </v-form>
-            <v-divider class="my-4" />
+            <v-divider class="my-4"/>
 
             <v-btn
-              color="primary"
               class="me-2"
+              color="primary"
               @click="applySettings"
             >
               应用设置
             </v-btn>
             <v-btn
-              color="secondary"
               class="me-2"
+              color="secondary"
               @click="clearGuard"
             >
               清除重定向守卫
@@ -83,9 +83,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { getSetting, setSetting } from '@/utils/settings'
-import { kvServerProvider } from '@/utils/providers/kvServerProvider'
+import {ref, computed} from 'vue'
+import {getSetting, setSetting} from '@/utils/settings'
+import {kvServerProvider} from '@/utils/providers/kvServerProvider'
 
 const REDIRECT_GUARD_KEY = 'kvinit.redirecting'
 
@@ -104,7 +104,11 @@ const applySettings = () => {
 }
 
 const clearGuard = () => {
-  try { sessionStorage.removeItem(REDIRECT_GUARD_KEY) } catch (e) { console.debug(e) }
+  try {
+    sessionStorage.removeItem(REDIRECT_GUARD_KEY)
+  } catch (e) {
+    console.debug(e)
+  }
 }
 
 const simulateLoadError = () => {
@@ -117,7 +121,11 @@ const simulateLoadError = () => {
 }
 
 const guardRaw = computed(() => {
-  try { return sessionStorage.getItem(REDIRECT_GUARD_KEY) } catch (e) { return String(e) }
+  try {
+    return sessionStorage.getItem(REDIRECT_GUARD_KEY)
+  } catch (e) {
+    return String(e)
+  }
 })
 
 const settingsDump = computed(() => {

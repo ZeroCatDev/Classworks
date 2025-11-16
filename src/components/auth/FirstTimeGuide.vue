@@ -15,9 +15,9 @@
       >
         <div class="text-center mb-6">
           <v-icon
-            size="80"
-            color="primary"
             class="mb-4"
+            color="primary"
+            size="80"
           >
             mdi-hand-wave
           </v-icon>
@@ -40,22 +40,22 @@
         </h3>
 
         <v-card
-          variant="tonal"
-          color="primary"
           class="pa-6 mb-6"
+          color="primary"
+          variant="tonal"
         >
           <div class="relationship-diagram">
             <!-- Classworks 应用 -->
             <div class="diagram-item">
               <v-card
-                elevation="8"
-                color="blue-darken-1"
                 class="pa-4"
+                color="blue-darken-1"
+                elevation="8"
               >
                 <div class="text-center">
                   <v-icon
-                    size="60"
                     color="white"
+                    size="60"
                   >
                     mdi-laptop
                   </v-icon>
@@ -70,10 +70,10 @@
 
               <div class="diagram-description mt-3">
                 <v-chip
-                  color="blue"
-                  variant="flat"
-                  size="small"
                   class="mb-2"
+                  color="blue"
+                  size="small"
+                  variant="flat"
                 >
                   前端应用
                 </v-chip>
@@ -88,8 +88,8 @@
             <!-- 连接线 -->
             <div class="diagram-connector">
               <v-icon
-                size="40"
                 color="primary"
+                size="40"
               >
                 mdi-swap-horizontal
               </v-icon>
@@ -101,14 +101,14 @@
             <!-- Classworks KV -->
             <div class="diagram-item">
               <v-card
-                elevation="8"
-                color="green-darken-1"
                 class="pa-4"
+                color="green-darken-1"
+                elevation="8"
               >
                 <div class="text-center">
                   <v-icon
-                    size="60"
                     color="white"
+                    size="60"
                   >
                     mdi-cloud-sync
                   </v-icon>
@@ -123,10 +123,10 @@
 
               <div class="diagram-description mt-3">
                 <v-chip
-                  color="green"
-                  variant="flat"
-                  size="small"
                   class="mb-2"
+                  color="green"
+                  size="small"
+                  variant="flat"
                 >
                   后端服务
                 </v-chip>
@@ -153,9 +153,9 @@
         </h3>
 
         <v-card
-          variant="tonal"
-          color="info"
           class="mb-6 pa-4"
+          color="info"
+          variant="tonal"
         >
           <div class="text-body-2">
             比如：在家里电脑、手机上查看，或者多个教室设备共享数据
@@ -164,17 +164,17 @@
 
         <div class="button-group">
           <v-btn
-            size="x-large"
             block
-            variant="elevated"
-            color="primary"
             class="mb-4 py-6"
+            color="primary"
+            size="x-large"
+            variant="elevated"
             @click="selectStorageType('cloud')"
           >
             <div class="d-flex flex-column align-center py-2">
               <v-icon
-                size="40"
                 class="mb-2"
+                size="40"
               >
                 mdi-cloud-check
               </v-icon>
@@ -184,16 +184,16 @@
           </v-btn>
 
           <v-btn
-            size="x-large"
             block
-            variant="outlined"
             class="py-6"
+            size="x-large"
+            variant="outlined"
             @click="selectStorageType('local')"
           >
             <div class="d-flex flex-column align-center py-2">
               <v-icon
-                size="40"
                 class="mb-2"
+                size="40"
               >
                 mdi-laptop
               </v-icon>
@@ -211,9 +211,9 @@
       >
         <div class="text-center mb-6">
           <v-icon
-            size="80"
-            color="success"
             class="mb-4"
+            color="success"
+            size="80"
           >
             mdi-check-circle
           </v-icon>
@@ -221,8 +221,8 @@
             您可以使用本地模式
           </h3>
           <v-card
-            variant="tonal"
             class="pa-4 text-left"
+            variant="tonal"
           >
             <div class="text-body-1 mb-2">
               此数据将存储在您的浏览器中，如果您的浏览器不支持IndexedDB，可能会出现问题。如果您经常清除浏览器数据，请谨慎使用本地模式。
@@ -241,9 +241,9 @@
       >
         <div class="text-center mb-6">
           <v-icon
-            size="80"
-            color="primary"
             class="mb-4"
+            color="primary"
+            size="80"
           >
             mdi-cloud-cog
           </v-icon>
@@ -253,8 +253,8 @@
         </div>
 
         <v-card
-          variant="tonal"
           class="pa-6 mb-6"
+          variant="tonal"
         >
           <div class="d-flex flex-column flex-sm-row align-center">
             <div class="flex-grow-1">
@@ -266,9 +266,9 @@
               </p>
               <v-btn
                 color="primary"
+                prepend-icon="mdi-flash"
                 size="large"
                 variant="elevated"
-                prepend-icon="mdi-flash"
                 @click="goToProgressiveStep"
               >
                 自动注册
@@ -277,16 +277,17 @@
           </div>
         </v-card>
         <div class="mb-6">
-          也可以手动前往 Classworks KV 控制台获取认证信息：</div>
+          也可以手动前往 Classworks KV 控制台获取认证信息：
+        </div>
         <v-card
-          :variant="kvserverurl=='https://kv.houlang.cloud'? 'elevated' : 'outlined'"
           :color=" kvserverurl=='https://kv.houlang.cloud'? 'primary' : 'error' "
+          :variant="kvserverurl=='https://kv.houlang.cloud'? 'elevated' : 'outlined'"
           class="pa-6  mb-6"
           @click="openKVSite"
         >
           <v-icon
-            size="48"
             class="mb-3"
+            size="48"
           >
             mdi-open-in-new
           </v-icon>
@@ -322,12 +323,13 @@
             </v-expansion-panel-title>
             <v-expansion-panel-text>
               <v-card
-                variant="tonal"
-                color="success"
                 class="pa-4"
+                color="success"
+                variant="tonal"
               >
                 <div class="text-body-2 mb-2">
-                  如果您之前已经使用过 Classworks KV，可以直接使用您的 <strong>UUID（命名空间）</strong> 和 <strong>设置的密码</strong> 进行认证。
+                  如果您之前已经使用过 Classworks KV，可以直接使用您的 <strong>UUID（命名空间）</strong> 和
+                  <strong>设置的密码</strong> 进行认证。
                 </div>
                 <div class="text-body-2">
                   返回上一页，点击"已注册"按钮，输入您的认证信息即可登录。
@@ -350,9 +352,9 @@
             </v-expansion-panel-title>
             <v-expansion-panel-text>
               <v-card
-                variant="tonal"
-                color="info"
                 class="pa-4"
+                color="info"
+                variant="tonal"
               >
                 <div class="text-body-2 mb-2">
                   不同的密码对应不同的设备类型，这将由 <strong>管理员管理</strong>。
@@ -385,10 +387,10 @@
       >
         <div class="text-center mb-6">
           <v-avatar
-            size="80"
-            color="primary"
-            variant="tonal"
             class="mb-4"
+            color="primary"
+            size="80"
+            variant="tonal"
           >
             <v-icon size="48">
               mdi-rocket-launch
@@ -404,12 +406,11 @@
 
         <v-progress-linear
           :model-value="progressValue"
-          height="8"
-          color="primary"
-          rounded
           class="mb-6"
+          color="primary"
+          height="8"
+          rounded
         />
-
 
 
         <v-row>
@@ -417,8 +418,8 @@
             cols="12"
           >
             <v-card
-              variant="tonal"
               :color="statusColor"
+              variant="tonal"
             >
               <v-card-item>
                 <div class="d-flex align-center mb-3">
@@ -487,8 +488,8 @@
           <v-btn
             v-if="progressiveStatus === 'idle'"
             color="primary"
-            size="large"
             prepend-icon="mdi-play"
+            size="large"
             @click="startProgressiveRegister"
           >
             开始创建
@@ -497,8 +498,8 @@
           <v-btn
             v-if="progressiveStatus === 'error'"
             color="error"
-            variant="outlined"
             prepend-icon="mdi-refresh"
+            variant="outlined"
             @click="retryProgressiveRegister"
           >
             重试
@@ -506,10 +507,10 @@
 
           <v-btn
             v-if="progressiveStatus === 'registering'"
-            color="primary"
-            variant="tonal"
             :loading="true"
+            color="primary"
             prepend-icon="mdi-progress-clock"
+            variant="tonal"
           >
             正在执行…
           </v-btn>
@@ -517,9 +518,9 @@
           <v-btn
             v-if="progressiveStatus === 'success'"
             color="success"
+            prepend-icon="mdi-check-circle"
             size="large"
             variant="elevated"
-            prepend-icon="mdi-check-circle"
             @click="applyTokenAndClose"
           >
             应用令牌并关闭
@@ -528,9 +529,9 @@
           <v-btn
             v-if="progressiveStatus === 'success'"
             color="primary"
+            prepend-icon="mdi-open-in-new"
             size="large"
             variant="outlined"
-            prepend-icon="mdi-open-in-new"
             @click="openAuthPage"
           >
             前往绑定账户
@@ -552,12 +553,12 @@
         </v-icon>
         上一步
       </v-btn>
-      <v-spacer />
+      <v-spacer/>
       <v-btn
         v-if="currentStep < totalSteps && currentStep !== 4"
         :disabled="currentStep === 3 && !storageType"
-        size="large"
         color="primary"
+        size="large"
         variant="elevated"
         @click="nextStep"
       >
@@ -568,8 +569,8 @@
       </v-btn>
       <v-btn
         v-if="currentStep === totalSteps || currentStep === 4"
-        size="large"
         color="primary"
+        size="large"
         variant="elevated"
         @click="finish"
       >
@@ -580,10 +581,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { getSetting, setSetting } from '@/utils/settings'
+import {ref, computed} from 'vue'
+import {getSetting, setSetting} from '@/utils/settings'
 import axios from '@/axios/axios'
-import { v4 as uuidv4 } from 'uuid'
+import {v4 as uuidv4} from 'uuid'
+
 const emit = defineEmits(['close', 'success'])
 const kvserverurl = getSetting('server.authDomain')
 const currentStep = ref(1)
@@ -596,7 +598,7 @@ const progressiveError = ref('')
 const deviceInfo = ref(null)
 const tokenData = ref(null) // 保存获取到的 token 数据
 const logs = ref([])
-const stepStates = ref({ 1: false, 2: false, 3: false, 4: false })
+const stepStates = ref({1: false, 2: false, 3: false, 4: false})
 
 const nextStep = () => {
   if (currentStep.value < totalSteps) {
@@ -638,28 +640,28 @@ const statusColor = computed(() => {
   return progressiveStatus.value === 'success'
     ? 'success'
     : progressiveStatus.value === 'error'
-    ? 'error'
-    : 'primary'
+      ? 'error'
+      : 'primary'
 })
 
 const statusIcon = computed(() => {
   return progressiveStatus.value === 'success'
     ? 'mdi-check-circle'
     : progressiveStatus.value === 'error'
-    ? 'mdi-alert-circle'
-    : progressiveStatus.value === 'registering'
-    ? 'mdi-progress-clock'
-    : 'mdi-rocket-launch'
+      ? 'mdi-alert-circle'
+      : progressiveStatus.value === 'registering'
+        ? 'mdi-progress-clock'
+        : 'mdi-rocket-launch'
 })
 
 const statusTitle = computed(() => {
   return progressiveStatus.value === 'success'
     ? '完成！设备已创建'
     : progressiveStatus.value === 'error'
-    ? '创建失败'
-    : progressiveStatus.value === 'registering'
-    ? '正在执行…'
-    : '准备开始'
+      ? '创建失败'
+      : progressiveStatus.value === 'registering'
+        ? '正在执行…'
+        : '准备开始'
 })
 
 const addLog = (message) => {
@@ -667,7 +669,7 @@ const addLog = (message) => {
   const hh = String(now.getHours()).padStart(2, '0')
   const mm = String(now.getMinutes()).padStart(2, '0')
   const ss = String(now.getSeconds()).padStart(2, '0')
-  logs.value.push({ time: `${hh}:${mm}:${ss}`, message })
+  logs.value.push({time: `${hh}:${mm}:${ss}`, message})
 }
 
 
@@ -682,7 +684,7 @@ const startProgressiveRegister = async () => {
   progressiveStatus.value = 'registering'
   progressiveError.value = ''
   logs.value = []
-  stepStates.value = { 1: false, 2: false, 3: false, 4: false }
+  stepStates.value = {1: false, 2: false, 3: false, 4: false}
 
   try {
     addLog('正在生成设备信息…')
@@ -692,12 +694,12 @@ const startProgressiveRegister = async () => {
     stepStates.value[1] = true
 
     addLog('向服务器注册设备…')
-    const response = await axios.post(`${serverUrl}/devices`, { uuid, deviceName })
+    const response = await axios.post(`${serverUrl}/devices`, {uuid, deviceName})
     void response
     stepStates.value[2] = true
 
     // 保存设备信息
-    deviceInfo.value = { uuid, deviceName, createdAt: new Date().toISOString(), registered: true }
+    deviceInfo.value = {uuid, deviceName, createdAt: new Date().toISOString(), registered: true}
     localStorage.setItem('Classworks_progressive_device', JSON.stringify(deviceInfo.value))
 
     addLog('获取访问令牌…')
@@ -742,7 +744,7 @@ const retryProgressiveRegister = () => {
   progressiveStatus.value = 'idle'
   progressiveError.value = ''
   logs.value = []
-  stepStates.value = { 1: false, 2: false, 3: false, 4: false }
+  stepStates.value = {1: false, 2: false, 3: false, 4: false}
 }
 
 const openAuthPage = () => {
@@ -853,7 +855,7 @@ const applyTokenAndClose = () => {
 }
 
 .progressive-register-card:hover {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
 }
 
 .progressive-register-card .card-icon-wrapper {
@@ -865,7 +867,7 @@ const applyTokenAndClose = () => {
 }
 
 .progressive-register-card code {
-  background: rgba(0,0,0,0.1);
+  background: rgba(0, 0, 0, 0.1);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;

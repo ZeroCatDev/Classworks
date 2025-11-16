@@ -3,16 +3,16 @@
     <v-card-title class="d-flex align-center">
       <span>缓存管理</span>
       <v-spacer></v-spacer>
-      <v-btn color="error" @click="clearAllCaches" :loading="loading">
+      <v-btn :loading="loading" color="error" @click="clearAllCaches">
         清除所有缓存
       </v-btn>
-      <v-btn icon class="ml-2" @click="refreshCaches">
+      <v-btn class="ml-2" icon @click="refreshCaches">
         <v-icon>mdi-refresh</v-icon>
       </v-btn>
     </v-card-title>
 
     <v-card-text>
-      <v-alert v-if="!serviceWorkerActive" type="warning" class="mb-4">
+      <v-alert v-if="!serviceWorkerActive" class="mb-4" type="warning">
         Service Worker 未激活，缓存管理功能不可用。
       </v-alert>
 
@@ -30,7 +30,7 @@
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <div class="d-flex justify-end mb-2">
-              <v-btn color="error" size="small" @click="clearCache(cache.name)" :loading="loading">
+              <v-btn :loading="loading" color="error" size="small" @click="clearCache(cache.name)">
                 清除此缓存
               </v-btn>
             </div>
@@ -43,7 +43,7 @@
                   {{ url }}
                 </v-list-item-subtitle>
                 <template v-slot:append>
-                  <v-btn icon size="small" color="error" @click="clearUrl(cache.name, url)">
+                  <v-btn color="error" icon size="small" @click="clearUrl(cache.name, url)">
                     <v-icon>mdi-delete</v-icon>
                   </v-btn>
                 </template>
@@ -53,7 +53,7 @@
         </v-expansion-panel>
       </v-expansion-panels>
 
-      <v-skeleton-loader v-else-if="loading" type="article" />
+      <v-skeleton-loader v-else-if="loading" type="article"/>
 
       <v-alert v-else type="info">
         没有找到缓存数据。
@@ -99,7 +99,7 @@ export default {
 
       try {
         // 获取所有缓存名称
-        const cacheNames = await this.sendMessageToSW({ type: 'CACHE_KEYS' });
+        const cacheNames = await this.sendMessageToSW({type: 'CACHE_KEYS'});
 
         // 获取每个缓存的内容
         for (const cacheName of cacheNames.cacheNames) {
@@ -167,7 +167,7 @@ export default {
 
       this.loading = true;
       try {
-        const result = await this.sendMessageToSW({ type: 'CLEAR_ALL_CACHES' });
+        const result = await this.sendMessageToSW({type: 'CLEAR_ALL_CACHES'});
 
         if (result.success) {
           this.showMessage('已清除所有缓存', 'success');

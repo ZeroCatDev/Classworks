@@ -1,6 +1,3 @@
-
-
-
 // 添加卡片发光效果
 .glow-track {
   position: relative;
@@ -15,8 +12,8 @@
     right: 0;
     bottom: 0;
     background: radial-gradient(circle at var(--x, 50%) var(--y, 50%),
-        rgba(255, 255, 255, 0.15) 0%,
-        rgba(255, 255, 255, 0) 70%);
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0) 70%);
     opacity: 0;
     transition: opacity 0.3s;
     pointer-events: none;
@@ -32,20 +29,20 @@
 .glow-highlight {
   animation: glow-pulse 3s ease-in-out;
   box-shadow: 0 0 20px rgba(33, 150, 243, 0.6),
-              0 0 40px rgba(33, 150, 243, 0.4),
-              0 0 60px rgba(33, 150, 243, 0.2) !important;
+  0 0 40px rgba(33, 150, 243, 0.4),
+  0 0 60px rgba(33, 150, 243, 0.2) !important;
 }
 
 @keyframes glow-pulse {
   0%, 100% {
     box-shadow: 0 0 20px rgba(33, 150, 243, 0.6),
-                0 0 40px rgba(33, 150, 243, 0.4),
-                0 0 60px rgba(33, 150, 243, 0.2);
+    0 0 40px rgba(33, 150, 243, 0.4),
+    0 0 60px rgba(33, 150, 243, 0.2);
   }
   50% {
     box-shadow: 0 0 30px rgba(33, 150, 243, 0.8),
-                0 0 60px rgba(33, 150, 243, 0.6),
-                0 0 90px rgba(33, 150, 243, 0.4);
+    0 0 60px rgba(33, 150, 243, 0.6),
+    0 0 90px rgba(33, 150, 243, 0.4);
   }
 }
 
@@ -140,175 +137,176 @@
     transform: scale(0.95);
   }
 }
-.grid-masonry {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    padding: 8px;
-    grid-auto-flow: dense;
-  }
 
-  .grid-item {
-    width: 100%;
-    transition: all 0.2s ease;
+.grid-masonry {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 8px;
+  grid-auto-flow: dense;
+}
+
+.grid-item {
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.empty-card {
+  transform: scale(0.9);
+  opacity: 0.8;
+  grid-row-end: span 1 !important;
+}
+
+.empty-card:hover {
+  transform: scale(0.95);
+  opacity: 1;
+}
+
+.empty-subjects-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1199px) {
+  .grid-masonry {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 799px) {
+  .grid-masonry {
+    grid-template-columns: 1fr;
   }
 
   .empty-card {
-    transform: scale(0.9);
-    opacity: 0.8;
-    grid-row-end: span 1 !important;
-  }
-
-  .empty-card:hover {
     transform: scale(0.95);
-    opacity: 1;
   }
+}
 
-  .empty-subjects-container {
-    display: flex;
-    flex-wrap: wrap;
-  }
+/* 优化滚动条样式 */
+.main-window::-webkit-scrollbar {
+  width: 8px;
+}
 
-  @media (max-width: 1199px) {
-    .grid-masonry {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
+.main-window::-webkit-scrollbar-track {
+  background: transparent;
+}
 
-  @media (max-width: 799px) {
-    .grid-masonry {
-      grid-template-columns: 1fr;
-    }
+.main-window::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
 
-    .empty-card {
-      transform: scale(0.95);
-    }
-  }
+.main-window::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
 
-  /* 优化滚动条样式 */
-  .main-window::-webkit-scrollbar {
-    width: 8px;
-  }
+.no-data-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  margin: 20px 0;
+}
 
-  .main-window::-webkit-scrollbar-track {
-    background: transparent;
-  }
+.attendance-drawer {
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+}
 
-  .main-window::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-  }
+.attendance-drawer :deep(.v-navigation-drawer__content) {
+  overflow-y: auto;
+}
 
-  .main-window::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(0, 0, 0, 0.3);
-  }
+/* 优化滚动条样式 */
+.attendance-drawer :deep(.v-navigation-drawer__content::-webkit-scrollbar) {
+  width: 8px;
+}
 
-  .no-data-message {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 200px;
-    margin: 20px 0;
-  }
+.attendance-drawer
+:deep(.v-navigation-drawer__content::-webkit-scrollbar-track) {
+  background: transparent;
+}
 
+.attendance-drawer
+:deep(.v-navigation-drawer__content::-webkit-scrollbar-thumb) {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.attendance-drawer
+:deep(.v-navigation-drawer__content::-webkit-scrollbar-thumb:hover) {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* 响应式调整 */
+@media (max-width: 960px) {
   .attendance-drawer {
-    border-left: 1px solid rgba(0, 0, 0, 0.12);
+    display: none;
   }
+}
 
-  .attendance-drawer :deep(.v-navigation-drawer__content) {
-    overflow-y: auto;
-  }
+.text-success {
+  color: rgb(var(--v-theme-success));
+}
 
-  /* 优化滚动条样式 */
-  .attendance-drawer :deep(.v-navigation-drawer__content::-webkit-scrollbar) {
-    width: 8px;
-  }
+.text-error {
+  color: rgb(var(--v-theme-error));
+}
 
-  .attendance-drawer
-    :deep(.v-navigation-drawer__content::-webkit-scrollbar-track) {
-    background: transparent;
-  }
+.text-warning {
+  color: rgb(var(--v-theme-warning));
+}
 
-  .attendance-drawer
-    :deep(.v-navigation-drawer__content::-webkit-scrollbar-thumb) {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-  }
+.attendance-card {
+  display: flex;
+  flex-direction: column;
+}
 
-  .attendance-drawer
-    :deep(.v-navigation-drawer__content::-webkit-scrollbar-thumb:hover) {
-    background-color: rgba(0, 0, 0, 0.3);
-  }
+.attendance-numbers {
+  padding: 20px 0;
+}
 
-  /* 响应式调整 */
-  @media (max-width: 960px) {
-    .attendance-drawer {
-      display: none;
-    }
-  }
+.total-number {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  padding-bottom: 20px;
+}
 
-  .text-success {
-    color: rgb(var(--v-theme-success));
-  }
+.status-number {
+  flex: 1;
+}
 
-  .text-error {
-    color: rgb(var(--v-theme-error));
-  }
+.text-h2,
+.text-h3 {
+  line-height: 1.2;
+}
 
-  .text-warning {
-    color: rgb(var(--v-theme-warning));
-  }
+.empty-subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 8px;
+}
 
-  .attendance-card {
-    display: flex;
-    flex-direction: column;
-  }
+.empty-subject-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.8;
+}
 
-  .attendance-numbers {
-    padding: 20px 0;
-  }
+.empty-subject-card:hover {
+  transform: scale(1.02);
+  opacity: 1;
+}
 
-  .total-number {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-    padding-bottom: 20px;
-  }
+.empty-subjects {
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  padding-top: 1rem;
+}
 
-  .status-number {
-    flex: 1;
-  }
-
-  .text-h2,
-  .text-h3 {
-    line-height: 1.2;
-  }
-
-  .empty-subjects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-    padding: 8px;
-  }
-
-  .empty-subject-card {
-    cursor: pointer;
-    transition: all 0.2s ease;
-    opacity: 0.8;
-  }
-
-  .empty-subject-card:hover {
-    transform: scale(1.02);
-    opacity: 1;
-  }
-
-  .empty-subjects {
-    border-top: 1px solid rgba(0, 0, 0, 0.12);
-    padding-top: 1rem;
-  }
-
-  .empty-subject-card:not(:disabled):hover {
-    opacity: 1;
-    transform: scale(1.02);
-  }
+.empty-subject-card:not(:disabled):hover {
+  opacity: 1;
+  transform: scale(1.02);
+}
 
 // 出勤管理对话框样式
 .attendance-stat {

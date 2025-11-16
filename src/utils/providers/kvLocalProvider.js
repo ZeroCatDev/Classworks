@@ -1,5 +1,5 @@
-import { openDB } from "idb";
-import { formatResponse, formatError } from "../dataProvider";
+import {openDB} from "idb";
+import {formatResponse, formatError} from "../dataProvider";
 
 // Database initialization for local storage
 const DB_NAME = "ClassworksDB";

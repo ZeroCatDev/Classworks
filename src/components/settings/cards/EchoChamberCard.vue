@@ -1,8 +1,8 @@
 <template>
   <settings-card
     border
-    title="回声洞"
     icon="mdi-thought-bubble"
+    title="回声洞"
     @click="handleClick"
   >
     <v-card-text>
@@ -12,7 +12,7 @@
     <transition name="fade">
       <v-chip v-if="currentQuote?.contributor" class="contributor">
         <v-avatar start>
-          <v-img :src="`https://github.com/${currentQuote.contributor}.png`" />
+          <v-img :src="`https://github.com/${currentQuote.contributor}.png`"/>
         </v-avatar>
         {{ currentQuote.contributor }}
       </v-chip>
@@ -31,13 +31,13 @@ const INITIAL_STATE = {
 };
 
 const TYPEWRITER_CONFIG = {
-  main: { delay: 50, deleteSpeed: 100 },
-  source: { delay: 10, deleteSpeed: 10, cursor: "" }
+  main: {delay: 50, deleteSpeed: 100},
+  source: {delay: 10, deleteSpeed: 10, cursor: ""}
 };
 
 export default {
   name: "EchoChamberCard",
-  components: { SettingsCard },
+  components: {SettingsCard},
   data: () => ({
     typewriter: null,
     sourceWriter: null,
@@ -79,7 +79,7 @@ export default {
     async copyToClipboard() {
       if (!this.currentQuote) return;
 
-      const { text, author, contributor, link } = this.currentQuote;
+      const {text, author, contributor, link} = this.currentQuote;
       const parts = [
         text,
         author && `作者：${author}`,
@@ -107,6 +107,11 @@ export default {
   font-size: 0.9em;
 }
 
-.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
 </style>

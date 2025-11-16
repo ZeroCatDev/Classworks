@@ -556,8 +556,8 @@ class SettingsManagerClass {
           definition.type === "boolean"
             ? Boolean(value)
             : definition.type === "number"
-            ? Number(value)
-            : String(value);
+              ? Number(value)
+              : String(value);
       }
 
       // 验证
@@ -636,7 +636,8 @@ class SettingsManagerClass {
    * @returns {Function} 取消监听的函数
    */
   watchSettings(callback) {
-    if (typeof window === "undefined") return () => {};
+    if (typeof window === "undefined") return () => {
+    };
 
     const handler = (event) => {
       if (event.key === SETTINGS_STORAGE_KEY) {

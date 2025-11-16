@@ -1,7 +1,7 @@
 <template>
-  <v-card class="my-4" :loading="loading" :disabled="!hasNamespaceInfo">
+  <v-card :disabled="!hasNamespaceInfo" :loading="loading" class="my-4">
     <template #loader>
-      <v-progress-linear v-if="loading" indeterminate color="primary" />
+      <v-progress-linear v-if="loading" color="primary" indeterminate/>
     </template>
 
 
@@ -21,18 +21,18 @@
         class="mb-4"
       >
         <v-alert
+          border
           type="warning"
           variant="tonal"
-          border
         >
           <v-alert-title>设备未绑定账号</v-alert-title>
           <div>当前设备尚未绑定账号,部分功能可能受限。请前往绑定账号以获得完整体验。</div>
           <v-btn
-            class="mt-3"
-            variant="outlined"
             :href="getBindAccountUrl()"
             append-icon="mdi-open-in-new"
+            class="mt-3"
             target="_blank"
+            variant="outlined"
           >
             前往绑定账号
           </v-btn>
@@ -45,13 +45,13 @@
         class="d-flex align-center mb-4"
       >
         <v-card
-          border
-          hover
-          class="w-100"
-          variant="tonal"
           :prepend-avatar="namespaceInfo.account.avatarUrl"
-          :title="namespaceInfo.account.name || '未命名用户'"
           :subtitle="'此设备由贵校管理 管理员账号 ID: ' + namespaceInfo.account.id"
+          :title="namespaceInfo.account.name || '未命名用户'"
+          border
+          class="w-100"
+          hover
+          variant="tonal"
         >
           <v-card-text>
             此设备由贵校或贵单位管理，该管理员系此空间所有者，如有疑问请咨询他，对于恶意绑定、滥用行为请反馈。
@@ -62,10 +62,10 @@
       <!-- 设备信息卡片 -->
       <v-card
         v-if="namespaceInfo.device"
-        variant="tonal"
-        class="mb-4"
         border
+        class="mb-4"
         hover
+        variant="tonal"
       >
         <v-card-title class="pb-1">
           设备信息
@@ -74,8 +74,8 @@
           <div class="d-flex flex-column gap-1">
             <div class="d-flex align-center">
               <v-icon
-                size="small"
                 class="me-2"
+                size="small"
               >
                 mdi-tag
               </v-icon>
@@ -84,8 +84,8 @@
             </div>
             <div class="d-flex align-center">
               <v-icon
-                size="small"
                 class="me-2"
+                size="small"
               >
                 mdi-identifier
               </v-icon>
@@ -98,8 +98,8 @@
               class="d-flex align-center"
             >
               <v-icon
-                size="small"
                 class="me-2"
+                size="small"
               >
                 mdi-uuid
               </v-icon>
@@ -108,8 +108,8 @@
             </div>
             <div class="d-flex align-center">
               <v-icon
-                size="small"
                 class="me-2"
+                size="small"
               >
                 mdi-calendar
               </v-icon>
@@ -121,8 +121,8 @@
               class="d-flex align-center"
             >
               <v-icon
-                size="small"
                 class="me-2"
+                size="small"
               >
                 mdi-calendar-clock
               </v-icon>
@@ -134,13 +134,14 @@
       </v-card>
 
       <v-card
-        title="Classworks KV"
-        subtitle="文档形键值数据库"
         border
         hover
+        subtitle="文档形键值数据库"
+        title="Classworks KV"
       >
         <v-card-text>
-          Classworks KV 是厚浪云推出的文档形键值数据库，其是一个开放的云应用平台，为各种应用提供存储服务。此设备正在使用其服务，如果您希望管理设备信息，请前往 Classworks KV 的网站，如果您在服务推出前就在使用 Classworks，您的数据已被自动迁移。
+          Classworks KV 是厚浪云推出的文档形键值数据库，其是一个开放的云应用平台，为各种应用提供存储服务。此设备正在使用其服务，如果您希望管理设备信息，请前往
+          Classworks KV 的网站，如果您在服务推出前就在使用 Classworks，您的数据已被自动迁移。
           <br><br>
           Classworks KV 的全域管理员是
           <a
@@ -153,8 +154,8 @@
         <v-card-actions>
           <v-btn
             :href="defaultAuthServer"
-            class="text-none"
             append-icon="mdi-open-in-new"
+            class="text-none"
             target="_blank"
           >
             前往 Classworks KV
@@ -174,11 +175,11 @@
     </v-card-text>
 
     <v-card-actions>
-      <v-spacer />
+      <v-spacer/>
       <v-btn
+        :loading="loading"
         color="primary"
         variant="outlined"
-        :loading="loading"
         @click="reloadInfo"
       >
         刷新设备信息
@@ -202,9 +203,9 @@
         <v-card-title>确认重新初始化</v-card-title>
         <v-card-text>
           <v-alert
+            class="mb-3"
             type="warning"
             variant="tonal"
-            class="mb-3"
           >
             <v-alert-title>警告</v-alert-title>
             此操作将清除当前的云端存储配置（包括 Token），您需要重新进行授权。
@@ -212,7 +213,7 @@
           <p>您确定要重新初始化云端存储吗？</p>
         </v-card-text>
         <v-card-actions>
-          <v-spacer />
+          <v-spacer/>
           <v-btn
             variant="text"
             @click="showReinitDialog = false"
@@ -232,8 +233,8 @@
 </template>
 
 <script>
-import { kvServerProvider } from "@/utils/providers/kvServerProvider";
-import { setSetting, getSetting } from "@/utils/settings";
+import {kvServerProvider} from "@/utils/providers/kvServerProvider";
+import {setSetting, getSetting} from "@/utils/settings";
 
 export default {
   name: "CloudNamespaceInfoCard",

@@ -8,22 +8,22 @@
       <v-card
         class="kvinit-card"
         elevation="8"
-        title="初始化云端存储授权"
-        subtitle="请完成授权以启用云端存储功能"
         prepend-icon="mdi-cloud-lock"
+        subtitle="请完成授权以启用云端存储功能"
+        title="初始化云端存储授权"
       >
         <v-card-actions class="justify-end">
           <v-btn
-            text
             class="me-3"
+            text
             @click="useLocalMode"
           >
             使用本地模式
           </v-btn>
           <v-btn
+            :loading="loading"
             color="primary"
             variant="flat"
-            :loading="loading"
             @click="goToAuthorize"
           >
             前往授权
@@ -36,10 +36,10 @@
               class="d-flex align-center"
             >
               <v-progress-circular
+                class="me-2"
                 indeterminate
                 size="20"
                 width="2"
-                class="me-2"
               />
               <span class="body-2"> 正在检查授权状态… </span>
             </div>
@@ -57,10 +57,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
-import { useRoute } from "vue-router";
-import { getSetting,setSetting } from "@/utils/settings";
-import { kvServerProvider } from "@/utils/providers/kvServerProvider";
+import {ref, onMounted, onBeforeUnmount} from "vue";
+import {useRoute} from "vue-router";
+import {getSetting, setSetting} from "@/utils/settings";
+import {kvServerProvider} from "@/utils/providers/kvServerProvider";
 
 const visible = ref(false);
 const loading = ref(false);
@@ -103,7 +103,7 @@ const goToAuthorize = () => {
 
   // set a short-lived guard to prevent immediate re-redirect
   try {
-    const guardObj = { ts: Date.now() };
+    const guardObj = {ts: Date.now()};
     sessionStorage.setItem(REDIRECT_GUARD_KEY, JSON.stringify(guardObj));
   } catch (err) {
     // sessionStorage may be unavailable in some environments

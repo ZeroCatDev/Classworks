@@ -1,8 +1,8 @@
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching'
-import { registerRoute, setCatchHandler } from 'workbox-routing'
-import { CacheFirst, NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies'
-import { ExpirationPlugin } from 'workbox-expiration'
-import { CacheableResponsePlugin } from 'workbox-cacheable-response'
+import {precacheAndRoute, cleanupOutdatedCaches} from 'workbox-precaching'
+import {registerRoute, setCatchHandler} from 'workbox-routing'
+import {CacheFirst, NetworkFirst, StaleWhileRevalidate} from 'workbox-strategies'
+import {ExpirationPlugin} from 'workbox-expiration'
+import {CacheableResponsePlugin} from 'workbox-cacheable-response'
 
 // 使用 self.__WB_MANIFEST 是 workbox 的一个特殊变量，会被实际的预缓存清单替换
 precacheAndRoute(self.__WB_MANIFEST)
@@ -81,7 +81,7 @@ registerRoute(
 
 // 外部资源缓存
 registerRoute(
-  ({ url }) => url.origin !== self.location.origin,
+  ({url}) => url.origin !== self.location.origin,
   new NetworkFirst({
     cacheName: 'external-resources',
     plugins: [
@@ -102,7 +102,7 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'CACHE_KEYS') {
     // 获取所有缓存键
     caches.keys().then((cacheNames) => {
-      event.ports[0].postMessage({ cacheNames });
+      event.ports[0].postMessage({cacheNames});
     });
   } else if (event.data && event.data.type === 'CACHE_CONTENT') {
     // 获取特定缓存的内容
@@ -110,14 +110,14 @@ self.addEventListener('message', (event) => {
     caches.open(cacheName).then((cache) => {
       cache.keys().then((requests) => {
         const urls = requests.map(request => request.url);
-        event.ports[0].postMessage({ cacheName, urls });
+        event.ports[0].postMessage({cacheName, urls});
       });
     });
   } else if (event.data && event.data.type === 'CLEAR_CACHE') {
     // 清除特定缓存
     const cacheName = event.data.cacheName;
     caches.delete(cacheName).then((success) => {
-      event.ports[0].postMessage({ success, cacheName });
+      event.ports[0].postMessage({success, cacheName});
     });
   } else if (event.data && event.data.type === 'CLEAR_URL') {
     // 清除特定URL的缓存
@@ -125,7 +125,7 @@ self.addEventListener('message', (event) => {
     const url = event.data.url;
     caches.open(cacheName).then((cache) => {
       cache.delete(url).then((success) => {
-        event.ports[0].postMessage({ success, cacheName, url });
+        event.ports[0].postMessage({success, cacheName, url});
       });
     });
   } else if (event.data && event.data.type === 'CLEAR_ALL_CACHES') {
@@ -134,8 +134,8 @@ self.addEventListener('message', (event) => {
       Promise.all(
         cacheNames.map(name => caches.delete(name))
       ).then(() => {
-        event.ports[0].postMessage({ success: true });
+        event.ports[0].postMessage({success: true});
       });
     });
   }
-}); 
+});

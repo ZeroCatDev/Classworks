@@ -1,16 +1,16 @@
 <template>
   <settings-card
-    title="科目管理"
-    icon="mdi-book-multiple"
     :loading="loading"
     border
+    icon="mdi-book-multiple"
+    title="科目管理"
   >
     <v-alert
       v-if="error"
+      class="mb-4"
+      closable
       type="error"
       variant="tonal"
-      closable
-      class="mb-4"
     >
       {{ error }}
     </v-alert>
@@ -18,32 +18,32 @@
     <div class="d-flex justify-space-between align-center mb-6">
       <div>
         <v-btn
-          variant="text"
-          color="primary"
-          size="large"
-          prepend-icon="mdi-refresh"
           :loading="loading"
-          @click="loadConfig"
           class="mr-2"
+          color="primary"
+          prepend-icon="mdi-refresh"
+          size="large"
+          variant="text"
+          @click="loadConfig"
         >
           重新加载
         </v-btn>
 
         <v-btn
-          color="success"
-          size="large"
-          prepend-icon="mdi-content-save"
           :loading="loading"
+          color="success"
+          prepend-icon="mdi-content-save"
+          size="large"
           @click="saveConfig"
         >
           保存
         </v-btn>
-      <v-btn
-          variant="text"
-          prepend-icon="mdi-restore"
+        <v-btn
           :loading="loading"
-          @click="resetToDefault"
           class="mr-2"
+          prepend-icon="mdi-restore"
+          variant="text"
+          @click="resetToDefault"
         >
           重置为默认
         </v-btn>
@@ -64,12 +64,12 @@
           <v-col cols="12" sm="6">
             <v-text-field
               v-model="newSubjectName"
+              :rules="[v => !!v || '科目名称不能为空']"
+              append-inner-icon="mdi-plus"
+              density="comfortable"
               label="科目名称"
               variant="outlined"
-              density="comfortable"
-              :rules="[v => !!v || '科目名称不能为空']"
               @keyup.enter="addSubject"
-              append-inner-icon="mdi-plus"
               @click:append-inner="addSubject"
             />
           </v-col>
@@ -88,17 +88,17 @@
             <template v-slot:prepend>
               <div class="d-flex flex-column align-center mr-2">
                 <v-btn
-                  icon="mdi-chevron-up"
-                  variant="text"
-                  size="small"
                   :disabled="index === 0"
+                  icon="mdi-chevron-up"
+                  size="small"
+                  variant="text"
                   @click="moveSubject(index, -1)"
                 />
                 <v-btn
-                  icon="mdi-chevron-down"
-                  variant="text"
-                  size="small"
                   :disabled="index === subjects.length - 1"
+                  icon="mdi-chevron-down"
+                  size="small"
+                  variant="text"
                   @click="moveSubject(index, 1)"
                 />
               </div>
@@ -107,19 +107,19 @@
             <v-list-item-title>
               <v-text-field
                 v-model="subject.name"
-                variant="plain"
                 density="compact"
                 hide-details
+                variant="plain"
                 @blur="updateSubject(subject)"
               />
             </v-list-item-title>
 
             <template v-slot:append>
               <v-btn
-                icon="mdi-delete"
-                variant="text"
                 color="error"
+                icon="mdi-delete"
                 size="small"
+                variant="text"
                 @click="deleteSubject(subject)"
               />
             </template>
@@ -161,16 +161,16 @@ export default {
       snackbarText: '',
       snackbarColor: 'success',
       defaultSubjects: [
-        { name: '语文', order: 0 },
-        { name: '数学', order: 1 },
-        { name: '英语', order: 2 },
-        { name: '物理', order: 3 },
-        { name: '化学', order: 4 },
-        { name: '生物', order: 5 },
-        { name: '政治', order: 6 },
-        { name: '历史', order: 7 },
-        { name: '地理', order: 8 },
-        { name: '其他', order: 9 }
+        {name: '语文', order: 0},
+        {name: '数学', order: 1},
+        {name: '英语', order: 2},
+        {name: '物理', order: 3},
+        {name: '化学', order: 4},
+        {name: '生物', order: 5},
+        {name: '政治', order: 6},
+        {name: '历史', order: 7},
+        {name: '地理', order: 8},
+        {name: '其他', order: 9}
       ]
     };
   },
@@ -250,7 +250,7 @@ export default {
     updateSubject(subject) {
       const index = this.subjects.findIndex(s => s.order === subject.order);
       if (index > -1) {
-        this.subjects[index] = { ...subject };
+        this.subjects[index] = {...subject};
       }
     },
 
@@ -291,6 +291,7 @@ export default {
 .v-list-item {
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
+
 .v-list-item:last-child {
   border-bottom: none;
 }

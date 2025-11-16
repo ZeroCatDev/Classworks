@@ -7,8 +7,8 @@
           <v-col cols="12" md="6">
             <v-text-field
               v-model="classNumber"
-              label="班级编号"
               hint="请输入需要迁移的班级编号"
+              label="班级编号"
               persistent-hint
               prepend-icon="mdi-account-group"
             ></v-text-field>
@@ -17,8 +17,8 @@
           <v-col cols="12" md="6">
             <v-text-field
               v-model="machineId"
-              label="设备标识 (UUID)"
               hint="系统已自动填充设备标识，通常无需修改"
+              label="设备标识 (UUID)"
               persistent-hint
               prepend-icon="mdi-identifier"
               readonly
@@ -27,32 +27,32 @@
         </v-row>
 
         <v-radio-group v-model="migrationType" class="mt-2">
-          <v-radio value="local" label="本地数据迁移"></v-radio>
-          <v-radio value="server" label="服务器数据迁移"></v-radio>
+          <v-radio label="本地数据迁移" value="local"></v-radio>
+          <v-radio label="服务器数据迁移" value="server"></v-radio>
         </v-radio-group>
 
         <div v-if="migrationType === 'server'" class="mt-4">
           <v-text-field
             v-model="serverUrl"
-            label="服务器地址"
             hint="输入服务器域名，例如：https://example.com"
+            label="服务器地址"
             persistent-hint
             prepend-icon="mdi-server"
           ></v-text-field>
 
           <v-alert
+            class="mt-2"
             density="compact"
             type="info"
             variant="outlined"
-            class="mt-2"
           >
-            服务器接口格式：<br />
-            - 配置接口：域名/班号/config<br />
+            服务器接口格式：<br/>
+            - 配置接口：域名/班号/config<br/>
             - 作业数据接口：域名/班号/homework?date=YYYY-MM-DD
           </v-alert>
 
           <div class="d-flex align-center mt-4">
-            <v-icon color="warning" class="mr-2">mdi-calendar-range</v-icon>
+            <v-icon class="mr-2" color="warning">mdi-calendar-range</v-icon>
             <span class="text-subtitle-1">选择迁移时间范围：</span>
           </div>
 
@@ -61,8 +61,8 @@
               <v-text-field
                 v-model="startDate"
                 label="开始日期"
-                type="date"
                 prepend-icon="mdi-calendar-start"
+                type="date"
               ></v-text-field>
             </v-col>
 
@@ -70,8 +70,8 @@
               <v-text-field
                 v-model="endDate"
                 label="结束日期"
-                type="date"
                 prepend-icon="mdi-calendar-end"
+                type="date"
               ></v-text-field>
             </v-col>
           </v-row>
@@ -87,13 +87,13 @@
         }}</span>
         <v-spacer></v-spacer>
         <v-btn
+          :loading="loading || scanning"
           color="primary"
           @click="
             migrationType === 'local'
               ? scanLocalDatabase()
               : previewServerData()
           "
-          :loading="loading || scanning"
         >
           {{ migrationType === "local" ? "扫描数据" : "加载数据" }}
         </v-btn>
@@ -104,9 +104,9 @@
           type="info"
         >
           {{
-            migrationType === "local"
-              ? '尚未扫描本地数据或未找到可迁移的数据。点击"扫描数据"按钮开始扫描。'
-              : '尚未预览服务器数据或未找到可迁移的数据。点击"加载数据"按钮开始查询。'
+          migrationType === "local"
+          ? '尚未扫描本地数据或未找到可迁移的数据。点击"扫描数据"按钮开始扫描。'
+          : '尚未预览服务器数据或未找到可迁移的数据。点击"加载数据"按钮开始查询。'
           }}
         </v-alert>
 
@@ -115,8 +115,8 @@
           :headers="headers"
           :items="displayItems"
           :items-per-page="10"
-          item-value="key"
           class="elevation-1"
+          item-value="key"
         >
           <template #[`item.type`]="{ item }">
             <v-chip
@@ -134,9 +134,9 @@
 
         <v-alert
           v-if="displayItems.length > 0"
-          type="info"
-          density="compact"
           class="mt-2"
+          density="compact"
+          type="info"
         >
           系统将迁移表格中显示的所有数据项，迁移前请确认数据完整性。
         </v-alert>
@@ -152,15 +152,15 @@
       <v-card-title>迁移目标</v-card-title>
       <v-card-text>
         <v-radio-group v-model="targetStorage">
-          <v-radio value="kv-local" label="本地 KV 存储"></v-radio>
-          <v-radio value="kv-server" label="服务器 KV 存储"></v-radio>
+          <v-radio label="本地 KV 存储" value="kv-local"></v-radio>
+          <v-radio label="服务器 KV 存储" value="kv-server"></v-radio>
         </v-radio-group>
 
         <div v-if="targetStorage === 'kv-server'" class="mt-4">
           <v-text-field
             v-model="targetServerUrl"
-            label="目标服务器地址"
             hint="输入KV服务器地址，例如：https://example.com/kv-api"
+            label="目标服务器地址"
             persistent-hint
             prepend-icon="mdi-server-network"
           ></v-text-field>
@@ -170,10 +170,10 @@
 
     <div class="d-flex justify-end mb-6">
       <v-btn
+        :disabled="!canMigrate"
+        :loading="migrating"
         color="success"
         @click="startMigration"
-        :loading="migrating"
-        :disabled="!canMigrate"
       >
         开始迁移
       </v-btn>
@@ -188,7 +188,7 @@
           <span>{{ migrationSuccess ? "迁移成功" : "迁移失败" }}</span>
         </v-card-title>
         <v-card-text>
-          <v-alert v-if="migrationError" type="error" class="mb-4">
+          <v-alert v-if="migrationError" class="mb-4" type="error">
             {{ migrationError }}
           </v-alert>
 
@@ -216,7 +216,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" @click="showResult = false"> 关闭 </v-btn>
+          <v-btn color="primary" @click="showResult = false"> 关闭</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -224,9 +224,9 @@
 </template>
 
 <script>
-import { openDB } from "idb";
+import {openDB} from "idb";
 import axios from "@/axios/axios";
-import { getSetting, setSetting } from "@/utils/settings";
+import {getSetting, setSetting} from "@/utils/settings";
 
 export default {
   name: "MigrationTool",
@@ -259,10 +259,10 @@ export default {
       serverItems: [],
       selectedItems: [],
       headers: [
-        { title: "类型", key: "type", sortable: true },
-        { title: "键名", key: "key", sortable: true },
-        { title: "日期", key: "date", sortable: true },
-        { title: "大小", key: "size", sortable: true },
+        {title: "类型", key: "type", sortable: true},
+        {title: "键名", key: "key", sortable: true},
+        {title: "日期", key: "date", sortable: true},
+        {title: "大小", key: "size", sortable: true},
       ],
     };
   },
@@ -317,7 +317,7 @@ export default {
 
     // 获取请求头，包含网站令牌
     getRequestHeaders() {
-      const headers = { Accept: "application/json" };
+      const headers = {Accept: "application/json"};
       const siteKey = getSetting("server.siteKey");
 
       if (siteKey) {
@@ -330,7 +330,7 @@ export default {
     // 扫描本地数据库
     async scanLocalDatabase() {
       if (!this.classNumber) {
-        this.$emit("message", { text: "请先输入班级编号", type: "error" });
+        this.$emit("message", {text: "请先输入班级编号", type: "error"});
         return;
       }
 
@@ -606,7 +606,7 @@ export default {
             );
 
             // Remove studentList from config
-            const configWithoutStudentList = { ...value };
+            const configWithoutStudentList = {...value};
             delete configWithoutStudentList.studentList;
 
             // Save the modified config
@@ -619,7 +619,7 @@ export default {
             // Just store the config as is
             await db.put("kv", JSON.stringify(value), `classworks-config`);
           }
-          return { success: true, message: "配置已迁移" };
+          return {success: true, message: "配置已迁移"};
         } else {
           // 数据键名: classNumber/classworks-data-YYYYMMDD
           const itemDate = this.getItemDate(item);
@@ -634,7 +634,7 @@ export default {
               const [, year, month, day] = match;
               dateStr = `${year}${month}${day}`;
             } else {
-              return { success: false, message: "无法确定日期格式" };
+              return {success: false, message: "无法确定日期格式"};
             }
           }
 
@@ -643,11 +643,11 @@ export default {
             JSON.stringify(value),
             `classworks-data-${dateStr}`
           );
-          return { success: true, message: `${dateStr} 数据已迁移` };
+          return {success: true, message: `${dateStr} 数据已迁移`};
         }
       } catch (error) {
         console.error("本地KV迁移失败:", error);
-        return { success: false, message: error.message };
+        return {success: false, message: error.message};
       }
     },
 
@@ -670,7 +670,7 @@ export default {
             );
 
             // 移除学生列表
-            const configWithoutStudentList = { ...value };
+            const configWithoutStudentList = {...value};
             delete configWithoutStudentList.studentList;
 
             // 准备批量导入数据
@@ -721,7 +721,7 @@ export default {
               }
             );
           }
-          return { success: true, message: "配置已迁移到服务器" };
+          return {success: true, message: "配置已迁移到服务器"};
         } else {
           // 数据
           const itemDate = this.getItemDate(item);
@@ -736,7 +736,7 @@ export default {
               const [, year, month, day] = match;
               dateStr = `${year}${month}${day}`;
             } else {
-              return { success: false, message: "无法确定日期格式" };
+              return {success: false, message: "无法确定日期格式"};
             }
           }
 
@@ -747,7 +747,7 @@ export default {
               headers: this.getRequestHeaders(),
             }
           );
-          return { success: true, message: `${dateStr} 数据已迁移到服务器` };
+          return {success: true, message: `${dateStr} 数据已迁移到服务器`};
         }
       } catch (error) {
         console.error("服务器KV迁移失败:", error);
@@ -787,7 +787,7 @@ export default {
             );
 
             // 移除学生列表
-            const configWithoutStudentList = { ...value };
+            const configWithoutStudentList = {...value};
             delete configWithoutStudentList.studentList;
 
             // 准备批量导入数据
@@ -923,7 +923,7 @@ export default {
           }
         }
 
-        return { success: true };
+        return {success: true};
       } catch (error) {
         console.error("批量迁移到服务器失败:", error);
         return {

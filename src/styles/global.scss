@@ -42,8 +42,8 @@
     right: 0;
     bottom: 0;
     background: radial-gradient(circle at var(--x, 50%) var(--y, 50%),
-                rgba(255, 255, 255, 0.2) 0%,
-                rgba(255, 255, 255, 0) 60%);
+            rgba(255, 255, 255, 0.2) 0%,
+            rgba(255, 255, 255, 0) 60%);
     opacity: 0;
     transition: opacity 0.5s;
     pointer-events: none;

@@ -2,9 +2,9 @@
   <div class="warning-container">
     <v-chip
       v-if="show"
+      class="warning-chip"
       color="warning"
       size="small"
-      class="warning-chip"
     >
       {{ message }}
     </v-chip>
@@ -35,7 +35,13 @@ export default {
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

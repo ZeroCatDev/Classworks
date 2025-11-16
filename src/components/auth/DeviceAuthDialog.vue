@@ -3,9 +3,9 @@
     <v-card-text class="pa-8">
       <div class="text-center mb-6">
         <v-icon
-          size="80"
-          color="success"
           class="mb-4"
+          color="success"
+          size="80"
         >
           mdi-account-key
         </v-icon>
@@ -18,29 +18,29 @@
       </div>
 
       <v-card
-        variant="tonal"
-        color="info"
         class="pa-4 mb-6"
+        color="info"
+        variant="tonal"
       >
         <div class="text-body-2">
           <v-icon
-            size="20"
             class="mr-2"
+            size="20"
           >
             mdi-information
           </v-icon>
-         对于已有UUID的用户，您应当使用UUID与您的密码登录。
+          对于已有UUID的用户，您应当使用UUID与您的密码登录。
         </div>
       </v-card>
 
       <div class="form-section">
         <v-text-field
           v-model="form.namespace"
-          label="命名空间"
           class="mb-4"
-          variant="outlined"
           hide-details="auto"
+          label="命名空间"
           prepend-inner-icon="mdi-identifier"
+          variant="outlined"
         >
 
         </v-text-field>
@@ -48,19 +48,19 @@
         <v-text-field
           v-model="form.password"
           label="认证码"
+          prepend-inner-icon="mdi-lock-outline"
           type="text"
           variant="outlined"
-          prepend-inner-icon="mdi-lock-outline"
         >
 
         </v-text-field>
 
         <v-alert
           v-if="error"
-          type="error"
-          variant="tonal"
           class="mt-4"
           closable
+          type="error"
+          variant="tonal"
           @click:close="error = ''"
         >
           {{ error }}
@@ -77,19 +77,19 @@
       >
         取消
       </v-btn>
-      <v-spacer />
+      <v-spacer/>
       <v-btn
         :disabled="!form.namespace || authenticating"
         :loading="authenticating"
-        size="x-large"
-        color="primary"
-        variant="elevated"
         class="px-8"
+        color="primary"
+        size="x-large"
+        variant="elevated"
         @click="authenticate"
       >
         <v-icon
-          start
           size="24"
+          start
         >
           mdi-login
         </v-icon>
@@ -100,8 +100,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import { getSetting, setSetting } from '@/utils/settings'
+import {ref, watch} from 'vue'
+import {getSetting, setSetting} from '@/utils/settings'
 import axios from '@/axios/axios'
 
 const props = defineProps({
@@ -145,7 +145,7 @@ watch(
       }
     }
   },
-  { immediate: true, deep: true }
+  {immediate: true, deep: true}
 )
 
 const authenticate = async () => {
@@ -197,7 +197,7 @@ const authenticate = async () => {
 // 暴露清空表单的方法
 defineExpose({
   reset: () => {
-    form.value = { namespace: '', password: '' }
+    form.value = {namespace: '', password: ''}
     error.value = ''
   }
 })

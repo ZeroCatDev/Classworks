@@ -2,8 +2,8 @@
 // - Uses server domain from settings when available
 // - Exposes join/leave helpers and event on/off wrappers
 
-import { io } from 'socket.io-client';
-import { getSetting } from '@/utils/settings';
+import {io} from 'socket.io-client';
+import {getSetting} from '@/utils/settings';
 
 let socket = null;
 let connectedDomain = null;
@@ -20,16 +20,18 @@ export function getSocket() {
   const serverUrl = getServerUrl();
   if (!socket || connectedDomain !== serverUrl) {
     if (socket) {
-      try { socket.disconnect(); } catch (e) {
+      try {
+        socket.disconnect();
+      } catch (e) {
         void e; // ignore
       }
       socket = null;
     }
     connectedDomain = serverUrl;
-    socket = io(serverUrl, { transports: ['websocket'] });
+    socket = io(serverUrl, {transports: ['websocket']});
 
     // Re-attach previously registered event handlers on new socket instance
-    listeners.forEach(({ event, handler }) => {
+    listeners.forEach(({event, handler}) => {
       socket.on(event, handler);
     });
   }
@@ -39,7 +41,7 @@ export function getSocket() {
 export function on(event, handler) {
   const s = getSocket();
   s.on(event, handler);
-  listeners.add({ event, handler });
+  listeners.add({event, handler});
   return () => off(event, handler);
 }
 
@@ -57,12 +59,12 @@ export function off(event, handler) {
 export function joinToken(token) {
   const s = getSocket();
   if (!token) return;
-  s.emit('join-token', { token });
+  s.emit('join-token', {token});
 }
 
 export function leaveToken(token) {
   if (!socket) return;
-  socket.emit('leave-token', { token });
+  socket.emit('leave-token', {token});
 }
 
 export function leaveAll() {
@@ -78,7 +80,9 @@ export function onConnect(handler) {
 
 export function disconnect() {
   if (!socket) return;
-  try { socket.disconnect(); } catch (e) {
+  try {
+    socket.disconnect();
+  } catch (e) {
     void e; // ignore
   }
   socket = null;

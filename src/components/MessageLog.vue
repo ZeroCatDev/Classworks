@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer v-model="drawer" location="right" temporary width="400" v-if="drawer">
+  <v-navigation-drawer v-if="drawer" v-model="drawer" location="right" temporary width="400">
     <v-toolbar color="primary">
       <v-toolbar-title>消息记录</v-toolbar-title>
 
@@ -8,13 +8,14 @@
     <v-list>
       <v-list-item v-for="msg in messages" :key="msg.id" rounded>
         <template #prepend>
-          <v-icon :icon="icons[msg.type]" :color="colors[msg.type]" size="20" />
+          <v-icon :color="colors[msg.type]" :icon="icons[msg.type]" size="20"/>
         </template>
 
         <v-list-item-title>{{ msg.title }}</v-list-item-title>
         <v-list-item-subtitle v-if="msg.content">{{
           msg.content
-        }}</v-list-item-subtitle>
+          }}
+        </v-list-item-subtitle>
         <span class="text-caption text-grey">
           {{ new Date(msg.timestamp).toLocaleTimeString() }}
         </span>
@@ -24,7 +25,7 @@
 
       <v-list-item v-if="!messages.length">
         <template #prepend>
-          <v-icon icon="mdi-inbox" color="grey" />
+          <v-icon color="grey" icon="mdi-inbox"/>
         </template>
         <v-list-item-title class="text-grey">暂无消息</v-list-item-title>
       </v-list-item>
@@ -33,7 +34,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import {defineComponent, ref} from "vue";
 import messageService from "@/utils/message";
 
 export default defineComponent({

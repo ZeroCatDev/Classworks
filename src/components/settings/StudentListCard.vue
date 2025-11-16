@@ -1,29 +1,29 @@
 <template>
   <v-card
-    border
-    :color="unsavedChanges ? 'warning-subtle' : undefined"
     :class="{ 'unsaved-changes': unsavedChanges }"
+    :color="unsavedChanges ? 'warning-subtle' : undefined"
+    border
   >
     <v-card-item>
       <template #prepend>
-        <v-icon icon="mdi-account-group" size="large" class="mr-2" />
+        <v-icon class="mr-2" icon="mdi-account-group" size="large"/>
       </template>
       <v-card-title class="text-h6">学生列表</v-card-title>
       <template #append>
-        <unsaved-warning :show="unsavedChanges" message="有未保存的更改" />
+        <unsaved-warning :show="unsavedChanges" message="有未保存的更改"/>
         <v-btn
+          :disabled="modelValue.list.length === 0"
+          class="mr-2"
           prepend-icon="mdi-sort-alphabetical-variant"
           variant="text"
-          class="mr-2"
           @click="sortStudentsByPinyin"
-          :disabled="modelValue.list.length === 0"
         >
           按姓名首字母排序
         </v-btn>
         <v-btn
           :color="modelValue.advanced ? 'primary' : undefined"
-          variant="text"
           prepend-icon="mdi-code-braces"
+          variant="text"
           @click="toggleAdvanced"
         >
           {{ modelValue.advanced ? "返回基础编辑" : "高级编辑" }}
@@ -34,12 +34,12 @@
     <v-card-text>
       <v-progress-linear
         v-if="loading"
-        indeterminate
-        color="primary"
         class="mb-4"
+        color="primary"
+        indeterminate
       />
 
-      <v-alert v-if="error" type="error" variant="tonal" closable class="mb-4">
+      <v-alert v-if="error" class="mb-4" closable type="error" variant="tonal">
         {{ error }}
       </v-alert>
 
@@ -47,23 +47,23 @@
         <!-- 普通编辑模式 -->
         <div v-if="!modelValue.advanced">
           <v-row class="mb-6">
-            <v-col cols="12" sm="6" md="4">
+            <v-col cols="12" md="4" sm="6">
               <v-text-field
                 v-model="newStudentName"
+                class="mb-4"
+                hide-details
                 label="添加学生"
                 placeholder="输入学生姓名后回车添加"
                 prepend-inner-icon="mdi-account-plus"
                 variant="outlined"
-                hide-details
-                class="mb-4"
                 @keyup.enter="addStudent"
               >
                 <template #append>
                   <v-btn
+                    :disabled="!newStudentName.trim()"
+                    color="primary"
                     icon="mdi-plus"
                     variant="text"
-                    color="primary"
-                    :disabled="!newStudentName.trim()"
                     @click="addStudent"
                   />
                 </template>
@@ -76,25 +76,25 @@
               v-for="(student, index) in modelValue.list"
               :key="index"
               cols="12"
-              sm="6"
-              md="4"
               lg="3"
+              md="4"
+              sm="6"
             >
               <v-hover v-slot="{ isHovering, props }">
                 <v-card
-                  v-bind="props"
                   :elevation="isMobile ? 1 : isHovering ? 4 : 1"
-                  class="student-card"
                   border
+                  class="student-card"
+                  v-bind="props"
                 >
                   <v-card-text class="d-flex align-center pa-3">
-                    <v-menu location="bottom" :open-on-hover="!isMobile">
+                    <v-menu :open-on-hover="!isMobile" location="bottom">
                       <template #activator="{ props: menuProps }">
                         <v-btn
-                          variant="tonal"
-                          size="small"
                           class="mr-3 font-weight-medium"
+                          size="small"
                           v-bind="menuProps"
+                          variant="tonal"
                         >
                           {{ index + 1 }}
                         </v-btn>
@@ -102,23 +102,23 @@
 
                       <v-list density="compact" nav>
                         <v-list-item
-                          prepend-icon="mdi-arrow-up-bold"
                           :disabled="index === 0"
+                          prepend-icon="mdi-arrow-up-bold"
                           @click="moveStudent(index, 'top')"
                         >
                           置顶
                         </v-list-item>
-                        <v-divider />
+                        <v-divider/>
                         <v-list-item
-                          prepend-icon="mdi-arrow-up"
                           :disabled="index === 0"
+                          prepend-icon="mdi-arrow-up"
                           @click="moveStudent(index, 'up')"
                         >
                           上移
                         </v-list-item>
                         <v-list-item
-                          prepend-icon="mdi-arrow-down"
                           :disabled="index === modelValue.list.length - 1"
+                          prepend-icon="mdi-arrow-down"
                           @click="moveStudent(index, 'down')"
                         >
                           下移
@@ -129,13 +129,13 @@
                     <v-text-field
                       v-if="editState.index === index"
                       v-model="editState.name"
-                      density="compact"
-                      variant="underlined"
-                      hide-details
-                      class="flex-grow-1"
                       autofocus
-                      @keyup.enter="saveEdit"
+                      class="flex-grow-1"
+                      density="compact"
+                      hide-details
+                      variant="underlined"
                       @blur="saveEdit"
+                      @keyup.enter="saveEdit"
                     />
                     <span
                       v-else
@@ -146,21 +146,21 @@
                     </span>
 
                     <div
-                      class="d-flex gap-1 action-buttons"
                       :class="{ 'opacity-100': isHovering || isMobile }"
+                      class="d-flex gap-1 action-buttons"
                     >
                       <v-btn
-                        icon="mdi-pencil"
-                        variant="text"
                         color="primary"
+                        icon="mdi-pencil"
                         size="small"
+                        variant="text"
                         @click="startEdit(index, student)"
                       />
                       <v-btn
-                        icon="mdi-delete"
-                        variant="text"
                         color="error"
+                        icon="mdi-delete"
                         size="small"
+                        variant="text"
                         @click="removeStudent(index)"
                       />
                     </div>
@@ -175,36 +175,36 @@
         <div v-else class="pt-2">
           <v-textarea
             v-model="modelValue.text"
-            label="批量编辑学生列表"
-            placeholder="每行输入一个学生姓名"
             hint="使用文本编辑模式批量编辑学生名单，保存时会自动去除空行"
+            label="批量编辑学生列表"
             persistent-hint
-            variant="outlined"
+            placeholder="每行输入一个学生姓名"
             rows="10"
+            variant="outlined"
             @update:model-value="handleTextInput"
           />
         </div>
       </v-expand-transition>
 
       <v-row class="mt-6">
-        <v-col cols="12" class="d-flex gap-2">
+        <v-col class="d-flex gap-2" cols="12">
           <v-btn
+            :disabled="loading"
+            :loading="loading"
             color="primary"
             prepend-icon="mdi-content-save"
             size="large"
-            :loading="loading"
-            :disabled="loading"
             @click="saveStudents"
           >
             保存名单
           </v-btn>
           <v-btn
+            :disabled="loading"
+            :loading="loading"
             color="error"
-            variant="outlined"
             prepend-icon="mdi-refresh"
             size="large"
-            :loading="loading"
-            :disabled="loading"
+            variant="outlined"
             @click="loadStudents"
           >
             重载名单
@@ -218,9 +218,9 @@
 <script>
 import UnsavedWarning from "../common/UnsavedWarning.vue";
 import "@/styles/warnings.scss";
-import { pinyin } from "pinyin-pro";
+import {pinyin} from "pinyin-pro";
 import dataProvider from "@/utils/dataProvider";
-import { getSetting } from "@/utils/settings";
+import {getSetting} from "@/utils/settings";
 
 export default {
   name: "StudentListCard",
@@ -289,7 +289,7 @@ export default {
           if (response.success != false && Array.isArray(response)) {
             this.modelValue.list = response.map((item, index) => {
               if (typeof item === 'string') {
-                return { id: index + 1, name: item };
+                return {id: index + 1, name: item};
               }
               return {
                 id: item.id || index + 1,
@@ -301,7 +301,7 @@ export default {
             this.modelValue.text = this.modelValue.list.map(s => s.name).join("\n");
             this.lastSavedData = JSON.parse(JSON.stringify(this.modelValue.list));
             this.unsavedChanges = false;
-            return;
+
           }
         } catch (error) {
           console.warn(
@@ -371,9 +371,9 @@ export default {
       const newList = lines.map(name => {
         name = name.trim();
         if (currentIds.has(name)) {
-          return { id: currentIds.get(name), name };
+          return {id: currentIds.get(name), name};
         }
-        return { id: ++maxId, name };
+        return {id: ++maxId, name};
       });
 
       // Update the list
@@ -384,7 +384,7 @@ export default {
       const name = this.newStudentName.trim();
       if (name && !this.modelValue.list.some(s => s.name === name)) {
         const maxId = Math.max(0, ...this.modelValue.list.map(s => s.id));
-        this.modelValue.list.push({ id: maxId + 1, name });
+        this.modelValue.list.push({id: maxId + 1, name});
         this.newStudentName = "";
       }
     },
@@ -442,8 +442,8 @@ export default {
 
     sortStudentsByPinyin() {
       const sorted = [...this.modelValue.list].sort((a, b) => {
-        const pinyinA = pinyin(a.name, { toneType: "none" });
-        const pinyinB = pinyin(b.name, { toneType: "none" });
+        const pinyinA = pinyin(a.name, {toneType: "none"});
+        const pinyinB = pinyin(b.name, {toneType: "none"});
         return pinyinA.localeCompare(pinyinB);
       });
       sorted.forEach((s, i) => s.id = i + 1);

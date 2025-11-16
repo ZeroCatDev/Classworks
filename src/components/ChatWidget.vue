@@ -2,12 +2,12 @@
   <!-- Floating toggle button -->
   <div
     v-if="showToggleButton"
-    class="chat-toggle"
     :style="toggleStyle"
+    class="chat-toggle"
   >
     <v-btn
-      icon
       color="primary"
+      icon
       variant="flat"
       @click="open()"
     >
@@ -27,26 +27,26 @@
   <!-- Chat panel -->
   <div
     v-show="visible"
-    class="chat-panel"
     :style="panelStyle"
+    class="chat-panel"
   >
     <v-card
       border
-      elevation="8"
       class="chat-card"
+      elevation="8"
     >
       <v-card-title class="d-flex align-center">
         <v-icon class="mr-2">
           mdi-chat-processing
         </v-icon>
         <span class="text-subtitle-1">设备聊天室</span>
-        <v-spacer />
+        <v-spacer/>
         <v-tooltip location="top">
           <template #activator="{ props }">
             <v-chip
-              v-bind="props"
-              size="x-small"
               :color="connected ? 'success' : 'grey'"
+              size="x-small"
+              v-bind="props"
               variant="tonal"
             >
               {{ connected ? '已连接' : '未连接' }}
@@ -63,7 +63,7 @@
         </v-btn>
       </v-card-title>
 
-      <v-divider />
+      <v-divider/>
 
       <v-card-text class="chat-body">
         <div
@@ -78,21 +78,21 @@
               v-if="msg._type === 'divider'"
               class="divider-row"
             >
-              <v-divider class="my-2" />
+              <v-divider class="my-2"/>
               <div class="divider-text">
                 今天 - 上次访问
               </div>
-              <v-divider class="my-2" />
+              <v-divider class="my-2"/>
             </div>
             <div
               v-else
-              class="message-row"
               :class="{ self: msg.self }"
+              class="message-row"
             >
               <div class="avatar">
                 <v-avatar
-                  size="24"
                   :color="msg.self ? 'primary' : 'grey'"
+                  size="24"
                 >
                   <v-icon size="small">
                     {{ msg.self ? 'mdi-account' : 'mdi-account-outline' }}
@@ -112,13 +112,13 @@
         </div>
       </v-card-text>
 
-      <v-divider />
+      <v-divider/>
 
       <v-card-actions class="chat-input">
         <v-btn
+          class="mr-1"
           icon
           variant="text"
-          class="mr-1"
           @click="insertEmoji('😄')"
         >
           <v-icon>mdi-emoticon-outline</v-icon>
@@ -126,19 +126,19 @@
         <v-textarea
           ref="inputRef"
           v-model="text"
-          class="flex-grow-1"
-          rows="1"
           auto-grow
-          variant="solo"
+          class="flex-grow-1"
           hide-details
           placeholder="输入消息"
+          rows="1"
+          variant="solo"
           @keydown.enter.prevent="handleEnter"
           @keydown.shift.enter.stop
         />
         <v-btn
-          color="primary"
           :disabled="!canSend"
           class="ml-2"
+          color="primary"
           @click="send"
         >
           <v-icon start>
@@ -152,8 +152,8 @@
 </template>
 
 <script>
-import { getSetting } from '@/utils/settings'
-import { getSocket, joinToken, on as socketOn } from '@/utils/socketClient'
+import {getSetting} from '@/utils/settings'
+import {getSocket, joinToken, on as socketOn} from '@/utils/socketClient'
 
 export default {
   name: 'ChatWidget',
@@ -222,7 +222,7 @@ export default {
       const after = this.messages.slice(idx)
       return [
         ...before,
-        { _id: 'divider', _type: 'divider' },
+        {_id: 'divider', _type: 'divider'},
         ...after,
       ]
     },
@@ -239,7 +239,9 @@ export default {
     try {
       const stored = localStorage.getItem('chat.lastVisit')
       if (stored) this.lastVisit = stored
-    } catch (e) { void e }
+    } catch (e) {
+      void e
+    }
 
     // Prepare socket
     const s = getSocket()
@@ -280,7 +282,9 @@ export default {
       this.$emit('update:modelValue', false)
       try {
         localStorage.setItem('chat.lastVisit', new Date().toISOString())
-      } catch (e) { void e }
+      } catch (e) {
+        void e
+      }
       this.unreadCount = 0
     },
     onOpen() {
@@ -340,7 +344,9 @@ export default {
       if (!el) return
       try {
         el.scrollTop = el.scrollHeight
-      } catch (e) { void e }
+      } catch (e) {
+        void e
+      }
     },
   },
 }
@@ -351,46 +357,80 @@ export default {
   position: fixed;
   z-index: 1100;
 }
+
 .chat-panel {
   position: fixed;
   z-index: 1101;
 }
+
 .chat-card {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
 }
+
 .chat-body {
   padding: 8px 12px;
   height: calc(100% - 120px);
 }
+
 .messages {
   height: 100%;
   overflow: auto;
 }
+
 .message-row {
   display: flex;
   align-items: flex-end;
   margin: 8px 0;
 }
+
 .message-row.self {
   flex-direction: row-reverse;
 }
-.message-row .avatar { width: 28px; display: flex; justify-content: center; }
+
+.message-row .avatar {
+  width: 28px;
+  display: flex;
+  justify-content: center;
+}
+
 .message-row .bubble {
   max-width: 70%;
-  background: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   padding: 6px 10px;
   margin: 0 8px;
 }
+
 .message-row.self .bubble {
-  background: rgba(33,150,243,0.15);
+  background: rgba(33, 150, 243, 0.15);
 }
-.bubble .text { white-space: pre-wrap; word-break: break-word; }
-.bubble .meta { font-size: 12px; opacity: 0.6; margin-top: 2px; text-align: right; }
-.divider-row { text-align: center; color: rgba(255,255,255,0.6); font-size: 12px; }
-.divider-text { margin: 4px 0; }
-.chat-input { padding: 8px; }
+
+.bubble .text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.bubble .meta {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 2px;
+  text-align: right;
+}
+
+.divider-row {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+}
+
+.divider-text {
+  margin: 4px 0;
+}
+
+.chat-input {
+  padding: 8px;
+}
 </style>

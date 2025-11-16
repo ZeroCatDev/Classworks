@@ -1,15 +1,15 @@
 <template>
   <v-alert
     v-if="isReadOnly"
+    class="readonly-warning"
+    closable
+    prominent
     type="warning"
     variant="tonal"
-    prominent
-    closable
-    class="readonly-warning"
     @click:close="dismissed = true"
   >
     <template #prepend>
-      <v-icon icon="mdi-lock-alert" />
+      <v-icon icon="mdi-lock-alert"/>
     </template>
     <v-alert-title>当前使用只读 Token</v-alert-title>
     <div class="text-body-2">
@@ -32,8 +32,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { getSetting } from '@/utils/settings'
+import {ref, computed, onMounted, watch} from 'vue'
+import {getSetting} from '@/utils/settings'
 import axios from '@/axios/axios'
 
 const props = defineProps({

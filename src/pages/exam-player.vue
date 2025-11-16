@@ -1,30 +1,30 @@
 <template>
   <v-alert
     v-if="error"
-    type="error"
-    variant="tonal"
     border="start"
     class="mb-4"
     closable
+    type="error"
+    variant="tonal"
     @click:close="error = ''"
   >
     {{ error }}
   </v-alert>
 
-  <v-skeleton-loader v-if="loading" type="article" />
+  <v-skeleton-loader v-if="loading" type="article"/>
 
   <div v-else-if="!config">
-    <v-alert type="warning" variant="tonal" border="start">
+    <v-alert border="start" type="warning" variant="tonal">
       缺少配置，请通过 URL 参数 id 或 url 传入配置。
     </v-alert>
   </div>
 
   <div v-else>
-    <div class="player" ref="playerRef">
+    <div ref="playerRef" class="player">
       <ExamPlayer
         v-model:room-number="roomNumberLocal"
-        :exam-config="config"
         :config="playerConfigObj"
+        :exam-config="config"
         :show-action-bar="true"
         :time-sync-status="'电脑时间'"
         @exit="exit()"
@@ -34,14 +34,14 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import {ref, computed, onMounted, watch} from "vue";
+import {useRoute, useRouter} from "vue-router";
 import dataProvider from "@/utils/dataProvider";
-import { ExamPlayer } from "@examaware-cs/player";
+import {ExamPlayer} from "@examaware-cs/player";
 
 export default {
   name: "ExamPlayerPage",
-  components: { ExamPlayer },
+  components: {ExamPlayer},
   setup() {
     const route = useRoute();
     const router = useRouter();
@@ -103,11 +103,11 @@ export default {
         // ExamAware 需要 examInfos: { name, start, end, alertTime? }
         examInfos: Array.isArray(raw?.examInfos)
           ? raw.examInfos.map((i) => ({
-              name: i?.name || "未命名科目",
-              start: i?.start || "",
-              end: i?.end || "",
-              alertTime: typeof i?.alertTime === "number" ? i.alertTime : 15,
-            }))
+            name: i?.name || "未命名科目",
+            start: i?.start || "",
+            end: i?.end || "",
+            alertTime: typeof i?.alertTime === "number" ? i.alertTime : 15,
+          }))
           : [],
       };
     }
@@ -143,7 +143,7 @@ export default {
 @font-face {
   font-family: "TCloudNumber";
   src: url("../assets/fonts/TCloudNumberVF.ttf") format("truetype-variations"),
-    url("../assets/fonts/TCloudNumberVF.ttf") format("truetype");
+  url("../assets/fonts/TCloudNumberVF.ttf") format("truetype");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -156,8 +156,8 @@ body,
   margin: 0;
   padding: 0;
   font-family: "MiSans", MiSans, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans",
-    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans",
+  "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
 }
 
 /* 设置主题为深色 */

@@ -16,7 +16,7 @@
         <h1 class="text-h2 font-weight-bold">Vuetify</h1>
       </div>
 
-      <div class="py-4" />
+      <div class="py-4"/>
 
       <v-row>
         <v-col cols="12">
@@ -29,7 +29,7 @@
             variant="outlined"
           >
             <template #image>
-              <v-img position="top right" />
+              <v-img position="top right"/>
             </template>
 
             <template #title>
@@ -38,16 +38,23 @@
 
             <template #subtitle>
               <div class="text-subtitle-1">
-                Replace this page by removing <v-kbd>{{ `<HelloWorld />` }}</v-kbd> in <v-kbd>pages/index.vue</v-kbd>.
+                Replace this page by removing
+                <v-kbd>{{ `
+                  <HelloWorld/>
+                  ` }}
+                </v-kbd>
+                in
+                <v-kbd>pages/index.vue</v-kbd>
+                .
               </div>
             </template>
 
             <v-overlay
-              opacity=".12"
-              scrim="primary"
               contained
               model-value
+              opacity=".12"
               persistent
+              scrim="primary"
             />
           </v-card>
         </v-col>
@@ -67,11 +74,11 @@
             variant="text"
           >
             <v-overlay
-              opacity=".06"
-              scrim="primary"
               contained
               model-value
+              opacity=".06"
               persistent
+              scrim="primary"
             />
           </v-card>
         </v-col>
@@ -91,11 +98,11 @@
             variant="text"
           >
             <v-overlay
-              opacity=".06"
-              scrim="primary"
               contained
               model-value
+              opacity=".06"
               persistent
+              scrim="primary"
             />
           </v-card>
         </v-col>
@@ -115,11 +122,11 @@
             variant="text"
           >
             <v-overlay
-              opacity=".06"
-              scrim="primary"
               contained
               model-value
+              opacity=".06"
               persistent
+              scrim="primary"
             />
           </v-card>
         </v-col>
@@ -139,11 +146,11 @@
             variant="text"
           >
             <v-overlay
-              opacity=".06"
-              scrim="primary"
               contained
               model-value
+              opacity=".06"
               persistent
+              scrim="primary"
             />
           </v-card>
         </v-col>
@@ -153,5 +160,5 @@
 </template>
 
 <script setup>
-  //
+//
 </script>

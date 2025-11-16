@@ -1,7 +1,7 @@
 <template>
   <v-container class="fill-height" fluid>
     <v-row align="center" justify="center">
-      <v-col cols="12" sm="8" md="6">
+      <v-col cols="12" md="6" sm="8">
         <v-card>
           <v-card-title class="text-h5">
             {{ status === 'processing' ? '正在处理授权...' : status === 'success' ? '授权成功' : '授权失败' }}
@@ -9,9 +9,9 @@
           <v-card-text>
             <v-progress-linear
               v-if="status === 'processing'"
-              indeterminate
-              color="primary"
               class="mb-4"
+              color="primary"
+              indeterminate
             ></v-progress-linear>
             <p>{{ message }}</p>
           </v-card-text>
@@ -26,9 +26,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { getSetting, setSetting } from '@/utils/settings';
+import {ref, onMounted} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
+import {getSetting, setSetting} from '@/utils/settings';
 
 const route = useRoute();
 const router = useRouter();
@@ -59,7 +59,7 @@ onMounted(async () => {
     }
 
     status.value = 'success';
-router.push('/');
+    router.push('/');
 
   } catch (error) {
     console.error('授权处理失败:', error);

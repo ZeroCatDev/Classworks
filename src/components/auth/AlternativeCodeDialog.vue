@@ -4,23 +4,23 @@
     <v-card-text>
       <v-textarea
         v-model="code"
+        density="comfortable"
+        hide-details="auto"
         label="替代代码"
         placeholder="请输入替代代码"
-        variant="outlined"
-        density="comfortable"
         rows="5"
-        hide-details="auto"
+        variant="outlined"
       />
       <v-alert
+        class="mt-3"
         type="info"
         variant="tonal"
-        class="mt-3"
       >
         替代代码功能暂未实现，敬请期待
       </v-alert>
     </v-card-text>
     <v-card-actions>
-      <v-spacer />
+      <v-spacer/>
       <v-btn
         v-if="showCancel"
         variant="text"
@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import {ref} from 'vue'
 
 defineProps({
   showCancel: {

@@ -25,8 +25,8 @@
             <div class="card-horizontal-layout">
               <div class="card-icon-wrapper">
                 <v-icon
-                  size="48"
                   color="primary"
+                  size="48"
                 >
                   mdi-new-box
                 </v-icon>
@@ -53,8 +53,8 @@
             <div class="card-horizontal-layout">
               <div class="card-icon-wrapper">
                 <v-icon
-                  size="48"
                   color="success"
+                  size="48"
                 >
                   mdi-account-check
                 </v-icon>
@@ -81,8 +81,8 @@
             <div class="card-horizontal-layout">
               <div class="card-icon-wrapper">
                 <v-icon
-                  size="48"
                   color="info"
+                  size="48"
                 >
                   mdi-database-cog
                 </v-icon>
@@ -102,33 +102,33 @@
 
       <div class="options-buttons">
         <v-btn
-          variant="tonal"
           prepend-icon="mdi-laptop"
           size="small"
+          variant="tonal"
           @click="useLocalMode"
         >
           使用本地模式
         </v-btn>
         <v-btn
-          variant="tonal"
           prepend-icon="mdi-flash"
           size="small"
+          variant="tonal"
           @click="handleAutoAuthorize"
         >
           授权码式授权（弃用）
         </v-btn>
         <v-btn
-          variant="tonal"
           prepend-icon="mdi-key"
           size="small"
+          variant="tonal"
           @click="showTokenDialog = true"
         >
           输入 Token
         </v-btn>
         <v-btn
-          variant="tonal"
           prepend-icon="mdi-code-tags"
           size="small"
+          variant="tonal"
           @click="showAlternativeCodeDialog = true"
         >
           输入替代代码
@@ -158,10 +158,10 @@
     >
       <DeviceAuthDialog
         ref="deviceAuthDialog"
-        :show-cancel="true"
         :preconfig="deviceAuthPreconfig"
-        @success="handleAuthSuccess"
+        :show-cancel="true"
         @cancel="showDeviceAuthDialog = false"
+        @success="handleAuthSuccess"
       />
     </v-dialog>
 
@@ -171,8 +171,8 @@
     >
       <TokenInputDialog
         :show-cancel="true"
-        @success="handleTokenSuccess"
         @cancel="showTokenDialog = false"
+        @success="handleTokenSuccess"
       />
     </v-dialog>
 
@@ -182,16 +182,16 @@
     >
       <AlternativeCodeDialog
         :show-cancel="true"
-        @submit="handleAlternativeCodeSubmit"
         @cancel="showAlternativeCodeDialog = false"
+        @submit="handleAlternativeCodeSubmit"
       />
     </v-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { getSetting, setSetting } from '@/utils/settings'
+import {ref, computed, onMounted, watch} from 'vue'
+import {getSetting, setSetting} from '@/utils/settings'
 import DeviceAuthDialog from './auth/DeviceAuthDialog.vue'
 import TokenInputDialog from './auth/TokenInputDialog.vue'
 import AlternativeCodeDialog from './auth/AlternativeCodeDialog.vue'
@@ -258,7 +258,7 @@ watch(
       }, 500)
     }
   },
-  { immediate: true, deep: true }
+  {immediate: true, deep: true}
 )
 
 onMounted(() => {
@@ -339,7 +339,7 @@ const openClassworksKV = () => {
 .init-header .title {
   font-size: 28px;
   font-weight: 700;
-  text-align:left;
+  text-align: left;
   margin-bottom: 8px;
 }
 
@@ -364,7 +364,7 @@ const openClassworksKV = () => {
 }
 
 .main-service-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .main-service-card .v-card-item {
@@ -387,18 +387,18 @@ const openClassworksKV = () => {
 }
 
 .gradient-new {
-  background: linear-gradient(135deg, rgba(33,150,243,.12), rgba(103,80,164,0.08) 60%);
-  border: 2px solid rgba(33,150,243,.2);
+  background: linear-gradient(135deg, rgba(33, 150, 243, .12), rgba(103, 80, 164, 0.08) 60%);
+  border: 2px solid rgba(33, 150, 243, .2);
 }
 
 .gradient-registered {
-  background: linear-gradient(135deg, rgba(76,175,80,.12), rgba(0,184,212,0.08) 60%);
-  border: 2px solid rgba(76,175,80,.2);
+  background: linear-gradient(135deg, rgba(76, 175, 80, .12), rgba(0, 184, 212, 0.08) 60%);
+  border: 2px solid rgba(76, 175, 80, .2);
 }
 
 .gradient-kv {
-  background: linear-gradient(135deg, rgba(0,184,212,.12), rgba(33,150,243,0.08) 60%);
-  border: 2px solid rgba(0,184,212,.2);
+  background: linear-gradient(135deg, rgba(0, 184, 212, .12), rgba(33, 150, 243, 0.08) 60%);
+  border: 2px solid rgba(0, 184, 212, .2);
 }
 
 /* 其他选项 */

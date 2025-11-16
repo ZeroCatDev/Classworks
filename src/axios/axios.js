@@ -1,8 +1,8 @@
 import axios from "axios";
-import { getSetting } from "@/utils/settings";
-import { parseRateLimit } from "ratelimit-header-parser";
+import {getSetting} from "@/utils/settings";
+import {parseRateLimit} from "ratelimit-header-parser";
 import RateLimitModal from "@/components/RateLimitModal.vue";
-import { Base64 } from "js-base64";
+import {Base64} from "js-base64";
 
 // 基本配置
 const axiosInstance = axios.create({

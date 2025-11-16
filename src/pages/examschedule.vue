@@ -2,9 +2,9 @@
   <v-container class="fill-height">
     <v-row>
       <v-col cols="12">
-        <v-card class="elevation-12" border>
+        <v-card border class="elevation-12">
           <v-card-title class="d-flex align-center primary lighten-1 white--text py-3 px-4">
-            <v-icon color="white" class="mr-2">mdi-calendar-check</v-icon>
+            <v-icon class="mr-2" color="white">mdi-calendar-check</v-icon>
             考试看板
           </v-card-title>
           <v-card-subtitle>
@@ -14,11 +14,11 @@
             <!-- 错误提示 -->
             <v-alert
               v-if="error"
-              type="error"
-              class="mb-4 mt-3 mx-2"
-              variant="tonal"
               border="start"
+              class="mb-4 mt-3 mx-2"
               closable
+              type="error"
+              variant="tonal"
               @click:close="error = ''"
             >
               <div class="d-flex align-center">
@@ -30,11 +30,11 @@
             <!-- 成功提示 -->
             <v-alert
               v-if="success"
-              type="success"
-              class="mb-4 mt-3 mx-2"
-              variant="tonal"
               border="start"
+              class="mb-4 mt-3 mx-2"
               closable
+              type="success"
+              variant="tonal"
               @click:close="success = ''"
             >
               <div class="d-flex align-center">
@@ -47,19 +47,19 @@
             <div class="d-flex justify-space-between align-center mb-4">
               <div class="d-flex align-center">
                 <v-btn
+                  class="mr-2"
                   color="primary"
                   prepend-icon="mdi-plus"
-                  class="mr-2"
                   @click="createNewConfig"
                 >
                   新建配置
                 </v-btn>
                 <v-btn
+                  :loading="loading"
                   color="info"
                   prepend-icon="mdi-refresh"
-                  :loading="loading"
-                  @click="loadConfigs"
                   variant="outlined"
+                  @click="loadConfigs"
                 >
                   刷新
                 </v-btn>
@@ -77,8 +77,8 @@
             <v-card v-if="loading" class="my-4" outlined>
               <v-card-text>
                 <v-skeleton-loader
-                  type="list-item-avatar-two-line@3"
                   class="mx-auto"
+                  type="list-item-avatar-two-line@3"
                 ></v-skeleton-loader>
               </v-card-text>
             </v-card>
@@ -98,7 +98,7 @@
                   @click="showEditDialog(config)"
                 >
                   <template #prepend>
-                    <v-avatar color="primary" class="mr-2">
+                    <v-avatar class="mr-2" color="primary">
                       <v-icon color="white">mdi-calendar-text</v-icon>
                     </v-avatar>
                   </template>
@@ -108,11 +108,11 @@
                   </v-list-item-title>
                   <v-list-item-subtitle class="text-caption mt-1">
                     <div class="d-flex align-center">
-                      <v-icon size="small" class="mr-1">mdi-information-outline</v-icon>
+                      <v-icon class="mr-1" size="small">mdi-information-outline</v-icon>
                       {{ config.message || '无描述' }}
                     </div>
                     <div class="d-flex align-center mt-1">
-                      <v-icon size="small" class="mr-1">mdi-book-multiple</v-icon>
+                      <v-icon class="mr-1" size="small">mdi-book-multiple</v-icon>
                       {{ config.examInfos ? config.examInfos.length : 0 }} 堂考试
                     </div>
                   </v-list-item-subtitle>
@@ -120,22 +120,22 @@
                   <template #append>
                     <div class="d-flex align-center">
                       <v-btn
+                        class="mr-1"
+                        color="primary"
                         icon="mdi-pencil"
                         size="small"
-                        color="primary"
                         variant="text"
-                        class="mr-1"
                         @click="showEditDialog(config)"
                       >
                         <v-icon>mdi-pencil</v-icon>
                       </v-btn>
 
                       <v-btn
+                        class="mr-1"
+                        color="info"
                         icon="mdi-eye"
                         size="small"
-                        color="info"
                         variant="text"
-                        class="mr-1"
                         @click="showEditDialog(config)"
                       >
                         <v-icon>mdi-eye</v-icon>
@@ -151,7 +151,7 @@
             <!-- 空状态 -->
             <v-card v-if="!loading && configs.length === 0" class="my-4" elevation="1">
               <v-card-text class="text-center py-8">
-                <v-icon size="64" color="grey-lighten-1" class="mb-4">
+                <v-icon class="mb-4" color="grey-lighten-1" size="64">
                   mdi-calendar-blank
                 </v-icon>
                 <h3 class="text-h6 mb-2 text-grey-darken-1">暂无配置</h3>
@@ -176,16 +176,16 @@
     <v-dialog v-model="renameDialog" max-width="500">
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon color="primary" class="mr-2">mdi-rename-box</v-icon>
+          <v-icon class="mr-2" color="primary">mdi-rename-box</v-icon>
           重命名配置
         </v-card-title>
         <v-card-text>
           <v-text-field
             v-model="newConfigName"
+            :rules="[v => !!v || '配置名称不能为空']"
             label="配置名称"
             prepend-inner-icon="mdi-calendar-text"
             variant="outlined"
-            :rules="[v => !!v || '配置名称不能为空']"
             @keyup.enter="renameConfig"
           ></v-text-field>
         </v-card-text>
@@ -199,11 +199,11 @@
             取消
           </v-btn>
           <v-btn
+            :disabled="!newConfigName"
+            :loading="renaming"
             color="primary"
             variant="outlined"
-            :loading="renaming"
             @click="renameConfig"
-            :disabled="!newConfigName"
           >
             确认
           </v-btn>
@@ -215,22 +215,22 @@
     <v-dialog v-model="editDialog" max-width="1200" persistent>
       <v-card>
         <v-card-title class="d-flex align-center primary lighten-1 white--text py-3 px-4">
-          <v-icon color="white" class="mr-2">mdi-pencil</v-icon>
+          <v-icon class="mr-2" color="white">mdi-pencil</v-icon>
           编辑考试配置
           <v-spacer></v-spacer>
           <v-chip
             v-if="editingConfig"
-            color="white"
-            text-color="primary"
-            size="small"
             class="mr-2"
+            color="white"
+            size="small"
+            text-color="primary"
           >
             ID: {{ editingConfig.id }}
           </v-chip>
 
           <v-btn
-            icon="mdi-close"
             color="white"
+            icon="mdi-close"
             variant="text"
             @click="closeEditDialog"
           >
@@ -238,33 +238,33 @@
           </v-btn>
         </v-card-title>
         <v-card-text class="pa-4"
-style="max-height: 70vh; overflow-y: auto;">
+                     style="max-height: 70vh; overflow-y: auto;">
           <ExamConfigEditor
             v-if="editingConfig"
-            :config-id="editingConfig.id"
             ref="configEditor"
+            :config-id="editingConfig.id"
             :dialog-mode="true"
-            @saved="onConfigSaved"
+            @deleted="onConfigDeleted"
             @error="onConfigError"
             @opened="onConfigOpened"
-            @deleted="onConfigDeleted"
+            @saved="onConfigSaved"
           />
         </v-card-text>
         <v-card-actions class="pa-4">
           <v-btn
             color="grey"
-            variant="outlined"
             prepend-icon="mdi-close"
+            variant="outlined"
             @click="closeEditDialog"
           >
             关闭
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
-            color="success"
-            variant="outlined"
-            prepend-icon="mdi-content-save"
             :loading="saving"
+            color="success"
+            prepend-icon="mdi-content-save"
+            variant="outlined"
             @click="saveConfigInDialog"
           >
             保存配置
@@ -277,7 +277,7 @@ style="max-height: 70vh; overflow-y: auto;">
 
 <script>
 import dataProvider from '@/utils/dataProvider'
-import { getSetting } from '@/utils/settings'
+import {getSetting} from '@/utils/settings'
 import ExamConfigEditor from '@/components/ExamConfigEditor.vue'
 
 export default {
@@ -358,12 +358,12 @@ export default {
       ]
 
       // 保存配置列表
-      const configList = exampleConfigs.map(c => ({ id: c.id }))
+      const configList = exampleConfigs.map(c => ({id: c.id}))
       await dataProvider.saveData('es_list', configList)
 
       // 保存每个配置的详细信息
       for (let config of exampleConfigs) {
-        const configData = { ...config }
+        const configData = {...config}
         delete configData.id
         await dataProvider.saveData(`es_${config.id}`, configData)
       }
@@ -444,7 +444,7 @@ export default {
         })
 
         // 更新存储的配置列表
-        const currentList = this.configs.map(c => ({ id: c.id }))
+        const currentList = this.configs.map(c => ({id: c.id}))
         const listResponse = await dataProvider.saveData('es_list', currentList)
         if (!listResponse) {
           throw new Error(listResponse.error?.message || '更新列表失败')
@@ -462,11 +462,6 @@ export default {
         this.error = '创建配置失败: ' + err.message
       }
     },
-
-
-
-
-
 
 
     /**
@@ -532,7 +527,6 @@ export default {
       this.editingConfig = null
       this.saving = false
     },
-
 
 
     /**

@@ -8,13 +8,13 @@ $standard-accelerate: cubic-bezier(0.3, 0.0, 1.0, 1.0);
 // 网格项目的进入和离开动画
 .grid-item {
   transition: transform 400ms $emphasized-decelerate,
-              opacity 200ms $standard-easing;
+  opacity 200ms $standard-easing;
   will-change: transform, opacity;
   backface-visibility: hidden;
 
   &.v-enter-active {
     transition: transform 400ms $emphasized-decelerate,
-                opacity 250ms $standard-easing;
+    opacity 250ms $standard-easing;
   }
 
   &.v-move {
@@ -25,7 +25,7 @@ $standard-accelerate: cubic-bezier(0.3, 0.0, 1.0, 1.0);
   &.v-leave-active {
     position: absolute !important;
     transition: transform 300ms $emphasized-accelerate,
-                opacity 200ms $standard-accelerate;
+    opacity 200ms $standard-accelerate;
   }
 
   &.v-enter-from,
@@ -122,20 +122,20 @@ $standard-accelerate: cubic-bezier(0.3, 0.0, 1.0, 1.0);
 // 保持对话框本身的过渡动画
 .v-dialog-transition-enter-active {
   transition: transform 400ms $emphasized-decelerate,
-              opacity 300ms $standard-easing;
+  opacity 300ms $standard-easing;
 }
 
 .v-dialog-transition-leave-active {
   transition: transform 250ms $emphasized-accelerate,
-              opacity 200ms $standard-accelerate;
+  opacity 200ms $standard-accelerate;
 }
 
 // 按钮状态变化动画
 .v-btn {
   transition: background-color 250ms $standard-easing,
-              transform 150ms $emphasized-decelerate;
+  transform 150ms $emphasized-decelerate;
   touch-action: manipulation;
-  min-height: 40px;  // 确保触摸目标足够大
+  min-height: 40px; // 确保触摸目标足够大
   min-width: 40px;
 
   &:active {

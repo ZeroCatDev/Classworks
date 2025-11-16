@@ -4,9 +4,9 @@
       <v-col cols="12">
         <div class="d-flex align-center mb-6">
           <v-icon
-            size="x-large"
-            color="primary"
             class="mr-3"
+            color="primary"
+            size="x-large"
           >
             mdi-database-sync
           </v-icon>
@@ -22,13 +22,13 @@
 
         <v-card
           class="mb-6"
-          variant="tonal"
           color="info"
+          variant="tonal"
         >
           <v-card-text class="d-flex align-center">
             <v-icon
-              color="info"
               class="mr-2"
+              color="info"
             >
               mdi-information-outline
             </v-icon>
@@ -38,7 +38,7 @@
           </v-card-text>
         </v-card>
 
-        <MigrationTool ref="migrationTool" />
+        <MigrationTool ref="migrationTool"/>
       </v-col>
     </v-row>
 
@@ -51,9 +51,9 @@
       <v-card>
         <v-card-title class="text-h5 d-flex align-center">
           <v-icon
+            class="mr-3"
             color="primary"
             size="large"
-            class="mr-3"
           >
             mdi-database-sync
           </v-icon>
@@ -66,10 +66,10 @@
           </p>
 
           <v-alert
-            color="info"
-            variant="tonal"
             class="mt-4"
+            color="info"
             icon="mdi-information-outline"
+            variant="tonal"
           >
             <ul class="ml-3 mt-1">
               <li>数据源: {{ dataSourceText }}</li>
@@ -83,7 +83,7 @@
           </v-alert>
         </v-card-text>
         <v-card-actions>
-          <v-spacer />
+          <v-spacer/>
           <v-btn
             color="grey-darken-1"
             variant="text"
@@ -92,16 +92,16 @@
             稍后再说
           </v-btn>
           <v-btn
+            :disabled="isAutoMigrating"
+            :loading="isAutoMigrating"
             color="primary"
             size="large"
             variant="elevated"
-            :loading="isAutoMigrating"
-            :disabled="isAutoMigrating"
             @click="startAutoMigration"
           >
             <v-icon
-              left
               class="mr-2"
+              left
             >
               mdi-database-export
             </v-icon>
@@ -115,7 +115,7 @@
 
 <script>
 import MigrationTool from "@/components/MigrationTool.vue";
-import { getSetting, setSetting } from "@/utils/settings";
+import {getSetting, setSetting} from "@/utils/settings";
 
 export default {
   name: "DataMigrationPage",

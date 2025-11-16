@@ -25,8 +25,8 @@
                 <v-list-item-subtitle>
                   <v-chip
                     :color="connected ? 'success' : 'error'"
-                    size="small"
                     class="mr-2"
+                    size="small"
                   >
                     {{ connected ? 'connected' : 'disconnected' }}
                   </v-chip>
@@ -42,7 +42,7 @@
                 <v-list-item-subtitle>{{ currentDataKey }}</v-list-item-subtitle>
               </v-list-item>
             </v-list>
-            <v-divider class="my-4" />
+            <v-divider class="my-4"/>
             <v-row>
               <v-col
                 cols="12"
@@ -50,26 +50,26 @@
               >
                 <v-text-field
                   v-model="manualToken"
-                  label="手动加入 Token (留空使用配置的 Token)"
                   clearable
+                  label="手动加入 Token (留空使用配置的 Token)"
                 />
               </v-col>
               <v-col
+                class="d-flex align-center"
                 cols="12"
                 md="4"
-                class="d-flex align-center"
               >
                 <v-btn
-                  color="primary"
                   class="mr-2"
+                  color="primary"
                   @click="handleJoinToken(manualToken || currentToken)"
                 >
                   加入
                 </v-btn>
                 <v-btn
-                  color="warning"
-                  class="mr-2"
                   :disabled="!joinedToken"
+                  class="mr-2"
+                  color="warning"
                   @click="handleLeaveToken(joinedToken)"
                 >
                   离开当前
@@ -83,24 +83,24 @@
                 </v-btn>
               </v-col>
             </v-row>
-            <v-divider class="my-4" />
+            <v-divider class="my-4"/>
             <v-row>
               <v-col cols="12">
-                <v-card variant="tonal" color="primary" border>
+                <v-card border color="primary" variant="tonal">
                   <v-card-title class="text-subtitle-1">聊天室消息</v-card-title>
                   <v-card-text>
                     <v-textarea
                       v-model="chatInput"
-                      label="发送到当前已加入的设备频道"
-                      rows="2"
                       auto-grow
                       clearable
+                      label="发送到当前已加入的设备频道"
+                      rows="2"
                     />
                     <div class="d-flex">
-                      <v-spacer />
+                      <v-spacer/>
                       <v-btn
-                        color="primary"
                         :disabled="!canSendChat"
+                        color="primary"
                         @click="sendChat"
                       >
                         发送聊天
@@ -128,8 +128,8 @@
           <v-card-title>在线设备</v-card-title>
           <v-card-text>
             <v-btn
-              color="primary"
               class="mb-3"
+              color="primary"
               @click="fetchOnline"
             >
               刷新在线列表
@@ -178,11 +178,11 @@
         <v-card border>
           <v-card-title class="d-flex align-center">
             事件日志
-            <v-spacer />
+            <v-spacer/>
             <v-btn
+              color="error"
               size="small"
               variant="text"
-              color="error"
               @click="clearLogs"
             >
               清空
@@ -214,8 +214,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-import { getSetting } from '@/utils/settings'
+import {ref, onMounted, onBeforeUnmount, computed} from 'vue'
+import {getSetting} from '@/utils/settings'
 import {
   getSocket,
   on as socketOn,
@@ -262,17 +262,17 @@ function wireSocketBaseEvents() {
   s.on('connect', () => {
     connected.value = true
     socketId.value = s.id || ''
-    pushLog('connect', { id: s.id })
+    pushLog('connect', {id: s.id})
     // re-join with token if set
     if (joinedToken.value) joinToken(joinedToken.value)
   })
   s.on('disconnect', (reason) => {
     connected.value = false
-    pushLog('disconnect', { reason })
+    pushLog('disconnect', {reason})
   })
-  s.on('connect_error', (err) => pushLog('connect_error', { message: err?.message }))
-  s.on('reconnect_attempt', (n) => pushLog('reconnect_attempt', { attempt: n }))
-  s.on('reconnect', (n) => pushLog('reconnect', { attempt: n }))
+  s.on('connect_error', (err) => pushLog('connect_error', {message: err?.message}))
+  s.on('reconnect_attempt', (n) => pushLog('reconnect_attempt', {attempt: n}))
+  s.on('reconnect', (n) => pushLog('reconnect', {attempt: n}))
 }
 
 function wireBusinessEvents() {
@@ -306,7 +306,7 @@ function handleJoinToken(token) {
     }
     joinToken(token)
     joinedToken.value = token
-    pushLog('join-token', { token })
+    pushLog('join-token', {token})
   } catch (e) {
     pushLog('join-token-error', String(e))
   }
@@ -316,7 +316,7 @@ function handleLeaveToken(token) {
   try {
     leaveToken(token)
     if (joinedToken.value === token) joinedToken.value = ''
-    pushLog('leave-token', { token })
+    pushLog('leave-token', {token})
   } catch (e) {
     pushLog('leave-token-error', String(e))
   }
@@ -353,7 +353,7 @@ function sendChat() {
     const s = getSocket()
     // send as plain string per server contract
     s.emit('chat:send', text)
-    pushLog('chat:send', { text })
+    pushLog('chat:send', {text})
     chatInput.value = ''
   } catch (e) {
     pushLog('chat:error', String(e))
@@ -373,7 +373,7 @@ async function fetchOnline() {
     const resp = await fetch(`${serverUrl.value}/devices/online`)
     const data = await resp.json()
     onlineDevices.value = Array.isArray(data?.devices) ? data.devices : []
-    pushLog('fetch-online', { count: onlineDevices.value.length })
+    pushLog('fetch-online', {count: onlineDevices.value.length})
   } catch (e) {
     pushLog('fetch-online-error', String(e))
   }

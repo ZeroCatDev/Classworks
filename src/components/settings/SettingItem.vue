@@ -1,7 +1,7 @@
 <template>
-  <v-list-item class="setting-item" :disabled="disabled">
+  <v-list-item :disabled="disabled" class="setting-item">
     <template #prepend>
-      <v-icon :icon="settingIcon" />
+      <v-icon :icon="settingIcon"/>
     </template>
 
     <v-list-item-title class="text-wrap">
@@ -19,57 +19,57 @@
           <v-switch
             v-if="type === 'boolean'"
             v-model="localValue"
+            :disabled="disabled"
             density="comfortable"
             hide-details
-            :disabled="disabled"
             @update:model-value="updateSetting"
           />
 
           <v-select
             v-else-if="type === 'string' && hasOptions"
             v-model="localValue"
+            :disabled="disabled"
             :items="selectOptions"
+            bg-color="surface"
+            class="setting-select"
             density="compact"
             hide-details
-            :disabled="disabled"
-            class="setting-select"
-            variant="outlined"
-            bg-color="surface"
-            @update:model-value="updateSetting"
             item-title="title"
             item-value="value"
+            variant="outlined"
+            @update:model-value="updateSetting"
           />
 
           <div v-else-if="type === 'number'" class="d-flex align-center">
             <v-btn
+              :disabled="disabled || localValue <= minValue"
               icon="mdi-minus"
               size="small"
               variant="text"
-              :disabled="disabled || localValue <= minValue"
               @click="adjustValue(-stepValue)"
             />
 
             <v-text-field
               v-model.number="localValue"
-              type="number"
+              :disabled="disabled"
+              :max="maxValue"
+              :min="minValue"
+              :step="stepValue"
+              bg-color="surface"
+              class="mx-2 setting-number-field"
               density="compact"
               hide-details
-              :min="minValue"
-              :max="maxValue"
-              :step="stepValue"
-              :disabled="disabled"
-              class="mx-2 setting-number-field"
               style="width: 80px"
+              type="number"
               variant="outlined"
-              bg-color="surface"
               @update:model-value="updateSetting"
             />
 
             <v-btn
+              :disabled="disabled || localValue >= maxValue"
               icon="mdi-plus"
               size="small"
               variant="text"
-              :disabled="disabled || localValue >= maxValue"
               @click="adjustValue(stepValue)"
             />
           </div>
@@ -78,34 +78,34 @@
         <v-menu location="bottom">
           <template v-slot:activator="{ props }">
             <v-btn
+              :disabled="disabled"
+              class="ml-2"
               icon="mdi-dots-vertical"
               size="small"
-              variant="text"
               v-bind="props"
-              class="ml-2"
-              :disabled="disabled"
+              variant="text"
             />
           </template>
           <v-list density="compact">
             <v-list-item @click="copySettingId">
               <template v-slot:prepend>
-                <v-icon icon="mdi-key" size="small" />
+                <v-icon icon="mdi-key" size="small"/>
               </template>
               <v-list-item-title>复制设置ID</v-list-item-title>
             </v-list-item>
 
             <v-list-item @click="copySettingValue">
               <template v-slot:prepend>
-                <v-icon icon="mdi-content-copy" size="small" />
+                <v-icon icon="mdi-content-copy" size="small"/>
               </template>
               <v-list-item-title>复制设置值</v-list-item-title>
             </v-list-item>
 
             <v-divider></v-divider>
 
-            <v-list-item @click="resetToDefault" :disabled="isDefaultValue">
+            <v-list-item :disabled="isDefaultValue" @click="resetToDefault">
               <template v-slot:prepend>
-                <v-icon icon="mdi-restore" size="small" />
+                <v-icon icon="mdi-restore" size="small"/>
               </template>
               <v-list-item-title>重置为默认值</v-list-item-title>
             </v-list-item>
@@ -119,12 +119,12 @@
   <div v-if="type === 'string' && !hasOptions" class="px-4 pb-2 pt-0">
     <v-text-field
       v-model="localValue"
+      :disabled="disabled"
+      bg-color="surface"
+      class="setting-text-field mt-1"
       density="compact"
       hide-details
-      :disabled="disabled"
-      class="setting-text-field mt-1"
       variant="outlined"
-      bg-color="surface"
       @update:model-value="updateSetting"
     />
   </div>
@@ -206,20 +206,20 @@ export default {
       showSnackbar: false,
       snackbarText: "",
       fontFamilies: [
-        { title: "Arial", value: "Arial, sans-serif" },
-        { title: "Calibri", value: "Calibri, sans-serif" },
-        { title: "Cambria", value: "Cambria, serif" },
-        { title: "Consolas", value: "Consolas, monospace" },
-        { title: "Courier New", value: "Courier New, monospace" },
-        { title: "Georgia", value: "Georgia, serif" },
-        { title: "Helvetica", value: "Helvetica, sans-serif" },
-        { title: "Segoe UI", value: "Segoe UI, sans-serif" },
-        { title: "Times New Roman", value: "Times New Roman, serif" },
-        { title: "Trebuchet MS", value: "Trebuchet MS, sans-serif" },
-        { title: "Verdana", value: "Verdana, sans-serif" },
-        { title: "Monospace", value: "monospace" },
-        { title: "Sans-serif", value: "sans-serif" },
-        { title: "Serif", value: "serif" },
+        {title: "Arial", value: "Arial, sans-serif"},
+        {title: "Calibri", value: "Calibri, sans-serif"},
+        {title: "Cambria", value: "Cambria, serif"},
+        {title: "Consolas", value: "Consolas, monospace"},
+        {title: "Courier New", value: "Courier New, monospace"},
+        {title: "Georgia", value: "Georgia, serif"},
+        {title: "Helvetica", value: "Helvetica, sans-serif"},
+        {title: "Segoe UI", value: "Segoe UI, sans-serif"},
+        {title: "Times New Roman", value: "Times New Roman, serif"},
+        {title: "Trebuchet MS", value: "Trebuchet MS, sans-serif"},
+        {title: "Verdana", value: "Verdana, sans-serif"},
+        {title: "Monospace", value: "monospace"},
+        {title: "Sans-serif", value: "sans-serif"},
+        {title: "Serif", value: "serif"},
       ],
       // 设置项的显示名称映射
       displayValueMappings: {

@@ -4,24 +4,24 @@
     <v-card-text>
       <v-text-field
         v-model="token"
+        clearable
+        density="comfortable"
+        hide-details="auto"
         label="KV 授权 Token"
         placeholder="粘贴从授权页面获取的 Token"
         variant="outlined"
-        density="comfortable"
-        hide-details="auto"
-        clearable
       />
       <v-alert
         v-if="error"
+        class="mt-3"
         type="error"
         variant="tonal"
-        class="mt-3"
       >
         {{ error }}
       </v-alert>
     </v-card-text>
     <v-card-actions>
-      <v-spacer />
+      <v-spacer/>
       <v-btn
         v-if="showCancel"
         variant="text"
@@ -42,8 +42,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { getSetting, setSetting } from '@/utils/settings'
+import {ref} from 'vue'
+import {getSetting, setSetting} from '@/utils/settings'
 import axios from '@/axios/axios'
 
 defineProps({

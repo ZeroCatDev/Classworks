@@ -3,8 +3,8 @@
     <!-- 正常路由 -->
     <router-view v-slot="{ Component, route }">
       <transition
-        name="md3"
         mode="out-in"
+        name="md3"
       >
         <component
           :is="Component"
@@ -12,17 +12,18 @@
         />
       </transition>
     </router-view>
-    <global-message />
-    <rate-limit-modal />
+    <global-message/>
+    <rate-limit-modal/>
   </v-app>
 </template>
 
 <script setup>
-import { onMounted } from "vue";
-import { useTheme } from "vuetify";
-import { getSetting } from "@/utils/settings";
+import {onMounted} from "vue";
+import {useTheme} from "vuetify";
+import {getSetting} from "@/utils/settings";
 import RateLimitModal from "@/components/RateLimitModal.vue";
 import Clarity from "@microsoft/clarity";
+
 const theme = useTheme();
 
 onMounted(() => {
@@ -44,7 +45,7 @@ onMounted(() => {
 .md3-enter-active,
 .md3-leave-active {
   transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .md3-enter-from {

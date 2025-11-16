@@ -2,8 +2,8 @@
   <v-card>
     <v-card-title class="d-flex align-center">
       <v-icon
-        icon="mdi-account-plus"
         class="mr-2"
+        icon="mdi-account-plus"
       />
       渐进式注册
     </v-card-title>
@@ -15,12 +15,12 @@
         </p>
 
         <v-alert
+          class="mb-4"
           type="info"
           variant="tonal"
-          class="mb-4"
         >
           <template #prepend>
-            <v-icon icon="mdi-information" />
+            <v-icon icon="mdi-information"/>
           </template>
           系统将自动为您创建设备并获取访问令牌，无需手动配置
         </v-alert>
@@ -30,10 +30,10 @@
       <div v-else-if="isRegistering">
         <div class="text-center py-4">
           <v-progress-circular
+            class="mb-4"
+            color="primary"
             indeterminate
             size="48"
-            color="primary"
-            class="mb-4"
           />
           <p class="text-h6 mb-2">
             正在注册设备...
@@ -47,12 +47,12 @@
       <!-- 注册成功 -->
       <div v-else-if="isRegistered && deviceInfo">
         <v-alert
+          class="mb-4"
           type="success"
           variant="tonal"
-          class="mb-4"
         >
           <template #prepend>
-            <v-icon icon="mdi-check-circle" />
+            <v-icon icon="mdi-check-circle"/>
           </template>
           设备注册成功！已自动获取访问令牌
         </v-alert>
@@ -60,7 +60,7 @@
         <v-list>
           <v-list-item>
             <template #prepend>
-              <v-icon icon="mdi-identifier" />
+              <v-icon icon="mdi-identifier"/>
             </template>
             <v-list-item-title>设备名称</v-list-item-title>
             <v-list-item-subtitle>{{ deviceInfo.deviceName }}</v-list-item-subtitle>
@@ -68,7 +68,7 @@
 
           <v-list-item>
             <template #prepend>
-              <v-icon icon="mdi-key" />
+              <v-icon icon="mdi-key"/>
             </template>
             <v-list-item-title>设备 UUID</v-list-item-title>
             <v-list-item-subtitle class="font-mono text-caption">
@@ -78,12 +78,12 @@
         </v-list>
 
         <v-alert
+          class="mt-4"
           type="info"
           variant="tonal"
-          class="mt-4"
         >
           <template #prepend>
-            <v-icon icon="mdi-information" />
+            <v-icon icon="mdi-information"/>
           </template>
           您可以点击下方按钮访问云端控制台来设置密码和管理高级功能
         </v-alert>
@@ -92,12 +92,12 @@
       <!-- 错误状态 -->
       <div v-else-if="errorMessage">
         <v-alert
+          class="mb-4"
           type="error"
           variant="tonal"
-          class="mb-4"
         >
           <template #prepend>
-            <v-icon icon="mdi-alert-circle" />
+            <v-icon icon="mdi-alert-circle"/>
           </template>
           {{ errorMessage }}
         </v-alert>
@@ -105,14 +105,14 @@
     </v-card-text>
 
     <v-card-actions>
-      <v-spacer />
+      <v-spacer/>
 
       <!-- 注册按钮 -->
       <v-btn
         v-if="!isRegistered && !isRegistering"
+        :loading="isRegistering"
         color="primary"
         prepend-icon="mdi-plus"
-        :loading="isRegistering"
         @click="registerDevice"
       >
         注册设备
@@ -149,8 +149,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { getSetting, setSetting } from '@/utils/settings'
+import {ref} from 'vue'
+import {getSetting, setSetting} from '@/utils/settings'
 import axios from '@/axios/axios'
 
 // 事件定义
@@ -168,7 +168,7 @@ const registrationStep = ref('')
 
 // 生成 UUID
 const generateUUID = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = Math.random() * 16 | 0
     const v = c === 'x' ? r : (r & 0x3 | 0x8)
     return v.toString(16)
@@ -211,7 +211,7 @@ const registerDevice = async () => {
     const serverUrl = getSetting('server.domain')
 
     registrationStep.value = '正在注册设备到服务器...'
-    console.log('开始注册设备:', { uuid, deviceName, serverUrl })
+    console.log('开始注册设备:', {uuid, deviceName, serverUrl})
 
     // 调用设备注册接口
     const response = await axios.post(`${serverUrl}/devices`, {

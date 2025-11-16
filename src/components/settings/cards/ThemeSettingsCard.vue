@@ -1,24 +1,24 @@
 <template>
-  <settings-card title="主题设置" icon="mdi-palette">
+  <settings-card icon="mdi-palette" title="主题设置">
     <v-list>
       <v-list-item>
         <template #prepend>
-          <v-icon icon="mdi-theme-light-dark" class="mr-3" />
+          <v-icon class="mr-3" icon="mdi-theme-light-dark"/>
         </template>
         <v-list-item-title>主题模式</v-list-item-title>
         <v-list-item-subtitle>选择明亮或暗黑主题</v-list-item-subtitle>
         <template #append>
           <v-btn-toggle
             v-model="localTheme"
-            density="comfortable"
             color="primary"
+            density="comfortable"
           >
             <v-btn value="light">
-              <v-icon icon="mdi-white-balance-sunny" class="mr-2" />
+              <v-icon class="mr-2" icon="mdi-white-balance-sunny"/>
               明亮
             </v-btn>
             <v-btn value="dark">
-              <v-icon icon="mdi-moon-waning-crescent" class="mr-2" />
+              <v-icon class="mr-2" icon="mdi-moon-waning-crescent"/>
               暗黑
             </v-btn>
           </v-btn-toggle>
@@ -30,12 +30,12 @@
 
 <script>
 import SettingsCard from '@/components/SettingsCard.vue';
-import { getSetting, setSetting } from '@/utils/settings';
-import { useTheme } from 'vuetify';
+import {getSetting, setSetting} from '@/utils/settings';
+import {useTheme} from 'vuetify';
 
 export default {
   name: 'ThemeSettingsCard',
-  components: { SettingsCard },
+  components: {SettingsCard},
 
   data() {
     return {
@@ -52,7 +52,7 @@ export default {
 
   setup() {
     const theme = useTheme();
-    return { theme };
+    return {theme};
   },
 
   methods: {

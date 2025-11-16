@@ -1,4 +1,5 @@
-<template><v-app-bar elevation="1">
+<template>
+  <v-app-bar elevation="1">
     <template #prepend>
       <v-btn
         icon="mdi-arrow-left"
@@ -7,9 +8,8 @@
       />
     </template>
     <v-app-bar-title class="text-h6">列表</v-app-bar-title>
-  </v-app-bar><v-container>
-
-
+  </v-app-bar>
+  <v-container>
 
 
     <v-card border class="mb-5" rounded="xl">
@@ -21,8 +21,8 @@
         <v-list-item
           v-for="list in lists"
           :key="list.id"
-          :to="list.id !== editingListId ? `/list/${list.id}` : undefined"
           :active="list.id === editingListId"
+          :to="list.id !== editingListId ? `/list/${list.id}` : undefined"
         >
           <div v-if="list.id !== editingListId">
             <v-list-item-title>{{ list.name }}</v-list-item-title>
@@ -30,27 +30,27 @@
           <div v-else class="d-flex align-center w-100">
             <v-text-field
               v-model="editListName"
-              label="列表名称"
-              hide-details
-              density="compact"
-              class="mr-2"
               autofocus
+              class="mr-2"
+              density="compact"
+              hide-details
+              label="列表名称"
               @keyup.enter="saveListName"
             ></v-text-field>
-            <v-btn icon color="primary" @click.stop.prevent="saveListName" class="mr-2" border>
+            <v-btn border class="mr-2" color="primary" icon @click.stop.prevent="saveListName">
               <v-icon>mdi-check</v-icon>
             </v-btn>
-            <v-btn icon color="error" @click.stop.prevent="cancelEditing" border>
+            <v-btn border color="error" icon @click.stop.prevent="cancelEditing">
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
 
           <template #append>
             <div v-if="list.id !== editingListId">
-              <v-btn icon @click.stop.prevent="startEditing(list.id)" class="mr-2" border>
+              <v-btn border class="mr-2" icon @click.stop.prevent="startEditing(list.id)">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
-              <v-btn icon @click.stop.prevent="confirmDeleteList(list.id)" border>
+              <v-btn border icon @click.stop.prevent="confirmDeleteList(list.id)">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </div>
@@ -58,15 +58,15 @@
         </v-list-item>
       </v-list>
     </v-card>
-    <v-card class="mb-5" border rounded="xl">
+    <v-card border class="mb-5" rounded="xl">
       <v-card-title>创建新列表</v-card-title>
       <v-card-text>
         <v-text-field
           v-model="newListName"
-          label="列表名称"
           :rules="[v => !!v || '名称不能为空']"
+          label="列表名称"
         ></v-text-field>
-        <v-btn color="primary" @click="createNewList" :disabled="!newListName">
+        <v-btn :disabled="!newListName" color="primary" @click="createNewList">
           创建列表
         </v-btn>
       </v-card-text>
@@ -87,11 +87,12 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
- </v-container>
+  </v-container>
 </template>
 
 <script>
 import dataProvider from "@/utils/dataProvider.js";
+
 export default {
   data() {
     return {

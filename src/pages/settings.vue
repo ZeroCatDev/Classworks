@@ -27,11 +27,11 @@
           <v-list-item
             v-for="tab in settingsTabs"
             :key="tab.value"
-            @click="settingsTab = tab.value"
             :active="settingsTab === tab.value"
+            :color="settingsTab === tab.value ? 'primary' : 'default'"
             :prepend-icon="tab.icon"
             class="rounded-e-xl"
-            :color="settingsTab === tab.value ? 'primary' : 'default'"
+            @click="settingsTab = tab.value"
           >
             <v-list-item-title>{{ tab.title }}</v-list-item-title>
           </v-list-item>
@@ -40,11 +40,13 @@
 
       <v-tabs-window
         v-model="settingsTab"
-        style="width: 100%"
         direction="vertical"
+        style="width: 100%"
       >
         <v-tabs-window-item value="index"
-          ><v-card class="service-card gradient-right clickable mb-4" elevation="8" rounded="xl" border hover  @click="openClassworksKV" color="primary" variant="tonal">
+        >
+          <v-card border class="service-card gradient-right clickable mb-4" color="primary" elevation="8" hover
+                  rounded="xl" variant="tonal" @click="openClassworksKV">
             <v-card-item>
               <div class="card-title">
                 <div>
@@ -58,10 +60,10 @@
             <v-card-text>
               <div class="mt-4">
                 <v-btn
-                  variant="text"
-                  class="text-none"
                   append-icon="mdi-arrow-right"
+                  class="text-none"
                   rounded="xl"
+                  variant="text"
                   @click="openClassworksKV"
                 >
                   打开 Classworks KV
@@ -69,126 +71,137 @@
               </div>
             </v-card-text>
           </v-card>
-          <v-card title="Classworks" subtitle="设置" class="rounded-xl mb-4" border>
+          <v-card border class="rounded-xl mb-4" subtitle="设置" title="Classworks">
             <v-card-text>
               <v-alert
-                color="error"
-                variant="tonal"
-                icon="mdi-alert-circle"
                 class="rounded-xl"
-                >Classworks
+                color="error"
+                icon="mdi-alert-circle"
+                variant="tonal"
+              >Classworks
                 是开源免费的软件，官方没有提供任何形式的付费支持服务，源代码仓库地址在
                 <a
                   href="https://github.com/ZeroCatDev/Classworks"
                   target="_blank"
-                  >https://github.com/ZeroCatDev/Classworks</a
-                >。如果您通过有偿协助等付费方式取得本应用，在遇到问题时请在与卖家约定的服务框架下，优先向卖家求助。如果卖家没有提供您预期的服务，请退款或通过其它形式积极维护您的合法权益。</v-alert
+                >https://github.com/ZeroCatDev/Classworks</a
+                >。如果您通过有偿协助等付费方式取得本应用，在遇到问题时请在与卖家约定的服务框架下，优先向卖家求助。如果卖家没有提供您预期的服务，请退款或通过其它形式积极维护您的合法权益。
+              </v-alert
               >
               <v-alert
                 class="mt-4 rounded-xl"
                 color="info"
-                variant="tonal"
                 icon="mdi-information"
-                >请不要使用浏览器清除缓存功能，否则会导致配置丢失。<del
-                  >恶意的操作可能导致您受到贵校教师的处理</del
-                ></v-alert
+                variant="tonal"
+              >请不要使用浏览器清除缓存功能，否则会导致配置丢失。
+                <del
+                >恶意的操作可能导致您受到贵校教师的处理
+                </del
+                >
+              </v-alert
               >
               <v-alert
                 class="mt-4 rounded-xl"
                 color="warning"
-                variant="tonal"
                 icon="mdi-information"
-                ><p>
-                  请不要使用包括但不限于360极速浏览器、360安全浏览器、夸克浏览器、QQ浏览器等浏览器使用
-                  Classworks
-                  ，这些浏览器过时且存在严重的一致性问题。在Windows上，使用新版
-                  Microsoft Edge 浏览器是最推荐的选择。
-                </p>
+                variant="tonal"
+              ><p>
+                请不要使用包括但不限于360极速浏览器、360安全浏览器、夸克浏览器、QQ浏览器等浏览器使用
+                Classworks
+                ，这些浏览器过时且存在严重的一致性问题。在Windows上，使用新版
+                Microsoft Edge 浏览器是最推荐的选择。
+              </p>
                 <p style="color: #666">
                   上述浏览器商标为其所属公司所有，Classworks™
                   与上述浏览器所属公司无竞争关系。
                 </p>
-                <br /><v-btn
+                <br/>
+                <v-btn
+                  append-icon="mdi-open-in-new"
+                  class="text-none rounded-xl"
+                  color="warning"
                   href="https://www.microsoft.com/zh-cn/windows/microsoft-edge"
                   target="_blank"
-                  color="warning"
                   variant="tonal"
-                  class="text-none rounded-xl"
-                  append-icon="mdi-open-in-new"
-                  >下载 Microsoft Edge（微软边缘浏览器）</v-btn
-                ></v-alert
+                >下载 Microsoft Edge（微软边缘浏览器）
+                </v-btn
+                >
+              </v-alert
               >
             </v-card-text>
-          </v-card><about-card />
+          </v-card>
+          <about-card/>
         </v-tabs-window-item>
 
         <v-tabs-window-item value="server">
           <server-settings-card
-            border
             :loading="loading.server"
+            border
             @saved="onSettingsSaved"
           />
-          <data-provider-settings-card border class="mt-4" />
-          <kv-database-card border class="mt-4" />
+          <data-provider-settings-card border class="mt-4"/>
+          <kv-database-card border class="mt-4"/>
         </v-tabs-window-item>
 
         <v-tabs-window-item value="student">
-          <student-list-card border :is-mobile="isMobile" />
+          <student-list-card :is-mobile="isMobile" border/>
         </v-tabs-window-item>
         <v-tabs-window-item value="share">
-          <settings-link-generator border class="mt-4" />
+          <settings-link-generator border class="mt-4"/>
         </v-tabs-window-item>
 
         <v-tabs-window-item value="refresh">
           <refresh-settings-card
-            border
             :loading="loading.refresh"
+            border
             @saved="onSettingsSaved"
           />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="edit">
           <edit-settings-card
-            border
             :loading="loading.edit"
+            border
             @saved="onSettingsSaved"
           />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="display">
           <display-settings-card
-            border
             :loading="loading.display"
+            border
             @saved="onSettingsSaved"
           />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="theme">
           <theme-settings-card
-            border
             :loading="loading.theme"
+            border
             @saved="onSettingsSaved"
           />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="randomPicker">
-          <random-picker-card border :is-mobile="isMobile" />
+          <random-picker-card :is-mobile="isMobile" border/>
         </v-tabs-window-item>
         <v-tabs-window-item value="subject">
-          <subject-management-card border /> <br />
-          <homework-template-card border />
+          <subject-management-card border/>
+          <br/>
+          <homework-template-card border/>
         </v-tabs-window-item>
 
         <v-tabs-window-item value="developer"
-          ><settings-card border title="开发者选项" icon="mdi-developer-board">
+        >
+          <settings-card border icon="mdi-developer-board" title="开发者选项">
             <v-list>
               <v-list-item>
                 <template #prepend>
-                  <v-icon icon="mdi-code-tags" class="mr-3" />
+                  <v-icon class="mr-3" icon="mdi-code-tags"/>
                 </template>
                 <v-list-item-title>启用开发者选项</v-list-item-title>
                 <v-list-item-subtitle
-                  >启用后可以查看和修改开发者设置</v-list-item-subtitle
+                >启用后可以查看和修改开发者设置
+                </v-list-item-subtitle
                 >
                 <template #append>
                   <v-switch
@@ -202,39 +215,39 @@
             </v-list>
           </settings-card>
           <developer-settings-card
-            border
             :loading="loading.developer"
+            border
             @saved="onSettingsSaved"
           />
           <template v-if="settings.developer.enabled">
             <v-card border class="mt-4 rounded-lg">
               <v-card-title class="d-flex align-center">
-                <v-icon icon="mdi-cog-outline" class="mr-2" />
+                <v-icon class="mr-2" icon="mdi-cog-outline"/>
                 所有设置
               </v-card-title>
-              <v-card-subtitle> 浏览和修改所有可用设置 </v-card-subtitle>
+              <v-card-subtitle> 浏览和修改所有可用设置</v-card-subtitle>
               <v-card-text>
-                <settings-explorer @update="onSettingUpdate" />
+                <settings-explorer @update="onSettingUpdate"/>
               </v-card-text>
             </v-card>
           </template>
-          <v-col v-if="settings.developer.enabled" cols="12"> </v-col>
+          <v-col v-if="settings.developer.enabled" cols="12"></v-col>
         </v-tabs-window-item>
 
         <v-tabs-window-item value="about">
-          <about-card />
-          <echo-chamber-card border class="mt-4" />
+          <about-card/>
+          <echo-chamber-card border class="mt-4"/>
         </v-tabs-window-item>
       </v-tabs-window>
     </v-container>
 
     <!-- 消息记录组件 -->
-    <message-log ref="messageLog" />
+    <message-log ref="messageLog"/>
   </div>
 </template>
 
 <script>
-import { useDisplay } from "vuetify";
+import {useDisplay} from "vuetify";
 import ServerSettingsCard from "@/components/settings/cards/ServerSettingsCard.vue";
 import EditSettingsCard from "@/components/settings/cards/EditSettingsCard.vue";
 import RefreshSettingsCard from "@/components/settings/cards/RefreshSettingsCard.vue";
@@ -259,6 +272,7 @@ import RandomPickerCard from "@/components/settings/cards/RandomPickerCard.vue";
 import HomeworkTemplateCard from "@/components/settings/cards/HomeworkTemplateCard.vue";
 import SubjectManagementCard from "@/components/settings/cards/SubjectManagementCard.vue";
 import KvDatabaseCard from "@/components/settings/cards/KvDatabaseCard.vue";
+
 export default {
   name: "Settings",
   components: {
@@ -281,8 +295,8 @@ export default {
     KvDatabaseCard,
   },
   setup() {
-    const { mobile } = useDisplay();
-    return { isMobile: mobile };
+    const {mobile} = useDisplay();
+    return {isMobile: mobile};
   },
   data() {
     const provider = getSetting("server.provider");
@@ -326,8 +340,8 @@ export default {
     return {
       settings,
       dataProviders: [
-        { title: "服务器", value: "server" },
-        { title: "本地数据库", value: "indexedDB" },
+        {title: "服务器", value: "server"},
+        {title: "本地数据库", value: "indexedDB"},
       ],
       studentData: {
         list: [],
@@ -642,6 +656,7 @@ export default {
 .settings-page {
   .v-card {
     transition: transform 0.2s, box-shadow 0.2s;
+
     &:hover {
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
     }

@@ -3,7 +3,7 @@
     <!-- 统一链接生成器卡片 -->
     <v-card border class="unified-link-generator">
       <v-card-title class="text-h6">
-        <v-icon start icon="mdi-link-variant" class="mr-2" />
+        <v-icon class="mr-2" icon="mdi-link-variant" start/>
         统一链接生成器
       </v-card-title>
 
@@ -13,7 +13,7 @@
         </div>
 
         <!-- 预配置认证信息部分 -->
-        <v-card variant="tonal" class="mb-4">
+        <v-card class="mb-4" variant="tonal">
           <v-card-title class="text-subtitle-1">
             <v-icon start>mdi-account-key</v-icon>
             预配置认证信息
@@ -24,23 +24,23 @@
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="preconfigForm.namespace"
-                  label="命名空间"
-                  variant="outlined"
-                  prepend-inner-icon="mdi-identifier"
-                  placeholder="例如: classroom-001"
                   hint="设备的命名空间标识符"
+                  label="命名空间"
                   persistent-hint
+                  placeholder="例如: classroom-001"
+                  prepend-inner-icon="mdi-identifier"
+                  variant="outlined"
                 />
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="preconfigForm.authCode"
-                  label="认证码"
-                  variant="outlined"
-                  prepend-inner-icon="mdi-lock-outline"
-                  placeholder="设备认证码（可选）"
                   hint="留空则需要用户手动输入"
+                  label="认证码"
                   persistent-hint
+                  placeholder="设备认证码（可选）"
+                  prepend-inner-icon="mdi-lock-outline"
+                  variant="outlined"
                 />
               </v-col>
             </v-row>
@@ -49,10 +49,10 @@
               <v-col cols="12">
                 <v-checkbox
                   v-model="preconfigForm.autoExecute"
-                  label="自动执行认证"
-                  hint="启用后会自动尝试认证，即使没有认证码也会尝试"
-                  persistent-hint
                   density="compact"
+                  hint="启用后会自动尝试认证，即使没有认证码也会尝试"
+                  label="自动执行认证"
+                  persistent-hint
                 />
               </v-col>
             </v-row>
@@ -60,36 +60,38 @@
             <!-- 预配置信息预览 -->
             <v-alert
               v-if="preconfigForm.namespace"
+              class="mt-3"
               type="info"
               variant="tonal"
-              class="mt-3"
             >
               <div class="text-subtitle-2 mb-2">预配置信息：</div>
-              <v-chip size="small" class="mr-2 mb-1">
-                <v-icon start size="small">mdi-identifier</v-icon>
+              <v-chip class="mr-2 mb-1" size="small">
+                <v-icon size="small" start>mdi-identifier</v-icon>
                 命名空间: {{ preconfigForm.namespace }}
               </v-chip>
               <v-chip
                 v-if="preconfigForm.authCode"
-                size="small"
                 class="mr-2 mb-1"
                 color="warning"
+                size="small"
               >
-                <v-icon start size="small">mdi-lock</v-icon>
-                认证码: {{ preconfigForm.authCode.length > 8 ? preconfigForm.authCode.substring(0, 8) + "..." : preconfigForm.authCode }}
+                <v-icon size="small" start>mdi-lock</v-icon>
+                认证码: {{ preconfigForm.authCode.length > 8 ? preconfigForm.authCode.substring(0, 8) + "..." :
+                preconfigForm.authCode }}
               </v-chip>
-              <v-chip v-else size="small" class="mr-2 mb-1" color="grey">
-                <v-icon start size="small">mdi-lock-open</v-icon>
+              <v-chip v-else class="mr-2 mb-1" color="grey" size="small">
+                <v-icon size="small" start>mdi-lock-open</v-icon>
                 无认证码
               </v-chip>
               <v-chip
-                size="small"
-                class="mr-2 mb-1"
                 :color="preconfigForm.autoExecute ? 'success' : 'orange'"
+                class="mr-2 mb-1"
+                size="small"
               >
-                <v-icon start size="small">{{
+                <v-icon size="small" start>{{
                   preconfigForm.autoExecute ? "mdi-play-circle" : "mdi-hand-back-left"
-                }}</v-icon>
+                  }}
+                </v-icon>
                 {{ preconfigForm.autoExecute ? "自动认证" : "手动认证" }}
               </v-chip>
             </v-alert>
@@ -97,7 +99,7 @@
         </v-card>
 
         <!-- 设置分享部分 -->
-        <v-card variant="tonal" class="mb-4">
+        <v-card class="mb-4" variant="tonal">
           <v-card-title class="text-subtitle-1">
             <v-icon start>mdi-cog-transfer</v-icon>
             设置分享（可选）
@@ -111,37 +113,37 @@
             <!-- 设置快速选择按钮 -->
             <div class="d-flex mb-3 gap-2 flex-wrap">
               <v-btn
-                size="small"
-                variant="tonal"
                 color="primary"
                 prepend-icon="mdi-server-network"
+                size="small"
+                variant="tonal"
                 @click="selectDataSourceSettings"
               >
                 数据源设置
               </v-btn>
               <v-btn
-                size="small"
-                variant="tonal"
                 color="primary"
                 prepend-icon="mdi-compare"
+                size="small"
+                variant="tonal"
                 @click="selectChangedSettings"
               >
                 已变更设置
               </v-btn>
               <v-btn
-                size="small"
-                variant="tonal"
                 color="success"
                 prepend-icon="mdi-select-all"
+                size="small"
+                variant="tonal"
                 @click="selectAll"
               >
                 全选
               </v-btn>
               <v-btn
-                size="small"
-                variant="tonal"
                 color="error"
                 prepend-icon="mdi-select-remove"
+                size="small"
+                variant="tonal"
                 @click="resetSelection"
               >
                 清除选择
@@ -150,7 +152,7 @@
 
             <!-- 选择摘要 -->
             <div class="d-flex align-center mb-3 flex-wrap gap-2">
-              <v-chip color="primary" class="mr-2">
+              <v-chip class="mr-2" color="primary">
                 已选 {{ selectedItems.length }} 项设置
               </v-chip>
 
@@ -158,17 +160,17 @@
                 <v-chip
                   v-for="item in selectedItems.slice(0, 3)"
                   :key="item"
-                  size="small"
                   class="mr-1"
+                  size="small"
                   variant="text"
                 >
                   {{ getSettingDescription(item) }}
                 </v-chip>
                 <v-chip
                   v-if="selectedItems.length > 3"
+                  color="grey"
                   size="small"
                   variant="text"
-                  color="grey"
                 >
                   +{{ selectedItems.length - 3 }} 更多
                 </v-chip>
@@ -190,39 +192,39 @@
                 <v-expansion-panel-text>
                   <v-text-field
                     v-model="search"
+                    class="mb-4"
+                    clearable
+                    hide-details
                     label="搜索设置"
                     prepend-inner-icon="mdi-magnify"
                     single-line
-                    hide-details
-                    class="mb-4"
-                    clearable
                   />
 
                   <v-data-table
-                    :items-per-page="settingItems.length"
+                    v-model="selectedItems"
                     :headers="headers"
                     :items="filteredItems"
-                    item-value="key"
-                    v-model="selectedItems"
-                    show-select
-                    density="compact"
-                    class="rounded setting-table"
-                    @update:selected="handleSelectionChange"
+                    :items-per-page="settingItems.length"
                     :sort-by="[{ key: 'isChanged', order: 'desc' }]"
+                    class="rounded setting-table"
+                    density="compact"
+                    item-value="key"
+                    show-select
+                    @update:selected="handleSelectionChange"
                   >
                     <template #[`item.description`]="{ item }">
                       <div class="d-flex align-center">
                         <v-icon
-                          size="small"
                           :icon="item.icon"
                           class="mr-2"
+                          size="small"
                         />
                         {{ item.description }}
                         <v-chip
                           v-if="item.key === 'server.kvToken'"
-                          size="x-small"
-                          color="error"
                           class="ml-2"
+                          color="error"
+                          size="x-small"
                         >
                           敏感
                         </v-chip>
@@ -245,10 +247,10 @@
 
                     <template #[`item.isChanged`]="{ item }">
                       <v-chip
-                        size="x-small"
                         :color="item.isChanged ? 'warning' : 'success'"
                         :text="item.isChanged ? '已修改' : '默认'"
                         density="compact"
+                        size="x-small"
                       />
                     </template>
                   </v-data-table>
@@ -259,7 +261,7 @@
         </v-card>
 
         <!-- 链接生成和操作部分 -->
-        <v-card variant="outlined" class="mb-4">
+        <v-card class="mb-4" variant="outlined">
           <v-card-title class="text-subtitle-1">
             <v-icon start>mdi-link</v-icon>
             生成的统一链接
@@ -269,27 +271,27 @@
             <!-- 操作按钮 -->
             <div class="d-flex mb-3 gap-2 flex-wrap">
               <v-btn
-                variant="flat"
+                :disabled="!preconfigForm.namespace.trim()"
                 color="primary"
                 prepend-icon="mdi-auto-fix"
+                variant="flat"
                 @click="generateUnifiedLink"
-                :disabled="!preconfigForm.namespace.trim()"
               >
                 生成统一链接
               </v-btn>
               <v-btn
-                variant="tonal"
+                :disabled="!unifiedLink"
                 color="success"
                 prepend-icon="mdi-test-tube"
+                variant="tonal"
                 @click="openTestLink"
-                :disabled="!unifiedLink"
               >
                 测试链接
               </v-btn>
               <v-btn
-                variant="tonal"
                 color="error"
                 prepend-icon="mdi-delete"
+                variant="tonal"
                 @click="clearAll"
               >
                 清空所有
@@ -299,38 +301,38 @@
             <!-- 生成的链接 -->
             <v-text-field
               v-model="unifiedLink"
+              :append-inner-icon="linkCopied ? 'mdi-check' : 'mdi-content-copy'"
+              :placeholder="preconfigForm.namespace ? '点击「生成统一链接」按钮' : '请先输入命名空间'"
+              class="mb-3"
               label="统一链接"
               readonly
               variant="outlined"
-              class="mb-3"
-              :append-inner-icon="linkCopied ? 'mdi-check' : 'mdi-content-copy'"
               @click:append-inner="copyUnifiedLink"
-              :placeholder="preconfigForm.namespace ? '点击「生成统一链接」按钮' : '请先输入命名空间'"
             />
 
             <!-- 链接内容预览 -->
             <v-alert
               v-if="unifiedLink"
+              class="mb-3"
               type="success"
               variant="tonal"
-              class="mb-3"
             >
               <div class="text-subtitle-2 mb-2">链接包含内容：</div>
               <div class="d-flex flex-wrap gap-1">
-                <v-chip size="small" color="primary">
-                  <v-icon start size="small">mdi-account-key</v-icon>
+                <v-chip color="primary" size="small">
+                  <v-icon size="small" start>mdi-account-key</v-icon>
                   预配置认证
                 </v-chip>
                 <v-chip
                   v-if="selectedItems.length > 0"
-                  size="small"
                   color="secondary"
+                  size="small"
                 >
-                  <v-icon start size="small">mdi-cog</v-icon>
+                  <v-icon size="small" start>mdi-cog</v-icon>
                   {{ selectedItems.length }} 项设置
                 </v-chip>
-                <v-chip v-else size="small" color="grey">
-                  <v-icon start size="small">mdi-cog-off</v-icon>
+                <v-chip v-else color="grey" size="small">
+                  <v-icon size="small" start>mdi-cog-off</v-icon>
                   无额外设置
                 </v-chip>
               </div>
@@ -389,16 +391,16 @@ export default {
       unifiedLink: "",
 
       headers: [
-        { title: "", key: "data-table-select" },
-        { title: "设置项", key: "description", sortable: true },
-        { title: "当前值", key: "value", sortable: true },
+        {title: "", key: "data-table-select"},
+        {title: "设置项", key: "description", sortable: true},
+        {title: "当前值", key: "value", sortable: true},
         {
           title: "键名",
           key: "key",
           class: "d-none d-sm-table-cell",
           sortable: true,
         },
-        { title: "状态", key: "isChanged", sortable: true },
+        {title: "状态", key: "isChanged", sortable: true},
       ],
     };
   },
@@ -550,7 +552,7 @@ export default {
         );
 
         // 构建查询参数
-        const queryParams = { config: base64String };
+        const queryParams = {config: base64String};
 
         // 添加当前日期到查询参数，如果URL中存在
         const urlParams = new URLSearchParams(window.location.search);

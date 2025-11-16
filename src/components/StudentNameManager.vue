@@ -14,12 +14,12 @@
         <v-autocomplete
           v-model="selectedName"
           :items="studentList"
+          clearable
+          hide-details
           item-title="name"
           item-value="name"
           label="学生姓名"
           placeholder="选择您的姓名"
-          clearable
-          hide-details
         />
         <div
           v-if="studentList.length > 0"
@@ -29,9 +29,9 @@
         </div>
         <v-alert
           v-if="error"
+          class="mt-3"
           type="error"
           variant="tonal"
-          class="mt-3"
         >
           {{ error }}
         </v-alert>
@@ -43,7 +43,7 @@
         >
           稍后设置
         </v-btn>
-        <v-spacer />
+        <v-spacer/>
         <v-btn
           :disabled="!selectedName || saving"
           :loading="saving"
@@ -58,18 +58,19 @@
 
   <!-- 顶栏学生姓名显示（通过插槽暴露给父组件） -->
   <slot
-    name="header-display"
-    :student-name="currentStudentName"
     :is-student="isStudentToken"
     :open-dialog="openDialog"
+    :student-name="currentStudentName"
+    name="header-display"
   />
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
-import { getSetting, watchSettings } from '@/utils/settings'
+import {ref, computed, watch, onMounted} from 'vue'
+import {getSetting, watchSettings} from '@/utils/settings'
 import axios from '@/axios/axios'
 import dataProvider from '@/utils/dataProvider'
+
 const emit = defineEmits(['token-info-updated'])
 
 const showDialog = ref(false)
@@ -236,7 +237,7 @@ watchSettings(() => {
 // 监听 tokenInfo 变化，通知父组件
 watch(tokenInfo, () => {
   emit('token-info-updated')
-}, { deep: true })
+}, {deep: true})
 
 // 初始化
 onMounted(() => {

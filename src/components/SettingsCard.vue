@@ -1,11 +1,11 @@
 <template>
-  <v-card elevation="2" class="settings-card rounded-lg">
+  <v-card class="settings-card rounded-lg" elevation="2">
     <v-card-item>
       <template #prepend>
         <v-icon
           :icon="icon"
-          size="large"
           class="mr-2"
+          size="large"
         />
       </template>
       <v-card-title class="text-h6">{{ title }}</v-card-title>
@@ -14,15 +14,15 @@
     <v-card-text>
       <v-progress-linear
         v-if="loading"
-        indeterminate
-        color="primary"
         class="mb-4"
+        color="primary"
+        indeterminate
       />
-      <slot />
+      <slot/>
     </v-card-text>
 
     <v-card-actions v-if="$slots.actions" class="pa-4">
-      <slot name="actions" />
+      <slot name="actions"/>
     </v-card-actions>
   </v-card>
 </template>

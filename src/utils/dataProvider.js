@@ -1,12 +1,12 @@
-import { kvLocalProvider } from "./providers/kvLocalProvider";
-import { kvServerProvider } from "./providers/kvServerProvider";
-import { getSetting, setSetting } from "./settings";
+import {kvLocalProvider} from "./providers/kvLocalProvider";
+import {kvServerProvider} from "./providers/kvServerProvider";
+import {getSetting, setSetting} from "./settings";
 
 export const formatResponse = (data) => data;
 
 export const formatError = (message, code = "UNKNOWN_ERROR") => ({
   success: false,
-  error: { code, message },
+  error: {code, message},
 });
 
 // Main data provider with simplified API
@@ -254,7 +254,6 @@ export default {
     }
   },
 };
-
 
 
 export const ErrorCodes = {

@@ -1,27 +1,28 @@
 <template>
   <div class="settings-explorer">
-   
 
-    <div >
-      <v-text-field v-model="searchQuery" label="搜索设置" prepend-inner-icon="mdi-magnify" clearable variant="outlined"
-        density="comfortable" class="mb-4" />
 
-      
+    <div>
+      <v-text-field v-model="searchQuery" class="mb-4" clearable density="comfortable" label="搜索设置"
+                    prepend-inner-icon="mdi-magnify" variant="outlined"/>
+
 
       <v-list>
         <div v-for="setting in allSettings" :key="setting.key">
-          <setting-item :key="setting.key" :setting-key="setting.key"
-            :disabled="setting.requireDeveloper && !isDeveloperMode" @update="onSettingUpdate" @error="onSettingError" />
-          <v-divider class="my-2" />
+          <setting-item :key="setting.key" :disabled="setting.requireDeveloper && !isDeveloperMode"
+                        :setting-key="setting.key" @error="onSettingError"
+                        @update="onSettingUpdate"/>
+          <v-divider class="my-2"/>
         </div>
-      </v-list><v-card border>
+      </v-list>
+      <v-card border>
         <v-card-title class="text-subtitle-1">当前配置</v-card-title>
         <v-card-text>
           <pre class="settings-json">{{ formattedSettings }}</pre>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn  @click="copySettingsToClipboard">
+          <v-btn @click="copySettingsToClipboard">
             复制到剪贴板
             <v-icon right>mdi-content-copy</v-icon>
           </v-btn>
@@ -32,7 +33,7 @@
 </template>
 
 <script>
-import { getSetting, settingsDefinitions, exportSettingsAsKeyValue, watchSettings } from '@/utils/settings';
+import {getSetting, settingsDefinitions, exportSettingsAsKeyValue, watchSettings} from '@/utils/settings';
 import SettingItem from './SettingItem.vue';
 
 export default {
@@ -82,7 +83,7 @@ export default {
   created() {
     // 初始化当前设置
     this.updateCurrentSettings();
-    
+
     // 监听设置变化
     this.unwatchFunction = watchSettings(() => {
       this.updateCurrentSettings();
@@ -115,11 +116,11 @@ export default {
       navigator.clipboard.writeText(JSON.stringify(this.currentSettings))
         .then(() => {
           // 可以添加一个提示，表示复制成功
-          this.$emit('message', { type: 'success', text: '设置已复制到剪贴板' });
+          this.$emit('message', {type: 'success', text: '设置已复制到剪贴板'});
         })
         .catch(err => {
           console.error('复制到剪贴板失败:', err);
-          this.$emit('message', { type: 'error', text: '复制到剪贴板失败' });
+          this.$emit('message', {type: 'error', text: '复制到剪贴板失败'});
         });
     }
   }

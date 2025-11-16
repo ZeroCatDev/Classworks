@@ -1,4 +1,4 @@
-import { getSetting } from './settings';
+import {getSetting} from './settings';
 
 class LogDB {
   constructor() {
@@ -39,7 +39,7 @@ const defaultOptions = {
 };
 
 async function createMessage(type, title, content = '', options = {}) {
-  const msgOptions = { ...defaultOptions, ...options };
+  const msgOptions = {...defaultOptions, ...options};
   const message = {
     id: Date.now() + Math.random(),
     type,
@@ -87,8 +87,12 @@ export default {
       warning: (title, content, options) => createMessage(MessageType.WARNING, title, content, options),
     };
   },
-  onSnackbar: (callback) => { snackbarCallback = callback; },
-  onLog: (callback) => { logCallback = callback; },
+  onSnackbar: (callback) => {
+    snackbarCallback = callback;
+  },
+  onLog: (callback) => {
+    logCallback = callback;
+  },
   getMessages: async () => {
     try {
       return await logDB.getLogs();
@@ -107,7 +111,8 @@ export default {
     }
   },
   MessageType,
-  markAsRead: () => {}, // 移除标记已读功能
+  markAsRead: () => {
+  }, // 移除标记已读功能
   deleteMessage: async (messageId) => {
     try {
       await logDB.deleteLog(messageId);

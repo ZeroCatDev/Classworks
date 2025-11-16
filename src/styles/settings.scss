@@ -10,72 +10,72 @@
 // );
 
 .student-card {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bg-primary-subtle {
+  background-color: rgb(var(--v-theme-primary), 0.05);
+}
+
+.action-buttons {
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}
+
+.gap-1 {
+  gap: 4px;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+.student-card .v-text-field {
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 600px) {
+  .v-container {
+    padding: 12px;
   }
 
-  .bg-primary-subtle {
-    background-color: rgb(var(--v-theme-primary), 0.05);
+  .v-col {
+    padding: 8px;
   }
+}
 
-  .action-buttons {
-    transition: opacity 0.2s ease;
-    opacity: 0;
-  }
+.student-card.mobile {
+  margin-bottom: 8px;
+}
 
-  .gap-1 {
-    gap: 4px;
-  }
+.student-card.mobile .v-btn {
+  min-width: 40px;
+  min-height: 40px;
+}
 
-  .gap-2 {
-    gap: 8px;
-  }
+.student-card.mobile .v-text-field {
+  font-size: 16px;
+}
 
-  .student-card .v-text-field {
-    margin: 0;
-    padding: 0;
-  }
-
-  @media (max-width: 600px) {
-    .v-container {
-      padding: 12px;
-    }
-
-    .v-col {
-      padding: 8px;
-    }
-  }
-
-  .student-card.mobile {
-    margin-bottom: 8px;
-  }
-
-  .student-card.mobile .v-btn {
-    min-width: 40px;
-    min-height: 40px;
-  }
-
-  .student-card.mobile .v-text-field {
-    font-size: 16px;
-  }
-
-  @media (max-width: 600px) {
-    .v-col {
-      padding: 6px !important;
-    }
-
-    .student-card {
-      margin-bottom: 4px;
-    }
-
-    .action-buttons {
-      opacity: 1;
-    }
+@media (max-width: 600px) {
+  .v-col {
+    padding: 6px !important;
   }
 
   .student-card {
-    -webkit-tap-highlight-color: transparent;
+    margin-bottom: 4px;
   }
 
-  .student-card:active {
-    background-color: rgb(var(--v-theme-primary), 0.05);
+  .action-buttons {
+    opacity: 1;
   }
+}
+
+.student-card {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.student-card:active {
+  background-color: rgb(var(--v-theme-primary), 0.05);
+}

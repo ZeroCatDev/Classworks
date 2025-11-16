@@ -1,16 +1,16 @@
 <template>
   <v-dialog
     v-model="dialog"
-    max-width="600"
     fullscreen-breakpoint="sm"
+    max-width="600"
     persistent
   >
-    <v-card class="random-picker-card" rounded="xl" border>
+    <v-card border class="random-picker-card" rounded="xl">
       <v-card-title class="text-h5 d-flex align-center">
-        <v-icon icon="mdi-account-question" class="mr-2" />
+        <v-icon class="mr-2" icon="mdi-account-question"/>
         随机点名
-        <v-spacer />
-        <v-btn icon="mdi-close" variant="text" @click="dialog = false" />
+        <v-spacer/>
+        <v-btn icon="mdi-close" variant="text" @click="dialog = false"/>
       </v-card-title>
 
       <v-card-text v-if="!isPickingStarted" class="text-center py-6">
@@ -18,13 +18,13 @@
 
         <div class="d-flex justify-center align-center counter-container">
           <v-btn
-            size="x-large"
-            icon="mdi-minus"
-            variant="tonal"
-            color="primary"
             :disabled="count <= 1"
-            @click="decrementCount"
             class="counter-btn"
+            color="primary"
+            icon="mdi-minus"
+            size="x-large"
+            variant="tonal"
+            @click="decrementCount"
           />
 
           <div class="count-display mx-8">
@@ -33,13 +33,13 @@
           </div>
 
           <v-btn
-            size="x-large"
-            icon="mdi-plus"
-            variant="tonal"
-            color="primary"
             :disabled="count >= maxAllowedCount"
-            @click="incrementCount"
             class="counter-btn"
+            color="primary"
+            icon="mdi-plus"
+            size="x-large"
+            variant="tonal"
+            @click="incrementCount"
           />
         </div>
 
@@ -47,13 +47,13 @@
         <div class="mode-switch-container mt-6">
           <v-btn-toggle
             v-model="pickerMode"
-            color="primary"
-            rounded="pill"
-            mandatory
             class="mode-toggle"
+            color="primary"
+            mandatory
+            rounded="pill"
           >
-            <v-btn value="name" prepend-icon="mdi-account">姓名模式</v-btn>
-            <v-btn value="number" prepend-icon="mdi-numeric">学号模式</v-btn>
+            <v-btn prepend-icon="mdi-account" value="name">姓名模式</v-btn>
+            <v-btn prepend-icon="mdi-numeric" value="number">学号模式</v-btn>
           </v-btn-toggle>
         </div>
 
@@ -63,36 +63,36 @@
           <div class="d-flex justify-center align-center gap-4">
             <v-text-field
               v-model.number="minNumber"
-              label="最小值"
-              type="number"
-              min="1"
-              max="100"
-              hide-details
               class="number-input"
               density="compact"
+              hide-details
+              label="最小值"
+              max="100"
+              min="1"
+              type="number"
             />
             <span class="mx-2">至</span>
             <v-text-field
               v-model.number="maxNumber"
-              label="最大值"
-              type="number"
-              min="1"
-              max="100"
-              hide-details
               class="number-input"
               density="compact"
+              hide-details
+              label="最大值"
+              max="100"
+              min="1"
+              type="number"
             />
           </div>
         </div>
 
         <div class="mt-4">
           <v-btn
-            size="x-large"
-            color="primary"
-            prepend-icon="mdi-dice-multiple"
-            @click="startPicking"
             :disabled="filteredStudents.length === 0"
             class="start-btn"
+            color="primary"
+            prepend-icon="mdi-dice-multiple"
+            size="x-large"
+            @click="startPicking"
           >
             开始抽取
           </v-btn>
@@ -112,10 +112,10 @@
           <v-tooltip v-if="pickerMode === 'name'" location="bottom">
             <template v-slot:activator="{ props }">
               <v-icon
-                v-bind="props"
+                class="ml-1"
                 icon="mdi-information-outline"
                 size="small"
-                class="ml-1"
+                v-bind="props"
               />
             </template>
             <div class="pa-2">
@@ -136,18 +136,18 @@
             <v-chip
               :color="tempFilters.excludeLate ? 'warning' : 'default'"
               :variant="tempFilters.excludeLate ? 'elevated' : 'text'"
-              @click="tempFilters.excludeLate = !tempFilters.excludeLate"
-              prepend-icon="mdi-clock-alert"
               class="filter-chip"
+              prepend-icon="mdi-clock-alert"
+              @click="tempFilters.excludeLate = !tempFilters.excludeLate"
             >
               {{ tempFilters.excludeLate ? "排除" : "包含" }}迟到学生
             </v-chip>
             <v-chip
               :color="tempFilters.excludeAbsent ? 'error' : 'default'"
               :variant="tempFilters.excludeAbsent ? 'elevated' : 'text'"
-              @click="tempFilters.excludeAbsent = !tempFilters.excludeAbsent"
-              prepend-icon="mdi-account-off"
               class="filter-chip"
+              prepend-icon="mdi-account-off"
+              @click="tempFilters.excludeAbsent = !tempFilters.excludeAbsent"
             >
               {{ tempFilters.excludeAbsent ? "排除" : "包含" }}请假学生
             </v-chip>
@@ -155,9 +155,9 @@
             <v-chip
               :color="tempFilters.excludeExcluded ? 'grey' : 'default'"
               :variant="tempFilters.excludeExcluded ? 'elevated' : 'text'"
-              @click="tempFilters.excludeExcluded = !tempFilters.excludeExcluded"
-              prepend-icon="mdi-account-cancel"
               class="filter-chip"
+              prepend-icon="mdi-account-cancel"
+              @click="tempFilters.excludeExcluded = !tempFilters.excludeExcluded"
             >
               {{ tempFilters.excludeExcluded ? "排除" : "包含" }}不参与学生
             </v-chip>
@@ -169,15 +169,15 @@
         <div v-if="isAnimating" class="animation-container">
           <div class="animation-wrapper">
             <transition-group
+              class="shuffle-container"
               name="shuffle"
               tag="div"
-              class="shuffle-container"
             >
               <div
                 v-for="(student, index) in animationStudents"
                 :key="student.id"
-                class="student-item"
                 :class="{ highlighted: highlightedIndices.includes(index) }"
+                class="student-item"
               >
                 {{ student.name }}
               </div>
@@ -190,46 +190,46 @@
           <v-card
             v-for="(student, index) in pickedStudents"
             :key="index"
-            variant="outlined"
-            color="primary"
             class="mb-2 result-card"
+            color="primary"
+            variant="outlined"
           >
             <v-card-text
               class="text-h4 text-center py-4 d-flex align-center justify-center"
             >
               {{ student }}
               <v-btn
-                icon="mdi-refresh"
-                variant="text"
-                size="small"
-                class="ml-2 refresh-btn"
-                @click="refreshSingleStudent(index)"
                 :disabled="remainingStudents.length === 0"
                 :title="
                   remainingStudents.length === 0
                     ? '没有更多可用学生'
                     : '重新抽取此学生'
                 "
+                class="ml-2 refresh-btn"
+                icon="mdi-refresh"
+                size="small"
+                variant="text"
+                @click="refreshSingleStudent(index)"
               />
             </v-card-text>
           </v-card>
 
           <div class="mt-8 d-flex justify-center">
             <v-btn
+              class="mx-2"
               color="primary"
               prepend-icon="mdi-refresh"
-              @click="resetPicker"
               size="large"
-              class="mx-2"
+              @click="resetPicker"
             >
               重新抽取
             </v-btn>
             <v-btn
+              class="mx-2"
               color="grey"
+              size="large"
               variant="outlined"
               @click="dialog = false"
-              size="large"
-              class="mx-2"
             >
               关闭
             </v-btn>
@@ -241,7 +241,7 @@
 </template>
 
 <script>
-import { getSetting, setSetting } from "@/utils/settings";
+import {getSetting, setSetting} from "@/utils/settings";
 
 export default {
   name: "RandomPicker",
@@ -253,7 +253,7 @@ export default {
     attendance: {
       type: Object,
       required: true,
-      default: () => ({ absent: [], late: [], exclude: [] }),
+      default: () => ({absent: [], late: [], exclude: []}),
     },
   },
   data() {

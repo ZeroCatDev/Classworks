@@ -1,10 +1,10 @@
 <template>
   <a
+    aria-label="浙ICP备2024068645号"
     class="floating-icp-link"
     href="https://beian.miit.gov.cn/"
-    target="_blank"
     rel="noopener noreferrer"
-    aria-label="浙ICP备2024068645号"
+    target="_blank"
   >
     浙ICP备2024068645号
   </a>

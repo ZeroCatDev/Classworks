@@ -1,20 +1,20 @@
 <template>
-  <v-card border rounded="xl" hover>
+  <v-card border hover rounded="xl">
     <v-card-item>
       <template #prepend>
-        <v-icon icon="mdi-information" size="large" class="mr-2" />
+        <v-icon class="mr-2" icon="mdi-information" size="large"/>
       </template>
       <v-card-title class="text-h6">关于</v-card-title>
     </v-card-item>
 
     <v-card-text>
       <v-row>
-        <v-col cols="12" md="8" class="mx-auto">
+        <v-col class="mx-auto" cols="12" md="8">
           <div class="d-flex flex-column align-start">
-            <v-avatar size="120" class="mb-4">
+            <v-avatar class="mb-4" size="120">
               <v-img
-                src="../../assets/cslogo.png"
                 alt="Classworks"
+                src="../../assets/cslogo.png"
               />
             </v-avatar>
 
@@ -24,35 +24,35 @@
             <div class="d-flex gap-2 flex-wrap mb-6">
               <v-btn
                 color="red"
-                variant="tonal"
                 href="https://github.com/ClassworksDev/Classworks/issues"
-                target="_blank"
                 prepend-icon="mdi-bug"
+                target="_blank"
+                variant="tonal"
               >
                 报告问题
               </v-btn>
               <v-btn
                 color="primary"
-                variant="tonal"
                 href="https://qm.qq.com/q/qNBX4ZZVeg"
-                target="_blank"
                 prepend-icon="mdi-qqchat"
+                target="_blank"
+                variant="tonal"
               >
                 QQ 群
               </v-btn>
               <v-btn
-                variant="text"
                 href="https://github.com/ClassworksDev/Classworks"
-                target="_blank"
                 prepend-icon="mdi-github"
+                target="_blank"
+                variant="text"
               >
                 前端
               </v-btn>
               <v-btn
-                variant="text"
                 href="https://github.com/ClassworksDev/ClassworksServer"
-                target="_blank"
                 prepend-icon="mdi-github"
+                target="_blank"
+                variant="text"
               >
                 后端
               </v-btn>
@@ -63,9 +63,9 @@
             <h3 class="text-h6 mb-2">备注与致谢</h3>
             <v-list class="mb-4 bg-transparent">
               <v-list-item
+                append-icon="mdi-link"
                 href="https://github.com/EnderWolf006/HomeworkBoard"
                 target="_blank"
-                append-icon="mdi-link"
               >
                 <v-list-item-title>
                   本项目受到 HomeworkBoard 的启发而开发
@@ -76,9 +76,9 @@
                 </v-list-item-subtitle>
               </v-list-item>
               <v-list-item
+                append-icon="mdi-link"
                 href="https://hlyun.org"
                 target="_blank"
-                append-icon="mdi-link"
               >
                 <v-list-item-title>
                   Classworks 由<strong>厚浪云</strong>提供
@@ -88,9 +88,9 @@
                 </v-list-item-subtitle>
               </v-list-item>
               <v-list-item
+                append-icon="mdi-link"
                 href="https://zerocat.houlangs.com"
                 target="_blank"
-                append-icon="mdi-link"
               >
                 <v-list-item-title>
                   感谢 ZeroCat 社区的开发者们
@@ -101,9 +101,9 @@
               </v-list-item>
               <v-divider class="ma-1"></v-divider>
               <v-list-item
+                append-icon="mdi-link"
                 href="https://github.com/HUSX100/IslandCaller"
                 target="_blank"
-                append-icon="mdi-link"
               >
                 <v-list-item-title>
                   本项目与 IslandCaller 没有从属关系
@@ -114,9 +114,9 @@
                 </v-list-item-subtitle>
               </v-list-item>
               <v-list-item
+                append-icon="mdi-link"
                 href="https://classisland.tech"
                 target="_blank"
-                append-icon="mdi-link"
               >
                 <v-list-item-title>
                   本项目与 ClassIsland 没有从属关系
@@ -129,9 +129,9 @@
             </v-list>
 
             <v-btn
-              variant="text"
               class="mb-4"
               prepend-icon="mdi-package-variant"
+              variant="text"
               @click="showDeps = true"
             >
               查看使用的第三方库
@@ -139,11 +139,12 @@
 
             <v-dialog
               v-model="showDeps"
-              transition="dialog-bottom-transition"
               fullscreen
+              transition="dialog-bottom-transition"
             >
               <v-card
-                ><v-toolbar>
+              >
+                <v-toolbar>
                   <v-btn icon="mdi-close" @click="showDeps = false"></v-btn>
                   <v-toolbar-title>使用的第三方库</v-toolbar-title>
                   <v-spacer></v-spacer>
@@ -154,8 +155,8 @@
                       v-for="dep in Dependencies"
                       :key="dep.name"
                       :href="'https://www.npmjs.com/package/' + dep.name"
-                      target="_blank"
                       append-icon="mdi-link"
+                      target="_blank"
                     >
                       <v-list-item-title>
                         {{ dep.name }}
@@ -180,7 +181,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import {ref, onMounted} from "vue";
 import packageJson from "../../../package.json";
 
 export default {

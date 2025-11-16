@@ -5,19 +5,24 @@
 ## 组件列表
 
 ### DeviceAuthDialog.vue
+
 设备认证对话框,用于通过 namespace 和密码进行设备认证。
 
 **Props:**
+
 - `showCancel` (Boolean): 是否显示取消按钮,默认为 `false`
 
 **Events:**
+
 - `@success`: 认证成功时触发,传递认证数据
 - `@cancel`: 点击取消按钮时触发
 
 **暴露的方法:**
+
 - `reset()`: 清空表单和错误信息
 
 **使用示例:**
+
 ```vue
 <template>
   <v-dialog v-model="dialog">
@@ -37,19 +42,24 @@ import DeviceAuthDialog from '@/components/auth/DeviceAuthDialog.vue'
 ---
 
 ### TokenInputDialog.vue
+
 Token 输入对话框,用于手动输入 KV 授权 Token。
 
 **Props:**
+
 - `showCancel` (Boolean): 是否显示取消按钮,默认为 `false`
 
 **Events:**
+
 - `@success`: Token 验证成功时触发
 - `@cancel`: 点击取消按钮时触发
 
 **暴露的方法:**
+
 - `reset()`: 清空表单和错误信息
 
 **使用示例:**
+
 ```vue
 <template>
   <v-dialog v-model="dialog">
@@ -69,19 +79,24 @@ import TokenInputDialog from '@/components/auth/TokenInputDialog.vue'
 ---
 
 ### AlternativeCodeDialog.vue
+
 替代代码输入对话框（功能暂未实现）。
 
 **Props:**
+
 - `showCancel` (Boolean): 是否显示取消按钮,默认为 `false`
 
 **Events:**
+
 - `@submit`: 提交代码时触发,传递代码内容
 - `@cancel`: 点击取消按钮时触发
 
 **暴露的方法:**
+
 - `reset()`: 清空表单
 
 **使用示例:**
+
 ```vue
 <template>
   <v-dialog v-model="dialog">
@@ -101,12 +116,15 @@ import AlternativeCodeDialog from '@/components/auth/AlternativeCodeDialog.vue'
 ---
 
 ### FirstTimeGuide.vue
+
 初次使用指南,介绍 Classworks KV 的功能和使用方式。
 
 **Events:**
+
 - `@close`: 关闭指南时触发
 
 **使用示例:**
+
 ```vue
 <template>
   <v-dialog v-model="dialog">

@@ -11,12 +11,12 @@
       <v-app-bar-title class="text-h6">
         编辑考试配置
       </v-app-bar-title>
-      <v-spacer />
+      <v-spacer/>
       <v-btn
-        color="success"
-        variant="outlined"
-        prepend-icon="mdi-content-save"
         :loading="saving"
+        color="success"
+        prepend-icon="mdi-content-save"
+        variant="outlined"
         @click="save"
       >
         保存
@@ -31,8 +31,8 @@
         v-if="id"
         ref="editor"
         :config-id="id"
-        @saved="onSaved"
         @error="onError"
+        @saved="onSaved"
       />
     </v-container>
   </v-container>
@@ -43,7 +43,7 @@ import ExamConfigEditor from '@/components/ExamConfigEditor.vue'
 
 export default {
   name: 'ExamEditorPage',
-  components: { ExamConfigEditor },
+  components: {ExamConfigEditor},
   data() {
     return {
       id: this.$route.params.id,

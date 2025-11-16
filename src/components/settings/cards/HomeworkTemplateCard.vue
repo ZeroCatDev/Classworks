@@ -1,17 +1,17 @@
 <template>
   <settings-card
-    title="作业模板配置"
-    icon="mdi-book-edit"
     :loading="loading"
     border
+    icon="mdi-book-edit"
+    title="作业模板配置"
   >
     <!-- 顶部操作按钮 -->
     <v-alert
       v-if="error"
+      class="mb-4"
+      closable
       type="error"
       variant="tonal"
-      closable
-      class="mb-4"
     >
       {{ error }}
     </v-alert>
@@ -19,20 +19,20 @@
     <div class="d-flex justify-space-between align-center mb-6">
       <div>
         <v-btn
-          color="primary"
-          size="large"
-          prepend-icon="mdi-refresh"
           :loading="loading"
-          @click="loadConfig"
           class="mr-2"
+          color="primary"
+          prepend-icon="mdi-refresh"
+          size="large"
+          @click="loadConfig"
         >
           重新加载配置
         </v-btn>
         <v-btn
-          color="success"
-          size="large"
-          prepend-icon="mdi-content-save"
           :loading="loading"
+          color="success"
+          prepend-icon="mdi-content-save"
+          size="large"
           @click="saveConfig"
         >
           保存所有更改
@@ -49,15 +49,15 @@
 
     <v-row>
       <v-col cols="12" md="6">
-        <setting-group title="科目配置" icon="mdi-book" border>
+        <setting-group border icon="mdi-book" title="科目配置">
           <v-list>
             <v-list-item>
               <v-text-field
                 v-model="newSubject"
+                append-inner-icon="mdi-plus"
+                density="comfortable"
                 label="添加新科目"
                 variant="outlined"
-                density="comfortable"
-                append-inner-icon="mdi-plus"
                 @click:append-inner="addSubject"
                 @keyup.enter="addSubject"
               />
@@ -70,32 +70,32 @@
                     v-model="editedSubjects[subject]"
                     :placeholder="subject"
                     density="comfortable"
-                    variant="plain"
                     hide-details
+                    variant="plain"
                     @blur="updateSubject(subject)"
                   />
-                  <v-spacer />
+                  <v-spacer/>
                   <v-btn
-                    icon="mdi-delete"
-                    variant="text"
                     color="error"
+                    icon="mdi-delete"
                     size="small"
+                    variant="text"
                     @click="deleteSubject(subject)"
                   />
                 </v-card-title>
                 <v-card-text>
                   <v-text-field
                     v-model="newBookTypes[subject]"
+                    append-inner-icon="mdi-plus"
+                    class="mb-2"
+                    density="comfortable"
                     label="添加作业本名称"
                     variant="outlined"
-                    density="comfortable"
-                    class="mb-2"
-                    append-inner-icon="mdi-plus"
                     @click:append-inner="() => addBookType(subject)"
                     @keyup.enter="() => addBookType(subject)"
                   />
 
-                  <v-list density="compact" border rounded>
+                  <v-list border density="compact" rounded>
                     <v-list-item
                       v-for="(books, bookType) in config.subjects[subject].books"
                       :key="bookType"
@@ -103,21 +103,21 @@
                       @click="openSubjectBookDialog(subject, bookType, books)"
                     >
                       <template v-slot:prepend>
-                        <v-icon icon="mdi-book-open-variant" class="mr-2" />
+                        <v-icon class="mr-2" icon="mdi-book-open-variant"/>
                       </template>
                       <template v-slot:append>
                         <v-chip
-                          size="small"
                           class="mr-2"
                           color="info"
+                          size="small"
                         >
                           {{ books.length }}个部分
                         </v-chip>
                         <v-btn
-                          icon="mdi-delete"
-                          variant="text"
                           color="error"
+                          icon="mdi-delete"
                           size="small"
+                          variant="text"
                           @click.stop="() => deleteBookType(subject, bookType)"
                         />
                       </template>
@@ -131,22 +131,22 @@
       </v-col>
 
       <v-col cols="12" md="6">
-        <setting-group title="通用配置" icon="mdi-cog" border>
+        <setting-group border icon="mdi-cog" title="通用配置">
           <v-list>
             <v-list-item>
               <v-text-field
                 v-model="newCommonBook"
+                append-inner-icon="mdi-plus"
+                density="comfortable"
                 label="添加作业本名称"
                 variant="outlined"
-                density="comfortable"
-                append-inner-icon="mdi-plus"
                 @click:append-inner="addCommonBook"
                 @keyup.enter="addCommonBook"
               />
             </v-list-item>
 
             <v-list-item>
-              <v-list density="compact" border rounded>
+              <v-list border density="compact" rounded>
                 <v-list-item
                   v-for="(books, bookType) in config.commonSubject.books"
                   :key="bookType"
@@ -154,21 +154,21 @@
                   @click="openSubjectBookDialog('common', bookType, books)"
                 >
                   <template v-slot:prepend>
-                    <v-icon icon="mdi-book-multiple" class="mr-2" />
+                    <v-icon class="mr-2" icon="mdi-book-multiple"/>
                   </template>
                   <template v-slot:append>
                     <v-chip
-                      size="small"
                       class="mr-2"
                       color="info"
+                      size="small"
                     >
                       {{ books.length }}个部分
                     </v-chip>
                     <v-btn
-                      icon="mdi-delete"
-                      variant="text"
                       color="error"
+                      icon="mdi-delete"
                       size="small"
+                      variant="text"
                       @click.stop="() => deleteBookType('common', bookType)"
                     />
                   </template>
@@ -176,22 +176,22 @@
               </v-list>
             </v-list-item>
 
-            <v-divider class="my-2" />
+            <v-divider class="my-2"/>
 
             <v-list-item>
               <v-text-field
                 v-model="newAction"
+                append-inner-icon="mdi-plus"
+                density="comfortable"
                 label="添加操作"
                 variant="outlined"
-                density="comfortable"
-                append-inner-icon="mdi-plus"
                 @click:append-inner="addAction"
                 @keyup.enter="addAction"
               />
             </v-list-item>
 
             <v-list-item>
-              <v-list density="compact" border rounded>
+              <v-list border density="compact" rounded>
                 <v-list-item
                   v-for="action in config.actions"
                   :key="action"
@@ -200,10 +200,10 @@
                 >
                   <template v-slot:append>
                     <v-btn
-                      icon="mdi-delete"
-                      variant="text"
                       color="error"
+                      icon="mdi-delete"
                       size="small"
+                      variant="text"
                       @click.stop="removeAction(action)"
                     />
                   </template>
@@ -229,41 +229,41 @@
                 <v-text-field
                   v-model="dialog.editedItem.name"
                   :label="dialog.nameLabel"
-                  variant="outlined"
-                  density="comfortable"
                   :rules="[v => !!v || '名称不能为空']"
+                  density="comfortable"
+                  variant="outlined"
                 />
               </v-col>
 
-              <v-col cols="12" v-if="dialog.editedItem.type === 'subjectBook'">
+              <v-col v-if="dialog.editedItem.type === 'subjectBook'" cols="12">
                 <div class="text-subtitle-2 mb-2">所属科目</div>
                 <v-chip color="primary">{{ dialog.editedItem.subject }}</v-chip>
               </v-col>
 
-              <v-col cols="12" v-if="['subjectBook', 'commonBook'].includes(dialog.editedItem.type)">
+              <v-col v-if="['subjectBook', 'commonBook'].includes(dialog.editedItem.type)" cols="12">
                 <v-card variant="outlined">
                   <v-card-title class="text-subtitle-1 py-2">需完成部分</v-card-title>
                   <v-card-text class="pt-0">
-                    <v-list density="compact" border rounded class="mb-2">
+                    <v-list border class="mb-2" density="compact" rounded>
                       <v-list-item
                         v-for="(task, index) in dialog.editedItem.tasks"
                         :key="index"
                       >
                         <template v-slot:prepend>
-                          <v-icon icon="mdi-checkbox-blank-circle-outline" size="small" class="mr-2" />
+                          <v-icon class="mr-2" icon="mdi-checkbox-blank-circle-outline" size="small"/>
                         </template>
                         <v-text-field
                           v-model="dialog.editedItem.tasks[index]"
-                          variant="plain"
                           density="compact"
                           hide-details
+                          variant="plain"
                         />
                         <template v-slot:append>
                           <v-btn
-                            icon="mdi-delete"
-                            variant="text"
                             color="error"
+                            icon="mdi-delete"
                             size="small"
+                            variant="text"
                             @click="removeTask(index)"
                           />
                         </template>
@@ -271,13 +271,13 @@
                     </v-list>
                     <v-text-field
                       v-model="newTask"
+                      append-inner-icon="mdi-plus"
+                      class="mt-2"
+                      density="comfortable"
                       label="添加需完成部分"
                       variant="outlined"
-                      density="comfortable"
-                      append-inner-icon="mdi-plus"
                       @click:append-inner="addTask"
                       @keyup.enter="addTask"
-                      class="mt-2"
                     />
                   </v-card-text>
                 </v-card>
@@ -318,7 +318,7 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
+import {reactive} from 'vue';
 import SettingsCard from '@/components/SettingsCard.vue';
 import SettingGroup from '@/components/settings/SettingGroup.vue';
 import dataProvider from "@/utils/dataProvider.js";
@@ -466,7 +466,7 @@ export default {
     addSubject() {
       if (!this.newSubject) return;
       if (!this.config.subjects[this.newSubject]) {
-        this.config.subjects[this.newSubject] = { books: {} };
+        this.config.subjects[this.newSubject] = {books: {}};
       }
       this.newSubject = '';
     },
@@ -627,7 +627,7 @@ export default {
     },
 
     saveDialog() {
-      const { type, name, subject, originalName, tasks } = this.dialog.editedItem;
+      const {type, name, subject, originalName, tasks} = this.dialog.editedItem;
 
       if (!name) {
         this.showMessage('名称不能为空', 'error');

@@ -45,12 +45,19 @@
 
             <!-- 输入方式选择 -->
             <v-tabs v-model="activeTab" class="mb-4 mx-2" color="primary" rounded>
-              <v-tab value="text" class="px-5"><v-icon start>mdi-text-box</v-icon> 文本粘贴</v-tab>
-              <v-tab value="file" class="px-5"><v-icon start>mdi-file-upload</v-icon> 文件上传</v-tab>
+              <v-tab value="text" class="px-5">
+                <v-icon start>mdi-text-box</v-icon>
+                文本粘贴
+              </v-tab>
+              <v-tab value="file" class="px-5">
+                <v-icon start>mdi-file-upload</v-icon>
+                文件上传
+              </v-tab>
             </v-tabs>
 
             <!-- 格式选择 -->
-            <v-btn-toggle v-model="formatMode" color="primary" class="mb-4 mx-2" mandatory density="comfortable" border rounded>
+            <v-btn-toggle v-model="formatMode" color="primary" class="mb-4 mx-2" mandatory density="comfortable" border
+                          rounded>
               <v-btn value="auto">自动检测</v-btn>
               <v-btn value="json">JSON</v-btn>
               <v-btn value="yaml" :disabled="!yamlLibLoaded">
@@ -268,12 +275,12 @@
                           <span
                             v-if="!settings.hideTeacherName && course.teacher"
                           >
-                            <br />{{ course.teacher }}
+                            <br/>{{ course.teacher }}
                           </span>
                           <span
                             v-if="!settings.hideRoom && course.room"
                           >
-                            <br />{{ course.room }}
+                            <br/>{{ course.room }}
                           </span>
                           <span
                             v-if="course.weekType"
@@ -288,17 +295,17 @@
                         <span
                           v-if="!settings.hideTeacherName && item[day].teacher"
                         >
-                          <br />{{ item[day].teacher }}
+                          <br/>{{ item[day].teacher }}
                         </span>
                         <span
                           v-if="!settings.hideRoom && item[day].room"
                         >
-                          <br />{{ item[day].room }}
+                          <br/>{{ item[day].room }}
                         </span>
-                          <span
+                        <span
                           v-if="item[day].weekType"
-                            class="week-type"
-                          >
+                          class="week-type"
+                        >
                           {{ item[day].weekType }}周
                         </span>
                       </template>
@@ -329,7 +336,8 @@
               </v-card-title>
               <v-card-text>
                 <!-- 美化日期导航标签 -->
-                <v-tabs v-if="daysWithSchedule.length > 0" v-model="activeDay" class="mb-4" color="primary" grow align-tabs="center">
+                <v-tabs v-if="daysWithSchedule.length > 0" v-model="activeDay" class="mb-4" color="primary" grow
+                        align-tabs="center">
                   <v-tab v-for="day in daysWithSchedule" :key="day" :value="day" class="px-2 font-weight-medium">
                     {{ dayNames[day] }}
                     <v-badge
@@ -345,67 +353,69 @@
                   <v-window-item v-for="day in daysWithSchedule" :key="day" :value="day">
                     <v-table density="compact" class="rounded" :headers-length="6" disable-sort>
                       <thead>
-                        <tr>
-                          <th class="text-center">节次</th>
-                          <th>课程</th>
-                          <th>时间</th>
-                          <th>教师</th>
-                          <th>教室</th>
-                          <th>周次</th>
-                        </tr>
+                      <tr>
+                        <th class="text-center">节次</th>
+                        <th>课程</th>
+                        <th>时间</th>
+                        <th>教师</th>
+                        <th>教室</th>
+                        <th>周次</th>
+                      </tr>
                       </thead>
                       <tbody>
-                        <template v-for="(group, index) in groupByPeriod(getDaySchedule(day))" :key="index">
-                          <tr>
-                            <td class="text-center font-weight-bold">
-                              {{ group.period }}
-                              <v-tooltip v-if="group.originalPeriod !== group.period">
-                                <template v-slot:activator="{ props }">
-                                  <v-icon size="x-small" v-bind="props" color="info" class="ml-1">mdi-sync</v-icon>
-                                </template>
-                                原节次: {{ group.originalPeriod }}
-                              </v-tooltip>
-                            </td>
-                            <td>
-                              <div v-for="(item, i) in group.items" :key="i" class="mb-1">
-                                <v-chip size="small" :color="getSubjectColor(item.subject)" label text-color="white" class="mr-1">
-                                  {{ item.subject }}
-                                </v-chip>
-                                <v-chip v-if="group.items.length > 1" size="x-small" class="ml-1" :color="item.weekType === '单' ? 'warning' : 'success'">
-                                  {{ item.weekType }}周
-                                </v-chip>
-                              </div>
-                            </td>
-                            <td>
-                              <div v-for="(timeSlot, i) in group.uniqueTimeSlots" :key="i" class="mb-1">
-                                <v-chip size="x-small" class="time-chip">
-                                  {{ formatTime(timeSlot.startTime) }} - {{ formatTime(timeSlot.endTime) }}
-                                </v-chip>
-                              </div>
-                            </td>
-                            <td>
-                              <template v-if="!settings.hideTeacherName">
-                                <div v-for="(item, i) in group.items" :key="i" class="mb-1">
-                                  {{ item.teacher || '-' }}
-                                </div>
+                      <template v-for="(group, index) in groupByPeriod(getDaySchedule(day))" :key="index">
+                        <tr>
+                          <td class="text-center font-weight-bold">
+                            {{ group.period }}
+                            <v-tooltip v-if="group.originalPeriod !== group.period">
+                              <template v-slot:activator="{ props }">
+                                <v-icon size="x-small" v-bind="props" color="info" class="ml-1">mdi-sync</v-icon>
                               </template>
-                              <template v-else>-</template>
-                            </td>
-                            <td>
-                              <template v-if="!settings.hideRoom">
-                                <div v-for="(item, i) in group.items" :key="i" class="mb-1">
-                                  {{ item.room || '-' }}
-                                </div>
-                              </template>
-                              <template v-else>-</template>
-                            </td>
-                            <td>
+                              原节次: {{ group.originalPeriod }}
+                            </v-tooltip>
+                          </td>
+                          <td>
+                            <div v-for="(item, i) in group.items" :key="i" class="mb-1">
+                              <v-chip size="small" :color="getSubjectColor(item.subject)" label text-color="white"
+                                      class="mr-1">
+                                {{ item.subject }}
+                              </v-chip>
+                              <v-chip v-if="group.items.length > 1" size="x-small" class="ml-1"
+                                      :color="item.weekType === '单' ? 'warning' : 'success'">
+                                {{ item.weekType }}周
+                              </v-chip>
+                            </div>
+                          </td>
+                          <td>
+                            <div v-for="(timeSlot, i) in group.uniqueTimeSlots" :key="i" class="mb-1">
+                              <v-chip size="x-small" class="time-chip">
+                                {{ formatTime(timeSlot.startTime) }} - {{ formatTime(timeSlot.endTime) }}
+                              </v-chip>
+                            </div>
+                          </td>
+                          <td>
+                            <template v-if="!settings.hideTeacherName">
                               <div v-for="(item, i) in group.items" :key="i" class="mb-1">
-                                {{ item.weeks }}
+                                {{ item.teacher || '-' }}
                               </div>
-                            </td>
-                          </tr>
-                        </template>
+                            </template>
+                            <template v-else>-</template>
+                          </td>
+                          <td>
+                            <template v-if="!settings.hideRoom">
+                              <div v-for="(item, i) in group.items" :key="i" class="mb-1">
+                                {{ item.room || '-' }}
+                              </div>
+                            </template>
+                            <template v-else>-</template>
+                          </td>
+                          <td>
+                            <div v-for="(item, i) in group.items" :key="i" class="mb-1">
+                              {{ item.weeks }}
+                            </div>
+                          </td>
+                        </tr>
+                      </template>
                       </tbody>
                     </v-table>
                   </v-window-item>
@@ -600,25 +610,25 @@ export default {
         totalWeeks: 30
       },
       tableHeaders: [
-        { title: "", key: "data-table-select" },
-        { title: "节次", key: "period" },
-        { title: "周一", key: "1" },
-        { title: "周二", key: "2" },
-        { title: "周三", key: "3" },
-        { title: "周四", key: "4" },
-        { title: "周五", key: "5" },
-        { title: "周六", key: "6" },
-        { title: "周日", key: "7" },
+        {title: "", key: "data-table-select"},
+        {title: "节次", key: "period"},
+        {title: "周一", key: "1"},
+        {title: "周二", key: "2"},
+        {title: "周三", key: "3"},
+        {title: "周四", key: "4"},
+        {title: "周五", key: "5"},
+        {title: "周六", key: "6"},
+        {title: "周日", key: "7"},
       ],
       timeTableHeaders: [
-        { title: "节次", key: "period" },
-        { title: "课程", key: "subject" },
-        { title: "星期", key: "day" },
-        { title: "开始时间", key: "startTime" },
-        { title: "结束时间", key: "endTime" },
-        { title: "教师", key: "teacher" },
-        { title: "教室", key: "room" },
-        { title: "周次", key: "weeks" },
+        {title: "节次", key: "period"},
+        {title: "课程", key: "subject"},
+        {title: "星期", key: "day"},
+        {title: "开始时间", key: "startTime"},
+        {title: "结束时间", key: "endTime"},
+        {title: "教师", key: "teacher"},
+        {title: "教室", key: "room"},
+        {title: "周次", key: "weeks"},
       ],
       dayNames: {
         1: "周一",
@@ -700,7 +710,7 @@ export default {
         // 先按节次排序
         if (a.period !== b.period) return a.period - b.period;
         // 再按星期排序
-        const dayOrder = { "周一": 1, "周二": 2, "周三": 3, "周四": 4, "周五": 5, "周六": 6, "周日": 7 };
+        const dayOrder = {"周一": 1, "周二": 2, "周三": 3, "周四": 4, "周五": 5, "周六": 6, "周日": 7};
         return dayOrder[a.day] - dayOrder[b.day];
       });
     },
@@ -845,8 +855,8 @@ export default {
       // 如果数据是通过CSESParser解析的
       if (data instanceof CSESParser) {
         return data.version === 1 &&
-               Array.isArray(data.subjects) &&
-               Array.isArray(data.schedules);
+          Array.isArray(data.subjects) &&
+          Array.isArray(data.schedules);
       }
 
       // 基本验证
@@ -865,7 +875,7 @@ export default {
     },
 
     processCsesData(data) {
-      const { schedules, subjects } = data;
+      const {schedules, subjects} = data;
 
       // 使用对象引用优化内存使用
       const subjectMap = Object.fromEntries(
@@ -1004,7 +1014,7 @@ export default {
         for (const group of periodGroups) {
           // 遍历该节次的每个课程
           for (const item of group.items) {
-            const dayNumber = { "周一": 1, "周二": 2, "周三": 3, "周四": 4, "周五": 5, "周六": 6, "周日": 7 }[item.day];
+            const dayNumber = {"周一": 1, "周二": 2, "周三": 3, "周四": 4, "周五": 5, "周六": 6, "周日": 7}[item.day];
             const teacher = this.settings.hideTeacherName ? "" : (item.teacher || "");
             const room = this.settings.hideRoom ? "" : (item.room || "");
 
@@ -1072,7 +1082,7 @@ export default {
       }
       // 检查是否含有YAML典型的格式如键值对 key: value
       return /^\s*[a-zA-Z0-9_-]+\s*:/.test(trimmed) ||
-             /\n\s*[a-zA-Z0-9_-]+\s*:/.test(trimmed);
+        /\n\s*[a-zA-Z0-9_-]+\s*:/.test(trimmed);
     },
 
     parseYaml(text) {
@@ -1094,7 +1104,7 @@ export default {
       // 获取原始数据并过滤
       const allData = this.getUnfilteredTimeTableData();
       return allData.filter(item => {
-        const dayNum = { "周一": 1, "周二": 2, "周三": 3, "周四": 4, "周五": 5, "周六": 6, "周日": 7 }[item.day];
+        const dayNum = {"周一": 1, "周二": 2, "周三": 3, "周四": 4, "周五": 5, "周六": 6, "周日": 7}[item.day];
         return dayNum === day;
       });
     },
@@ -1165,7 +1175,7 @@ export default {
         // 先按节次排序
         if (a.period !== b.period) return a.period - b.period;
         // 再按星期排序
-        const dayOrder = { "周一": 1, "周二": 2, "周三": 3, "周四": 4, "周五": 5, "周六": 6, "周日": 7 };
+        const dayOrder = {"周一": 1, "周二": 2, "周三": 3, "周四": 4, "周五": 5, "周六": 6, "周日": 7};
         return dayOrder[a.day] - dayOrder[b.day];
       });
     },
