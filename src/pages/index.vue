@@ -4,7 +4,7 @@
       {{ titleText }}
     </v-app-bar-title>
 
-    <v-spacer/>
+    <v-spacer />
 
     <template #append>
       <!-- 只读 Token 警告 -->
@@ -31,7 +31,11 @@
         {{ tokenDisplayInfo.text }}
       </v-chip>
 
-      <v-btn icon="mdi-chat" variant="text" @click="isChatOpen = true"/>
+      <v-btn
+        icon="mdi-chat"
+        variant="text"
+        @click="isChatOpen = true"
+      />
       <v-btn
         :badge="unreadCount || undefined"
         :badge-color="unreadCount ? 'error' : undefined"
@@ -39,7 +43,11 @@
         variant="text"
         @click="$refs.messageLog.drawer = true"
       />
-      <v-btn icon="mdi-cog" variant="text" @click="$router.push('/settings')"/>
+      <v-btn
+        icon="mdi-cog"
+        variant="text"
+        @click="$router.push('/settings')"
+      />
     </template>
   </v-app-bar>
   <!-- 初始化选择卡片，仅在首页且需要授权时显示；不影响顶栏 -->
@@ -56,11 +64,20 @@
     @token-info-updated="updateTokenDisplayInfo"
   />
 
-  <div v-if="!shouldShowInit" class="d-flex">
+  <div
+    v-if="!shouldShowInit"
+    class="d-flex"
+  >
     <!-- 主要内容区域 -->
-    <v-container class="main-window flex-grow-1 no-select" fluid>
+    <v-container
+      class="main-window flex-grow-1 no-select"
+      fluid
+    >
       <!-- 有内容的科目卡片 -->
-      <div ref="gridContainer" class="grid-masonry">
+      <div
+        ref="gridContainer"
+        class="grid-masonry"
+      >
         <TransitionGroup name="grid">
           <div
             v-for="item in sortedItems"
@@ -99,19 +116,27 @@
       <!-- 单独显示空科目 -->
       <div class="empty-subjects mt-4">
         <template v-if="emptySubjectDisplay === 'button'">
-          <v-btn-group divided variant="tonal">
+          <v-btn-group
+            divided
+            variant="tonal"
+          >
             <v-btn
               v-for="subject in unusedSubjects"
               :key="subject.name"
               :disabled="isEditingDisabled"
               @click="openDialog(subject.name)"
             >
-              <v-icon start> mdi-plus</v-icon>
+              <v-icon start>
+                mdi-plus
+              </v-icon>
               {{ subject.name }}
             </v-btn>
           </v-btn-group>
         </template>
-        <div v-else class="empty-subjects-grid">
+        <div
+          v-else
+          class="empty-subjects-grid"
+        >
           <TransitionGroup name="v-list">
             <v-card
               v-for="subject in unusedSubjects"
@@ -125,8 +150,15 @@
                 {{ subject.name }}
               </v-card-title>
               <v-card-text class="text-center">
-                <v-icon color="grey" size="small"> mdi-plus</v-icon>
-                <div class="text-caption text-grey">点击添加作业</div>
+                <v-icon
+                  color="grey"
+                  size="small"
+                >
+                  mdi-plus
+                </v-icon>
+                <div class="text-caption text-grey">
+                  点击添加作业
+                </div>
               </v-card-text>
             </v-card>
           </TransitionGroup>
@@ -142,7 +174,12 @@
       >
         上传
       </v-btn>
-      <v-btn v-else color="success" size="large" @click="showSyncMessage">
+      <v-btn
+        v-else
+        color="success"
+        size="large"
+        @click="showSyncMessage"
+      >
         同步完成
       </v-btn>
       <v-btn
@@ -197,7 +234,11 @@
         variant="tonal"
       >
         <v-card-title class="text-subtitle-1">
-          <v-icon icon="mdi-shield-check" size="small" start/>
+          <v-icon
+            icon="mdi-shield-check"
+            size="small"
+            start
+          />
           屏幕保护技术已启用
         </v-card-title>
         <v-card-text class="text-body-2">
@@ -206,10 +247,10 @@
           </p>
           <p class="text-caption text-grey">
             *研究显示动态像素偏移技术可以修复屏幕坏点，起到保护屏幕的作用，数据来自实验室。<a
-            href="https://patentscope.wipo.int/search/zh/detail.jsf?docId=CN232281523&_cid=P20-M8L0YX-67061-1"
-            target="_blank"
-          >专利号CN108648692
-          </a>
+              href="https://patentscope.wipo.int/search/zh/detail.jsf?docId=CN232281523&_cid=P20-M8L0YX-67061-1"
+              target="_blank"
+            >专利号CN108648692
+            </a>
           </p>
           <p class="text-caption text-grey">
             *技术已自动适配您的设备，无需手动调整
@@ -228,29 +269,35 @@
     >
       <h1>出勤</h1>
       <h2>
-        <snap style="white-space: nowrap"> 应到</snap>
+        <snap style="white-space: nowrap">
+          应到
+        </snap>
         :
         <snap style="white-space: nowrap">
           {{
-          state.studentList.length -
-          state.boardData.attendance.exclude.length
+            state.studentList.length -
+              state.boardData.attendance.exclude.length
           }}人
         </snap>
       </h2>
       <h2>
-        <snap style="white-space: nowrap"> 实到</snap>
+        <snap style="white-space: nowrap">
+          实到
+        </snap>
         :
         <snap style="white-space: nowrap">
           {{
-          state.studentList.length -
-          state.boardData.attendance.absent.length -
-          state.boardData.attendance.late.length -
-          state.boardData.attendance.exclude.length
+            state.studentList.length -
+              state.boardData.attendance.absent.length -
+              state.boardData.attendance.late.length -
+              state.boardData.attendance.exclude.length
           }}人
         </snap>
       </h2>
       <h2>
-        <snap style="white-space: nowrap"> 请假</snap>
+        <snap style="white-space: nowrap">
+          请假
+        </snap>
         :
         <snap style="white-space: nowrap">
           {{ state.boardData.attendance.absent.length }}人
@@ -261,11 +308,12 @@
         :key="'absent-' + index"
         class="gray-text"
       >
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
-        ><span style="white-space: nowrap">{{ name }}</span>
+        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name }}</span>
       </h3>
       <h2>
-        <snap style="white-space: nowrap">迟到</snap>
+        <snap style="white-space: nowrap">
+          迟到
+        </snap>
         :
         <snap style="white-space: nowrap">
           {{ state.boardData.attendance.late.length }}人
@@ -276,11 +324,12 @@
         :key="'late-' + index"
         class="gray-text"
       >
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
-        ><span style="white-space: nowrap">{{ name }}</span>
+        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name }}</span>
       </h3>
       <h2>
-        <snap style="white-space: nowrap">不参与</snap>
+        <snap style="white-space: nowrap">
+          不参与
+        </snap>
         :
         <snap style="white-space: nowrap">
           {{ state.boardData.attendance.exclude.length }}人
@@ -291,8 +340,7 @@
         :key="'exclude-' + index"
         class="gray-text"
       >
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
-        ><span style="white-space: nowrap">{{ name }}</span>
+        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name }}</span>
       </h3>
     </v-col>
   </div>
@@ -305,7 +353,10 @@
     @save="handleHomeworkSave"
   />
 
-  <v-snackbar v-model="state.snackbar" :timeout="2000">
+  <v-snackbar
+    v-model="state.snackbar"
+    :timeout="2000"
+  >
     {{ state.snackbarText }}
   </v-snackbar>
 
@@ -317,10 +368,17 @@
   >
     <v-card>
       <v-card-title class="d-flex align-center">
-        <v-icon class="mr-2" icon="mdi-account-group"/>
+        <v-icon
+          class="mr-2"
+          icon="mdi-account-group"
+        />
         出勤状态管理
-        <v-spacer/>
-        <v-chip class="ml-2" color="primary" size="small">
+        <v-spacer />
+        <v-chip
+          class="ml-2"
+          color="primary"
+          size="small"
+        >
           {{ state.dateString }}
         </v-chip>
       </v-card-title>
@@ -328,7 +386,10 @@
       <v-card-text>
         <!-- 批量操作和搜索 -->
         <v-row class="mb-4">
-          <v-col cols="12" md="12">
+          <v-col
+            cols="12"
+            md="12"
+          >
             <v-text-field
               v-model="attendanceSearch"
               clearable
@@ -437,7 +498,10 @@
             md="6"
             sm="6"
           >
-            <v-card border class="student-card">
+            <v-card
+              border
+              class="student-card"
+            >
               <v-card-text class="d-flex align-center pa-2">
                 <div class="flex-grow-1">
                   <div class="d-flex align-center">
@@ -450,12 +514,15 @@
                       class="mr-2"
                       size="24"
                     >
-                      <v-icon size="small">{{
-                        getStudentStatusIcon(state.studentList.indexOf(student))
+                      <v-icon size="small">
+                        {{
+                          getStudentStatusIcon(state.studentList.indexOf(student))
                         }}
                       </v-icon>
                     </v-avatar>
-                    <div class="text-subtitle-1">{{ student }}</div>
+                    <div class="text-subtitle-1">
+                      {{ student }}
+                    </div>
                   </div>
                 </div>
                 <div class="attendance-actions">
@@ -513,10 +580,19 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="12" md="12">
-            <v-card class="mb-4" color="primary" variant="tonal">
+          <v-col
+            cols="12"
+            md="12"
+          >
+            <v-card
+              class="mb-4"
+              color="primary"
+              variant="tonal"
+            >
               <v-card-text>
-                <div class="text-subtitle-2 mb-2">批量操作</div>
+                <div class="text-subtitle-2 mb-2">
+                  批量操作
+                </div>
                 <v-btn-group>
                   <v-btn
                     color="success"
@@ -552,24 +628,28 @@
               </v-card-text>
             </v-card>
           </v-col>
-        </v-row
-        >
+        </v-row>
       </v-card-text>
 
-      <v-divider/>
+      <v-divider />
 
       <v-card-actions>
-        <v-spacer/>
+        <v-spacer />
 
-        <v-btn color="primary" @click="saveAttendance">
-          <v-icon start>mdi-content-save</v-icon>
+        <v-btn
+          color="primary"
+          @click="saveAttendance"
+        >
+          <v-icon start>
+            mdi-content-save
+          </v-icon>
           保存
         </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 
-  <message-log ref="messageLog"/>
+  <message-log ref="messageLog" />
 
   <!-- 添加悬浮工具栏 -->
   <floating-toolbar
@@ -587,24 +667,41 @@
   />
 
   <!-- 添加ICP备案悬浮组件 -->
-  <FloatingICP/>
+  <FloatingICP />
 
   <!-- 设备聊天室（右下角浮窗） -->
-  <ChatWidget v-model="isChatOpen" :show-button="false"/>
+  <ChatWidget
+    v-model="isChatOpen"
+    :show-button="false"
+  />
 
   <!-- 添加确认对话框 -->
-  <v-dialog v-model="confirmDialog.show" max-width="400">
+  <v-dialog
+    v-model="confirmDialog.show"
+    max-width="400"
+  >
     <v-card>
-      <v-card-title class="text-h6"> 确认保存</v-card-title>
+      <v-card-title class="text-h6">
+        确认保存
+      </v-card-title>
       <v-card-text>
         您正在修改 {{ state.dateString }} 的数据，确定要保存吗？
       </v-card-text>
       <v-card-actions>
-        <v-spacer/>
-        <v-btn color="grey" variant="text" @click="confirmDialog.reject">
+        <v-spacer />
+        <v-btn
+          color="grey"
+          variant="text"
+          @click="confirmDialog.reject"
+        >
           取消
         </v-btn>
-        <v-btn color="primary" @click="confirmDialog.resolve"> 确认保存</v-btn>
+        <v-btn
+          color="primary"
+          @click="confirmDialog.resolve"
+        >
+          确认保存
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -617,9 +714,14 @@
   />
 
   <!-- 添加URL配置确认对话框 -->
-  <v-dialog v-model="urlConfigDialog.show" max-width="500">
+  <v-dialog
+    v-model="urlConfigDialog.show"
+    max-width="500"
+  >
     <v-card>
-      <v-card-title class="text-h6"> 确认应用URL配置</v-card-title>
+      <v-card-title class="text-h6">
+        确认应用URL配置
+      </v-card-title>
       <v-card-text>
         <p>以下配置将应用于当前班级：</p>
         <v-list density="compact">
@@ -628,18 +730,30 @@
             :key="change.key"
           >
             <template #prepend>
-              <v-icon :icon="change.icon" class="mr-2" size="small"/>
+              <v-icon
+                :icon="change.icon"
+                class="mr-2"
+                size="small"
+              />
             </template>
             <v-list-item-title class="d-flex align-center">
               <span class="text-subtitle-1">{{ change.name }}</span>
-              <v-tooltip activator="parent" location="top">{{
-                change.description || change.key
+              <v-tooltip
+                activator="parent"
+                location="top"
+              >
+                {{
+                  change.description || change.key
                 }}
               </v-tooltip>
             </v-list-item-title>
             <v-list-item-subtitle>
               <span class="text-grey-darken-1">{{ change.oldValue }}</span>
-              <v-icon class="mx-1" icon="mdi-arrow-right" size="small"/>
+              <v-icon
+                class="mx-1"
+                icon="mdi-arrow-right"
+                size="small"
+              />
               <span class="text-primary font-weight-medium">{{
                 change.newValue
               }}</span>
@@ -648,7 +762,7 @@
         </v-list>
       </v-card-text>
       <v-card-actions>
-        <v-spacer/>
+        <v-spacer />
         <v-btn
           color="grey"
           variant="text"
@@ -656,14 +770,16 @@
         >
           取消
         </v-btn>
-        <v-btn color="primary" @click="urlConfigDialog.confirmHandler">
+        <v-btn
+          color="primary"
+          @click="urlConfigDialog.confirmHandler"
+        >
           确认应用
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog
-  >
-  <br/><br/><br/>
+  </v-dialog>
+  <br><br><br>
 </template>
 
 <script>

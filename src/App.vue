@@ -12,8 +12,8 @@
         />
       </transition>
     </router-view>
-    <global-message/>
-    <rate-limit-modal/>
+    <global-message />
+    <rate-limit-modal />
   </v-app>
 </template>
 

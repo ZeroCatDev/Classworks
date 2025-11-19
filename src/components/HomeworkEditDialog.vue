@@ -1,10 +1,15 @@
 # 创建新的作业编辑对话框组件
 <template>
-  <v-dialog v-model="dialogVisible" max-width="900" width="auto" @click:outside="handleClose">
+  <v-dialog
+    v-model="dialogVisible"
+    max-width="900"
+    width="auto"
+    @click:outside="handleClose"
+  >
     <v-card border>
       <v-card-title>{{ title }}</v-card-title>
       <v-card-subtitle>
-        {{ autoSave ? "喵？喵呜！" : "写完后点击上传谢谢喵" }}
+        {{ autoSave ? autoSavePromptText : manualSavePromptText }}
       </v-card-subtitle>
       <v-card-text>
         <div class="d-flex">
@@ -21,13 +26,21 @@
             />
 
             <!-- Template Buttons Section -->
-            <div v-if="templateData" class="mt-4">
-              <div v-if="hasTemplates" class="template-buttons">
-
-
+            <div
+              v-if="templateData"
+              class="mt-4"
+            >
+              <div
+                v-if="hasTemplates"
+                class="template-buttons"
+              >
                 <!-- Subject specific books -->
                 <template v-if="subjectBooks">
-                  <div v-for="(pages, book) in subjectBooks" :key="book" class="button-group">
+                  <div
+                    v-for="(pages, book) in subjectBooks"
+                    :key="book"
+                    class="button-group"
+                  >
                     <v-chip
                       :color="isBookSelected(book) ? 'success' : 'default'"
                       :variant="isBookSelected(book) ? 'elevated' : 'flat'"
@@ -38,7 +51,10 @@
                     </v-chip>
 
                     <!-- Show pages only if book is selected -->
-                    <div v-if="isBookSelected(book)" class="pages-container mt-2">
+                    <div
+                      v-if="isBookSelected(book)"
+                      class="pages-container mt-2"
+                    >
                       <v-chip
                         v-for="page in pages"
                         :key="page"
@@ -55,7 +71,11 @@
 
                 <!-- Common books -->
                 <template v-if="commonBooks">
-                  <div v-for="(pages, book) in commonBooks" :key="book" class="button-group">
+                  <div
+                    v-for="(pages, book) in commonBooks"
+                    :key="book"
+                    class="button-group"
+                  >
                     <v-chip
                       :color="isBookSelected(book) ? 'success' : 'default'"
                       :variant="isBookSelected(book) ? 'elevated' : 'flat'"
@@ -66,7 +86,10 @@
                     </v-chip>
 
                     <!-- Show pages only if book is selected -->
-                    <div v-if="isBookSelected(book)" class="pages-container mt-2">
+                    <div
+                      v-if="isBookSelected(book)"
+                      class="pages-container mt-2"
+                    >
                       <v-chip
                         v-for="page in pages"
                         :key="page"
@@ -82,7 +105,10 @@
                 </template>
 
                 <!-- Actions -->
-                <div v-if="templateData.actions?.length" class="button-group">
+                <div
+                  v-if="templateData.actions?.length"
+                  class="button-group"
+                >
                   <v-chip
                     v-for="action in templateData.actions"
                     :key="action"
@@ -95,14 +121,21 @@
                   </v-chip>
                 </div>
               </div>
-              <div v-else class="text-center text-body-2 text-disabled mt-2">
+              <div
+                v-else
+                class="text-center text-body-2 text-disabled mt-2"
+              >
                 暂无可用的模板
               </div>
             </div>
           </div>
 
           <!-- Quick Tools Section -->
-          <div v-if="showQuickTools" class="quick-tools ml-4" style="min-width: 180px;">
+          <div
+            v-if="showQuickTools"
+            class="quick-tools ml-4"
+            style="min-width: 180px;"
+          >
             <!-- Numeric Keypad -->
             <div class="numeric-keypad mb-4">
               <div class="keypad-row">
@@ -206,7 +239,6 @@
       <div class="text-center text-body-2 text-disabled mb-5">
         点击空白处完成编辑
       </div>
-
     </v-card>
   </v-dialog>
 </template>
@@ -280,6 +312,12 @@ export default {
     },
     showQuickTools() {
       return getSetting("display.showQuickTools");
+    },
+    autoSavePromptText() {
+      return getSetting("edit.autoSavePromptText");
+    },
+    manualSavePromptText() {
+      return getSetting("edit.manualSavePromptText");
     }
   },
   watch: {

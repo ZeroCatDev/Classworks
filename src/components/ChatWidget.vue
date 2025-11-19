@@ -40,7 +40,7 @@
           mdi-chat-processing
         </v-icon>
         <span class="text-subtitle-1">设备聊天室</span>
-        <v-spacer/>
+        <v-spacer />
         <v-tooltip location="top">
           <template #activator="{ props }">
             <v-chip
@@ -63,7 +63,7 @@
         </v-btn>
       </v-card-title>
 
-      <v-divider/>
+      <v-divider />
 
       <v-card-text class="chat-body">
         <div
@@ -78,11 +78,11 @@
               v-if="msg._type === 'divider'"
               class="divider-row"
             >
-              <v-divider class="my-2"/>
+              <v-divider class="my-2" />
               <div class="divider-text">
                 今天 - 上次访问
               </div>
-              <v-divider class="my-2"/>
+              <v-divider class="my-2" />
             </div>
             <div
               v-else
@@ -112,7 +112,7 @@
         </div>
       </v-card-text>
 
-      <v-divider/>
+      <v-divider />
 
       <v-card-actions class="chat-input">
         <v-btn
