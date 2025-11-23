@@ -4,7 +4,7 @@
       {{ titleText }}
     </v-app-bar-title>
 
-    <v-spacer/>
+    <v-spacer />
 
     <template #append>
       <!-- 只读 Token 警告 -->
@@ -31,7 +31,14 @@
         {{ tokenDisplayInfo.text }}
       </v-chip>
 
-      <v-btn icon="mdi-chat" variant="text" @click="isChatOpen = true"/>
+      <v-btn
+        v-if="shouldShowUrgentTestButton"
+        prepend-icon="mdi-chat"
+        @click="urgentTestDialog = true"
+        variant="tonal"
+        >发送通知</v-btn
+      >
+      <v-btn icon="mdi-chat" variant="text" @click="isChatOpen = true" />
       <v-btn
         :badge="unreadCount || undefined"
         :badge-color="unreadCount ? 'error' : undefined"
@@ -39,7 +46,7 @@
         variant="text"
         @click="$refs.messageLog.drawer = true"
       />
-      <v-btn icon="mdi-cog" variant="text" @click="$router.push('/settings')"/>
+      <v-btn icon="mdi-cog" variant="text" @click="$router.push('/settings')" />
     </template>
   </v-app-bar>
   <!-- 初始化选择卡片，仅在首页且需要授权时显示；不影响顶栏 -->
@@ -197,7 +204,7 @@
         variant="tonal"
       >
         <v-card-title class="text-subtitle-1">
-          <v-icon icon="mdi-shield-check" size="small" start/>
+          <v-icon icon="mdi-shield-check" size="small" start />
           屏幕保护技术已启用
         </v-card-title>
         <v-card-text class="text-body-2">
@@ -206,10 +213,10 @@
           </p>
           <p class="text-caption text-grey">
             *研究显示动态像素偏移技术可以修复屏幕坏点，起到保护屏幕的作用，数据来自实验室。<a
-            href="https://patentscope.wipo.int/search/zh/detail.jsf?docId=CN232281523&_cid=P20-M8L0YX-67061-1"
-            target="_blank"
-          >专利号CN108648692
-          </a>
+              href="https://patentscope.wipo.int/search/zh/detail.jsf?docId=CN232281523&_cid=P20-M8L0YX-67061-1"
+              target="_blank"
+              >专利号CN108648692
+            </a>
           </p>
           <p class="text-caption text-grey">
             *技术已自动适配您的设备，无需手动调整
@@ -221,7 +228,13 @@
     <!-- 出勤统计区域 -->
     <v-col
       v-if="state.studentList && state.studentList.length"
-      v-ripple="{ class: `text-${['primary','secondary','info','success','warning','error'][Math.floor(Math.random()*6)]}` }"
+      v-ripple="{
+        class: `text-${
+          ['primary', 'secondary', 'info', 'success', 'warning', 'error'][
+            Math.floor(Math.random() * 6)
+          ]
+        }`,
+      }"
       class="attendance-area no-select"
       cols="1"
       @click="setAttendanceArea()"
@@ -232,8 +245,8 @@
         :
         <snap style="white-space: nowrap">
           {{
-          state.studentList.length -
-          state.boardData.attendance.exclude.length
+            state.studentList.length -
+            state.boardData.attendance.exclude.length
           }}人
         </snap>
       </h2>
@@ -242,10 +255,10 @@
         :
         <snap style="white-space: nowrap">
           {{
-          state.studentList.length -
-          state.boardData.attendance.absent.length -
-          state.boardData.attendance.late.length -
-          state.boardData.attendance.exclude.length
+            state.studentList.length -
+            state.boardData.attendance.absent.length -
+            state.boardData.attendance.late.length -
+            state.boardData.attendance.exclude.length
           }}人
         </snap>
       </h2>
@@ -317,9 +330,9 @@
   >
     <v-card>
       <v-card-title class="d-flex align-center">
-        <v-icon class="mr-2" icon="mdi-account-group"/>
+        <v-icon class="mr-2" icon="mdi-account-group" />
         出勤状态管理
-        <v-spacer/>
+        <v-spacer />
         <v-chip class="ml-2" color="primary" size="small">
           {{ state.dateString }}
         </v-chip>
@@ -450,8 +463,11 @@
                       class="mr-2"
                       size="24"
                     >
-                      <v-icon size="small">{{
-                        getStudentStatusIcon(state.studentList.indexOf(student))
+                      <v-icon size="small"
+                        >{{
+                          getStudentStatusIcon(
+                            state.studentList.indexOf(student)
+                          )
                         }}
                       </v-icon>
                     </v-avatar>
@@ -552,14 +568,13 @@
               </v-card-text>
             </v-card>
           </v-col>
-        </v-row
-        >
+        </v-row>
       </v-card-text>
 
-      <v-divider/>
+      <v-divider />
 
       <v-card-actions>
-        <v-spacer/>
+        <v-spacer />
 
         <v-btn color="primary" @click="saveAttendance">
           <v-icon start>mdi-content-save</v-icon>
@@ -569,7 +584,7 @@
     </v-card>
   </v-dialog>
 
-  <message-log ref="messageLog"/>
+  <message-log ref="messageLog" />
 
   <!-- 添加悬浮工具栏 -->
   <floating-toolbar
@@ -587,10 +602,13 @@
   />
 
   <!-- 添加ICP备案悬浮组件 -->
-  <FloatingICP/>
+  <FloatingICP />
 
   <!-- 设备聊天室（右下角浮窗） -->
-  <ChatWidget v-model="isChatOpen" :show-button="false"/>
+  <ChatWidget v-model="isChatOpen" :show-button="false" />
+
+  <!-- 紧急通知测试对话框 -->
+  <UrgentTestDialog v-model="urgentTestDialog" />
 
   <!-- 添加确认对话框 -->
   <v-dialog v-model="confirmDialog.show" max-width="400">
@@ -600,7 +618,7 @@
         您正在修改 {{ state.dateString }} 的数据，确定要保存吗？
       </v-card-text>
       <v-card-actions>
-        <v-spacer/>
+        <v-spacer />
         <v-btn color="grey" variant="text" @click="confirmDialog.reject">
           取消
         </v-btn>
@@ -628,18 +646,17 @@
             :key="change.key"
           >
             <template #prepend>
-              <v-icon :icon="change.icon" class="mr-2" size="small"/>
+              <v-icon :icon="change.icon" class="mr-2" size="small" />
             </template>
             <v-list-item-title class="d-flex align-center">
               <span class="text-subtitle-1">{{ change.name }}</span>
-              <v-tooltip activator="parent" location="top">{{
-                change.description || change.key
-                }}
+              <v-tooltip activator="parent" location="top"
+                >{{ change.description || change.key }}
               </v-tooltip>
             </v-list-item-title>
             <v-list-item-subtitle>
               <span class="text-grey-darken-1">{{ change.oldValue }}</span>
-              <v-icon class="mx-1" icon="mdi-arrow-right" size="small"/>
+              <v-icon class="mx-1" icon="mdi-arrow-right" size="small" />
               <span class="text-primary font-weight-medium">{{
                 change.newValue
               }}</span>
@@ -648,7 +665,7 @@
         </v-list>
       </v-card-text>
       <v-card-actions>
-        <v-spacer/>
+        <v-spacer />
         <v-btn
           color="grey"
           variant="text"
@@ -661,9 +678,8 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog
-  >
-  <br/><br/><br/>
+  </v-dialog>
+  <br /><br /><br />
 </template>
 
 <script>
@@ -675,6 +691,7 @@ import ChatWidget from "@/components/ChatWidget.vue";
 import HomeworkEditDialog from "@/components/HomeworkEditDialog.vue";
 import InitServiceChooser from "@/components/InitServiceChooser.vue";
 import StudentNameManager from "@/components/StudentNameManager.vue";
+import UrgentTestDialog from "@/components/UrgentTestDialog.vue";
 import dataProvider from "@/utils/dataProvider";
 import {
   getSetting,
@@ -682,14 +699,14 @@ import {
   setSetting,
   settingsDefinitions,
 } from "@/utils/settings";
-import {kvServerProvider} from "@/utils/providers/kvServerProvider";
-import {useDisplay} from "vuetify";
+import { kvServerProvider } from "@/utils/providers/kvServerProvider";
+import { useDisplay } from "vuetify";
 import "../styles/index.scss";
 import "../styles/transitions.scss";
 import "../styles/global.scss";
-import {pinyin} from "pinyin-pro";
-import {debounce, throttle} from "@/utils/debounce";
-import {Base64} from "js-base64";
+import { pinyin } from "pinyin-pro";
+import { debounce, throttle } from "@/utils/debounce";
+import { Base64 } from "js-base64";
 import {
   getSocket,
   on as socketOn,
@@ -697,7 +714,8 @@ import {
   leaveAll,
   onConnect as onSocketConnect,
 } from "@/utils/socketClient";
-import {createDeviceEventHandler} from "@/utils/deviceEvents";
+import { createDeviceEventHandler } from "@/utils/deviceEvents";
+import axios from "@/axios/axios";
 
 export default {
   name: "Classworks 作业板",
@@ -710,19 +728,20 @@ export default {
     InitServiceChooser,
     ChatWidget,
     StudentNameManager,
+    UrgentTestDialog,
   },
   data() {
     const defaultSubjects = [
-      {name: "语文", order: 0},
-      {name: "数学", order: 1},
-      {name: "英语", order: 2},
-      {name: "物理", order: 3},
-      {name: "化学", order: 4},
-      {name: "生物", order: 5},
-      {name: "政治", order: 6},
-      {name: "历史", order: 7},
-      {name: "地理", order: 8},
-      {name: "其他", order: 9},
+      { name: "语文", order: 0 },
+      { name: "数学", order: 1 },
+      { name: "英语", order: 2 },
+      { name: "物理", order: 3 },
+      { name: "化学", order: 4 },
+      { name: "生物", order: 5 },
+      { name: "政治", order: 6 },
+      { name: "历史", order: 7 },
+      { name: "地理", order: 8 },
+      { name: "其他", order: 9 },
     ];
 
     return {
@@ -749,7 +768,7 @@ export default {
         dateString: "",
         synced: false,
         attendDialogVisible: false,
-        contentStyle: {"font-size": `${getSetting("font.size")}px`},
+        contentStyle: { "font-size": `${getSetting("font.size")}px` },
         uploadLoading: false,
         downloadLoading: false,
         snackbar: false,
@@ -800,11 +819,11 @@ export default {
       tokenDisplayInfo: {
         show: false,
         readonly: false, // 是否是只读 token
-        text: '',
-        color: 'primary',
-        variant: 'tonal',
-        icon: 'mdi-account',
-        disabled: false
+        text: "",
+        color: "primary",
+        variant: "tonal",
+        icon: "mdi-account",
+        disabled: false,
       },
       // 实时刷新信息
       realtimeInfo: {
@@ -820,8 +839,12 @@ export default {
         namespace: null,
         authCode: null,
         autoOpen: false,
-        autoExecute: false
+        autoExecute: false,
       },
+      // 紧急通知测试对话框
+      urgentTestDialog: false,
+      // 令牌信息
+      tokenInfo: null,
     };
   },
 
@@ -872,7 +895,7 @@ export default {
           rowSpan: Math.ceil(
             (value.content.split("\n").filter((line) => line.trim()).length +
               1) *
-            0.8
+              0.8
           ),
         }));
 
@@ -970,6 +993,26 @@ export default {
       void this.settingsTick;
       return onHome && isKv && (!token || token === "");
     },
+    // 是否显示紧急通知测试按钮（仅教师和课堂令牌）
+    shouldShowUrgentTestButton() {
+      // 检查是否使用 KV 服务器
+      const provider = getSetting("server.provider");
+      const isKv = provider === "kv-server" || provider === "classworkscloud";
+      if (!isKv) return false;
+
+      // 检查是否有令牌
+      const kvToken = getSetting("server.kvToken");
+      if (!kvToken) return false;
+
+      // 检查令牌信息是否已加载
+      if (!this.tokenInfo) return false;
+
+      // 只有 teacher 或 classroom 类型的令牌才显示
+      return (
+        this.tokenInfo.deviceType === "teacher" ||
+        this.tokenInfo.deviceType === "classroom"
+      );
+    },
     filteredStudents() {
       let students = [...this.state.studentList];
 
@@ -1022,10 +1065,10 @@ export default {
       });
 
       return Array.from(surnameMap.entries())
-        .map(([name, count]) => ({name, count}))
+        .map(([name, count]) => ({ name, count }))
         .sort((a, b) => {
-          const pinyinA = pinyin(a.name, {toneType: "none", mode: "surname"});
-          const pinyinB = pinyin(b.name, {toneType: "none", mode: "surname"});
+          const pinyinA = pinyin(a.name, { toneType: "none", mode: "surname" });
+          const pinyinB = pinyin(b.name, { toneType: "none", mode: "surname" });
           return pinyinA.localeCompare(pinyinB);
         });
     },
@@ -1081,15 +1124,22 @@ export default {
         if (studentNameManager) {
           this.studentNameInfo.name = studentNameManager.currentStudentName;
           this.studentNameInfo.isStudent = studentNameManager.isStudentToken;
-          this.studentNameInfo.openDialog = () => studentNameManager.openDialog();
+          this.studentNameInfo.openDialog = () =>
+            studentNameManager.openDialog();
 
           // 监听学生姓名变化
-          this.$watch(() => studentNameManager.currentStudentName, (newName) => {
-            this.studentNameInfo.name = newName;
-          });
-          this.$watch(() => studentNameManager.isStudentToken, (isStudent) => {
-            this.studentNameInfo.isStudent = isStudent;
-          });
+          this.$watch(
+            () => studentNameManager.currentStudentName,
+            (newName) => {
+              this.studentNameInfo.name = newName;
+            }
+          );
+          this.$watch(
+            () => studentNameManager.isStudentToken,
+            (isStudent) => {
+              this.studentNameInfo.isStudent = isStudent;
+            }
+          );
         }
       });
 
@@ -1121,6 +1171,9 @@ export default {
       this.$nextTick(() => {
         this.updateTokenDisplayInfo();
       });
+
+      // 获取令牌信息
+      await this.loadTokenInfo();
     } catch (err) {
       console.error("初始化失败:", err);
       this.showError("初始化失败，请刷新页面重试");
@@ -1156,21 +1209,21 @@ export default {
 
     // 退出设备房间并清理监听
     try {
-      if (this.$offKvChanged && typeof this.$offKvChanged === 'function') {
+      if (this.$offKvChanged && typeof this.$offKvChanged === "function") {
         this.$offKvChanged();
         this.$offKvChanged = null;
       }
-      if (this.$offDeviceEvent && typeof this.$offDeviceEvent === 'function') {
+      if (this.$offDeviceEvent && typeof this.$offDeviceEvent === "function") {
         this.$offDeviceEvent();
         this.$offDeviceEvent = null;
       }
-      if (this.$offConnect && typeof this.$offConnect === 'function') {
+      if (this.$offConnect && typeof this.$offConnect === "function") {
         this.$offConnect();
         this.$offConnect = null;
       }
       leaveAll();
     } catch (e) {
-      console.warn('主页面事件清理失败:', e);
+      console.warn("主页面事件清理失败:", e);
     }
   },
 
@@ -1179,7 +1232,8 @@ export default {
     async loadDeviceInfo() {
       try {
         const provider = getSetting("server.provider");
-        const useServer = provider === "kv-server" || provider === "classworkscloud";
+        const useServer =
+          provider === "kv-server" || provider === "classworkscloud";
         if (!useServer) return;
 
         const res = await kvServerProvider.loadNamespaceInfo();
@@ -1187,56 +1241,82 @@ export default {
 
         this.state.namespaceInfo = res || null;
         // 兜底填充设备名，避免重复解析
-        this.state.deviceName =
-          res?.account?.deviceName ||
-          "";
+        this.state.deviceName = res?.account?.deviceName || "";
       } catch (e) {
         console.warn("加载设备信息失败:", e);
       }
     },
 
+    // 获取令牌信息
+    async loadTokenInfo() {
+      try {
+        const provider = getSetting("server.provider");
+        const isKv = provider === "kv-server" || provider === "classworkscloud";
+        if (!isKv) return;
+
+        const kvToken = getSetting("server.kvToken");
+        if (!kvToken) return;
+
+        const serverUrl = getSetting("server.domain");
+        if (!serverUrl) return;
+
+        // 获取 Token 信息
+        const tokenResponse = await axios.get(`${serverUrl}/kv/_token`, {
+          headers: {
+            Authorization: `Bearer ${kvToken}`,
+          },
+        });
+
+        this.tokenInfo = tokenResponse.data;
+        console.log("Token info loaded:", this.tokenInfo);
+      } catch (error) {
+        console.warn("Failed to load token info:", error);
+        this.tokenInfo = null;
+      }
+    },
+
     // 更新 Token 显示信息
     updateTokenDisplayInfo() {
-      const manager = this.$refs.studentNameManager
+      const manager = this.$refs.studentNameManager;
       if (!manager || !manager.hasToken) {
-        this.tokenDisplayInfo.show = false
-        this.tokenDisplayInfo.readonly = false
-        return
+        this.tokenDisplayInfo.show = false;
+        this.tokenDisplayInfo.readonly = false;
+        return;
       }
 
-      const displayName = manager.displayName
-      const isReadOnly = manager.isReadOnly
-      const isStudent = manager.isStudentToken
+      const displayName = manager.displayName;
+      const isReadOnly = manager.isReadOnly;
+      const isStudent = manager.isStudentToken;
 
       // 设置只读状态（对所有类型的 token 都显示）
-      this.tokenDisplayInfo.readonly = isReadOnly
+      this.tokenDisplayInfo.readonly = isReadOnly;
 
       // 只有学生类型的 token 才显示名称 chip
       if (!isStudent) {
-        this.tokenDisplayInfo.show = false
-        return
+        this.tokenDisplayInfo.show = false;
+        return;
       }
 
       // 设置学生名称显示（始终蓝色）
-      this.tokenDisplayInfo.text = displayName
-      this.tokenDisplayInfo.color = 'primary'
-      this.tokenDisplayInfo.icon = 'mdi-account'
-      this.tokenDisplayInfo.disabled = isReadOnly // 只读时不可点击
-      this.tokenDisplayInfo.show = true
+      this.tokenDisplayInfo.text = displayName;
+      this.tokenDisplayInfo.color = "primary";
+      this.tokenDisplayInfo.icon = "mdi-account";
+      this.tokenDisplayInfo.disabled = isReadOnly; // 只读时不可点击
+      this.tokenDisplayInfo.show = true;
     },
 
     // 处理 Token Chip 点击
     handleTokenChipClick() {
-      console.log('Token chip clicked')
-      const manager = this.$refs.studentNameManager
-      console.log('Manager:', manager)
-      console.log('Is student token:', manager?.isStudentToken)
+      console.log("Token chip clicked");
+      const manager = this.$refs.studentNameManager;
+      console.log("Manager:", manager);
+      console.log("Is student token:", manager?.isStudentToken);
 
       if (manager && manager.isStudentToken) {
-        console.log('Opening dialog...')
-        manager.openDialog()
+        console.log("Opening dialog...");
+        manager.openDialog();
       } else {
-        console.log('Cannot open dialog - conditions not met')
+        console.log("Cannot open dialog - conditions not met");
       }
     },
 
@@ -1318,10 +1398,15 @@ export default {
             this.state.showNoDataMessage = true;
             this.state.noDataMessage = response.error.message;
             // 如果强制清空或当前没有数据时才设置为空
-            if (forceClear || !this.state.boardData || (!this.state.boardData.homework && !this.state.boardData.attendance)) {
+            if (
+              forceClear ||
+              !this.state.boardData ||
+              (!this.state.boardData.homework &&
+                !this.state.boardData.attendance)
+            ) {
               this.state.boardData = {
                 homework: {},
-                attendance: {absent: [], late: [], exclude: []},
+                attendance: { absent: [], late: [], exclude: [] },
               };
             }
           } else {
@@ -1345,10 +1430,14 @@ export default {
         console.error("数据加载失败:", error);
         this.$message.error("下载失败", error.message);
         // 如果强制清空或当前没有任何数据，才初始化为空数据
-        if (forceClear || !this.state.boardData || (!this.state.boardData.homework && !this.state.boardData.attendance)) {
+        if (
+          forceClear ||
+          !this.state.boardData ||
+          (!this.state.boardData.homework && !this.state.boardData.attendance)
+        ) {
           this.state.boardData = {
             homework: {},
-            attendance: {absent: [], late: [], exclude: []},
+            attendance: { absent: [], late: [], exclude: [] },
           };
         }
       } finally {
@@ -1607,11 +1696,13 @@ export default {
 
     updateSettings() {
       this.state.fontSize = getSetting("font.size");
-      this.state.contentStyle = {"font-size": `${this.state.fontSize}px`};
+      this.state.contentStyle = { "font-size": `${this.state.fontSize}px` };
       this.setupAutoRefresh();
       this.updateBackendUrl();
       // 设置更新时尝试刷新设备名称（例如 Token 或域名变更）
       this.loadDeviceInfo();
+      // 重新加载令牌信息（Token 可能已变更）
+      this.loadTokenInfo();
       // 触发依赖刷新（例如 shouldShowInit）
       this.settingsTick++;
     },
@@ -1632,10 +1723,9 @@ export default {
 
           this.$router
             .replace({
-              query: {date: formattedDate},
+              query: { date: formattedDate },
             })
-            .catch(() => {
-            });
+            .catch(() => {});
 
           // Load both data and subjects in parallel, force clear data when switching dates
           await Promise.all([this.downloadData(true), this.loadSubjects()]);
@@ -1650,7 +1740,7 @@ export default {
       const maxColumns = Math.min(3, Math.floor(window.innerWidth / 300));
       if (maxColumns <= 1) return items;
 
-      const columns = Array.from({length: maxColumns}, () => ({
+      const columns = Array.from({ length: maxColumns }, () => ({
         height: 0,
         items: [],
       }));
@@ -1748,13 +1838,13 @@ export default {
           // 新格式：直接事件数据
           if (eventData.content && eventData.timestamp) {
             msg = {
-              uuid: eventData.senderId || 'realtime',
+              uuid: eventData.senderId || "realtime",
               key: eventData.content.key,
               action: eventData.content.action,
               created: eventData.content.created,
               updatedAt: eventData.content.updatedAt || eventData.timestamp,
               deletedAt: eventData.content.deletedAt,
-              batch: eventData.content.batch
+              batch: eventData.content.batch,
             };
           }
 
@@ -1766,9 +1856,12 @@ export default {
         // 保留设备事件监听（为未来扩展）
         this.deviceEventHandler = createDeviceEventHandler({
           onKvChanged: handler,
-          enableLegacySupport: true
+          enableLegacySupport: true,
         });
-        this.$offDeviceEvent = socketOn("device-event", this.deviceEventHandler);
+        this.$offDeviceEvent = socketOn(
+          "device-event",
+          this.deviceEventHandler
+        );
       } catch (e) {
         console.warn("实时频道初始化失败", e);
       }
@@ -1805,7 +1898,7 @@ export default {
 
     isPresent(index) {
       const student = this.state.studentList[index];
-      const {absent, late, exclude} = this.state.boardData.attendance;
+      const { absent, late, exclude } = this.state.boardData.attendance;
       return (
         !absent.includes(student) &&
         !late.includes(student) &&
@@ -2334,8 +2427,10 @@ export default {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const namespace = urlParams.get("namespace");
-        const authCode = urlParams.get("authCode") || urlParams.get("auth_code");
-        const autoExecute = urlParams.get("autoExecute") || urlParams.get("auto_execute");
+        const authCode =
+          urlParams.get("authCode") || urlParams.get("auth_code");
+        const autoExecute =
+          urlParams.get("autoExecute") || urlParams.get("auto_execute");
 
         if (namespace) {
           this.preconfigData.namespace = namespace;
@@ -2347,11 +2442,17 @@ export default {
           console.log("检测到预配数据:", {
             namespace: this.preconfigData.namespace,
             hasAuthCode: !!this.preconfigData.authCode,
-            autoExecute: this.preconfigData.autoExecute
+            autoExecute: this.preconfigData.autoExecute,
           });
 
           // 清理URL参数，避免重复处理
-          this.cleanupUrlParams(['namespace', 'authCode', 'auth_code', 'autoExecute', 'auto_execute']);
+          this.cleanupUrlParams([
+            "namespace",
+            "authCode",
+            "auth_code",
+            "autoExecute",
+            "auto_execute",
+          ]);
         }
       } catch (error) {
         console.error("解析预配数据失败:", error);
@@ -2362,7 +2463,9 @@ export default {
     parseBoolean(value) {
       if (!value) return false;
       const lowerValue = value.toLowerCase();
-      return lowerValue === 'true' || lowerValue === '1' || lowerValue === 'yes';
+      return (
+        lowerValue === "true" || lowerValue === "1" || lowerValue === "yes"
+      );
     },
 
     // 清理URL参数
@@ -2371,7 +2474,7 @@ export default {
         const url = new URL(window.location);
         let hasChanged = false;
 
-        params.forEach(param => {
+        params.forEach((param) => {
           if (url.searchParams.has(param)) {
             url.searchParams.delete(param);
             hasChanged = true;

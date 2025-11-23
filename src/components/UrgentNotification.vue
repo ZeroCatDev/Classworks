@@ -13,7 +13,7 @@
     >
       <v-card-text>
         <div class="urgent-title mb-6">
-          {{ notification?.content?.message || "无内容" }}
+          {{ currentNotification?.content?.message || "无内容" }}
         </div>
 
         <!-- 发送者信息（使用 Vuetify Card） -->
@@ -45,10 +45,46 @@
               size="small"
             >
               <v-icon left size="16"> mdi-clock </v-icon>
-              {{ formatTime(notification?.timestamp) }}
+              {{ formatTime(currentNotification?.timestamp) }}
             </v-chip>
           </v-card-text>
         </v-card>
+
+        <!-- 多通知导航 -->
+        <div v-if="hasMultipleNotifications" class="navigation-controls mt-6">
+          <v-card variant="flat" color="rgba(255,255,255,0.1)">
+            <v-card-text class="text-center">
+              <div class="notification-counter mb-3">
+                <v-chip color="white" variant="flat" size="small">
+                  {{ notificationCountText }}
+                </v-chip>
+              </div>
+              <div class="navigation-buttons">
+                <v-btn
+                  :disabled="currentIndex === 0"
+                  color="white"
+                  variant="outlined"
+                  size="small"
+                  @click="previousNotification"
+                >
+                  <v-icon> mdi-chevron-left </v-icon>
+                  上一个
+                </v-btn>
+                <v-btn
+                  :disabled="currentIndex === notificationQueue.length - 1"
+                  color="white"
+                  variant="outlined"
+                  size="small"
+                  class="ml-2"
+                  @click="nextNotification"
+                >
+                  下一个
+                  <v-icon> mdi-chevron-right </v-icon>
+                </v-btn>
+              </div>
+            </v-card-text>
+          </v-card>
+        </div>
 
         <!-- 操作按钮 -->
         <div class="mt-8">
@@ -76,14 +112,32 @@ export default {
   data() {
     return {
       visible: false,
-      notification: null,
+      notificationQueue: [], // 通知队列
+      currentIndex: 0, // 当前显示的通知索引
       autoCloseTimer: null,
       urgentSoundTimer: null,
     };
   },
   computed: {
+    // 当前显示的通知
+    currentNotification() {
+      return this.notificationQueue[this.currentIndex] || null;
+    },
+    // 队列中是否有通知
+    hasNotifications() {
+      return this.notificationQueue.length > 0;
+    },
+    // 是否有多个通知
+    hasMultipleNotifications() {
+      return this.notificationQueue.length > 1;
+    },
+    // 通知计数文本
+    notificationCountText() {
+      if (!this.hasMultipleNotifications) return "";
+      return `${this.currentIndex + 1} / ${this.notificationQueue.length}`;
+    },
     isUrgent() {
-      return this.notification?.content?.isUrgent || false;
+      return this.currentNotification?.content?.isUrgent || false;
     },
     urgencyColor() {
       return this.isUrgent ? "red darken-2" : "blue darken-2";
@@ -101,18 +155,20 @@ export default {
     },
     senderName() {
       const senderInfo =
-        this.notification?.senderInfo || this.notification?.content?.senderInfo;
+        this.currentNotification?.senderInfo ||
+        this.currentNotification?.content?.senderInfo;
       if (!senderInfo) return "未知发送者";
 
       return senderInfo.deviceName || senderInfo.deviceType || "未知设备";
     },
     deviceType() {
       const senderInfo =
-        this.notification?.senderInfo || this.notification?.content?.senderInfo;
+        this.currentNotification?.senderInfo ||
+        this.currentNotification?.content?.senderInfo;
       return senderInfo?.deviceType || "未知类型";
     },
     targetDevices() {
-      return this.notification?.content?.targetDevices || [];
+      return this.currentNotification?.content?.targetDevices || [];
     },
   },
   beforeUnmount() {
@@ -125,23 +181,39 @@ export default {
   },
   methods: {
     show(notificationData) {
-      this.notification = notificationData;
-      this.visible = true;
+      // 检查是否已存在相同的通知（避免重复）
+      const existingIndex = this.notificationQueue.findIndex(
+        (n) =>
+          n.content?.notificationId === notificationData.content?.notificationId
+      );
 
-      // 发送显示回执
-      this.sendDisplayedReceipt();
-
-      // 清除之前的自动关闭定时器
-      if (this.autoCloseTimer) {
-        clearTimeout(this.autoCloseTimer);
+      if (existingIndex !== -1) {
+        console.log("通知已存在，跳过添加");
+        return;
       }
 
-      // 播放统一的提示音
-      this.playNotificationSound();
+      // 添加到队列
+      this.notificationQueue.push(notificationData);
 
-      // 如果是加急通知，启动定时音效
-      if (this.isUrgent) {
-        this.startUrgentSound();
+      // 如果当前没有显示通知，显示第一个
+      if (!this.visible) {
+        this.currentIndex = this.notificationQueue.length - 1; // 显示最新的通知
+        this.visible = true;
+        this.sendDisplayedReceipt();
+        this.playNotificationSound();
+
+        // 如果是加急通知，启动定时音效
+        if (this.isUrgent) {
+          this.startUrgentSound();
+        }
+      } else {
+        // 如果已经有通知在显示，新通知是紧急的话优先显示
+        if (notificationData.content?.isUrgent && !this.isUrgent) {
+          this.currentIndex = this.notificationQueue.length - 1;
+          this.sendDisplayedReceipt();
+          this.playNotificationSound();
+          this.startUrgentSound();
+        }
       }
     },
     close() {
@@ -153,24 +225,58 @@ export default {
         console.warn("发送已读回执失败:", error);
       }
 
-      this.closeWithoutRead();
+      // 显示已读消息提示，便于设备端重新查看
+      if (this.currentNotification?.content?.message) {
+        const notificationType = this.isUrgent ? "紧急通知" : "通知";
+        if (this.isUrgent) {
+          this.$message?.error(
+            notificationType,
+            `${this.currentNotification.content.message}`
+          );
+        } else {
+          this.$message?.info(
+            notificationType,
+            `${this.currentNotification.content.message}`
+          );
+        }
+      }
+
+      // 从队列中移除当前通知
+      if (this.notificationQueue.length > 0) {
+        this.notificationQueue.splice(this.currentIndex, 1);
+
+        // 调整当前索引
+        if (this.currentIndex >= this.notificationQueue.length) {
+          this.currentIndex = Math.max(0, this.notificationQueue.length - 1);
+        }
+
+        // 如果还有通知，显示下一个；否则关闭
+        if (this.notificationQueue.length > 0) {
+          this.sendDisplayedReceipt();
+          // 如果新的当前通知是紧急的，启动音效
+          if (this.isUrgent) {
+            this.startUrgentSound();
+          } else {
+            this.stopUrgentSound();
+          }
+        } else {
+          this.closeWithoutRead();
+        }
+      }
     },
     // 关闭通知但不发送已读回执（用于程序异常或强制关闭）
     closeWithoutRead() {
       // 立即关闭弹框
       this.visible = false;
-      this.notification = null;
+      this.notificationQueue = [];
+      this.currentIndex = 0;
 
       if (this.autoCloseTimer) {
         clearTimeout(this.autoCloseTimer);
         this.autoCloseTimer = null;
       }
 
-      // 停止加急音效定时器
-      if (this.urgentSoundTimer) {
-        clearInterval(this.urgentSoundTimer);
-        this.urgentSoundTimer = null;
-      }
+      this.stopUrgentSound();
     },
     formatTime(timestamp) {
       if (!timestamp) return "";
@@ -230,12 +336,12 @@ export default {
     // 发送显示回执
     sendDisplayedReceipt() {
       try {
-        if (this.$refs.eventSender && this.notification?.eventId) {
+        if (this.$refs.eventSender && this.currentNotification?.eventId) {
           this.$refs.eventSender.sendDisplayedReceipt(
             {},
-            this.notification.content.notificationId
+            this.currentNotification.content.notificationId
           );
-          console.log("已发送显示回执:", this.notification.eventId);
+          console.log("已发送显示回执:", this.currentNotification.eventId);
         }
       } catch (error) {
         console.warn("发送显示回执失败:", error);
@@ -244,34 +350,64 @@ export default {
     // 发送已读回执
     sendReadReceipt() {
       try {
-        if (this.$refs.eventSender && this.notification?.eventId) {
+        if (this.$refs.eventSender && this.currentNotification?.eventId) {
           this.$refs.eventSender.sendReadReceipt(
             {},
-            this.notification.content.notificationId
+            this.currentNotification.content.notificationId
           );
-          console.log("已发送已读回执:", this.notification.eventId);
+          console.log("已发送已读回执:", this.currentNotification.eventId);
         }
       } catch (error) {
         console.warn("发送已读回执失败:", error);
       }
     },
+    // 导航到上一个通知
+    previousNotification() {
+      if (this.currentIndex > 0) {
+        this.currentIndex--;
+        this.sendDisplayedReceipt();
+
+        // 根据新通知的紧急程度调整音效
+        if (this.isUrgent) {
+          this.startUrgentSound();
+        } else {
+          this.stopUrgentSound();
+        }
+      }
+    },
+    // 导航到下一个通知
+    nextNotification() {
+      if (this.currentIndex < this.notificationQueue.length - 1) {
+        this.currentIndex++;
+        this.sendDisplayedReceipt();
+
+        // 根据新通知的紧急程度调整音效
+        if (this.isUrgent) {
+          this.startUrgentSound();
+        } else {
+          this.stopUrgentSound();
+        }
+      }
+    },
     // 启动加急通知的定时音效
     startUrgentSound() {
-      // 清除之前的定时器
-      if (this.urgentSoundTimer) {
-        clearInterval(this.urgentSoundTimer);
-      }
+      this.stopUrgentSound(); // 先清除之前的定时器
 
       // 每秒播放一次提示音
       this.urgentSoundTimer = setInterval(() => {
         if (this.visible && this.isUrgent) {
           this.playNotificationSound();
         } else {
-          // 如果弹框已关闭或不再是加急状态，停止音效
-          clearInterval(this.urgentSoundTimer);
-          this.urgentSoundTimer = null;
+          this.stopUrgentSound();
         }
       }, 1000);
+    },
+    // 停止加急音效
+    stopUrgentSound() {
+      if (this.urgentSoundTimer) {
+        clearInterval(this.urgentSoundTimer);
+        this.urgentSoundTimer = null;
+      }
     },
   },
 };
@@ -339,6 +475,21 @@ export default {
   display: flex;
   justify-content: center;
   gap: 16px;
+}
+
+.navigation-controls {
+  backdrop-filter: blur(10px);
+}
+
+.notification-counter {
+  color: white;
+  font-weight: 600;
+}
+
+.navigation-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* 动画效果 */
