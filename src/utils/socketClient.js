@@ -78,6 +78,14 @@ export function onConnect(handler) {
   return () => s.off('connect', handler);
 }
 
+export function sendEvent(type, content = null) {
+  const s = getSocket();
+  s.emit('send-event', {
+    type,
+    content
+  });
+}
+
 export function disconnect() {
   if (!socket) return;
   try {

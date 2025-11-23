@@ -224,6 +224,7 @@ import {
   leaveAll,
   getServerUrl
 } from '@/utils/socketClient'
+import {sendChatMessage, DeviceEventTypes, formatDeviceInfo} from '@/utils/deviceEvents'
 
 const currentToken = ref(getSetting('server.kvToken') || '')
 const manualToken = ref('')
@@ -292,9 +293,13 @@ function wireBusinessEvents() {
   socketOn('join-error', (msg) => {
     pushLog('join-error', msg)
   })
-  // chat message
+  // chat message (旧接口)
   socketOn('chat:message', (msg) => {
     pushLog('chat:message', msg)
+  })
+  // device events (新通用事件接口)
+  socketOn('device-event', (eventData) => {
+    pushLog('device-event', eventData)
   })
 }
 
@@ -350,10 +355,9 @@ function sendChat() {
   try {
     const text = (chatInput.value || '').trim()
     if (!text) return
-    const s = getSocket()
-    // send as plain string per server contract
-    s.emit('chat:send', text)
-    pushLog('chat:send', {text})
+    // 使用新的通用事件接口发送聊天消息
+    sendChatMessage(text)
+    pushLog('send-event', {type: DeviceEventTypes.CHAT, content: {text}})
     chatInput.value = ''
   } catch (e) {
     pushLog('chat:error', String(e))

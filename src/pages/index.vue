@@ -697,6 +697,7 @@ import {
   leaveAll,
   onConnect as onSocketConnect,
 } from "@/utils/socketClient";
+import {createDeviceEventHandler} from "@/utils/deviceEvents";
 
 export default {
   name: "Classworks 作业板",
@@ -1155,11 +1156,21 @@ export default {
 
     // 退出设备房间并清理监听
     try {
-      if (this.$offKvChanged) this.$offKvChanged();
-      if (this.$offConnect) this.$offConnect();
+      if (this.$offKvChanged && typeof this.$offKvChanged === 'function') {
+        this.$offKvChanged();
+        this.$offKvChanged = null;
+      }
+      if (this.$offDeviceEvent && typeof this.$offDeviceEvent === 'function') {
+        this.$offDeviceEvent();
+        this.$offDeviceEvent = null;
+      }
+      if (this.$offConnect && typeof this.$offConnect === 'function') {
+        this.$offConnect();
+        this.$offConnect = null;
+      }
       leaveAll();
     } catch (e) {
-      void e;
+      console.warn('主页面事件清理失败:', e);
     }
   },
 
@@ -1730,7 +1741,34 @@ export default {
           this.debouncedRealtimeRefresh?.(msg.key);
         };
 
-        this.$offKvChanged = socketOn("kv-key-changed", handler);
+        // 监听 KV 变化事件（支持新旧格式）
+        const kvHandler = (eventData) => {
+          let msg = eventData;
+
+          // 新格式：直接事件数据
+          if (eventData.content && eventData.timestamp) {
+            msg = {
+              uuid: eventData.senderId || 'realtime',
+              key: eventData.content.key,
+              action: eventData.content.action,
+              created: eventData.content.created,
+              updatedAt: eventData.content.updatedAt || eventData.timestamp,
+              deletedAt: eventData.content.deletedAt,
+              batch: eventData.content.batch
+            };
+          }
+
+          handler(msg);
+        };
+
+        this.$offKvChanged = socketOn("kv-key-changed", kvHandler);
+
+        // 保留设备事件监听（为未来扩展）
+        this.deviceEventHandler = createDeviceEventHandler({
+          onKvChanged: handler,
+          enableLegacySupport: true
+        });
+        this.$offDeviceEvent = socketOn("device-event", this.deviceEventHandler);
       } catch (e) {
         console.warn("实时频道初始化失败", e);
       }
