@@ -1,46 +1,25 @@
 <template>
-  <v-card
-    border
-    hover
-    rounded="xl"
-  >
+  <v-card border hover rounded="xl">
     <v-card-item>
       <template #prepend>
-        <v-icon
-          class="mr-2"
-          icon="mdi-information"
-          size="large"
-        />
+        <v-icon class="mr-2" icon="mdi-information" size="large"/>
       </template>
-      <v-card-title class="text-h6">
-        关于
-      </v-card-title>
+      <v-card-title class="text-h6">关于</v-card-title>
     </v-card-item>
 
     <v-card-text>
       <v-row>
-        <v-col
-          class="mx-auto"
-          cols="12"
-          md="8"
-        >
+        <v-col class="mx-auto" cols="12" md="8">
           <div class="d-flex flex-column align-start">
-            <v-avatar
-              class="mb-4"
-              size="120"
-            >
+            <v-avatar class="mb-4" size="120">
               <v-img
                 alt="Classworks"
                 src="../../assets/cslogo.png"
               />
             </v-avatar>
 
-            <h2 class="text-h5 mb-2">
-              Classworks
-            </h2>
-            <p class="text-body-1 mb-4">
-              适用于班级大屏的作业板小工具
-            </p>
+            <h2 class="text-h5 mb-2">Classworks</h2>
+            <p class="text-body-1 mb-4">适用于班级大屏的作业板小工具</p>
 
             <div class="d-flex gap-2 flex-wrap mb-6">
               <v-btn
@@ -79,11 +58,9 @@
               </v-btn>
             </div>
 
-            <v-divider class="mb-4 w-100" />
+            <v-divider class="mb-4 w-100"></v-divider>
 
-            <h3 class="text-h6 mb-2">
-              备注与致谢
-            </h3>
+            <h3 class="text-h6 mb-2">备注与致谢</h3>
             <v-list class="mb-4 bg-transparent">
               <v-list-item
                 append-icon="mdi-link"
@@ -122,7 +99,7 @@
                   新一代，开源，编程社区
                 </v-list-item-subtitle>
               </v-list-item>
-              <v-divider class="ma-1" />
+              <v-divider class="ma-1"></v-divider>
               <v-list-item
                 append-icon="mdi-link"
                 href="https://github.com/HUSX100/IslandCaller"
@@ -165,14 +142,12 @@
               fullscreen
               transition="dialog-bottom-transition"
             >
-              <v-card>
+              <v-card
+              >
                 <v-toolbar>
-                  <v-btn
-                    icon="mdi-close"
-                    @click="showDeps = false"
-                  />
+                  <v-btn icon="mdi-close" @click="showDeps = false"></v-btn>
                   <v-toolbar-title>使用的第三方库</v-toolbar-title>
-                  <v-spacer />
+                  <v-spacer></v-spacer>
                 </v-toolbar>
                 <v-card-text>
                   <v-list>

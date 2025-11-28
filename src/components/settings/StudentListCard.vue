@@ -6,20 +6,11 @@
   >
     <v-card-item>
       <template #prepend>
-        <v-icon
-          class="mr-2"
-          icon="mdi-account-group"
-          size="large"
-        />
+        <v-icon class="mr-2" icon="mdi-account-group" size="large"/>
       </template>
-      <v-card-title class="text-h6">
-        学生列表
-      </v-card-title>
+      <v-card-title class="text-h6">学生列表</v-card-title>
       <template #append>
-        <unsaved-warning
-          :show="unsavedChanges"
-          message="有未保存的更改"
-        />
+        <unsaved-warning :show="unsavedChanges" message="有未保存的更改"/>
         <v-btn
           :disabled="modelValue.list.length === 0"
           class="mr-2"
@@ -48,13 +39,7 @@
         indeterminate
       />
 
-      <v-alert
-        v-if="error"
-        class="mb-4"
-        closable
-        type="error"
-        variant="tonal"
-      >
+      <v-alert v-if="error" class="mb-4" closable type="error" variant="tonal">
         {{ error }}
       </v-alert>
 
@@ -62,11 +47,7 @@
         <!-- 普通编辑模式 -->
         <div v-if="!modelValue.advanced">
           <v-row class="mb-6">
-            <v-col
-              cols="12"
-              md="4"
-              sm="6"
-            >
+            <v-col cols="12" md="4" sm="6">
               <v-text-field
                 v-model="newStudentName"
                 class="mb-4"
@@ -107,10 +88,7 @@
                   v-bind="props"
                 >
                   <v-card-text class="d-flex align-center pa-3">
-                    <v-menu
-                      :open-on-hover="!isMobile"
-                      location="bottom"
-                    >
+                    <v-menu :open-on-hover="!isMobile" location="bottom">
                       <template #activator="{ props: menuProps }">
                         <v-btn
                           class="mr-3 font-weight-medium"
@@ -122,10 +100,7 @@
                         </v-btn>
                       </template>
 
-                      <v-list
-                        density="compact"
-                        nav
-                      >
+                      <v-list density="compact" nav>
                         <v-list-item
                           :disabled="index === 0"
                           prepend-icon="mdi-arrow-up-bold"
@@ -133,7 +108,7 @@
                         >
                           置顶
                         </v-list-item>
-                        <v-divider />
+                        <v-divider/>
                         <v-list-item
                           :disabled="index === 0"
                           prepend-icon="mdi-arrow-up"
@@ -197,10 +172,7 @@
         </div>
 
         <!-- 高级编辑模式 -->
-        <div
-          v-else
-          class="pt-2"
-        >
+        <div v-else class="pt-2">
           <v-textarea
             v-model="modelValue.text"
             hint="使用文本编辑模式批量编辑学生名单，保存时会自动去除空行"
@@ -215,10 +187,7 @@
       </v-expand-transition>
 
       <v-row class="mt-6">
-        <v-col
-          class="d-flex gap-2"
-          cols="12"
-        >
+        <v-col class="d-flex gap-2" cols="12">
           <v-btn
             :disabled="loading"
             :loading="loading"

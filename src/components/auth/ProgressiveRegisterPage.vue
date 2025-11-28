@@ -20,7 +20,7 @@
           variant="tonal"
         >
           <template #prepend>
-            <v-icon icon="mdi-information" />
+            <v-icon icon="mdi-information"/>
           </template>
           系统将自动为您创建设备并获取访问令牌，无需手动配置
         </v-alert>
@@ -52,7 +52,7 @@
           variant="tonal"
         >
           <template #prepend>
-            <v-icon icon="mdi-check-circle" />
+            <v-icon icon="mdi-check-circle"/>
           </template>
           设备注册成功！已自动获取访问令牌
         </v-alert>
@@ -60,7 +60,7 @@
         <v-list>
           <v-list-item>
             <template #prepend>
-              <v-icon icon="mdi-identifier" />
+              <v-icon icon="mdi-identifier"/>
             </template>
             <v-list-item-title>设备名称</v-list-item-title>
             <v-list-item-subtitle>{{ deviceInfo.deviceName }}</v-list-item-subtitle>
@@ -68,7 +68,7 @@
 
           <v-list-item>
             <template #prepend>
-              <v-icon icon="mdi-key" />
+              <v-icon icon="mdi-key"/>
             </template>
             <v-list-item-title>设备 UUID</v-list-item-title>
             <v-list-item-subtitle class="font-mono text-caption">
@@ -83,7 +83,7 @@
           variant="tonal"
         >
           <template #prepend>
-            <v-icon icon="mdi-information" />
+            <v-icon icon="mdi-information"/>
           </template>
           您可以点击下方按钮访问云端控制台来设置密码和管理高级功能
         </v-alert>
@@ -97,7 +97,7 @@
           variant="tonal"
         >
           <template #prepend>
-            <v-icon icon="mdi-alert-circle" />
+            <v-icon icon="mdi-alert-circle"/>
           </template>
           {{ errorMessage }}
         </v-alert>
@@ -105,7 +105,7 @@
     </v-card-text>
 
     <v-card-actions>
-      <v-spacer />
+      <v-spacer/>
 
       <!-- 注册按钮 -->
       <v-btn

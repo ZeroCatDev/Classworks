@@ -21,7 +21,7 @@
       </v-alert>
     </v-card-text>
     <v-card-actions>
-      <v-spacer />
+      <v-spacer/>
       <v-btn
         v-if="showCancel"
         variant="text"

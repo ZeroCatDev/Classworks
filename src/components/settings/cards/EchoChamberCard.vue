@@ -6,22 +6,13 @@
     @click="handleClick"
   >
     <v-card-text>
-      <div
-        ref="typewriter"
-        class="typewriter-text"
-      />
-      <div
-        ref="sourceWriter"
-        class="source-text"
-      />
+      <div ref="typewriter" class="typewriter-text"></div>
+      <div ref="sourceWriter" class="source-text"></div>
     </v-card-text>
     <transition name="fade">
-      <v-chip
-        v-if="currentQuote?.contributor"
-        class="contributor"
-      >
+      <v-chip v-if="currentQuote?.contributor" class="contributor">
         <v-avatar start>
-          <v-img :src="`https://github.com/${currentQuote.contributor}.png`" />
+          <v-img :src="`https://github.com/${currentQuote.contributor}.png`"/>
         </v-avatar>
         {{ currentQuote.contributor }}
       </v-chip>
@@ -56,10 +47,6 @@ export default {
 
   mounted() {
     this.initTypewriters();
-  },
-
-  beforeUnmount() {
-    [this.typewriter, this.sourceWriter].forEach(writer => writer?.stop());
   },
 
   methods: {
@@ -106,6 +93,10 @@ export default {
         console.error("复制失败:", err);
       }
     }
+  },
+
+  beforeUnmount() {
+    [this.typewriter, this.sourceWriter].forEach(writer => writer?.stop());
   }
 };
 </script>

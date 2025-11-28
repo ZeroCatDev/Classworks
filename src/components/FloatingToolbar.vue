@@ -6,10 +6,9 @@
       elevation="4"
       rounded="xl"
     >
-      <v-btn-group
-        class="toolbar-buttons"
-        variant="text"
-      >
+
+
+      <v-btn-group class="toolbar-buttons" variant="text">
         <v-btn
           v-ripple
           :title="'查看昨天'"
@@ -34,10 +33,7 @@
           variant="text"
           @click="$emit('zoom', 'up')"
         />
-        <v-menu
-          :close-on-content-click="false"
-          location="top"
-        >
+        <v-menu :close-on-content-click="false" location="top">
           <template #activator="{ props }">
             <v-btn
               v-ripple
@@ -48,10 +44,7 @@
               variant="text"
             />
           </template>
-          <v-card
-            border
-            class="date-picker-card"
-          >
+          <v-card border class="date-picker-card">
             <v-date-picker
               :model-value="selectedDate"
               color="primary"
@@ -79,6 +72,8 @@
           @click="$emit('next-day')"
         />
       </v-btn-group>
+
+
     </v-card>
   </v-slide-y-transition>
 </template>
