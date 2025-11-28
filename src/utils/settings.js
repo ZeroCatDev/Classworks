@@ -289,6 +289,20 @@ const settingsDefinitions = {
     description: "保存非当天数据需确认",
     icon: "mdi-calendar-alert",
   },
+  "edit.autoSavePromptText": {
+    type: "string",
+    default: "喵？喵呜！",
+    description: "自动保存模式提示文本",
+    icon: "mdi-text-box-outline",
+    // 作业编辑对话框在自动保存模式下显示的提示文本
+  },
+  "edit.manualSavePromptText": {
+    type: "string",
+    default: "写完后点击上传谢谢喵",
+    description: "手动保存模式提示文本",
+    icon: "mdi-text-box-outline",
+    // 作业编辑对话框在手动保存模式下显示的提示文本
+  },
 
   // 开发者选项
   "developer.enabled": {

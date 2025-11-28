@@ -4,7 +4,7 @@
     <v-card border>
       <v-card-title>{{ title }}</v-card-title>
       <v-card-subtitle>
-        {{ autoSave ? "喵？喵呜！" : "写完后点击上传谢谢喵" }}
+        {{ autoSave ? autoSavePromptText : manualSavePromptText }}
       </v-card-subtitle>
       <v-card-text>
         <div class="d-flex">
@@ -280,6 +280,12 @@ export default {
     },
     showQuickTools() {
       return getSetting("display.showQuickTools");
+    },
+    autoSavePromptText() {
+      return getSetting("edit.autoSavePromptText");
+    },
+    manualSavePromptText() {
+      return getSetting("edit.manualSavePromptText");
     }
   },
   watch: {

@@ -15,6 +15,14 @@
       <v-divider class="my-2"/>
       <setting-item :setting-key="'edit.refreshBeforeEdit'"/>
 
+
+      <v-divider class="my-2"/>
+      <setting-item :setting-key="'edit.autoSavePromptText'"/>
+
+
+      <v-divider class="my-2"/>
+      <setting-item :setting-key="'edit.manualSavePromptText'"/>
+
     </v-list>
   </settings-card>
 </template>
