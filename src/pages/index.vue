@@ -122,7 +122,7 @@
     :attendance="state.boardData.attendance"
     :date-string="state.dateString"
     @save="saveAttendance"
-    @change="state.synced = false"
+    @change="handleAttendanceChange"
   />
 
   <message-log ref="messageLog" />
@@ -343,6 +343,7 @@ export default {
         students: false,
       },
       debouncedUpload: null,
+      debouncedAttendanceSave: null,
       throttledReflow: null,
       sortedItemsCache: {
         key: "",
@@ -615,10 +616,20 @@ export default {
       },
       deep: true,
     },
+    "state.attendanceDialog": {
+      handler(newValue) {
+        this.handleAttendanceDialogClose(newValue);
+      },
+    },
   },
 
   created() {
     this.debouncedUpload = debounce(this.uploadData, 2000);
+    this.debouncedAttendanceSave = debounce(async () => {
+      if (this.autoSave) {
+        await this.trySave(true);
+      }
+    }, 2000);
     this.throttledReflow = throttle(() => {
       if (this.$refs.gridContainer) {
         this.optimizeGridLayout(this.sortedItems);
@@ -1398,6 +1409,11 @@ export default {
 
     async manualUpload() {
       return this.trySave(false);
+    },
+
+    handleAttendanceChange() {
+      this.state.synced = false;
+      this.debouncedAttendanceSave();
     },
 
     async handleAttendanceDialogClose(newValue) {
