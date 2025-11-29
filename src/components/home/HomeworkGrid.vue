@@ -128,7 +128,23 @@
 
   <!-- 单独显示空科目 -->
   <div class="empty-subjects mt-4">
-    <template v-if="emptySubjectDisplay === 'button'">
+    <!-- 移动端优化视图 -->
+    <div v-if="isMobile" class="d-flex flex-wrap justify-center">
+      <v-chip
+        v-for="subject in unusedSubjects"
+        :key="subject.name"
+        :disabled="isEditingDisabled"
+        class="ma-1"
+        color="primary"
+        variant="tonal"
+        @click="$emit('open-dialog', subject.name)"
+      >
+        <v-icon start size="small">mdi-plus</v-icon>
+        {{ subject.name }}
+      </v-chip>
+    </div>
+
+    <template v-else-if="emptySubjectDisplay === 'button'">
       <v-btn-group divided variant="tonal">
         <v-btn
           v-for="subject in unusedSubjects"
@@ -194,6 +210,11 @@ export default {
     },
   },
   emits: ["open-dialog", "open-attendance"],
+  computed: {
+    isMobile() {
+      return this.$vuetify.display.mobile;
+    },
+  },
   methods: {
     splitPoint(content) {
       return content.split("\n").filter((text) => text.trim());
