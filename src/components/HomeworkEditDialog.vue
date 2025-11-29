@@ -1,8 +1,18 @@
 # 创建新的作业编辑对话框组件
 <template>
-  <v-dialog v-model="dialogVisible" max-width="900" width="auto" @click:outside="handleClose">
+  <v-dialog
+    v-model="dialogVisible"
+    :fullscreen="isMobile"
+    max-width="900"
+    width="auto"
+    @click:outside="handleClose"
+  >
     <v-card border>
-      <v-card-title>{{ title }}</v-card-title>
+      <v-card-title class="d-flex align-center">
+        {{ title }}
+        <v-spacer />
+        <v-btn icon="mdi-close" variant="text" @click="handleClose" />
+      </v-card-title>
       <v-card-subtitle>
         {{ autoSave ? autoSavePromptText : manualSavePromptText }}
       </v-card-subtitle>
@@ -15,7 +25,7 @@
               auto-grow
               placeholder="使用换行表示分条"
               rows="5"
-              width="480"
+              :width="isMobile ? '100%' : '480'"
               @click="updateCurrentLine"
               @keyup="updateCurrentLine"
             />
@@ -102,7 +112,7 @@
           </div>
 
           <!-- Quick Tools Section -->
-          <div v-if="showQuickTools" class="quick-tools ml-4" style="min-width: 180px;">
+          <div v-if="showQuickTools && !isMobile" class="quick-tools ml-4" style="min-width: 180px;">
             <!-- Numeric Keypad -->
             <div class="numeric-keypad mb-4">
               <div class="keypad-row">
@@ -214,6 +224,7 @@
 <script>
 import dataProvider from "@/utils/dataProvider";
 import {getSetting} from "@/utils/settings";
+import { useDisplay } from "vuetify";
 
 export default {
   name: "HomeworkEditDialog",
@@ -236,6 +247,10 @@ export default {
     }
   },
   emits: ["update:modelValue", "save"],
+  setup() {
+    const { mobile } = useDisplay();
+    return { isMobile: mobile };
+  },
   data() {
     return {
       content: "",

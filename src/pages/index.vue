@@ -65,249 +65,43 @@
 
   <div v-if="!shouldShowInit" class="d-flex">
     <!-- 主要内容区域 -->
-    <v-container class="main-window flex-grow-1 no-select" fluid>
-      <!-- 有内容的科目卡片 -->
-      <div ref="gridContainer" class="grid-masonry">
-        <TransitionGroup name="grid">
-          <div
-            v-for="item in sortedItems"
-            :key="item.key"
-            :style="{
-              'grid-row-end': `span ${item.rowSpan}`,
-              order: item.order,
-            }"
-            class="grid-item"
-          >
-            <v-card
-              :class="{ 'glow-highlight': highlightedCards[item.key] }"
-              border
-              class="glow-track"
-              height="100%"
-              @click="!isEditingDisabled && openDialog(item.key)"
-              @mousemove="handleMouseMove"
-              @touchmove="handleTouchMove"
-            >
-              <v-card-title>{{ item.name }}</v-card-title>
-              <v-card-text :style="state.contentStyle">
-                <v-list>
-                  <v-list-item
-                    v-for="text in splitPoint(item.content)"
-                    :key="text"
-                  >
-                    {{ text }}
-                  </v-list-item>
-                </v-list>
-              </v-card-text>
-            </v-card>
-          </div>
-        </TransitionGroup>
-      </div>
+    <v-container class="main-window flex-grow-1 no-select bloom-container" fluid>
+      <homework-grid
+        :sorted-items="sortedItems"
+        :unused-subjects="unusedSubjects"
+        :empty-subject-display="emptySubjectDisplay"
+        :is-editing-disabled="isEditingDisabled"
+        :content-style="state.contentStyle"
+        :highlighted-cards="highlightedCards"
+        @open-dialog="openDialog"
+        @open-attendance="setAttendanceArea"
+      />
 
-      <!-- 单独显示空科目 -->
-      <div class="empty-subjects mt-4">
-        <template v-if="emptySubjectDisplay === 'button'">
-          <v-btn-group divided variant="tonal">
-            <v-btn
-              v-for="subject in unusedSubjects"
-              :key="subject.name"
-              :disabled="isEditingDisabled"
-              @click="openDialog(subject.name)"
-            >
-              <v-icon start> mdi-plus</v-icon>
-              {{ subject.name }}
-            </v-btn>
-          </v-btn-group>
-        </template>
-        <div v-else class="empty-subjects-grid">
-          <TransitionGroup name="v-list">
-            <v-card
-              v-for="subject in unusedSubjects"
-              :key="subject.name"
-              :disabled="isEditingDisabled"
-              border
-              class="empty-subject-card"
-              @click="openDialog(subject.name)"
-            >
-              <v-card-title class="text-subtitle-1">
-                {{ subject.name }}
-              </v-card-title>
-              <v-card-text class="text-center">
-                <v-icon color="grey" size="small"> mdi-plus</v-icon>
-                <div class="text-caption text-grey">点击添加作业</div>
-              </v-card-text>
-            </v-card>
-          </TransitionGroup>
-        </div>
-      </div>
-      <v-btn
-        v-if="!state.synced"
-        :loading="loading.upload"
-        class="ml-2"
-        color="error"
-        size="large"
-        @click="manualUpload"
-      >
-        上传
-      </v-btn>
-      <v-btn v-else color="success" size="large" @click="showSyncMessage">
-        同步完成
-      </v-btn>
-      <v-btn
-        v-if="showRandomPickerButton"
-        append-icon="mdi-dice-multiple"
-        class="ml-2"
-        color="amber"
-        prepend-icon="mdi-account-question"
-        size="large"
-        @click="openRandomPicker"
-      >
-        随机点名
-      </v-btn>
-      <v-btn
-        v-if="showExamScheduleButton"
-        class="ml-2"
-        color="green"
-        prepend-icon="mdi-calendar-check"
-        size="large"
-        @click="$router.push('/examschedule')"
-      >
-        考试看板
-      </v-btn>
-      <v-btn
-        v-if="showListCardButton"
-        class="ml-2"
-        color="primary-darken-1"
-        prepend-icon="mdi-list-box"
-        size="large"
-        @click="$router.push('/list')"
-      >
-        列表
-      </v-btn>
-      <v-btn
-        v-if="showFullscreenButton"
-        :color="state.isFullscreen ? 'blue-grey' : 'blue'"
-        :prepend-icon="
-          state.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'
-        "
-        class="ml-2"
-        size="large"
-        @click="toggleFullscreen"
-      >
-        {{ state.isFullscreen ? "退出全屏" : "全屏显示"
-        }}<!-- 修改防烧屏提示卡片，使用 tonal 样式减少信息密度 -->
-      </v-btn>
-      <v-card
-        v-if="showAntiScreenBurnCard"
-        border
-        class="mt-4 anti-burn-card"
-        color="primary"
-        variant="tonal"
-      >
-        <v-card-title class="text-subtitle-1">
-          <v-icon icon="mdi-shield-check" size="small" start />
-          屏幕保护技术已启用
-        </v-card-title>
-        <v-card-text class="text-body-2">
-          <p>
-            本应用采用独立自研的动态像素偏移技术(DPO™)，有效防止LCD屏幕烧屏现象。
-          </p>
-          <p class="text-caption text-grey">
-            *研究显示动态像素偏移技术可以修复屏幕坏点，起到保护屏幕的作用，数据来自实验室。<a
-              href="https://patentscope.wipo.int/search/zh/detail.jsf?docId=CN232281523&_cid=P20-M8L0YX-67061-1"
-              target="_blank"
-              >专利号CN108648692
-            </a>
-          </p>
-          <p class="text-caption text-grey">
-            *技术已自动适配您的设备，无需手动调整
-          </p>
-        </v-card-text>
-      </v-card>
+      <home-actions
+        :synced="state.synced"
+        :loading-upload="loading.upload"
+        :show-random-picker-button="showRandomPickerButton"
+        :show-exam-schedule-button="showExamScheduleButton"
+        :show-list-card-button="showListCardButton"
+        :show-fullscreen-button="showFullscreenButton"
+        :is-fullscreen="state.isFullscreen"
+        :show-anti-screen-burn-card="showAntiScreenBurnCard"
+        :show-test-card-button="showTestCardButton"
+        @upload="manualUpload"
+        @show-sync-message="showSyncMessage"
+        @open-random-picker="openRandomPicker"
+        @toggle-fullscreen="toggleFullscreen"
+        @add-test-card="addTestCard"
+      />
     </v-container>
 
     <!-- 出勤统计区域 -->
-    <v-col
-      v-if="state.studentList && state.studentList.length"
-      v-ripple="{
-        class: `text-${
-          ['primary', 'secondary', 'info', 'success', 'warning', 'error'][
-            Math.floor(Math.random() * 6)
-          ]
-        }`,
-      }"
-      class="attendance-area no-select"
-      cols="1"
-      @click="setAttendanceArea()"
-    >
-      <h1>出勤</h1>
-      <h2>
-        <snap style="white-space: nowrap"> 应到</snap>
-        :
-        <snap style="white-space: nowrap">
-          {{
-            state.studentList.length -
-            state.boardData.attendance.exclude.length
-          }}人
-        </snap>
-      </h2>
-      <h2>
-        <snap style="white-space: nowrap"> 实到</snap>
-        :
-        <snap style="white-space: nowrap">
-          {{
-            state.studentList.length -
-            state.boardData.attendance.absent.length -
-            state.boardData.attendance.late.length -
-            state.boardData.attendance.exclude.length
-          }}人
-        </snap>
-      </h2>
-      <h2>
-        <snap style="white-space: nowrap"> 请假</snap>
-        :
-        <snap style="white-space: nowrap">
-          {{ state.boardData.attendance.absent.length }}人
-        </snap>
-      </h2>
-      <h3
-        v-for="(name, index) in state.boardData.attendance.absent"
-        :key="'absent-' + index"
-        class="gray-text"
-      >
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
-        ><span style="white-space: nowrap">{{ name }}</span>
-      </h3>
-      <h2>
-        <snap style="white-space: nowrap">迟到</snap>
-        :
-        <snap style="white-space: nowrap">
-          {{ state.boardData.attendance.late.length }}人
-        </snap>
-      </h2>
-      <h3
-        v-for="(name, index) in state.boardData.attendance.late"
-        :key="'late-' + index"
-        class="gray-text"
-      >
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
-        ><span style="white-space: nowrap">{{ name }}</span>
-      </h3>
-      <h2>
-        <snap style="white-space: nowrap">不参与</snap>
-        :
-        <snap style="white-space: nowrap">
-          {{ state.boardData.attendance.exclude.length }}人
-        </snap>
-      </h2>
-      <h3
-        v-for="(name, index) in state.boardData.attendance.exclude"
-        :key="'exclude-' + index"
-        class="gray-text"
-      >
-        <span v-if="useDisplay().lgAndUp.value">{{ `${index + 1}. ` }}</span
-        ><span style="white-space: nowrap">{{ name }}</span>
-      </h3>
-    </v-col>
+    <attendance-sidebar
+      v-if="!mobile"
+      :student-list="state.studentList"
+      :attendance="state.boardData.attendance"
+      @click="setAttendanceArea"
+    />
   </div>
 
   <homework-edit-dialog
@@ -322,267 +116,14 @@
     {{ state.snackbarText }}
   </v-snackbar>
 
-  <v-dialog
+  <attendance-management-dialog
     v-model="state.attendanceDialog"
-    fullscreen-breakpoint="sm"
-    max-width="900"
-    @update:model-value="handleAttendanceDialogClose"
-  >
-    <v-card>
-      <v-card-title class="d-flex align-center">
-        <v-icon class="mr-2" icon="mdi-account-group" />
-        出勤状态管理
-        <v-spacer />
-        <v-chip class="ml-2" color="primary" size="small">
-          {{ state.dateString }}
-        </v-chip>
-      </v-card-title>
-
-      <v-card-text>
-        <!-- 批量操作和搜索 -->
-        <v-row class="mb-4">
-          <v-col cols="12" md="12">
-            <v-text-field
-              v-model="attendanceSearch"
-              clearable
-              hint="支持筛选姓氏，如输入'孙'可筛选所有姓孙的学生"
-              label="搜索学生"
-              prepend-inner-icon="mdi-magnify"
-              variant="outlined"
-              @update:model-value="handleSearchChange"
-            />
-
-            <!-- 姓氏筛选 -->
-            <div class="d-flex flex-wrap mt-2 gap-1">
-              <v-btn
-                v-for="surname in extractedSurnames"
-                :key="surname.name"
-                :color="attendanceSearch === surname.name ? 'primary' : ''"
-                :variant="
-                  attendanceSearch === surname.name ? 'elevated' : 'text'
-                "
-                @click="
-                  attendanceSearch =
-                    attendanceSearch === surname.name ? '' : surname.name
-                "
-              >
-                {{ surname.name }}
-                ({{ surname.count }})
-              </v-btn>
-            </div>
-          </v-col>
-        </v-row>
-
-        <!-- 过滤器 -->
-        <div class="d-flex flex-wrap mb-4 gap-2">
-          <div>
-            <v-chip
-              :append-icon="
-                attendanceFilter.includes('present') ? 'mdi-check' : ''
-              "
-              :color="attendanceFilter.includes('present') ? 'success' : ''"
-              :variant="
-                attendanceFilter.includes('present') ? 'elevated' : 'tonal'
-              "
-              class="px-2 filter-chip"
-              prepend-icon="mdi-account-check"
-              value="present"
-              @click="toggleFilter('present')"
-            >
-              到课
-            </v-chip>
-
-            <v-chip
-              :append-icon="
-                attendanceFilter.includes('absent') ? 'mdi-check' : ''
-              "
-              :color="attendanceFilter.includes('absent') ? 'error' : ''"
-              :variant="
-                attendanceFilter.includes('absent') ? 'elevated' : 'tonal'
-              "
-              class="px-2 filter-chip"
-              prepend-icon="mdi-account-off"
-              value="absent"
-              @click="toggleFilter('absent')"
-            >
-              请假
-            </v-chip>
-            <v-chip
-              :append-icon="
-                attendanceFilter.includes('late') ? 'mdi-check' : ''
-              "
-              :color="attendanceFilter.includes('late') ? 'warning' : ''"
-              :variant="
-                attendanceFilter.includes('late') ? 'elevated' : 'tonal'
-              "
-              class="px-2 filter-chip"
-              prepend-icon="mdi-clock-alert"
-              value="late"
-              @click="toggleFilter('late')"
-            >
-              迟到
-            </v-chip>
-            <v-chip
-              :append-icon="
-                attendanceFilter.includes('exclude') ? 'mdi-check' : ''
-              "
-              :color="attendanceFilter.includes('exclude') ? 'grey' : ''"
-              :variant="
-                attendanceFilter.includes('exclude') ? 'elevated' : 'tonal'
-              "
-              class="px-2 filter-chip"
-              prepend-icon="mdi-account-cancel"
-              value="exclude"
-              @click="toggleFilter('exclude')"
-            >
-              不参与
-            </v-chip>
-          </div>
-        </div>
-
-        <!-- 学生列表 -->
-        <v-row>
-          <v-col
-            v-for="student in filteredStudents"
-            :key="student"
-            cols="12"
-            lg="4"
-            md="6"
-            sm="6"
-          >
-            <v-card border class="student-card">
-              <v-card-text class="d-flex align-center pa-2">
-                <div class="flex-grow-1">
-                  <div class="d-flex align-center">
-                    <v-avatar
-                      :color="
-                        getStudentStatusColor(
-                          state.studentList.indexOf(student)
-                        )
-                      "
-                      class="mr-2"
-                      size="24"
-                    >
-                      <v-icon size="small"
-                        >{{
-                          getStudentStatusIcon(
-                            state.studentList.indexOf(student)
-                          )
-                        }}
-                      </v-icon>
-                    </v-avatar>
-                    <div class="text-subtitle-1">{{ student }}</div>
-                  </div>
-                </div>
-                <div class="attendance-actions">
-                  <v-btn
-                    :color="
-                      isPresent(state.studentList.indexOf(student))
-                        ? 'success'
-                        : ''
-                    "
-                    :title="'设为到课'"
-                    icon="mdi-account-check"
-                    size="small"
-                    variant="text"
-                    @click="setPresent(state.studentList.indexOf(student))"
-                  />
-                  <v-btn
-                    :color="
-                      isAbsent(state.studentList.indexOf(student))
-                        ? 'error'
-                        : ''
-                    "
-                    :title="'设为请假'"
-                    icon="mdi-account-off"
-                    size="small"
-                    variant="text"
-                    @click="setAbsent(state.studentList.indexOf(student))"
-                  />
-                  <v-btn
-                    :color="
-                      isLate(state.studentList.indexOf(student))
-                        ? 'warning'
-                        : ''
-                    "
-                    :title="'设为迟到'"
-                    icon="mdi-clock-alert"
-                    size="small"
-                    variant="text"
-                    @click="setLate(state.studentList.indexOf(student))"
-                  />
-                  <v-btn
-                    :color="
-                      isExclude(state.studentList.indexOf(student))
-                        ? 'grey'
-                        : ''
-                    "
-                    :title="'设为不参与'"
-                    icon="mdi-account-cancel"
-                    size="small"
-                    variant="text"
-                    @click="setExclude(state.studentList.indexOf(student))"
-                  />
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12" md="12">
-            <v-card class="mb-4" color="primary" variant="tonal">
-              <v-card-text>
-                <div class="text-subtitle-2 mb-2">批量操作</div>
-                <v-btn-group>
-                  <v-btn
-                    color="success"
-                    prepend-icon="mdi-account-check"
-                    @click="setAllPresent"
-                  >
-                    全部到齐
-                  </v-btn>
-                  <v-btn
-                    color="error"
-                    prepend-icon="mdi-account-off"
-                    @click="setAllAbsent"
-                  >
-                    全部请假
-                  </v-btn>
-                </v-btn-group>
-                <v-btn-group>
-                  <v-btn
-                    color="warning"
-                    prepend-icon="mdi-clock-alert"
-                    @click="setAllLate"
-                  >
-                    全部迟到
-                  </v-btn>
-                  <v-btn
-                    color="grey"
-                    prepend-icon="mdi-account-cancel"
-                    @click="setAllExclude"
-                  >
-                    全部不参与
-                  </v-btn>
-                </v-btn-group>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-card-text>
-
-      <v-divider />
-
-      <v-card-actions>
-        <v-spacer />
-
-        <v-btn color="primary" @click="saveAttendance">
-          <v-icon start>mdi-content-save</v-icon>
-          保存
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+    :student-list="state.studentList"
+    :attendance="state.boardData.attendance"
+    :date-string="state.dateString"
+    @save="saveAttendance"
+    @change="state.synced = false"
+  />
 
   <message-log ref="messageLog" />
 
@@ -692,6 +233,10 @@ import HomeworkEditDialog from "@/components/HomeworkEditDialog.vue";
 import InitServiceChooser from "@/components/InitServiceChooser.vue";
 import StudentNameManager from "@/components/StudentNameManager.vue";
 import UrgentTestDialog from "@/components/UrgentTestDialog.vue";
+import AttendanceSidebar from "@/components/attendance/AttendanceSidebar.vue";
+import AttendanceManagementDialog from "@/components/attendance/AttendanceManagementDialog.vue";
+import HomeworkGrid from "@/components/home/HomeworkGrid.vue";
+import HomeActions from "@/components/home/HomeActions.vue";
 import dataProvider from "@/utils/dataProvider";
 import {
   getSetting,
@@ -704,7 +249,6 @@ import { useDisplay } from "vuetify";
 import "../styles/index.scss";
 import "../styles/transitions.scss";
 import "../styles/global.scss";
-import { pinyin } from "pinyin-pro";
 import { debounce, throttle } from "@/utils/debounce";
 import { Base64 } from "js-base64";
 import {
@@ -729,6 +273,14 @@ export default {
     ChatWidget,
     StudentNameManager,
     UrgentTestDialog,
+    AttendanceSidebar,
+    AttendanceManagementDialog,
+    HomeworkGrid,
+    HomeActions,
+  },
+  setup() {
+    const { mobile } = useDisplay();
+    return { mobile };
   },
   data() {
     const defaultSubjects = [
@@ -801,8 +353,6 @@ export default {
         resolve: null,
         reject: null,
       },
-      attendanceSearch: "",
-      attendanceFilter: [],
       urlConfigDialog: {
         show: false,
         config: null,
@@ -850,7 +400,7 @@ export default {
 
   computed: {
     isMobile() {
-      return useDisplay().mobile.value;
+      return this.mobile;
     },
     titleText() {
       // 优先展示当前设备名称（如果已从云端获取）
@@ -876,37 +426,59 @@ export default {
       }
     },
     sortedItems() {
-      const key = `${JSON.stringify(
-        this.state.boardData.homework
-      )}_${this.subjectOrder.join()}_${this.dynamicSort}`;
-      if (this.sortedItemsCache.key === key) {
-        return this.sortedItemsCache.value;
+      const items = [];
+
+      // 如果是移动端，添加出勤卡片
+      if (this.mobile) {
+        items.push({
+          key: 'attendance-card',
+          name: '出勤统计',
+          type: 'attendance',
+          data: {
+            total: this.state.studentList.length,
+            absent: this.state.boardData.attendance.absent,
+            late: this.state.boardData.attendance.late,
+            exclude: this.state.boardData.attendance.exclude
+          }
+        });
       }
 
-      const items = Object.entries(this.state.boardData.homework)
-        .filter(([, value]) => value.content?.trim())
-        .map(([key, value]) => ({
-          key,
-          name:
-            this.state.availableSubjects.find((s) => s.name === key)?.name ||
-            key,
-          content: value.content,
-          order: this.subjectOrder.indexOf(key),
-          rowSpan: Math.ceil(
-            (value.content.split("\n").filter((line) => line.trim()).length +
-              1) *
-              0.8
-          ),
-        }));
+      // 添加作业卡片
+      for (const subject of this.state.availableSubjects) {
+        const subjectKey = subject.name;
+        const subjectData = this.state.boardData.homework[subjectKey];
 
-      const maxColumns = Math.min(3, Math.floor(window.innerWidth / 300));
-      const result = this.dynamicSort
-        ? items.sort((a, b) => a.order - b.order)
-        : items.sort((a, b) => a.order - b.order);
+        if (subjectData && subjectData.content) {
+          items.push({
+            key: subjectKey,
+            name: subjectKey,
+            type: 'homework',
+            content: subjectData.content,
+            order: subject.order,
+            rowSpan: Math.ceil((subjectData.content.split("\n").filter((line) => line.trim()).length + 1) * 0.8),
+          });
+        }
+      }
 
-      this.updateSortedItemsCache(key, result);
+      // 添加自定义卡片
+      for (const key in this.state.boardData.homework) {
+        if (key.startsWith('custom-')) {
+          const card = this.state.boardData.homework[key];
+          items.push({
+            key: key,
+            name: card.name,
+            type: 'custom',
+            content: card.content,
+            order: 9999, // Put at the end
+            rowSpan: Math.ceil((card.content.split("\n").filter((line) => line.trim()).length + 1) * 0.8),
+          });
+        }
+      }
 
-      return result;
+      // 按照顺序排序
+      items.sort((a, b) => a.order - b.order);
+
+      return items;
     },
     unusedSubjects() {
       const usedKeys = Object.keys(this.state.boardData.homework).filter(
@@ -984,6 +556,9 @@ export default {
     showAntiScreenBurnCard() {
       return getSetting("display.showAntiScreenBurnCard");
     },
+    showTestCardButton() {
+      return getSetting("developer.enabled");
+    },
     shouldShowInit() {
       const provider = getSetting("server.provider");
       const isKv = provider === "kv-server" || provider === "classworkscloud";
@@ -1014,65 +589,8 @@ export default {
         this.tokenInfo.deviceType === "classroom"
       );
     },
-    filteredStudents() {
-      let students = [...this.state.studentList];
 
-      if (this.attendanceSearch) {
-        const searchTerm = this.attendanceSearch.toLowerCase();
-        students = students.filter((student) =>
-          student.toLowerCase().includes(searchTerm)
-        );
-      }
 
-      if (this.attendanceFilter && this.attendanceFilter.length > 0) {
-        students = students.filter((student) => {
-          const index = this.state.studentList.indexOf(student);
-          if (
-            this.attendanceFilter.includes("present") &&
-            this.isPresent(index)
-          )
-            return true;
-          if (this.attendanceFilter.includes("absent") && this.isAbsent(index))
-            return true;
-          if (this.attendanceFilter.includes("late") && this.isLate(index))
-            return true;
-          if (
-            this.attendanceFilter.includes("exclude") &&
-            this.isExclude(index)
-          )
-            return true;
-          return false;
-        });
-      }
-
-      return students;
-    },
-    extractedSurnames() {
-      if (!this.state.studentList || this.state.studentList.length === 0) {
-        return [];
-      }
-
-      const surnameMap = new Map();
-
-      this.state.studentList.forEach((student) => {
-        if (student && student.length > 0) {
-          const surname = student.charAt(0);
-          if (surnameMap.has(surname)) {
-            surnameMap.set(surname, surnameMap.get(surname) + 1);
-          } else {
-            surnameMap.set(surname, 1);
-          }
-        }
-      });
-
-      return Array.from(surnameMap.entries())
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => {
-          const pinyinA = pinyin(a.name, { toneType: "none", mode: "surname" });
-          const pinyinB = pinyin(b.name, { toneType: "none", mode: "surname" });
-          return pinyinA.localeCompare(pinyinB);
-        });
-    },
     subjectOrder() {
       return [...this.state.availableSubjects]
         .sort((a, b) => a.order - b.order)
@@ -1483,9 +1001,14 @@ export default {
         this.state.boardData.homework[this.currentEditSubject]?.content || "";
 
       if (content !== originalContent.trim()) {
-        this.state.boardData.homework[this.currentEditSubject] = {
-          content: content,
-        };
+        // 如果是自定义卡片，保留其他属性
+        if (this.state.boardData.homework[this.currentEditSubject].type === 'custom') {
+          this.state.boardData.homework[this.currentEditSubject].content = content;
+        } else {
+          this.state.boardData.homework[this.currentEditSubject] = {
+            content: content,
+          };
+        }
 
         this.state.synced = false;
 
@@ -1560,6 +1083,15 @@ export default {
     },
 
     async openDialog(subject) {
+      // 如果是自定义卡片
+      if (subject.startsWith('custom-')) {
+        this.currentEditSubject = subject;
+        this.state.dialogTitle = this.state.boardData.homework[subject].name;
+        this.state.textarea = this.state.boardData.homework[subject].content;
+        this.state.dialogVisible = true;
+        return;
+      }
+
       if (this.refreshBeforeEdit) {
         try {
           await this.downloadData();
@@ -1585,9 +1117,14 @@ export default {
     async handleHomeworkSave(content) {
       if (!this.currentEditSubject) return;
 
-      this.state.boardData.homework[this.currentEditSubject] = {
-        content: content,
-      };
+      // 如果是自定义卡片，保留其他属性
+      if (this.state.boardData.homework[this.currentEditSubject].type === 'custom') {
+        this.state.boardData.homework[this.currentEditSubject].content = content;
+      } else {
+        this.state.boardData.homework[this.currentEditSubject] = {
+          content: content,
+        };
+      }
 
       this.state.synced = false;
 
@@ -1596,51 +1133,11 @@ export default {
       }
     },
 
-    splitPoint(content) {
-      return content.split("\n").filter((text) => text.trim());
-    },
-
     setAttendanceArea() {
       this.state.attendanceDialog = true;
     },
 
-    toggleStudentStatus(index) {
-      const student = this.state.studentList[index];
-      if (this.state.boardData.attendance.absent.includes(student)) {
-        this.state.boardData.attendance.absent =
-          this.state.boardData.attendance.absent.filter(
-            (name) => name !== student
-          );
-        this.state.boardData.attendance.late.push(student);
-      } else if (this.state.boardData.attendance.late.includes(student)) {
-        this.state.boardData.attendance.late =
-          this.state.boardData.attendance.late.filter(
-            (name) => name !== student
-          );
-        this.state.boardData.attendance.exclude.push(student);
-      } else if (this.state.boardData.attendance.exclude.includes(student)) {
-        this.state.boardData.attendance.exclude =
-          this.state.boardData.attendance.exclude.filter(
-            (name) => name !== student
-          );
-      } else {
-        this.state.boardData.attendance.absent.push(student);
-      }
-      this.state.synced = false;
-      if (this.canAutoSave) {
-        this.uploadData();
-      }
-    },
 
-    cleanstudentslist() {
-      this.state.boardData.attendance.absent = [];
-      this.state.boardData.attendance.late = [];
-      this.state.boardData.attendance.exclude = [];
-      this.state.synced = false;
-      if (this.canAutoSave) {
-        this.uploadData();
-      }
-    },
 
     zoom(direction) {
       const step = 2;
@@ -1836,98 +1333,7 @@ export default {
       }
     },
 
-    setAllPresent() {
-      this.state.boardData.attendance = {
-        absent: [],
-        late: [],
-        exclude: [],
-      };
-      this.state.synced = false;
-    },
 
-    setAllAbsent() {
-      this.state.boardData.attendance.absent = [...this.state.studentList];
-      this.state.boardData.attendance.late = [];
-      this.state.boardData.attendance.exclude = [];
-      this.state.synced = false;
-    },
-
-    setAllLate() {
-      this.state.boardData.attendance.absent = [];
-      this.state.boardData.attendance.late = [...this.state.studentList];
-      this.state.boardData.attendance.exclude = [];
-      this.state.synced = false;
-    },
-    setAllExclude() {
-      this.state.boardData.attendance.absent = [];
-      this.state.boardData.attendance.late = [];
-      this.state.boardData.attendance.exclude = [...this.state.studentList];
-      this.state.synced = false;
-    },
-
-    isPresent(index) {
-      const student = this.state.studentList[index];
-      const { absent, late, exclude } = this.state.boardData.attendance;
-      return (
-        !absent.includes(student) &&
-        !late.includes(student) &&
-        !exclude.includes(student)
-      );
-    },
-
-    isAbsent(index) {
-      return this.state.boardData.attendance.absent.includes(
-        this.state.studentList[index]
-      );
-    },
-
-    isLate(index) {
-      return this.state.boardData.attendance.late.includes(
-        this.state.studentList[index]
-      );
-    },
-
-    isExclude(index) {
-      return this.state.boardData.attendance.exclude.includes(
-        this.state.studentList[index]
-      );
-    },
-
-    setPresent(index) {
-      const student = this.state.studentList[index];
-      this.state.boardData.attendance.absent =
-        this.state.boardData.attendance.absent.filter(
-          (name) => name !== student
-        );
-      this.state.boardData.attendance.late =
-        this.state.boardData.attendance.late.filter((name) => name !== student);
-      this.state.boardData.attendance.exclude =
-        this.state.boardData.attendance.exclude.filter(
-          (name) => name !== student
-        );
-      this.state.synced = false;
-    },
-
-    setAbsent(index) {
-      const student = this.state.studentList[index];
-      this.setPresent(index);
-      this.state.boardData.attendance.absent.push(student);
-      this.state.synced = false;
-    },
-
-    setLate(index) {
-      const student = this.state.studentList[index];
-      this.setPresent(index);
-      this.state.boardData.attendance.late.push(student);
-      this.state.synced = false;
-    },
-
-    setExclude(index) {
-      const student = this.state.studentList[index];
-      this.setPresent(index);
-      this.state.boardData.attendance.exclude.push(student);
-      this.state.synced = false;
-    },
 
     async saveAttendance() {
       try {
@@ -1950,25 +1356,14 @@ export default {
       };
     },
 
-    handleMouseMove(e) {
-      const card = e.currentTarget;
-      const rect = card.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      card.style.setProperty("--x", `${x}%`);
-      card.style.setProperty("--y", `${y}%`);
-    },
-
-    handleTouchMove(e) {
-      if (e.touches.length === 1) {
-        const touch = e.touches[0];
-        const card = e.currentTarget;
-        const rect = card.getBoundingClientRect();
-        const x = ((touch.clientX - rect.left) / rect.width) * 100;
-        const y = ((touch.clientY - rect.top) / rect.height) * 100;
-        card.style.setProperty("--x", `${x}%`);
-        card.style.setProperty("--y", `${y}%`);
-      }
+    addTestCard() {
+      const id = Date.now().toString();
+      this.state.boardData.homework[`custom-${id}`] = {
+        name: "测试卡片",
+        content: "这是一个测试卡片\n可以用来测试布局",
+        type: "custom",
+      };
+      this.state.synced = false;
     },
 
     showConfirmDialog() {
@@ -2054,59 +1449,7 @@ export default {
       );
     },
 
-    getStudentStatusColor(index) {
-      const studentName = this.state.studentList[index];
-      if (this.state.boardData.attendance.absent.includes(studentName))
-        return "error";
-      if (this.state.boardData.attendance.late.includes(studentName))
-        return "warning";
-      if (this.state.boardData.attendance.exclude.includes(studentName))
-        return "grey";
-      return "success";
-    },
 
-    getStudentStatusVariant(index) {
-      const studentName = this.state.studentList[index];
-      if (
-        this.state.boardData.attendance.absent.includes(studentName) ||
-        this.state.boardData.attendance.late.includes(studentName) ||
-        this.state.boardData.attendance.exclude.includes(studentName)
-      ) {
-        return "tonal";
-      }
-      return "outlined";
-    },
-
-    getStudentStatusIcon(index) {
-      const studentName = this.state.studentList[index];
-      if (this.state.boardData.attendance.absent.includes(studentName))
-        return "mdi-account-off";
-      if (this.state.boardData.attendance.late.includes(studentName))
-        return "mdi-clock-alert";
-      if (this.state.boardData.attendance.exclude.includes(studentName))
-        return "mdi-account-cancel";
-      return "mdi-account-check";
-    },
-
-    getStudentStatusText(index) {
-      const studentName = this.state.studentList[index];
-      if (this.state.boardData.attendance.absent.includes(studentName))
-        return "请假";
-      if (this.state.boardData.attendance.late.includes(studentName))
-        return "迟到";
-      if (this.state.boardData.attendance.exclude.includes(studentName))
-        return "不参与";
-      return "到课";
-    },
-
-    toggleFilter(filter) {
-      const index = this.attendanceFilter.indexOf(filter);
-      if (index === -1) {
-        this.attendanceFilter.push(filter);
-      } else {
-        this.attendanceFilter.splice(index, 1);
-      }
-    },
 
     openRandomPicker() {
       if (this.$refs.randomPicker) {

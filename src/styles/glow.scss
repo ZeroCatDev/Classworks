@@ -1,0 +1,28 @@
+.glow-effect {
+  transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 0 15px rgba(var(--v-theme-primary), 0.5);
+    transform: translateY(-2px);
+  }
+}
+
+.glow-text {
+  text-shadow: 0 0 5px rgba(var(--v-theme-primary), 0.5);
+}
+
+.bloom-container {
+  .v-card {
+    transition: box-shadow 0.3s ease;
+    &:hover {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1), 0 0 15px rgba(var(--v-theme-primary), 0.3) !important;
+    }
+  }
+
+  .v-btn {
+    transition: box-shadow 0.3s ease;
+    &:hover {
+      box-shadow: 0 0 10px rgba(var(--v-theme-primary), 0.4);
+    }
+  }
+}
