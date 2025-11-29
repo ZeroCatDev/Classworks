@@ -899,8 +899,9 @@ export default {
           ),
         }));
 
+      const maxColumns = Math.min(3, Math.floor(window.innerWidth / 300));
       const result = this.dynamicSort
-        ? this.optimizeGridLayout(items)
+        ? items.sort((a, b) => a.order - b.order)
         : items.sort((a, b) => a.order - b.order);
 
       this.updateSortedItemsCache(key, result);
@@ -1712,54 +1713,22 @@ export default {
 
       try {
         const selectedDate = this.ensureDate(newDate);
-        const formattedDate = this.formatDate(selectedDate);
+        const dateStr = this.formatDate(selectedDate);
 
-        if (this.state.dateString !== formattedDate) {
-          this.state.dateString = formattedDate;
-          this.state.selectedDate = formattedDate;
-          this.state.selectedDateObj = selectedDate;
-          this.state.isToday =
-            formattedDate === this.formatDate(this.getToday());
+        if (dateStr === this.state.dateString) return;
 
-          this.$router
-            .replace({
-              query: { date: formattedDate },
-            })
-            .catch(() => {});
+        this.state.dateString = dateStr;
+        this.state.selectedDate = dateStr;
+        this.state.selectedDateObj = selectedDate;
+        this.state.isToday =
+          dateStr === this.formatDate(this.getToday());
 
-          // Load both data and subjects in parallel, force clear data when switching dates
-          await Promise.all([this.downloadData(true), this.loadSubjects()]);
-        }
+        // Load both data and subjects in parallel, force clear data when switching dates
+        await Promise.all([this.downloadData(true), this.loadSubjects()]);
       } catch (error) {
         console.error("Date processing error:", error);
         this.$message.error("日期处理错误", "请重新选择日期");
       }
-    },
-
-    optimizeGridLayout(items) {
-      const maxColumns = Math.min(3, Math.floor(window.innerWidth / 300));
-      if (maxColumns <= 1) return items;
-
-      const columns = Array.from({ length: maxColumns }, () => ({
-        height: 0,
-        items: [],
-      }));
-
-      items.forEach((item) => {
-        const shortestColumn = columns.reduce(
-          (min, col, i) => (col.height < columns[min].height ? i : min),
-          0
-        );
-        columns[shortestColumn].items.push(item);
-        columns[shortestColumn].height += item.rowSpan;
-      });
-
-      return columns
-        .flatMap((col) => col.items)
-        .map((item, index) => ({
-          ...item,
-          order: index,
-        }));
     },
 
     // 实时频道：加入设备房间并监听键变化
