@@ -14,6 +14,9 @@ importers:
       '@examaware-cs/player':
         specifier: ^1.0.2
         version: 1.0.2(tdesign-vue-next@1.17.5(vue@3.5.25(typescript@5.9.3)))(vue@3.5.25(typescript@5.9.3))
+      '@fingerprintjs/fingerprintjs':
+        specifier: ^5.0.1
+        version: 5.0.1
       '@mdi/font':
         specifier: 7.4.47
         version: 7.4.47
@@ -870,6 +873,9 @@ packages:
     peerDependencies:
       tdesign-vue-next: ^1.15.5
       vue: ^3.0.0
+
+  '@fingerprintjs/fingerprintjs@5.0.1':
+    resolution: {integrity: sha512-KbaeE/rk2WL8MfpRP6jTI4lSr42SJPjvkyrjP3QU6uUDkOMWWYC2Ts1sNSYcegHC8avzOoYTHBj+2fTqvZWQBA==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -4558,6 +4564,8 @@ snapshots:
       simple-keyboard: 3.8.92
       tdesign-vue-next: 1.17.5(vue@3.5.25(typescript@5.9.3))
       vue: 3.5.25(typescript@5.9.3)
+
+  '@fingerprintjs/fingerprintjs@5.0.1': {}
 
   '@humanfs/core@0.19.1': {}
 
