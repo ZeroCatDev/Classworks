@@ -687,11 +687,6 @@ export default {
         console.error('删除失败', e)
         this.$message?.error('删除失败')
       }
-    },
-
-    deletePersistentNotification(id) {
-      this.itemToDelete = id
-      this.deleteConfirmDialog = true
     }
   }
 }
