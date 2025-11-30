@@ -7,10 +7,7 @@
         elevation="4"
         rounded="xl"
       >
-        <v-btn-group
-          class="toolbar-buttons"
-          variant="text"
-        >
+        <v-btn-group class="toolbar-buttons" variant="text">
           <v-btn
             v-ripple
             :title="'查看昨天'"
@@ -35,10 +32,7 @@
             variant="text"
             @click="$emit('zoom', 'up')"
           />
-          <v-menu
-            :close-on-content-click="false"
-            location="top"
-          >
+          <v-menu :close-on-content-click="false" location="top">
             <template #activator="{ props }">
               <v-btn
                 v-ripple
@@ -49,10 +43,7 @@
                 variant="text"
               />
             </template>
-            <v-card
-              border
-              class="date-picker-card"
-            >
+            <v-card border class="date-picker-card">
               <v-date-picker
                 :model-value="selectedDate"
                 color="primary"
@@ -97,9 +88,7 @@
         size="large"
         text="复制作业内容到今天"
         @click="$emit('copy-to-today')"
-      >
-        复制到今天
-      </v-btn>
+      >复制到今天</v-btn>
     </v-slide-x-reverse-transition>
   </div>
 </template>

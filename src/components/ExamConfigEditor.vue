@@ -11,9 +11,7 @@
       @click:close="error = ''"
     >
       <div class="d-flex align-center">
-        <v-icon class="mr-2">
-          mdi-alert-circle
-        </v-icon>
+        <v-icon class="mr-2">mdi-alert-circle</v-icon>
         {{ error }}
       </div>
     </v-alert>
@@ -29,9 +27,7 @@
       @click:close="success = ''"
     >
       <div class="d-flex align-center">
-        <v-icon class="mr-2">
-          mdi-check-circle
-        </v-icon>
+        <v-icon class="mr-2">mdi-check-circle</v-icon>
         {{ success }}
       </div>
     </v-alert>
@@ -47,49 +43,29 @@
       <div class="d-flex align-center">
         <span class="font-weight-bold">配置验证失败，请检查以下问题：</span>
       </div>
-      <v-list
-        class="bg-transparent"
-        density="compact"
-      >
+      <v-list class="bg-transparent" density="compact">
         <v-list-item
           v-for="(error, index) in validationErrors"
           :key="index"
           class="px-0 py-0"
         >
-          <template #prepend>
-            <v-icon
-              color="warning"
-              size="small"
-            >
-              mdi-circle-small
-            </v-icon>
+          <template v-slot:prepend>
+            <v-icon color="warning" size="small">mdi-circle-small</v-icon>
           </template>
-          <v-list-item-title class="text-body-2">
-            {{ error }}
-          </v-list-item-title>
+          <v-list-item-title class="text-body-2">{{ error }}</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-alert>
 
     <!-- 加载状态 -->
-    <v-card
-      v-if="loading"
-      class="my-4"
-      outlined
-    >
+    <v-card v-if="loading" class="my-4" outlined>
       <v-card-text>
-        <v-skeleton-loader
-          class="mx-auto"
-          type="article"
-        />
+        <v-skeleton-loader class="mx-auto" type="article"></v-skeleton-loader>
       </v-card-text>
     </v-card>
 
     <!-- 模式切换按钮和操作按钮 -->
-    <div
-      v-if="!loading"
-      class="d-flex justify-space-between align-center mb-4"
-    >
+    <div v-if="!loading" class="d-flex justify-space-between align-center mb-4">
       <div class="d-flex align-center gap-2">
         <v-btn
           :disabled="!isValidConfig"
@@ -120,31 +96,19 @@
           class="text-error"
           prepend-icon="mdi-delete"
           @click="confirmDelete"
+
         >
           删除配置
         </v-btn>
-        <v-btn
-          :value="false"
-          prepend-icon="mdi-eye"
-        >
-          预览
-        </v-btn>
-        <v-btn
-          :value="true"
-          prepend-icon="mdi-pencil"
-        >
-          编辑
-        </v-btn>
+        <v-btn :value="false" prepend-icon="mdi-eye"> 预览</v-btn>
+        <v-btn :value="true" prepend-icon="mdi-pencil"> 编辑</v-btn>
       </v-btn-toggle>
     </div>
 
     <!-- 预览模式 -->
     <div v-if="!loading && !isEditMode">
       <div class="mb-8">
-        <div
-          class="text-h3 font-weight-bold"
-          style="line-height: 1.2"
-        >
+        <div class="text-h3 font-weight-bold" style="line-height: 1.2">
           {{ localConfig.examName || "未设置考试名称" }}
         </div>
         <div
@@ -153,14 +117,8 @@
         >
           {{ localConfig.message || "未设置考试提示" }}
         </div>
-        <v-chip
-          v-if="localConfig.room"
-          class="px-4 py-2"
-          size="large"
-        >
-          <v-icon start>
-            mdi-home
-          </v-icon>
+        <v-chip v-if="localConfig.room" class="px-4 py-2" size="large">
+          <v-icon start>mdi-home</v-icon>
           考场：{{ localConfig.room }}
         </v-chip>
       </div>
@@ -176,29 +134,20 @@
             lg="4"
             md="6"
           >
-            <v-card
-              class="h-100"
-              hover
-              variant="tonal"
-            >
+            <v-card class="h-100" hover variant="tonal">
               <v-card-title class="bg-primary-lighten-5 pa-4">
                 <div class="d-flex align-center">
-                  <v-icon class="mr-2">
-                    mdi-book-open-page-variant
-                  </v-icon>
+                  <v-icon class="mr-2">mdi-book-open-page-variant</v-icon>
                   <span class="">{{ examInfo.name || "未设置科目" }}</span>
                 </div>
               </v-card-title>
               <v-card-text class="pa-4">
                 <div class="mb-3">
                   <div class="d-flex align-center mb-1">
-                    <v-icon
-                      class="mr-2"
-                      color="success"
-                      size="small"
+                    <v-icon class="mr-2" color="success" size="small"
+                    >mdi-clock-start
+                    </v-icon
                     >
-                      mdi-clock-start
-                    </v-icon>
                     <span class="text-body-2 text-grey-darken-1">开始时间</span>
                   </div>
                   <div class="text-h6 font-weight-medium text-success">
@@ -207,13 +156,10 @@
                 </div>
                 <div>
                   <div class="d-flex align-center mb-1">
-                    <v-icon
-                      class="mr-2"
-                      color="error"
-                      size="small"
+                    <v-icon class="mr-2" color="error" size="small"
+                    >mdi-clock-end
+                    </v-icon
                     >
-                      mdi-clock-end
-                    </v-icon>
                     <span class="text-body-2 text-grey-darken-1">结束时间</span>
                   </div>
                   <div class="text-h6 font-weight-medium text-error">
@@ -225,50 +171,29 @@
           </v-col>
         </v-row>
       </div>
-      <div
-        v-else
-        class="text-center py-12"
-      >
-        <v-icon
-          class="mb-4"
-          color="grey-lighten-2"
-          size="80"
-        >
+      <div v-else class="text-center py-12">
+        <v-icon class="mb-4" color="grey-lighten-2" size="80">
           mdi-calendar-blank
         </v-icon>
-        <div class="text-h5 text-grey-darken-1 mb-2">
-          暂无考试科目安排
-        </div>
+        <div class="text-h5 text-grey-darken-1 mb-2">暂无考试科目安排</div>
         <div class="text-body-1 text-grey mb-4">
           点击上方"添加科目"按钮开始配置考试时间表
         </div>
-        <v-btn
-          color="primary"
-          variant="outlined"
-          @click="quickEdit"
-        >
-          <v-icon start>
-            mdi-plus
-          </v-icon>
+        <v-btn color="primary" variant="outlined" @click="quickEdit">
+          <v-icon start>mdi-plus</v-icon>
           立即添加
         </v-btn>
       </div>
 
       <!-- JSON预览 -->
-      <v-card
-        border
-        class="mb-4"
-        elevation="2"
-      >
+      <v-card border class="mb-4" elevation="2">
         <v-card-title
           class="d-flex align-center text-white cursor-pointer"
           @click="showJsonPreview = !showJsonPreview"
         >
-          <v-icon class="mr-2">
-            mdi-code-json
-          </v-icon>
+          <v-icon class="mr-2">mdi-code-json</v-icon>
           JSON配置预览
-          <v-spacer />
+          <v-spacer></v-spacer>
           <v-btn
             color="white"
             prepend-icon="mdi-content-copy"
@@ -284,17 +209,12 @@
             color="white"
             size="small"
             variant="text"
-          />
+          >
+          </v-btn>
         </v-card-title>
         <v-expand-transition>
-          <v-card-text
-            v-show="showJsonPreview"
-            class="pa-4"
-          >
-            <v-card
-              class="pa-4"
-              variant="tonal"
-            >
+          <v-card-text v-show="showJsonPreview" class="pa-4">
+            <v-card class="pa-4" variant="tonal">
               <pre class="json-preview"><code>{{ formattedJson }}</code></pre>
             </v-card>
           </v-card-text>
@@ -305,23 +225,14 @@
     <!-- 编辑模式 -->
     <div v-if="!loading && isEditMode">
       <!-- 基本信息 -->
-      <v-card
-        border
-        class="mb-4"
-        elevation="1"
-      >
+      <v-card border class="mb-4" elevation="1">
         <v-card-title class="d-flex align-center">
-          <v-icon class="mr-2">
-            mdi-information
-          </v-icon>
+          <v-icon class="mr-2">mdi-information</v-icon>
           基本信息
         </v-card-title>
         <v-card-text class="pa-4">
           <v-row>
-            <v-col
-              cols="12"
-              md="6"
-            >
+            <v-col cols="12" md="6">
               <v-text-field
                 v-model="localConfig.examName"
                 :rules="[(v) => !!v || '考试名称不能为空']"
@@ -329,18 +240,15 @@
                 prepend-inner-icon="mdi-calendar-text"
                 required
                 variant="outlined"
-              />
+              ></v-text-field>
             </v-col>
-            <v-col
-              cols="12"
-              md="6"
-            >
+            <v-col cols="12" md="6">
               <v-text-field
                 v-model="localConfig.room"
                 label="考场号（标准ES尚不支持此配置）"
                 prepend-inner-icon="mdi-home"
                 variant="outlined"
-              />
+              ></v-text-field>
             </v-col>
           </v-row>
           <v-textarea
@@ -350,7 +258,7 @@
             prepend-inner-icon="mdi-message-text"
             rows="3"
             variant="outlined"
-          />
+          ></v-textarea>
 
           <!-- 默认提示选项 -->
           <v-chip-group
@@ -367,39 +275,23 @@
               variant="outlined"
               @click="selectDefaultTip(tip)"
             >
-              <v-icon
-                size="small"
-                start
-              >
-                mdi-plus
-              </v-icon>
+              <v-icon size="small" start>mdi-plus</v-icon>
               {{ tip }}
             </v-chip>
           </v-chip-group>
           <div class="text-caption text-medium-emphasis ml-2">
-            <v-icon
-              class="mr-1"
-              size="small"
-            >
-              mdi-lightbulb-outline
-            </v-icon>
+            <v-icon class="mr-1" size="small">mdi-lightbulb-outline</v-icon>
             点击上方选项快速添加常用考试提示
           </div>
         </v-card-text>
       </v-card>
 
       <!-- 考试科目安排 -->
-      <v-card
-        border
-        class="mb-4"
-        elevation="1"
-      >
+      <v-card border class="mb-4" elevation="1">
         <v-card-title class="d-flex align-center">
-          <v-icon class="mr-2">
-            mdi-format-list-bulleted
-          </v-icon>
+          <v-icon class="mr-2">mdi-format-list-bulleted</v-icon>
           考试科目安排
-          <v-spacer />
+          <v-spacer></v-spacer>
           <v-btn
             color="primary"
             prepend-icon="mdi-plus"
@@ -420,10 +312,7 @@
             >
               <div class="w-100">
                 <v-row>
-                  <v-col
-                    cols="12"
-                    md="4"
-                  >
+                  <v-col cols="12" md="4">
                     <v-text-field
                       v-model="examInfo.name"
                       :rules="[(v) => !!v || '科目名称不能为空']"
@@ -431,12 +320,9 @@
                       label="科目名称"
                       prepend-inner-icon="mdi-book"
                       variant="outlined"
-                    />
+                    ></v-text-field>
                   </v-col>
-                  <v-col
-                    cols="12"
-                    md="3"
-                  >
+                  <v-col cols="12" md="3">
                     <v-menu
                       v-model="examInfo.startDateMenu"
                       :close-on-content-click="false"
@@ -444,7 +330,7 @@
                       offset-y
                       transition="scale-transition"
                     >
-                      <template #activator="{ props }">
+                      <template v-slot:activator="{ props }">
                         <v-text-field
                           v-model="examInfo.startFormatted"
                           :rules="[(v) => !!v || '开始时间不能为空']"
@@ -454,7 +340,7 @@
                           readonly
                           v-bind="props"
                           variant="outlined"
-                        />
+                        ></v-text-field>
                       </template>
                       <v-card min-width="600">
                         <v-card-title class="text-center py-2">
@@ -462,10 +348,7 @@
                         </v-card-title>
                         <v-card-text class="pa-0">
                           <v-row no-gutters>
-                            <v-col
-                              class="border-e"
-                              cols="6"
-                            >
+                            <v-col class="border-e" cols="6">
                               <v-date-picker
                                 v-model="examInfo.startDate"
                                 color="primary"
@@ -473,7 +356,7 @@
                                 locale="zh-cn"
                                 show-adjacent-months
                                 @update:model-value="updateStartDateTime(index)"
-                              />
+                              ></v-date-picker>
                             </v-col>
                             <v-col cols="6">
                               <v-time-picker
@@ -483,12 +366,12 @@
                                 format="24hr"
                                 scrollable
                                 @update:model-value="updateStartDateTime(index)"
-                              />
+                              ></v-time-picker>
                             </v-col>
                           </v-row>
                         </v-card-text>
                         <v-card-actions>
-                          <v-spacer />
+                          <v-spacer></v-spacer>
                           <v-btn
                             color="grey"
                             variant="text"
@@ -507,10 +390,7 @@
                       </v-card>
                     </v-menu>
                   </v-col>
-                  <v-col
-                    cols="12"
-                    md="3"
-                  >
+                  <v-col cols="12" md="3">
                     <v-menu
                       v-model="examInfo.endDateMenu"
                       :close-on-content-click="false"
@@ -518,7 +398,7 @@
                       offset-y
                       transition="scale-transition"
                     >
-                      <template #activator="{ props }">
+                      <template v-slot:activator="{ props }">
                         <v-text-field
                           v-model="examInfo.endFormatted"
                           :rules="[(v) => !!v || '结束时间不能为空']"
@@ -528,7 +408,7 @@
                           readonly
                           v-bind="props"
                           variant="outlined"
-                        />
+                        ></v-text-field>
                       </template>
                       <v-card min-width="600">
                         <v-card-title class="text-center py-2">
@@ -536,10 +416,7 @@
                         </v-card-title>
                         <v-card-text class="pa-0">
                           <v-row no-gutters>
-                            <v-col
-                              class="border-e"
-                              cols="6"
-                            >
+                            <v-col class="border-e" cols="6">
                               <v-date-picker
                                 v-model="examInfo.endDate"
                                 color="primary"
@@ -547,7 +424,7 @@
                                 locale="zh-cn"
                                 show-adjacent-months
                                 @update:model-value="updateEndDateTime(index)"
-                              />
+                              ></v-date-picker>
                             </v-col>
                             <v-col cols="6">
                               <v-time-picker
@@ -557,12 +434,12 @@
                                 format="24hr"
                                 scrollable
                                 @update:model-value="updateEndDateTime(index)"
-                              />
+                              ></v-time-picker>
                             </v-col>
                           </v-row>
                         </v-card-text>
                         <v-card-actions>
-                          <v-spacer />
+                          <v-spacer></v-spacer>
                           <v-btn
                             color="grey"
                             variant="text"
@@ -581,11 +458,7 @@
                       </v-card>
                     </v-menu>
                   </v-col>
-                  <v-col
-                    class="d-flex align-center"
-                    cols="12"
-                    md="2"
-                  >
+                  <v-col class="d-flex align-center" cols="12" md="2">
                     <v-btn
                       color="error"
                       icon="mdi-delete"
@@ -620,25 +493,14 @@
               </div>
             </v-list-item>
           </v-list>
-          <div
-            v-else
-            class="text-center py-8"
-          >
-            <v-icon
-              class="mb-2"
-              color="grey-lighten-1"
-              size="48"
-            >
+          <div v-else class="text-center py-8">
+            <v-icon class="mb-2" color="grey-lighten-1" size="48">
               mdi-book-plus
             </v-icon>
             <p class="text-body-2 text-grey-darken-1 mb-4">
               暂无考试科目，点击"添加科目"按钮开始添加
             </p>
-            <v-btn
-              color="primary"
-              prepend-icon="mdi-plus"
-              @click="addExamInfo"
-            >
+            <v-btn color="primary" prepend-icon="mdi-plus" @click="addExamInfo">
               添加科目
             </v-btn>
           </div>
@@ -647,18 +509,10 @@
     </div>
 
     <!-- 删除确认对话框 -->
-    <v-dialog
-      v-model="deleteDialog"
-      max-width="400"
-    >
+    <v-dialog v-model="deleteDialog" max-width="400">
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon
-            class="mr-2"
-            color="error"
-          >
-            mdi-delete-alert
-          </v-icon>
+          <v-icon class="mr-2" color="error">mdi-delete-alert</v-icon>
           确认删除配置
         </v-card-title>
         <v-card-text>
@@ -666,7 +520,7 @@
           <br><small class="text-grey">此操作不可撤销，将会删除所有相关数据</small>
         </v-card-text>
         <v-card-actions>
-          <v-spacer />
+          <v-spacer></v-spacer>
           <v-btn
             color="grey"
             variant="text"

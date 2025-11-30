@@ -26,7 +26,7 @@
                 label="server.authDomain"
               />
             </v-form>
-            <v-divider class="my-4" />
+            <v-divider class="my-4"/>
 
             <v-btn
               class="me-2"
