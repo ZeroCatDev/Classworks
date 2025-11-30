@@ -16,7 +16,6 @@
           {{ currentNotification?.content?.message || "无内容" }}
         </div>
 
-        <!-- 发送者信息（使用 Vuetify Card） -->
         <v-card variant="flat" color="white">
           <v-card-title>发送者信息</v-card-title>
           <v-card-text>
@@ -50,7 +49,6 @@
           </v-card-text>
         </v-card>
 
-        <!-- 多通知导航 -->
         <div v-if="hasMultipleNotifications" class="navigation-controls mt-6">
           <v-card variant="flat" color="rgba(255,255,255,0.1)">
             <v-card-text class="text-center">
@@ -86,7 +84,6 @@
           </v-card>
         </div>
 
-        <!-- 操作按钮 -->
         <div class="mt-8">
           <v-btn color="white" size="large" variant="flat" @click="close">
             <v-icon left> mdi-check </v-icon>
@@ -97,12 +94,12 @@
     </v-card>
   </v-dialog>
 
-  <!-- 事件发送器 -->
   <EventSender ref="eventSender" />
 </template>
 
 <script>
 import EventSender from "@/components/EventSender.vue";
+import { on as socketOn } from "@/utils/socketClient";
 
 export default {
   name: "UrgentNotification",
@@ -116,6 +113,7 @@ export default {
       currentIndex: 0, // 当前显示的通知索引
       autoCloseTimer: null,
       urgentSoundTimer: null,
+      revokeCleanup: null, // 用于存储撤回事件的清理函数
     };
   },
   computed: {
@@ -171,12 +169,21 @@ export default {
       return this.currentNotification?.content?.targetDevices || [];
     },
   },
+  mounted() {
+    // 监听撤回指令
+    this.revokeCleanup = socketOn("notification-revoke", (payload) => {
+      this.handleRevoke(payload);
+    });
+  },
   beforeUnmount() {
     if (this.autoCloseTimer) {
       clearTimeout(this.autoCloseTimer);
     }
     if (this.urgentSoundTimer) {
       clearInterval(this.urgentSoundTimer);
+    }
+    if (this.revokeCleanup) {
+      this.revokeCleanup();
     }
   },
   methods: {
@@ -214,6 +221,50 @@ export default {
           this.playNotificationSound();
           this.startUrgentSound();
         }
+      }
+    },
+    /**
+     * 处理撤回/删除事件
+     * @param {Object} payload { notificationId: string }
+     */
+    handleRevoke(payload) {
+      const { notificationId } = payload || {};
+      if (!notificationId) return;
+
+      console.log("收到撤回指令:", notificationId);
+
+      // 1. 从队列中找到该通知的索引
+      const index = this.notificationQueue.findIndex(
+        (n) => n.content?.notificationId === notificationId
+      );
+
+      if (index !== -1) {
+        // 2. 从队列中移除
+        this.notificationQueue.splice(index, 1);
+
+        // 3. 如果被移除的是当前正在展示的通知
+        if (this.notificationQueue.length === 0) {
+          // 如果队列空了，直接无声关闭
+          this.closeWithoutRead();
+        } else if (index === this.currentIndex) {
+          // 如果是当前显示的，且还有其他通知，显示下一条（注意索引可能越界，需取最小值）
+          this.currentIndex = Math.min(
+            this.currentIndex,
+            this.notificationQueue.length - 1
+          );
+          // 刷新音效状态（可能新显示的不是紧急通知）
+          if (this.isUrgent) {
+            this.startUrgentSound();
+          } else {
+            this.stopUrgentSound();
+          }
+        } else if (index < this.currentIndex) {
+          // 如果移除的是当前之前的通知，当前索引需要减1以保持指向正确
+          this.currentIndex--;
+        }
+
+        // 可选：提示用户
+        this.$message?.info("通知", "管理员已撤回一条通知");
       }
     },
     close() {

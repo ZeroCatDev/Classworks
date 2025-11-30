@@ -88,7 +88,6 @@
             </v-col>
           </v-row>
 
-          <!-- 常驻通知管理 -->
           <v-row class="mt-4">
             <v-col cols="12">
               <v-card>
@@ -124,7 +123,6 @@
             </v-col>
           </v-row>
 
-          <!-- 消息发送历史 -->
           <v-row class="mt-4">
             <v-col cols="12">
               <v-card>
@@ -158,7 +156,6 @@
                       md="6"
                       lg="4"
                     >
-                      <!-- 主消息卡片 -->
                       <v-card
                         :color="getMainCardColor(message.receipts)"
                         class="mb-2"
@@ -189,9 +186,7 @@
                         </v-card-text>
                       </v-card>
 
-                      <!-- 设备回执小卡片 -->
                       <div v-if="hasAnyReceipts(message.receipts)">
-                        <!-- 已读设备 -->
                         <v-card
                           v-for="device in message.receipts.read"
                           :key="`${device.senderId}-read`"
@@ -203,7 +198,7 @@
                             <div class="align-center">
 
                               <span class="text-body-2 font-weight-medium">{{ device.deviceName }}  </span>
-      <br/>
+                              <br/>
 
                               {{ device.deviceType }}
 
@@ -215,7 +210,6 @@
                           </v-card-text>
                         </v-card>
 
-                        <!-- 已显示设备（排除已读的设备） -->
                         <v-card
                           v-for="device in getDisplayedOnlyDevices(message.receipts)"
                           :key="`${device.senderId}-displayed`"
@@ -242,16 +236,16 @@
                       </div>
                       <div v-else> <v-card
 
-                          color="info-lighten-4"
-                          variant="outlined"
-                          class="mb-1"
-                          size="small"
-                          title="无设备在线"
-                        >
-                          <v-card-text>
-如果数秒后任然显示这个提示，则可能没有任何设备在线接收通知。
-                          </v-card-text>
-                        </v-card></div>
+                        color="info-lighten-4"
+                        variant="outlined"
+                        class="mb-1"
+                        size="small"
+                        title="无设备在线"
+                      >
+                        <v-card-text>
+                          如果数秒后任然显示这个提示，则可能没有任何设备在线接收通知。
+                        </v-card-text>
+                      </v-card></div>
                     </v-col>
                   </v-row>
                 </v-card-text>
@@ -265,7 +259,6 @@
     <ChatWidget />
     <EventSender ref="eventSender" />
 
-    <!-- 编辑常驻通知对话框 -->
     <v-dialog v-model="editDialog" max-width="500" :fullscreen="$vuetify.display.xs">
       <v-card>
         <v-toolbar flat density="compact">
@@ -303,11 +296,13 @@
       </v-card>
     </v-dialog>
 
-    <!-- 删除确认对话框 -->
     <v-dialog v-model="deleteConfirmDialog" max-width="400">
       <v-card>
         <v-card-title class="text-h5">确认删除</v-card-title>
-        <v-card-text>确定要删除这条常驻通知吗？此操作无法撤销。</v-card-text>
+        <v-card-text>
+          确定要删除这条常驻通知吗？此操作无法撤销。<br/>
+          <span class="text-error font-weight-bold">注意：此操作将从所有在线设备上立即撤回该消息。</span>
+        </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="grey-darken-1" variant="text" @click="deleteConfirmDialog = false">取消</v-btn>
@@ -430,8 +425,8 @@ export default {
             if (existingData && Array.isArray(existingData)) {
               list = existingData
             } else if (existingData && existingData.success !== false && Array.isArray(existingData.data)) {
-            // list = existingData.data
-               list = existingData.data
+              // list = existingData.data
+              list = existingData.data
             }
 
             const newNotification = {
@@ -594,11 +589,11 @@ export default {
 
           // 如果需要重新发送
           if (this.editForm.resend) {
-             const notificationId = this.editForm.id
-             const messageContent = this.editForm.message
-             const isUrgent = this.editForm.isUrgent
+            const notificationId = this.editForm.id
+            const messageContent = this.editForm.message
+            const isUrgent = this.editForm.isUrgent
 
-             const result = await this.$refs.eventSender.sendNotification(
+            const result = await this.$refs.eventSender.sendNotification(
               messageContent,
               isUrgent,
               [],
@@ -680,9 +675,20 @@ export default {
       this.itemToDelete = null
 
       try {
+        // 1. 从本地/数据库列表中删除
         this.persistentNotifications = this.persistentNotifications.filter(n => n.id !== id)
         await dataProvider.saveData('notification-list', this.persistentNotifications)
-        this.$message?.success('已删除')
+
+        // 2. [新增] 发送撤回指令给所有设备
+        if (this.$refs.eventSender) {
+          await this.$refs.eventSender.sendEvent('notification-revoke', {
+            notificationId: id,
+            timestamp: new Date().toISOString()
+          });
+          console.log(`已发送撤回指令: ${id}`);
+        }
+
+        this.$message?.success('已删除并撤回通知')
       } catch (e) {
         console.error('删除失败', e)
         this.$message?.error('删除失败')
