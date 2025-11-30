@@ -16,15 +16,12 @@ import GlobalMessage from '@/components/GlobalMessage.vue'
 
 // Composables
 import {createApp} from 'vue'
-import Clarity from '@microsoft/clarity';
-
-const projectId = "rhp8uqoc3l"
 //import TDesign from 'tdesign-vue-next'
 //import 'tdesign-vue-next/es/style/index.css'
 //import '@examaware-cs/player/dist/player.css'
 
-Clarity.init(projectId);
 import messageService from './utils/message';
+import { getVisitorId } from './utils/fingerprint';
 
 const app = createApp(App)
 
@@ -37,7 +34,30 @@ app.component('GlobalMessage', GlobalMessage)
 
 app.mount('#app')
 
-// 移除首屏 CSS 加载覆盖层（在 Vue 挂载完成后）
+// 异步加载 Clarity 以提升初始加载速度
+if (document.readyState === 'complete') {
+  loadClarity();
+} else {
+  window.addEventListener('load', loadClarity, { once: true });
+}
+
+async function loadClarity() {
+  try {
+    const Clarity = (await import('@microsoft/clarity')).default;
+    const projectId = "rhp8uqoc3l";
+    Clarity.init(projectId);
+
+    // 获取并设置访客标识
+    const visitorId = await getVisitorId();
+    console.log('Visitor ID:', visitorId);
+    Clarity.identify(visitorId);
+    Clarity.setTag('fingerprintjs', visitorId);
+  } catch (error) {
+    console.warn('Clarity 加载或标识设置失败:', error);
+  }
+}
+
+// 移除首屏 CSS 加载覆盖层(在 Vue 挂载完成后)
 try {
   const removeLoader = () => {
     document.body.classList.add('app-loaded');

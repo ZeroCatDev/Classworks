@@ -16,21 +16,13 @@ import { onMounted } from "vue";
 import { useTheme } from "vuetify";
 import { getSetting } from "@/utils/settings";
 import RateLimitModal from "@/components/RateLimitModal.vue";
-import Clarity from "@microsoft/clarity";
-import { getVisitorId } from "@/utils/fingerprint";
 
 const theme = useTheme();
 
-onMounted(async () => {
+onMounted(() => {
   // 应用保存的主题设置
   const savedTheme = getSetting("theme.mode");
   theme.global.name.value = savedTheme;
-
-  const visitorId = await getVisitorId();
-  console.log("Visitor ID:", visitorId);
-  // Clarity 标识（保留在 App 层）
-  Clarity.identify(visitorId);
-  Clarity.setTag("fingerprintjs", visitorId);
 });
 </script>
 <style>
