@@ -1,25 +1,46 @@
 <template>
-  <v-card border hover rounded="xl">
+  <v-card
+    border
+    hover
+    rounded="xl"
+  >
     <v-card-item>
       <template #prepend>
-        <v-icon class="mr-2" icon="mdi-information" size="large"/>
+        <v-icon
+          class="mr-2"
+          icon="mdi-information"
+          size="large"
+        />
       </template>
-      <v-card-title class="text-h6">关于</v-card-title>
+      <v-card-title class="text-h6">
+        关于
+      </v-card-title>
     </v-card-item>
 
     <v-card-text>
       <v-row>
-        <v-col class="mx-auto" cols="12" md="8">
+        <v-col
+          class="mx-auto"
+          cols="12"
+          md="8"
+        >
           <div class="d-flex flex-column align-start">
-            <v-avatar class="mb-4" size="120">
+            <v-avatar
+              class="mb-4"
+              size="120"
+            >
               <v-img
                 alt="Classworks"
                 src="../../assets/cslogo.png"
               />
             </v-avatar>
 
-            <h2 class="text-h5 mb-2">Classworks</h2>
-            <p class="text-body-1 mb-4">适用于班级大屏的作业板小工具</p>
+            <h2 class="text-h5 mb-2">
+              Classworks
+            </h2>
+            <p class="text-body-1 mb-4">
+              适用于班级大屏的作业板小工具
+            </p>
 
             <div class="d-flex gap-2 flex-wrap mb-6">
               <v-btn
@@ -57,9 +78,11 @@
               </v-btn>
             </div>
 
-            <v-divider class="mb-4 w-100"></v-divider>
+            <v-divider class="mb-4 w-100" />
 
-            <h3 class="text-h6 mb-2">备注与致谢</h3>
+            <h3 class="text-h6 mb-2">
+              备注与致谢
+            </h3>
             <v-list class="mb-4 bg-transparent">
               <v-list-item
                 append-icon="mdi-link"
@@ -98,7 +121,7 @@
                   新一代，开源，编程社区
                 </v-list-item-subtitle>
               </v-list-item>
-              <v-divider class="ma-1"></v-divider>
+              <v-divider class="ma-1" />
               <v-list-item
                 append-icon="mdi-link"
                 href="https://github.com/HUSX100/IslandCaller"
@@ -141,12 +164,14 @@
               fullscreen
               transition="dialog-bottom-transition"
             >
-              <v-card
-              >
+              <v-card>
                 <v-toolbar>
-                  <v-btn icon="mdi-close" @click="showDeps = false"></v-btn>
+                  <v-btn
+                    icon="mdi-close"
+                    @click="showDeps = false"
+                  />
                   <v-toolbar-title>使用的第三方库</v-toolbar-title>
-                  <v-spacer></v-spacer>
+                  <v-spacer />
                 </v-toolbar>
                 <v-card-text>
                   <v-list>
@@ -170,45 +195,108 @@
             </v-dialog>
 
             <!-- 报告问题对话框 -->
-            <v-dialog v-model="showReportDialog" max-width="640">
+            <v-dialog
+              v-model="showReportDialog"
+              max-width="640"
+            >
               <v-card>
                 <v-toolbar density="compact">
-                  <v-btn icon="mdi-close" @click="showReportDialog = false"></v-btn>
+                  <v-btn
+                    icon="mdi-close"
+                    @click="showReportDialog = false"
+                  />
                   <v-toolbar-title>报告问题</v-toolbar-title>
-                  <v-spacer></v-spacer>
+                  <v-spacer />
                 </v-toolbar>
                 <v-card-text>
                   <p class="mb-4">
                     调试ID与下方的浏览器环境信息将帮助我们快速定位问题，请在反馈中一并附上。
                   </p>
-                  <v-sheet class="mb-3 pa-3 bg-grey-lighten-4 rounded" style="max-height: 260px; overflow: auto;">
-                    <pre class="text-body-2" style="white-space: pre-wrap; margin: 0;">{{ envBoxText }}</pre>
+                  <v-sheet
+                    class="mb-3 pa-3 bg-grey-lighten-4 rounded"
+                    style="max-height: 260px; overflow: auto;"
+                  >
+                    <pre
+                      class="text-body-2"
+                      style="white-space: pre-wrap; margin: 0;"
+                    >{{ envBoxText }}</pre>
                   </v-sheet>
                   <div class="d-flex gap-2 flex-wrap mb-4">
-                    <v-btn size="small" variant="text" prepend-icon="mdi-refresh" @click="reloadVisitorId" :loading="visitorLoading">刷新</v-btn>
-                    <v-btn size="small" variant="text" prepend-icon="mdi-content-copy" @click="copyEnvInfo">复制信息</v-btn>
-                    <v-btn size="small" variant="text" prepend-icon="mdi-open-in-new" @click="goToDebug">查看 /debug 页面</v-btn>
+                    <v-btn
+                      size="small"
+                      variant="text"
+                      prepend-icon="mdi-refresh"
+                      :loading="visitorLoading"
+                      @click="reloadVisitorId"
+                    >
+                      刷新
+                    </v-btn>
+                    <v-btn
+                      size="small"
+                      variant="text"
+                      prepend-icon="mdi-content-copy"
+                      @click="copyEnvInfo"
+                    >
+                      复制信息
+                    </v-btn>
+                    <v-btn
+                      size="small"
+                      variant="text"
+                      prepend-icon="mdi-open-in-new"
+                      @click="goToDebug"
+                    >
+                      查看 /debug 页面
+                    </v-btn>
                   </div>
-                  <v-alert v-if="copyOk" type="success" density="compact" class="mb-4">已复制到剪贴板</v-alert>
-                  <h4 class="text-subtitle-1 mb-2">反馈渠道</h4>
-                  <v-list lines="one" class="bg-transparent">
-                    <v-list-item :href="qqGroupLink" target="_blank" prepend-icon="mdi-qqchat">
+                  <v-alert
+                    v-if="copyOk"
+                    type="success"
+                    density="compact"
+                    class="mb-4"
+                  >
+                    已复制到剪贴板
+                  </v-alert>
+                  <h4 class="text-subtitle-1 mb-2">
+                    反馈渠道
+                  </h4>
+                  <v-list
+                    lines="one"
+                    class="bg-transparent"
+                  >
+                    <v-list-item
+                      :href="qqGroupLink"
+                      target="_blank"
+                      prepend-icon="mdi-qqchat"
+                    >
                       <v-list-item-title>QQ群 ({{ qqGroupNumber }})</v-list-item-title>
                       <v-list-item-subtitle>964979747</v-list-item-subtitle>
                     </v-list-item>
-                    <v-list-item :href="githubIssueUrl" target="_blank" prepend-icon="mdi-github">
+                    <v-list-item
+                      :href="githubIssueUrl"
+                      target="_blank"
+                      prepend-icon="mdi-github"
+                    >
                       <v-list-item-title>GitHub Issue</v-list-item-title>
                       <v-list-item-subtitle>ZeroCatDev/Classworks</v-list-item-subtitle>
                     </v-list-item>
-                    <v-list-item :href="mailtoLink" target="_blank" prepend-icon="mdi-email">
+                    <v-list-item
+                      :href="mailtoLink"
+                      target="_blank"
+                      prepend-icon="mdi-email"
+                    >
                       <v-list-item-title>邮件</v-list-item-title>
                       <v-list-item-subtitle>sun@wuyuan.dev</v-list-item-subtitle>
                     </v-list-item>
                   </v-list>
                 </v-card-text>
                 <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn variant="text" @click="showReportDialog = false">关闭</v-btn>
+                  <v-spacer />
+                  <v-btn
+                    variant="text"
+                    @click="showReportDialog = false"
+                  >
+                    关闭
+                  </v-btn>
                 </v-card-actions>
               </v-card>
             </v-dialog>

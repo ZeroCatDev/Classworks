@@ -1,7 +1,15 @@
 <template>
-  <v-card :disabled="!hasNamespaceInfo" :loading="loading" class="my-4">
+  <v-card
+    :disabled="!hasNamespaceInfo"
+    :loading="loading"
+    class="my-4"
+  >
     <template #loader>
-      <v-progress-linear v-if="loading" color="primary" indeterminate/>
+      <v-progress-linear
+        v-if="loading"
+        color="primary"
+        indeterminate
+      />
     </template>
 
 
@@ -175,7 +183,7 @@
     </v-card-text>
 
     <v-card-actions>
-      <v-spacer/>
+      <v-spacer />
       <v-btn
         :loading="loading"
         color="primary"
@@ -213,7 +221,7 @@
           <p>您确定要重新初始化云端存储吗？</p>
         </v-card-text>
         <v-card-actions>
-          <v-spacer/>
+          <v-spacer />
           <v-btn
             variant="text"
             @click="showReinitDialog = false"

@@ -1,13 +1,21 @@
 <template>
-  <settings-card icon="mdi-refresh-circle" title="刷新设置">
+  <settings-card
+    icon="mdi-refresh-circle"
+    title="刷新设置"
+  >
     <v-form>
       <v-list>
-        <setting-item setting-key="refresh.auto" title="自动刷新"/>
-        <v-divider class="my-2"/>
+        <setting-item
+          setting-key="refresh.auto"
+          title="自动刷新"
+        />
+        <v-divider class="my-2" />
 
-        <setting-item setting-key="refresh.interval" title="刷新间隔"/>
+        <setting-item
+          setting-key="refresh.interval"
+          title="刷新间隔"
+        />
       </v-list>
-
     </v-form>
   </settings-card>
 </template>
