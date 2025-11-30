@@ -24,10 +24,9 @@
             <div class="d-flex gap-2 flex-wrap mb-6">
               <v-btn
                 color="red"
-                href="https://github.com/ClassworksDev/Classworks/issues"
                 prepend-icon="mdi-bug"
-                target="_blank"
                 variant="tonal"
+                @click="openReportDialog"
               >
                 报告问题
               </v-btn>
@@ -170,6 +169,50 @@
               </v-card>
             </v-dialog>
 
+            <!-- 报告问题对话框 -->
+            <v-dialog v-model="showReportDialog" max-width="640">
+              <v-card>
+                <v-toolbar density="compact">
+                  <v-btn icon="mdi-close" @click="showReportDialog = false"></v-btn>
+                  <v-toolbar-title>报告问题</v-toolbar-title>
+                  <v-spacer></v-spacer>
+                </v-toolbar>
+                <v-card-text>
+                  <p class="mb-4">
+                    调试ID与下方的浏览器环境信息将帮助我们快速定位问题，请在反馈中一并附上。
+                  </p>
+                  <v-sheet class="mb-3 pa-3 bg-grey-lighten-4 rounded" style="max-height: 260px; overflow: auto;">
+                    <pre class="text-body-2" style="white-space: pre-wrap; margin: 0;">{{ envBoxText }}</pre>
+                  </v-sheet>
+                  <div class="d-flex gap-2 flex-wrap mb-4">
+                    <v-btn size="small" variant="text" prepend-icon="mdi-refresh" @click="reloadVisitorId" :loading="visitorLoading">刷新</v-btn>
+                    <v-btn size="small" variant="text" prepend-icon="mdi-content-copy" @click="copyEnvInfo">复制信息</v-btn>
+                    <v-btn size="small" variant="text" prepend-icon="mdi-open-in-new" @click="goToDebug">查看 /debug 页面</v-btn>
+                  </div>
+                  <v-alert v-if="copyOk" type="success" density="compact" class="mb-4">已复制到剪贴板</v-alert>
+                  <h4 class="text-subtitle-1 mb-2">反馈渠道</h4>
+                  <v-list lines="one" class="bg-transparent">
+                    <v-list-item :href="qqGroupLink" target="_blank" prepend-icon="mdi-qqchat">
+                      <v-list-item-title>QQ群 ({{ qqGroupNumber }})</v-list-item-title>
+                      <v-list-item-subtitle>964979747</v-list-item-subtitle>
+                    </v-list-item>
+                    <v-list-item :href="githubIssueUrl" target="_blank" prepend-icon="mdi-github">
+                      <v-list-item-title>GitHub Issue</v-list-item-title>
+                      <v-list-item-subtitle>ZeroCatDev/Classworks</v-list-item-subtitle>
+                    </v-list-item>
+                    <v-list-item :href="mailtoLink" target="_blank" prepend-icon="mdi-email">
+                      <v-list-item-title>邮件</v-list-item-title>
+                      <v-list-item-subtitle>sun@wuyuan.dev</v-list-item-subtitle>
+                    </v-list-item>
+                  </v-list>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn variant="text" @click="showReportDialog = false">关闭</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+
             <p class="text-caption text-medium-emphasis">
               Copyright © {{ new Date().getFullYear() }} Sunwuyuan
             </p>
@@ -181,14 +224,23 @@
 </template>
 
 <script>
-import {ref, onMounted} from "vue";
+import {ref, onMounted, computed} from "vue";
+import { useRouter } from 'vue-router'
+import { getVisitorId } from '@/utils/fingerprint'
 import packageJson from "../../../package.json";
 
 export default {
   name: "AboutCard",
   setup() {
     const Dependencies = ref([]);
-    const showDeps = ref(false); // 添加对话框显示状态
+    const showDeps = ref(false);
+    const showReportDialog = ref(false);
+    const debugIdInput = ref('');
+    const visitorLoading = ref(false);
+    const copyOk = ref(false);
+    const qqGroupNumber = '964979747';
+    const qqGroupLink = 'https://qm.qq.com/q/T6qImKJjGi';
+    const router = useRouter();
 
     const loadDependencies = () => {
       try {
@@ -224,6 +276,87 @@ export default {
       return descriptions[name] || "";
     };
 
+    const goToDebug = () => {
+      router.push('/debug');
+    };
+
+    const loadVisitorId = async () => {
+      visitorLoading.value = true;
+      try {
+        const id = await getVisitorId();
+        debugIdInput.value = id || '';
+      } catch (e) {
+        console.error('获取访客ID失败', e);
+      } finally {
+        visitorLoading.value = false;
+      }
+    };
+
+    const reloadVisitorId = () => loadVisitorId();
+
+    const openReportDialog = async () => {
+      showReportDialog.value = true;
+      if (!debugIdInput.value) await loadVisitorId();
+    };
+
+    const copyEnvInfo = async () => {
+      try {
+        await navigator.clipboard.writeText(envBoxText.value);
+        copyOk.value = true;
+        setTimeout(() => (copyOk.value = false), 1800);
+      } catch (e) {
+        console.error('复制失败', e);
+      }
+    };
+
+    const envInfo = computed(() => {
+      const nav = navigator || {};
+      const intl = (typeof Intl !== 'undefined' && Intl.DateTimeFormat) ? Intl.DateTimeFormat().resolvedOptions() : {};
+      const tz = intl && intl.timeZone ? intl.timeZone : '';
+      const routePath = router.currentRoute?.value?.fullPath || location.pathname;
+      const lines = [
+        `App 版本: v${packageJson?.version || 'unknown'}`,
+        `URL: ${location.href}`,
+        `路由: ${routePath}`,
+        `UserAgent: ${nav.userAgent || ''}`,
+        `语言: ${nav.language || ''}`,
+        `时区: ${tz}`,
+        `平台: ${nav.platform || ''}`,
+        `在线: ${String(nav.onLine)}`,
+        `屏幕: ${screen?.width || '-'}x${screen?.height || '-'}`,
+        `视口: ${window.innerWidth || '-'}x${window.innerHeight || '-'}`,
+      ];
+      return lines.join('\n');
+    });
+
+    const envBoxText = computed(() => {
+      return `调试ID: ${debugIdInput.value || '获取失败'}\n\n浏览器/环境信息:\n${envInfo.value}`;
+    });
+
+    const reportBody = computed(() => {
+      return [
+        `问题描述:`,
+        `1. 期望行为:`,
+        `2. 实际行为:`,
+        `3. 复现步骤:`,
+        '',
+        envBoxText.value,
+      ].join('\n');
+    });
+
+    const githubIssueUrl = computed(() => {
+      const base = 'https://github.com/ZeroCatDev/Classworks/issues/new';
+      const title = encodeURIComponent('问题报告');
+      const body = encodeURIComponent(reportBody.value);
+      return `${base}?title=${title}&body=${body}`;
+    });
+
+    const mailtoLink = computed(() => {
+      const subject = encodeURIComponent('Classworks 问题报告');
+      const body = encodeURIComponent(reportBody.value);
+      return `mailto:sun@wuyuan.dev?subject=${subject}&body=${body}`;
+    });
+
     onMounted(() => {
       loadDependencies();
     });
@@ -231,6 +364,21 @@ export default {
     return {
       Dependencies,
       showDeps,
+      showReportDialog,
+      debugIdInput,
+      visitorLoading,
+      copyOk,
+      qqGroupNumber,
+      qqGroupLink,
+      goToDebug,
+      reloadVisitorId,
+      openReportDialog,
+      copyEnvInfo,
+      envBoxText,
+      envInfo,
+      reportBody,
+      githubIssueUrl,
+      mailtoLink,
     };
   },
 };
