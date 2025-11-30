@@ -1,16 +1,17 @@
 <template>
   <v-col
     v-if="studentList && studentList.length"
-    v-ripple="{
+    v-ripple="!isEditingDisabled ? {
       class: `text-${
         ['primary', 'secondary', 'info', 'success', 'warning', 'error'][
           Math.floor(Math.random() * 6)
         ]
       }`,
-    }"
+    } : false"
+    :class="{ 'cursor-not-allowed': isEditingDisabled }"
     class="attendance-area no-select"
     cols="1"
-    @click="$emit('click')"
+    @click="handleClick"
   >
     <h1>出勤</h1>
     <h2>
@@ -94,11 +95,24 @@ export default {
       type: Object,
       required: true,
     },
+    isEditingDisabled: {
+      type: Boolean,
+      default: false,
+    },
   },
-  emits: ["click"],
+  emits: ["click", "disabled-click"],
   setup() {
     const display = useDisplay();
     return { display };
+  },
+  methods: {
+    handleClick() {
+      if (this.isEditingDisabled) {
+        this.$emit('disabled-click');
+      } else {
+        this.$emit('click');
+      }
+    },
   },
 };
 </script>

@@ -213,6 +213,26 @@
         </div>
       </v-card-text>
 
+      <!-- 非今日编辑警告 -->
+      <v-alert
+        v-if="isEditingPastData"
+        type="warning"
+        variant="tonal"
+        class="mx-4 mb-4"
+        border="start"
+        border-color="warning"
+        prominent
+      >
+        <template #prepend>
+        </template>
+        <div class="d-flex flex-column">
+          <div class="text-h6 mb-1">你打算修改历史？</div>
+          <div class="text-body-2">
+            这是 {{ new Date(currentDateString.slice(0,4), currentDateString.slice(4,6)-1, currentDateString.slice(6,8)).toLocaleDateString() }} 的作业 • 请谨慎操作，确保不会覆盖重要数据
+          </div>
+        </div>
+      </v-alert>
+
       <div class="text-center text-body-2 text-disabled mb-5">
         点击空白处完成编辑
       </div>
@@ -244,6 +264,14 @@ export default {
     autoSave: {
       type: Boolean,
       default: false
+    },
+    isEditingPastData: {
+      type: Boolean,
+      default: false
+    },
+    currentDateString: {
+      type: String,
+      default: ""
     }
   },
   emits: ["update:modelValue", "save"],

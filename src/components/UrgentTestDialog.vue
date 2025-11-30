@@ -43,8 +43,14 @@
                           color="red"
                           inset
                         >
-
                         </v-switch>
+                        <v-checkbox
+                          v-model="notificationForm.isPersistent"
+                          label="常驻展示"
+                          color="primary"
+                          hide-details
+                          class="mt-0"
+                        ></v-checkbox>
                       </v-col>
                       <v-col cols="12">
                         <v-textarea
@@ -78,6 +84,42 @@
 
 
                 </v-card-actions>
+              </v-card>
+            </v-col>
+          </v-row>
+
+          <!-- 常驻通知管理 -->
+          <v-row class="mt-4">
+            <v-col cols="12">
+              <v-card>
+                <v-card-title>
+                  <v-icon class="mr-2">mdi-pin</v-icon>
+                  常驻通知管理
+                </v-card-title>
+                <v-card-text>
+                  <div v-if="persistentNotifications.length === 0" class="text-center text-grey py-4">
+                    暂无常驻通知
+                  </div>
+                  <v-list v-else>
+                    <v-list-item
+                      v-for="item in persistentNotifications"
+                      :key="item.id"
+                      :title="item.message"
+                      :subtitle="formatTime(item.timestamp)"
+                      lines="two"
+                    >
+                      <template v-slot:prepend>
+                        <v-icon :color="item.isUrgent ? 'error' : 'primary'">
+                          {{ item.isUrgent ? 'mdi-alert-circle' : 'mdi-information' }}
+                        </v-icon>
+                      </template>
+                      <template v-slot:append>
+                        <v-btn icon="mdi-pencil" variant="text" size="small" @click="openEditDialog(item)"></v-btn>
+                        <v-btn icon="mdi-delete" variant="text" color="error" size="small" @click="confirmDelete(item.id)"></v-btn>
+                      </template>
+                    </v-list-item>
+                  </v-list>
+                </v-card-text>
               </v-card>
             </v-col>
           </v-row>
@@ -222,6 +264,57 @@
 
     <ChatWidget />
     <EventSender ref="eventSender" />
+
+    <!-- 编辑常驻通知对话框 -->
+    <v-dialog v-model="editDialog" max-width="500" :fullscreen="$vuetify.display.xs">
+      <v-card>
+        <v-toolbar flat density="compact">
+          <v-toolbar-title>编辑常驻通知</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon="mdi-close" @click="editDialog = false"></v-btn>
+        </v-toolbar>
+        <v-card-text>
+          <v-form>
+            <v-textarea
+              v-model="editForm.message"
+              label="通知内容"
+              rows="3"
+              auto-grow
+            ></v-textarea>
+            <v-switch
+              v-model="editForm.isUrgent"
+              label="强调通知"
+              color="error"
+              hide-details
+            ></v-switch>
+            <v-checkbox
+              v-model="editForm.resend"
+              label="保存并重新发送通知"
+              hint="勾选后将作为新通知发送给所有在线设备"
+              persistent-hint
+            ></v-checkbox>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn variant="text" @click="editDialog = false">取消</v-btn>
+          <v-btn color="primary" :loading="savingEdit" @click="saveEdit">保存</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- 删除确认对话框 -->
+    <v-dialog v-model="deleteConfirmDialog" max-width="400">
+      <v-card>
+        <v-card-title class="text-h5">确认删除</v-card-title>
+        <v-card-text>确定要删除这条常驻通知吗？此操作无法撤销。</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="grey-darken-1" variant="text" @click="deleteConfirmDialog = false">取消</v-btn>
+          <v-btn color="error" variant="text" @click="confirmDelete">删除</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-dialog>
 </template>
 
@@ -229,6 +322,7 @@
 import ChatWidget from '@/components/ChatWidget.vue'
 import EventSender from '@/components/EventSender.vue'
 import { on as socketOn } from '@/utils/socketClient'
+import dataProvider from '@/utils/dataProvider'
 
 export default {
   name: 'UrgentTestDialog',
@@ -248,10 +342,22 @@ export default {
       sending: false,
       notificationForm: {
         isUrgent: false,
-        message: ''
+        message: '',
+        isPersistent: false
       },
       sentMessages: [],
-      receiptCleanup: []
+      receiptCleanup: [],
+      persistentNotifications: [],
+      editDialog: false,
+      editForm: {
+        id: null,
+        message: '',
+        isUrgent: false,
+        resend: false
+      },
+      savingEdit: false,
+      deleteConfirmDialog: false,
+      itemToDelete: null,
     }
   },
   computed: {
@@ -266,6 +372,7 @@ export default {
   },
   mounted() {
     this.setupEventListeners()
+    this.loadPersistentNotifications()
   },
   beforeUnmount() {
     this.cleanup()
@@ -288,10 +395,13 @@ export default {
       try {
         // 生成32位随机通知ID
         const notificationId = this.generateNotificationId()
+        const messageContent = this.notificationForm.message
+        const isUrgent = this.notificationForm.isUrgent
+        const isPersistent = this.notificationForm.isPersistent
 
         const result = await this.$refs.eventSender.sendNotification(
-          this.notificationForm.message,
-          this.notificationForm.isUrgent,
+          messageContent,
+          isUrgent,
           [],
           { deviceName: '测试设备', deviceType: 'system', isReadOnly: false },
           notificationId
@@ -302,14 +412,44 @@ export default {
         this.sentMessages.push({
           id: eventId,
           notificationId: notificationId,
-          message: this.notificationForm.message,
-          isUrgent: this.notificationForm.isUrgent,
+          message: messageContent,
+          isUrgent: isUrgent,
           timestamp: new Date().toISOString(),
           receipts: {
             displayed: [],
             read: []
           }
         })
+
+        // 处理常驻通知
+        if (isPersistent) {
+          try {
+            const listKey = 'notification-list'
+            const existingData = await dataProvider.loadData(listKey)
+            let list = []
+            if (existingData && Array.isArray(existingData)) {
+              list = existingData
+            } else if (existingData && existingData.success !== false && Array.isArray(existingData.data)) {
+            // list = existingData.data
+               list = existingData.data
+            }
+
+            const newNotification = {
+              id: notificationId,
+              message: messageContent,
+              isUrgent: isUrgent,
+              timestamp: new Date().toISOString()
+            }
+
+            list.unshift(newNotification)
+            await dataProvider.saveData(listKey, list)
+            // 更新本地列表
+            this.persistentNotifications = list
+            console.log('常驻通知已保存')
+          } catch (e) {
+            console.error('保存常驻通知失败', e)
+          }
+        }
 
         console.log('通知已发送，事件ID:', eventId, '通知ID:', notificationId)
         this.resetForm()
@@ -320,6 +460,13 @@ export default {
       }
     },
 
+    resetForm() {
+      this.notificationForm = {
+        isUrgent: false,
+        message: '',
+        isPersistent: false
+      }
+    },
 
     close() {
       this.dialog = false
@@ -414,6 +561,137 @@ export default {
       return receipts.displayed.filter(device =>
         !readSenderIds.includes(device.senderId)
       )
+    },
+
+    openEditDialog(notification) {
+      this.editForm = {
+        id: notification.id,
+        message: notification.message,
+        isUrgent: notification.isUrgent || false,
+        resend: false,
+        timestamp: notification.timestamp
+      }
+      this.editDialog = true
+    },
+
+    async saveEdit() {
+      if (!this.editForm.message.trim()) return
+
+      this.savingEdit = true
+      try {
+        // 更新列表
+        const index = this.persistentNotifications.findIndex(n => n.id === this.editForm.id)
+        if (index !== -1) {
+          this.persistentNotifications[index] = {
+            ...this.persistentNotifications[index],
+            message: this.editForm.message,
+            isUrgent: this.editForm.isUrgent,
+            // 如果重新发送，更新时间戳？或者保持原样？通常编辑后更新时间戳比较合理
+            timestamp: new Date().toISOString()
+          }
+
+          await dataProvider.saveData('notification-list', this.persistentNotifications)
+
+          // 如果需要重新发送
+          if (this.editForm.resend) {
+             const notificationId = this.editForm.id
+             const messageContent = this.editForm.message
+             const isUrgent = this.editForm.isUrgent
+
+             const result = await this.$refs.eventSender.sendNotification(
+              messageContent,
+              isUrgent,
+              [],
+              { deviceName: '测试设备', deviceType: 'system', isReadOnly: false },
+              notificationId
+            )
+
+            const eventId = result?.eventId || `msg-${Date.now()}`
+
+            // 添加到发送记录
+            this.sentMessages.push({
+              id: eventId,
+              notificationId: notificationId,
+              message: messageContent,
+              isUrgent: isUrgent,
+              timestamp: new Date().toISOString(),
+              receipts: {
+                displayed: [],
+                read: []
+              }
+            })
+          }
+
+          this.editDialog = false
+          this.$message?.success('已更新')
+        }
+      } catch (e) {
+        console.error('保存失败', e)
+        this.$message?.error('保存失败')
+      } finally {
+        this.savingEdit = false
+      }
+    },
+
+    async loadPersistentNotifications() {
+      try {
+        const res = await dataProvider.loadData('notification-list')
+        if (res && Array.isArray(res)) {
+          this.persistentNotifications = res
+        } else if (res && res.success !== false && Array.isArray(res.data)) {
+          this.persistentNotifications = res.data
+        } else {
+          this.persistentNotifications = []
+        }
+      } catch (e) {
+        console.error('加载常驻通知失败', e)
+      }
+    },
+
+    async deleteNotification(notificationId) {
+      const confirmed = confirm('确定要删除这个通知吗？')
+      if (!confirmed) return
+
+      try {
+        // 从 sentMessages 中删除
+        this.sentMessages = this.sentMessages.filter(msg => msg.id !== notificationId)
+
+        // 从常驻通知列表中删除
+        this.persistentNotifications = this.persistentNotifications.filter(notif => notif.id !== notificationId)
+
+        // TODO: 调用接口删除通知（如果有的话）
+
+        console.log('通知已删除，通知ID:', notificationId)
+      } catch (error) {
+        console.error('删除通知失败:', error)
+      }
+    },
+
+    deletePersistentNotification(id) {
+      this.itemToDelete = id
+      this.deleteConfirmDialog = true
+    },
+
+    async confirmDelete() {
+      if (!this.itemToDelete) return
+
+      const id = this.itemToDelete
+      this.deleteConfirmDialog = false
+      this.itemToDelete = null
+
+      try {
+        this.persistentNotifications = this.persistentNotifications.filter(n => n.id !== id)
+        await dataProvider.saveData('notification-list', this.persistentNotifications)
+        this.$message?.success('已删除')
+      } catch (e) {
+        console.error('删除失败', e)
+        this.$message?.error('删除失败')
+      }
+    },
+
+    confirmDelete(id) {
+      this.itemToDelete = id
+      this.deleteConfirmDialog = true
     }
   }
 }

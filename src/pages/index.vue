@@ -66,6 +66,77 @@
   <div v-if="!shouldShowInit" class="d-flex">
     <!-- 主要内容区域 -->
     <v-container class="main-window flex-grow-1 no-select bloom-container" fluid>
+      <!-- 常驻通知区域 -->
+      <v-row v-if="persistentNotifications.length > 0" class="mb-4">
+        <v-col cols="12">
+          <v-card
+            v-for="notification in persistentNotifications"
+            :key="notification.id"
+            :color="notification.isUrgent ? 'error' : 'primary'"
+            class="mb-2 cursor-pointer"
+            variant="tonal"
+            @click="showNotificationDetail(notification)"
+          >
+            <v-card-text class="d-flex align-center py-3">
+
+              <span class="text-h6 text-truncate font-weight-bold">{{ notification.message }}</span>
+              <v-spacer></v-spacer>
+              <v-btn icon="mdi-chevron-right" variant="text"></v-btn>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+
+      <!-- 通知详情对话框 -->
+      <v-dialog v-model="notificationDetailDialog" max-width="700" scrollable>
+        <v-card v-if="currentNotification" class="rounded-xl">
+          <v-card-title class="d-flex align-center pa-4 text-h5">
+
+            <span :class="currentNotification.isUrgent ? 'text-error' : ''" class="font-weight-bold">
+              {{ currentNotification.isUrgent ? '强调通知' : '通知详情' }}
+            </span>
+            <v-spacer></v-spacer>
+            <v-btn icon="mdi-close" variant="text" @click="notificationDetailDialog = false"></v-btn>
+          </v-card-title>
+
+          <v-divider></v-divider>
+
+          <v-card-text class="pa-6">
+            <div class="text-h4 font-weight-medium mb-4" style="line-height: 1.5;">
+              {{ currentNotification.message }}
+            </div>
+            <div class="text-subtitle-1 text-grey">
+              发布时间：{{ formatTime(currentNotification.timestamp) }}
+            </div>
+          </v-card-text>
+
+          <v-divider></v-divider>
+
+          <v-card-actions class="pa-4">
+            <v-btn
+              color="error"
+              prepend-icon="mdi-delete"
+              size="x-large"
+              variant="tonal"
+              class="px-6"
+              @click="removePersistentNotification(currentNotification.id)"
+            >
+              删除通知
+            </v-btn>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="primary"
+              size="x-large"
+              variant="elevated"
+              class="px-8"
+              @click="notificationDetailDialog = false"
+            >
+              关闭
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
       <homework-grid
         :sorted-items="sortedItems"
         :unused-subjects="unusedSubjects"
@@ -75,6 +146,7 @@
         :highlighted-cards="highlightedCards"
         @open-dialog="openDialog"
         @open-attendance="setAttendanceArea"
+        @disabled-click="handleDisabledClick"
       />
 
       <home-actions
@@ -100,7 +172,9 @@
       v-if="!mobile"
       :student-list="state.studentList"
       :attendance="state.boardData.attendance"
+      :is-editing-disabled="isEditingDisabled"
       @click="setAttendanceArea"
+      @disabled-click="handleDisabledClick"
     />
   </div>
 
@@ -109,6 +183,8 @@
     :auto-save="autoSave"
     :initial-content="state.textarea"
     :title="state.dialogTitle"
+    :is-editing-past-data="isEditingPastData"
+    :current-date-string="state.dateString"
     @save="handleHomeworkSave"
   />
 
@@ -217,6 +293,22 @@
         <v-btn color="primary" @click="urlConfigDialog.confirmHandler">
           确认应用
         </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+  <!-- 通知详情对话框 -->
+  <v-dialog v-model="notificationDetailDialog" max-width="600">
+    <v-card v-if="currentNotification">
+      <v-card-title class="headline" :class="currentNotification.isUrgent ? 'text-error' : 'text-primary'">
+        {{ currentNotification.isUrgent ? '强调通知' : '通知详情' }}
+      </v-card-title>
+      <v-card-text class="text-h5 py-4">
+        {{ currentNotification.message }}
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="error" variant="text" @click="removePersistentNotification(currentNotification.id)">删除</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="notificationDetailDialog = false">关闭</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -396,6 +488,11 @@ export default {
       urgentTestDialog: false,
       // 令牌信息
       tokenInfo: null,
+
+      // 常驻通知
+      persistentNotifications: [],
+      notificationDetailDialog: false,
+      currentNotification: null,
     };
   },
 
@@ -528,7 +625,17 @@ export default {
       return getSetting("display.dynamicSort");
     },
     isEditingDisabled() {
-      return this.state.uploadLoading || this.state.downloadLoading;
+      // 检查是否禁用编辑：加载中、没有编辑权限、或被配置禁止编辑过往数据
+      if (this.state.uploadLoading || this.state.downloadLoading) return true;
+
+      // 检查是否是只读 token
+      const manager = this.$refs.studentNameManager;
+      if (manager?.isReadOnly) return true;
+
+      // 检查是否禁止编辑过往数据
+      if (!this.canEditCurrentDate) return true;
+
+      return false;
     },
     unreadCount() {
       return this.$refs.messageLog?.unreadCount || 0;
@@ -542,11 +649,24 @@ export default {
     confirmNonTodaySave() {
       return getSetting("edit.confirmNonTodaySave");
     },
+    blockPastDataEdit() {
+      return getSetting("edit.blockPastDataEdit");
+    },
     shouldShowSaveConfirm() {
       return !this.isToday && this.confirmNonTodaySave;
     },
     shouldBlockAutoSave() {
       return !this.isToday && this.autoSave && this.blockNonTodayAutoSave;
+    },
+    canEditCurrentDate() {
+      // 检查是否可以编辑当前日期的数据
+      if (this.isToday) return true;
+      if (this.blockPastDataEdit) return false;
+      return true;
+    },
+    isEditingPastData() {
+      // 是否正在编辑过往数据（非今日数据）
+      return !this.isToday;
     },
     showFullscreenButton() {
       return getSetting("display.showFullscreenButton");
@@ -704,6 +824,9 @@ export default {
 
       // 获取令牌信息
       await this.loadTokenInfo();
+
+      // 加载常驻通知
+      this.loadPersistentNotifications();
     } catch (err) {
       console.error("初始化失败:", err);
       this.showError("初始化失败，请刷新页面重试");
@@ -869,6 +992,11 @@ export default {
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
       return `${year}${month}${day}`;
+    },
+
+    formatTime(timestamp) {
+      if (!timestamp) return '';
+      return new Date(timestamp).toLocaleString();
     },
 
     getToday() {
@@ -1094,6 +1222,19 @@ export default {
     },
 
     async openDialog(subject) {
+      // 检查编辑权限
+      if (this.isEditingDisabled) {
+        const manager = this.$refs.studentNameManager;
+        if (manager?.isReadOnly) {
+          this.$message.warning("无法编辑", "当前使用的是只读令牌");
+        } else if (!this.canEditCurrentDate) {
+          this.$message.warning("无法编辑", "已禁止编辑过往数据");
+        } else {
+          this.$message.warning("无法编辑", "数据加载中，请稍候");
+        }
+        return;
+      }
+
       // 如果是自定义卡片
       if (subject.startsWith('custom-')) {
         this.currentEditSubject = subject;
@@ -1145,10 +1286,25 @@ export default {
     },
 
     setAttendanceArea() {
+      // 检查编辑权限
+      if (this.isEditingDisabled) {
+        this.handleDisabledClick();
+        return;
+      }
       this.state.attendanceDialog = true;
     },
 
-
+    handleDisabledClick() {
+      // 处理点击禁用卡片/区域的情况
+      const manager = this.$refs.studentNameManager;
+      if (manager?.isReadOnly) {
+        this.$message.warning("无法编辑", "当前使用的是只读令牌");
+      } else if (!this.canEditCurrentDate) {
+        this.$message.warning("无法编辑", "已禁止编辑过往数据");
+      } else {
+        this.$message.warning("无法编辑", "数据加载中，请稍候");
+      }
+    },
 
     zoom(direction) {
       const step = 2;
@@ -1182,6 +1338,7 @@ export default {
         this.state.refreshInterval = setInterval(() => {
           if (!this.shouldSkipRefresh()) {
             this.downloadData();
+            this.loadPersistentNotifications();
           }
         }, interval * 1000);
       }
@@ -1300,6 +1457,13 @@ export default {
         const handler = (msg) => {
           // Expect msg = { uuid, key, action, created?, updatedAt?, deletedAt?, batch? }
           if (!msg) return;
+
+          // 检查是否是通知列表更新
+          if (msg.key === 'notification-list') {
+             this.loadPersistentNotifications();
+             return;
+          }
+
           // We only care about current date key changes
           const expectedKey = `classworks-data-${this.state.dateString}`;
           if (msg.key !== expectedKey) return;
@@ -1816,6 +1980,30 @@ export default {
       } catch (error) {
         console.error("清理URL参数失败:", error);
       }
+    },
+
+    async loadPersistentNotifications() {
+      try {
+        const res = await dataProvider.loadData('notification-list');
+        if (res && Array.isArray(res)) {
+          this.persistentNotifications = res;
+        } else if (res && res.success !== false && Array.isArray(res.data)) {
+          this.persistentNotifications = res.data;
+        } else {
+          this.persistentNotifications = [];
+        }
+      } catch (e) {
+        console.error('加载常驻通知失败', e);
+      }
+    },
+    showNotificationDetail(notification) {
+      this.currentNotification = notification;
+      this.notificationDetailDialog = true;
+    },
+    async removePersistentNotification(id) {
+      this.persistentNotifications = this.persistentNotifications.filter(n => n.id !== id);
+      await dataProvider.saveData('notification-list', this.persistentNotifications);
+      this.notificationDetailDialog = false;
     },
   },
 };

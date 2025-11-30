@@ -289,6 +289,13 @@ const settingsDefinitions = {
     description: "保存非当天数据需确认",
     icon: "mdi-calendar-alert",
   },
+  "edit.blockPastDataEdit": {
+    type: "boolean",
+    default: false,
+    description: "禁止编辑过往数据",
+    icon: "mdi-lock-clock",
+    // 启用后将禁止编辑非当天的历史数据，包括作业卡片和出勤统计
+  },
   "edit.autoSavePromptText": {
     type: "string",
     default: "喵？喵呜！",

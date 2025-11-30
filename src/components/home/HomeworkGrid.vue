@@ -13,11 +13,11 @@
         <!-- 出勤卡片 -->
         <v-card
           v-if="item.type === 'attendance'"
-          :class="{ 'glow-highlight': highlightedCards[item.key] }"
+          :class="{ 'glow-highlight': highlightedCards[item.key], 'cursor-not-allowed': isEditingDisabled, 'cursor-pointer': !isEditingDisabled }"
           border
           class="glow-track"
           height="100%"
-          @click="$emit('open-attendance')"
+          @click="handleCardClick('attendance', null)"
           @mousemove="handleMouseMove"
           @touchmove="handleTouchMove"
         >
@@ -82,11 +82,11 @@
         <!-- 自定义/测试卡片 -->
         <v-card
           v-else-if="item.type === 'custom'"
-          :class="{ 'glow-highlight': highlightedCards[item.key] }"
+          :class="{ 'glow-highlight': highlightedCards[item.key], 'cursor-not-allowed': isEditingDisabled, 'cursor-pointer': !isEditingDisabled }"
           border
           class="glow-track"
           height="100%"
-          @click="!isEditingDisabled && $emit('open-dialog', item.key)"
+          @click="handleCardClick('dialog', item.key)"
           @mousemove="handleMouseMove"
           @touchmove="handleTouchMove"
         >
@@ -102,11 +102,11 @@
         <!-- 普通作业卡片 -->
         <v-card
           v-else
-          :class="{ 'glow-highlight': highlightedCards[item.key] }"
+          :class="{ 'glow-highlight': highlightedCards[item.key], 'cursor-not-allowed': isEditingDisabled, 'cursor-pointer': !isEditingDisabled }"
           border
           class="glow-track"
           height="100%"
-          @click="!isEditingDisabled && $emit('open-dialog', item.key)"
+          @click="handleCardClick('dialog', item.key)"
           @mousemove="handleMouseMove"
           @touchmove="handleTouchMove"
         >
@@ -133,11 +133,10 @@
       <v-chip
         v-for="subject in unusedSubjects"
         :key="subject.name"
-        :disabled="isEditingDisabled"
         class="ma-1"
         color="primary"
         variant="tonal"
-        @click="$emit('open-dialog', subject.name)"
+        @click="handleCardClick('dialog', subject.name)"
       >
         <v-icon start size="small">mdi-plus</v-icon>
         {{ subject.name }}
@@ -149,8 +148,7 @@
         <v-btn
           v-for="subject in unusedSubjects"
           :key="subject.name"
-          :disabled="isEditingDisabled"
-          @click="$emit('open-dialog', subject.name)"
+          @click="handleCardClick('dialog', subject.name)"
         >
           <v-icon start> mdi-plus</v-icon>
           {{ subject.name }}
@@ -162,10 +160,9 @@
         <v-card
           v-for="subject in unusedSubjects"
           :key="subject.name"
-          :disabled="isEditingDisabled"
           border
           class="empty-subject-card"
-          @click="$emit('open-dialog', subject.name)"
+          @click="handleCardClick('dialog', subject.name)"
         >
           <v-card-title class="text-subtitle-1">
             {{ subject.name }}
@@ -209,13 +206,25 @@ export default {
       default: () => ({}),
     },
   },
-  emits: ["open-dialog", "open-attendance"],
+  emits: ["open-dialog", "open-attendance", "disabled-click"],
   computed: {
     isMobile() {
       return this.$vuetify.display.mobile;
     },
   },
   methods: {
+    handleCardClick(type, key) {
+      if (this.isEditingDisabled) {
+        this.$emit('disabled-click');
+        return;
+      }
+
+      if (type === 'attendance') {
+        this.$emit('open-attendance');
+      } else if (type === 'dialog') {
+        this.$emit('open-dialog', key);
+      }
+    },
     splitPoint(content) {
       return content.split("\n").filter((text) => text.trim());
     },
@@ -241,3 +250,17 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.cursor-not-allowed {
+  cursor: not-allowed !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.v-card.cursor-not-allowed:hover {
+  transform: none !important;
+}
+</style>
