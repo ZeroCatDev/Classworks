@@ -207,6 +207,7 @@
   <floating-toolbar
     :is-today="isToday"
     :loading="loading.download"
+    :copy-to-today-loading="loading.copyToToday"
     :selected-date="state.selectedDateObj"
     :unread-count="unreadCount"
     @refresh="downloadData"
@@ -216,6 +217,7 @@
     @date-select="handleDateSelect"
     @prev-day="navigateDay(-1)"
     @next-day="navigateDay(1)"
+    @copy-to-today="copyHomeworkToToday"
   />
 
   <!-- 添加ICP备案悬浮组件 -->
@@ -433,6 +435,7 @@ export default {
         download: false,
         upload: false,
         students: false,
+        copyToToday: false,
       },
       debouncedUpload: null,
       debouncedAttendanceSave: null,
@@ -1912,6 +1915,67 @@ export default {
       const currentDate = new Date(this.state.selectedDateObj);
       currentDate.setDate(currentDate.getDate() + offset);
       this.handleDateSelect(currentDate);
+    },
+
+    async copyHomeworkToToday() {
+      if (this.loading.copyToToday) return;
+
+      try {
+        this.loading.copyToToday = true;
+
+        // 1. 保存当前选中日期的作业数据
+        const sourceDate = this.state.dateString;
+        const sourceHomework = JSON.parse(JSON.stringify(this.state.boardData.homework));
+
+        // 2. 切换到今天并加载今天的数据（主要是为了获取考勤等其他数据）
+        const today = this.getToday();
+        const todayString = this.formatDate(today);
+
+        // 临时切换到今天以加载数据
+        this.state.dateString = todayString;
+        await this.downloadData();
+
+        // 3. 直接替换今天的作业数据（删除原有作业，使用源日期的作业）
+        // 深拷贝源日期的作业数据
+        const newHomework = {};
+        for (const key in sourceHomework) {
+          if (sourceHomework[key] && sourceHomework[key].content) {
+            // 如果是自定义卡片，保留完整结构
+            if (sourceHomework[key].type === 'custom') {
+              newHomework[key] = JSON.parse(JSON.stringify(sourceHomework[key]));
+            } else {
+              // 普通作业，只复制内容
+              newHomework[key] = {
+                content: sourceHomework[key].content
+              };
+            }
+          }
+        }
+
+        // 直接替换作业数据
+        this.state.boardData.homework = newHomework;
+        this.state.synced = false;
+
+        // 4. 保存到今天
+        await this.uploadData();
+
+        // 5. 更新视图状态为今天
+        this.state.selectedDate = todayString;
+        this.state.selectedDateObj = today;
+        this.state.isToday = true;
+
+        // 6. 更新URL
+        const url = new URL(window.location);
+        url.searchParams.delete('date');
+        window.history.pushState({}, '', url);
+
+        this.$message.success("复制成功", `已将 ${sourceDate} 的作业内容复制到今天（已替换原有作业）`);
+      } catch (error) {
+        console.error("复制作业失败:", error);
+        this.$message.error("复制失败", error.message || "请重试");
+      } finally {
+        this.loading.copyToToday = false;
+      }
     },
 
     // 解析预配数据
