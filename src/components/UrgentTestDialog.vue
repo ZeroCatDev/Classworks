@@ -115,7 +115,7 @@
                       </template>
                       <template v-slot:append>
                         <v-btn icon="mdi-pencil" variant="text" size="small" @click="openEditDialog(item)"></v-btn>
-                        <v-btn icon="mdi-delete" variant="text" color="error" size="small" @click="confirmDelete(item.id)"></v-btn>
+                        <v-btn icon="mdi-delete" variant="text" color="error" size="small" @click="deletePersistentNotification(item.id)"></v-btn>
                       </template>
                     </v-list-item>
                   </v-list>
@@ -311,7 +311,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="grey-darken-1" variant="text" @click="deleteConfirmDialog = false">取消</v-btn>
-          <v-btn color="error" variant="text" @click="confirmDelete">删除</v-btn>
+          <v-btn color="error" variant="text" @click="executeDelete">删除</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -672,7 +672,7 @@ export default {
       this.deleteConfirmDialog = true
     },
 
-    async confirmDelete() {
+    async executeDelete() {
       if (!this.itemToDelete) return
 
       const id = this.itemToDelete
@@ -689,7 +689,7 @@ export default {
       }
     },
 
-    confirmDelete(id) {
+    deletePersistentNotification(id) {
       this.itemToDelete = id
       this.deleteConfirmDialog = true
     }
