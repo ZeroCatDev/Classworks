@@ -2066,7 +2066,9 @@ export default {
     },
     async removePersistentNotification(id) {
       this.persistentNotifications = this.persistentNotifications.filter(n => n.id !== id);
-      await dataProvider.saveData('notification-list', this.persistentNotifications);
+      // 当通知列表为空时，保存空对象 {} 而不是空数组 []，因为后端不接受空数组
+      const dataToSave = this.persistentNotifications.length > 0 ? this.persistentNotifications : {};
+      await dataProvider.saveData('notification-list', dataToSave);
       this.notificationDetailDialog = false;
     },
   },
