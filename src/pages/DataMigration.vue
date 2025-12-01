@@ -38,7 +38,7 @@
           </v-card-text>
         </v-card>
 
-        <MigrationTool ref="migrationTool"/>
+        <MigrationTool ref="migrationTool" />
       </v-col>
     </v-row>
 
@@ -83,7 +83,7 @@
           </v-alert>
         </v-card-text>
         <v-card-actions>
-          <v-spacer/>
+          <v-spacer />
           <v-btn
             color="grey-darken-1"
             variant="text"

@@ -11,7 +11,11 @@
       <v-card-title class="d-flex align-center">
         {{ title }}
         <v-spacer />
-        <v-btn icon="mdi-close" variant="text" @click="handleClose" />
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="handleClose"
+        />
       </v-card-title>
       <v-card-subtitle>
         {{ autoSave ? autoSavePromptText : manualSavePromptText }}
@@ -31,13 +35,21 @@
             />
 
             <!-- Template Buttons Section -->
-            <div v-if="templateData" class="mt-4">
-              <div v-if="hasTemplates" class="template-buttons">
-
-
+            <div
+              v-if="templateData"
+              class="mt-4"
+            >
+              <div
+                v-if="hasTemplates"
+                class="template-buttons"
+              >
                 <!-- Subject specific books -->
                 <template v-if="subjectBooks">
-                  <div v-for="(pages, book) in subjectBooks" :key="book" class="button-group">
+                  <div
+                    v-for="(pages, book) in subjectBooks"
+                    :key="book"
+                    class="button-group"
+                  >
                     <v-chip
                       :color="isBookSelected(book) ? 'success' : 'default'"
                       :variant="isBookSelected(book) ? 'elevated' : 'flat'"
@@ -48,7 +60,10 @@
                     </v-chip>
 
                     <!-- Show pages only if book is selected -->
-                    <div v-if="isBookSelected(book)" class="pages-container mt-2">
+                    <div
+                      v-if="isBookSelected(book)"
+                      class="pages-container mt-2"
+                    >
                       <v-chip
                         v-for="page in pages"
                         :key="page"
@@ -65,7 +80,11 @@
 
                 <!-- Common books -->
                 <template v-if="commonBooks">
-                  <div v-for="(pages, book) in commonBooks" :key="book" class="button-group">
+                  <div
+                    v-for="(pages, book) in commonBooks"
+                    :key="book"
+                    class="button-group"
+                  >
                     <v-chip
                       :color="isBookSelected(book) ? 'success' : 'default'"
                       :variant="isBookSelected(book) ? 'elevated' : 'flat'"
@@ -76,7 +95,10 @@
                     </v-chip>
 
                     <!-- Show pages only if book is selected -->
-                    <div v-if="isBookSelected(book)" class="pages-container mt-2">
+                    <div
+                      v-if="isBookSelected(book)"
+                      class="pages-container mt-2"
+                    >
                       <v-chip
                         v-for="page in pages"
                         :key="page"
@@ -92,7 +114,10 @@
                 </template>
 
                 <!-- Actions -->
-                <div v-if="templateData.actions?.length" class="button-group">
+                <div
+                  v-if="templateData.actions?.length"
+                  class="button-group"
+                >
                   <v-chip
                     v-for="action in templateData.actions"
                     :key="action"
@@ -105,14 +130,21 @@
                   </v-chip>
                 </div>
               </div>
-              <div v-else class="text-center text-body-2 text-disabled mt-2">
+              <div
+                v-else
+                class="text-center text-body-2 text-disabled mt-2"
+              >
                 暂无可用的模板
               </div>
             </div>
           </div>
 
           <!-- Quick Tools Section -->
-          <div v-if="showQuickTools && !isMobile" class="quick-tools ml-4" style="min-width: 180px;">
+          <div
+            v-if="showQuickTools && !isMobile"
+            class="quick-tools ml-4"
+            style="min-width: 180px;"
+          >
             <!-- Numeric Keypad -->
             <div class="numeric-keypad mb-4">
               <div class="keypad-row">
@@ -223,10 +255,11 @@
         border-color="warning"
         prominent
       >
-        <template #prepend>
-        </template>
+        <template #prepend />
         <div class="d-flex flex-column">
-          <div class="text-h6 mb-1">你打算修改历史？</div>
+          <div class="text-h6 mb-1">
+            你打算修改历史？
+          </div>
           <div class="text-body-2">
             这是 {{ new Date(currentDateString.slice(0,4), currentDateString.slice(4,6)-1, currentDateString.slice(6,8)).toLocaleDateString() }} 的作业 • 请谨慎操作，确保不会覆盖重要数据
           </div>
@@ -236,7 +269,6 @@
       <div class="text-center text-body-2 text-disabled mb-5">
         点击空白处完成编辑
       </div>
-
     </v-card>
   </v-dialog>
 </template>
