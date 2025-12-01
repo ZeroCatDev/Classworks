@@ -1,10 +1,7 @@
 <template>
-  <v-list-item
-    :disabled="disabled"
-    class="setting-item"
-  >
+  <v-list-item :disabled="disabled" class="setting-item">
     <template #prepend>
-      <v-icon :icon="settingIcon" />
+      <v-icon :icon="settingIcon"/>
     </template>
 
     <v-list-item-title class="text-wrap">
@@ -17,10 +14,7 @@
 
     <template #append>
       <div class="d-flex flex-column flex-sm-row align-center">
-        <div
-          v-if="type !== 'string' || hasOptions"
-          class="me-2"
-        >
+        <div v-if="type !== 'string' || hasOptions" class="me-2">
           <!-- 根据设置类型渲染不同的控件 -->
           <v-switch
             v-if="type === 'boolean'"
@@ -46,10 +40,7 @@
             @update:model-value="updateSetting"
           />
 
-          <div
-            v-else-if="type === 'number'"
-            class="d-flex align-center"
-          >
+          <div v-else-if="type === 'number'" class="d-flex align-center">
             <v-btn
               :disabled="disabled || localValue <= minValue"
               icon="mdi-minus"
@@ -85,7 +76,7 @@
         </div>
 
         <v-menu location="bottom">
-          <template #activator="{ props }">
+          <template v-slot:activator="{ props }">
             <v-btn
               :disabled="disabled"
               class="ml-2"
@@ -97,36 +88,24 @@
           </template>
           <v-list density="compact">
             <v-list-item @click="copySettingId">
-              <template #prepend>
-                <v-icon
-                  icon="mdi-key"
-                  size="small"
-                />
+              <template v-slot:prepend>
+                <v-icon icon="mdi-key" size="small"/>
               </template>
               <v-list-item-title>复制设置ID</v-list-item-title>
             </v-list-item>
 
             <v-list-item @click="copySettingValue">
-              <template #prepend>
-                <v-icon
-                  icon="mdi-content-copy"
-                  size="small"
-                />
+              <template v-slot:prepend>
+                <v-icon icon="mdi-content-copy" size="small"/>
               </template>
               <v-list-item-title>复制设置值</v-list-item-title>
             </v-list-item>
 
-            <v-divider />
+            <v-divider></v-divider>
 
-            <v-list-item
-              :disabled="isDefaultValue"
-              @click="resetToDefault"
-            >
-              <template #prepend>
-                <v-icon
-                  icon="mdi-restore"
-                  size="small"
-                />
+            <v-list-item :disabled="isDefaultValue" @click="resetToDefault">
+              <template v-slot:prepend>
+                <v-icon icon="mdi-restore" size="small"/>
               </template>
               <v-list-item-title>重置为默认值</v-list-item-title>
             </v-list-item>
@@ -137,10 +116,7 @@
   </v-list-item>
 
   <!-- 文本框显示在下方 -->
-  <div
-    v-if="type === 'string' && !hasOptions"
-    class="px-4 pb-2 pt-0"
-  >
+  <div v-if="type === 'string' && !hasOptions" class="px-4 pb-2 pt-0">
     <v-text-field
       v-model="localValue"
       :disabled="disabled"

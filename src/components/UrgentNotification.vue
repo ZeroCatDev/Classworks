@@ -17,10 +17,7 @@
         </div>
 
         <!-- 发送者信息（使用 Vuetify Card） -->
-        <v-card
-          variant="flat"
-          color="white"
-        >
+        <v-card variant="flat" color="white">
           <v-card-title>发送者信息</v-card-title>
           <v-card-text>
             <v-chip
@@ -29,12 +26,7 @@
               variant="outlined"
               size="small"
             >
-              <v-icon
-                left
-                size="16"
-              >
-                mdi-account
-              </v-icon>
+              <v-icon left size="16"> mdi-account </v-icon>
               {{ senderName }}
             </v-chip>
             <v-chip
@@ -43,12 +35,7 @@
               variant="outlined"
               size="small"
             >
-              <v-icon
-                left
-                size="16"
-              >
-                mdi-devices
-              </v-icon>
+              <v-icon left size="16"> mdi-devices </v-icon>
               {{ deviceType }}
             </v-chip>
             <v-chip
@@ -57,33 +44,18 @@
               variant="outlined"
               size="small"
             >
-              <v-icon
-                left
-                size="16"
-              >
-                mdi-clock
-              </v-icon>
+              <v-icon left size="16"> mdi-clock </v-icon>
               {{ formatTime(currentNotification?.timestamp) }}
             </v-chip>
           </v-card-text>
         </v-card>
 
         <!-- 多通知导航 -->
-        <div
-          v-if="hasMultipleNotifications"
-          class="navigation-controls mt-6"
-        >
-          <v-card
-            variant="flat"
-            color="rgba(255,255,255,0.1)"
-          >
+        <div v-if="hasMultipleNotifications" class="navigation-controls mt-6">
+          <v-card variant="flat" color="rgba(255,255,255,0.1)">
             <v-card-text class="text-center">
               <div class="notification-counter mb-3">
-                <v-chip
-                  color="white"
-                  variant="flat"
-                  size="small"
-                >
+                <v-chip color="white" variant="flat" size="small">
                   {{ notificationCountText }}
                 </v-chip>
               </div>
@@ -116,15 +88,8 @@
 
         <!-- 操作按钮 -->
         <div class="mt-8">
-          <v-btn
-            color="white"
-            size="large"
-            variant="flat"
-            @click="close"
-          >
-            <v-icon left>
-              mdi-check
-            </v-icon>
+          <v-btn color="white" size="large" variant="flat" @click="close">
+            <v-icon left> mdi-check </v-icon>
             我知道了
           </v-btn>
         </div>

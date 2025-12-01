@@ -4,23 +4,17 @@
       <v-card-title>迁移设置</v-card-title>
       <v-card-text>
         <v-row>
-          <v-col
-            cols="12"
-            md="6"
-          >
+          <v-col cols="12" md="6">
             <v-text-field
               v-model="classNumber"
               hint="请输入需要迁移的班级编号"
               label="班级编号"
               persistent-hint
               prepend-icon="mdi-account-group"
-            />
+            ></v-text-field>
           </v-col>
 
-          <v-col
-            cols="12"
-            md="6"
-          >
+          <v-col cols="12" md="6">
             <v-text-field
               v-model="machineId"
               hint="系统已自动填充设备标识，通常无需修改"
@@ -28,35 +22,23 @@
               persistent-hint
               prepend-icon="mdi-identifier"
               readonly
-            />
+            ></v-text-field>
           </v-col>
         </v-row>
 
-        <v-radio-group
-          v-model="migrationType"
-          class="mt-2"
-        >
-          <v-radio
-            label="本地数据迁移"
-            value="local"
-          />
-          <v-radio
-            label="服务器数据迁移"
-            value="server"
-          />
+        <v-radio-group v-model="migrationType" class="mt-2">
+          <v-radio label="本地数据迁移" value="local"></v-radio>
+          <v-radio label="服务器数据迁移" value="server"></v-radio>
         </v-radio-group>
 
-        <div
-          v-if="migrationType === 'server'"
-          class="mt-4"
-        >
+        <div v-if="migrationType === 'server'" class="mt-4">
           <v-text-field
             v-model="serverUrl"
             hint="输入服务器域名，例如：https://example.com"
             label="服务器地址"
             persistent-hint
             prepend-icon="mdi-server"
-          />
+          ></v-text-field>
 
           <v-alert
             class="mt-2"
@@ -64,44 +46,33 @@
             type="info"
             variant="outlined"
           >
-            服务器接口格式：<br>
-            - 配置接口：域名/班号/config<br>
+            服务器接口格式：<br/>
+            - 配置接口：域名/班号/config<br/>
             - 作业数据接口：域名/班号/homework?date=YYYY-MM-DD
           </v-alert>
 
           <div class="d-flex align-center mt-4">
-            <v-icon
-              class="mr-2"
-              color="warning"
-            >
-              mdi-calendar-range
-            </v-icon>
+            <v-icon class="mr-2" color="warning">mdi-calendar-range</v-icon>
             <span class="text-subtitle-1">选择迁移时间范围：</span>
           </div>
 
           <v-row class="mt-1">
-            <v-col
-              cols="12"
-              md="6"
-            >
+            <v-col cols="12" md="6">
               <v-text-field
                 v-model="startDate"
                 label="开始日期"
                 prepend-icon="mdi-calendar-start"
                 type="date"
-              />
+              ></v-text-field>
             </v-col>
 
-            <v-col
-              cols="12"
-              md="6"
-            >
+            <v-col cols="12" md="6">
               <v-text-field
                 v-model="endDate"
                 label="结束日期"
                 prepend-icon="mdi-calendar-end"
                 type="date"
-              />
+              ></v-text-field>
             </v-col>
           </v-row>
         </div>
@@ -114,7 +85,7 @@
         <span>{{
           migrationType === "local" ? "本地数据库内容" : "服务器数据内容"
         }}</span>
-        <v-spacer />
+        <v-spacer></v-spacer>
         <v-btn
           :loading="loading || scanning"
           color="primary"
@@ -133,9 +104,9 @@
           type="info"
         >
           {{
-            migrationType === "local"
-              ? '尚未扫描本地数据或未找到可迁移的数据。点击"扫描数据"按钮开始扫描。'
-              : '尚未预览服务器数据或未找到可迁移的数据。点击"加载数据"按钮开始查询。'
+          migrationType === "local"
+          ? '尚未扫描本地数据或未找到可迁移的数据。点击"扫描数据"按钮开始扫描。'
+          : '尚未预览服务器数据或未找到可迁移的数据。点击"加载数据"按钮开始查询。'
           }}
         </v-alert>
 
@@ -173,7 +144,7 @@
         <v-skeleton-loader
           v-if="loading || scanning"
           type="table"
-        />
+        ></v-skeleton-loader>
       </v-card-text>
     </v-card>
 
@@ -181,27 +152,18 @@
       <v-card-title>迁移目标</v-card-title>
       <v-card-text>
         <v-radio-group v-model="targetStorage">
-          <v-radio
-            label="本地 KV 存储"
-            value="kv-local"
-          />
-          <v-radio
-            label="服务器 KV 存储"
-            value="kv-server"
-          />
+          <v-radio label="本地 KV 存储" value="kv-local"></v-radio>
+          <v-radio label="服务器 KV 存储" value="kv-server"></v-radio>
         </v-radio-group>
 
-        <div
-          v-if="targetStorage === 'kv-server'"
-          class="mt-4"
-        >
+        <div v-if="targetStorage === 'kv-server'" class="mt-4">
           <v-text-field
             v-model="targetServerUrl"
             hint="输入KV服务器地址，例如：https://example.com/kv-api"
             label="目标服务器地址"
             persistent-hint
             prepend-icon="mdi-server-network"
-          />
+          ></v-text-field>
         </div>
       </v-card-text>
     </v-card>
@@ -217,26 +179,16 @@
       </v-btn>
     </div>
 
-    <v-dialog
-      v-model="showResult"
-      max-width="600"
-    >
+    <v-dialog v-model="showResult" max-width="600">
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon
-            :color="migrationSuccess ? 'success' : 'error'"
-            class="mr-2"
-          >
+          <v-icon :color="migrationSuccess ? 'success' : 'error'" class="mr-2">
             {{ migrationSuccess ? "mdi-check-circle" : "mdi-alert-circle" }}
           </v-icon>
           <span>{{ migrationSuccess ? "迁移成功" : "迁移失败" }}</span>
         </v-card-title>
         <v-card-text>
-          <v-alert
-            v-if="migrationError"
-            class="mb-4"
-            type="error"
-          >
+          <v-alert v-if="migrationError" class="mb-4" type="error">
             {{ migrationError }}
           </v-alert>
 
@@ -245,7 +197,7 @@
               成功迁移 {{ migrationStats.success }} 项数据到
               {{ targetStorage === "kv-local" ? "本地" : "服务器" }} KV 存储。
             </p>
-            <v-divider class="my-4" />
+            <v-divider class="my-4"></v-divider>
             <v-list>
               <v-list-subheader>迁移详情</v-list-subheader>
               <v-list-item
@@ -263,13 +215,8 @@
           </div>
         </v-card-text>
         <v-card-actions>
-          <v-spacer />
-          <v-btn
-            color="primary"
-            @click="showResult = false"
-          >
-            关闭
-          </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="showResult = false"> 关闭</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

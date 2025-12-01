@@ -11,7 +11,7 @@
       <v-app-bar-title class="text-h6">
         编辑考试配置
       </v-app-bar-title>
-      <v-spacer />
+      <v-spacer/>
       <v-btn
         :loading="saving"
         color="success"

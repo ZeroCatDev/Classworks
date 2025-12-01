@@ -1,60 +1,36 @@
 <template>
-  <settings-card
-    :loading="loading"
-    icon="mdi-database-edit"
-    title="KV数据库管理"
-  >
+  <settings-card :loading="loading" icon="mdi-database-edit" title="KV数据库管理">
     <v-list>
       <!-- 数据库连接状态 -->
       <v-list-item>
         <template #prepend>
-          <v-icon
-            :color="connectionColor"
-            :icon="connectionIcon"
-            class="mr-3"
-          />
+          <v-icon :color="connectionColor" :icon="connectionIcon" class="mr-3"/>
         </template>
         <v-list-item-title>数据库状态</v-list-item-title>
         <v-list-item-subtitle>{{ connectionStatus }}</v-list-item-subtitle>
         <template #append>
-          <v-btn
-            :loading="loading"
-            variant="tonal"
-            @click="refreshConnection"
-          >
+          <v-btn :loading="loading" variant="tonal" @click="refreshConnection">
             刷新
           </v-btn>
         </template>
       </v-list-item>
 
-      <v-divider class="my-2" />
+      <v-divider class="my-2"/>
 
       <!-- 数据列表 -->
       <v-list-item>
         <template #prepend>
-          <v-icon
-            class="mr-3"
-            icon="mdi-format-list-bulleted"
-          />
+          <v-icon class="mr-3" icon="mdi-format-list-bulleted"/>
         </template>
         <v-list-item-title>数据条目</v-list-item-title>
         <v-list-item-subtitle>共 {{ kvData.length }} 条记录</v-list-item-subtitle>
         <template #append>
           <v-btn-group variant="tonal">
-            <v-btn
-              :loading="loadingData"
-              @click="loadKvData"
-            >
+            <v-btn :loading="loadingData" @click="loadKvData">
               加载数据
             </v-btn>
-            <v-btn
-              :disabled="!isKvProvider"
-              @click="createNewItem"
-            >
-              <v-icon
-                class="mr-1"
-                icon="mdi-plus"
-              />
+            <v-btn :disabled="!isKvProvider" @click="createNewItem">
+              <v-icon class="mr-1" icon="mdi-plus"/>
               新建
             </v-btn>
           </v-btn-group>
@@ -63,18 +39,11 @@
     </v-list>
 
     <!-- 数据表格 -->
-    <v-card
-      v-if="kvData.length > 0"
-      class="mt-4"
-      variant="outlined"
-    >
+    <v-card v-if="kvData.length > 0" class="mt-4" variant="outlined">
       <v-card-title class="d-flex align-center">
-        <v-icon
-          class="mr-2"
-          icon="mdi-table"
-        />
+        <v-icon class="mr-2" icon="mdi-table"/>
         KV数据列表
-        <v-spacer />
+        <v-spacer/>
         <v-text-field
           v-model="searchQuery"
           clearable
@@ -100,10 +69,7 @@
         </template>
 
         <template #[`item.actions`]="{ item }">
-          <v-btn-group
-            density="compact"
-            variant="text"
-          >
+          <v-btn-group density="compact" variant="text">
             <v-btn
               icon="mdi-eye"
               size="small"
@@ -136,23 +102,13 @@
     </v-card>
 
     <!-- 查看数据对话框 -->
-    <v-dialog
-      v-model="viewDialog"
-      max-width="800px"
-    >
+    <v-dialog v-model="viewDialog" max-width="800px">
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon
-            class="mr-2"
-            icon="mdi-eye"
-          />
+          <v-icon class="mr-2" icon="mdi-eye"/>
           查看数据
-          <v-spacer />
-          <v-btn
-            icon="mdi-close"
-            variant="text"
-            @click="viewDialog = false"
-          />
+          <v-spacer/>
+          <v-btn icon="mdi-close" variant="text" @click="viewDialog = false"/>
         </v-card-title>
 
         <v-card-subtitle v-if="selectedItem">
@@ -172,21 +128,12 @@
         </v-card-text>
 
         <v-card-actions>
-          <v-spacer />
-          <v-btn
-            variant="tonal"
-            @click="copyToClipboard(selectedItem?.value)"
-          >
-            <v-icon
-              class="mr-1"
-              icon="mdi-content-copy"
-            />
+          <v-spacer/>
+          <v-btn variant="tonal" @click="copyToClipboard(selectedItem?.value)">
+            <v-icon class="mr-1" icon="mdi-content-copy"/>
             复制数据
           </v-btn>
-          <v-btn
-            variant="text"
-            @click="viewDialog = false"
-          >
+          <v-btn variant="text" @click="viewDialog = false">
             关闭
           </v-btn>
         </v-card-actions>
@@ -194,23 +141,13 @@
     </v-dialog>
 
     <!-- 编辑数据对话框 -->
-    <v-dialog
-      v-model="editDialog"
-      max-width="800px"
-    >
+    <v-dialog v-model="editDialog" max-width="800px">
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon
-            class="mr-2"
-            icon="mdi-pencil"
-          />
+          <v-icon class="mr-2" icon="mdi-pencil"/>
           编辑数据
-          <v-spacer />
-          <v-btn
-            icon="mdi-close"
-            variant="text"
-            @click="closeEditDialog"
-          />
+          <v-spacer/>
+          <v-btn icon="mdi-close" variant="text" @click="closeEditDialog"/>
         </v-card-title>
 
         <v-card-subtitle v-if="editingItem">
@@ -230,11 +167,8 @@
         </v-card-text>
 
         <v-card-actions>
-          <v-spacer />
-          <v-btn
-            variant="text"
-            @click="closeEditDialog"
-          >
+          <v-spacer/>
+          <v-btn variant="text" @click="closeEditDialog">
             取消
           </v-btn>
           <v-btn
@@ -251,23 +185,13 @@
     </v-dialog>
 
     <!-- 新建数据对话框 -->
-    <v-dialog
-      v-model="createDialog"
-      max-width="800px"
-    >
+    <v-dialog v-model="createDialog" max-width="800px">
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon
-            class="mr-2"
-            icon="mdi-plus"
-          />
+          <v-icon class="mr-2" icon="mdi-plus"/>
           新建数据
-          <v-spacer />
-          <v-btn
-            icon="mdi-close"
-            variant="text"
-            @click="closeCreateDialog"
-          />
+          <v-spacer/>
+          <v-btn icon="mdi-close" variant="text" @click="closeCreateDialog"/>
         </v-card-title>
 
         <v-card-text>
@@ -287,18 +211,15 @@
             :error-messages="isValidNewJson ? [] : ['请输入有效的JSON格式']"
             class="font-monospace"
             label="数据内容 (JSON格式)"
-            placeholder="请输入JSON数据，如：{&quot;name&quot;: &quot;value&quot;}"
+            placeholder='请输入JSON数据，如：{"name": "value"}'
             rows="15"
             variant="outlined"
           />
         </v-card-text>
 
         <v-card-actions>
-          <v-spacer />
-          <v-btn
-            variant="text"
-            @click="closeCreateDialog"
-          >
+          <v-spacer/>
+          <v-btn variant="text" @click="closeCreateDialog">
             取消
           </v-btn>
           <v-btn
@@ -315,23 +236,13 @@
     </v-dialog>
 
     <!-- 云端地址对话框 -->
-    <v-dialog
-      v-model="cloudUrlDialog"
-      max-width="800px"
-    >
+    <v-dialog v-model="cloudUrlDialog" max-width="800px">
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon
-            class="mr-2"
-            icon="mdi-cloud-download"
-          />
+          <v-icon class="mr-2" icon="mdi-cloud-download"/>
           获取云端访问地址
-          <v-spacer />
-          <v-btn
-            icon="mdi-close"
-            variant="text"
-            @click="cloudUrlDialog = false"
-          />
+          <v-spacer/>
+          <v-btn icon="mdi-close" variant="text" @click="cloudUrlDialog = false"/>
         </v-card-title>
 
         <v-card-subtitle v-if="selectedCloudItem">
@@ -339,43 +250,19 @@
         </v-card-subtitle>
 
         <v-card-text>
-          <v-alert
-            v-if="cloudUrlError"
-            class="mb-4"
-            type="error"
-            variant="tonal"
-          >
+          <v-alert v-if="cloudUrlError" class="mb-4" type="error" variant="tonal">
             {{ cloudUrlError }}
           </v-alert>
 
-          <v-alert
-            v-if="cloudUrlResult && cloudUrlResult.success"
-            class="mb-4"
-            type="success"
-            variant="tonal"
-          >
+          <v-alert v-if="cloudUrlResult && cloudUrlResult.success" class="mb-4" type="success" variant="tonal">
             <v-alert-title>云端地址获取成功</v-alert-title>
             <div class="mt-2">
-              <div
-                v-if="cloudUrlResult.migrated"
-                class="mb-2"
-              >
-                <v-icon
-                  class="mr-1"
-                  color="success"
-                  icon="mdi-database-arrow-up"
-                />
+              <div v-if="cloudUrlResult.migrated" class="mb-2">
+                <v-icon class="mr-1" color="success" icon="mdi-database-arrow-up"/>
                 数据已从本地迁移到云端
               </div>
-              <div
-                v-if="cloudUrlResult.configured"
-                class="mb-2"
-              >
-                <v-icon
-                  class="mr-1"
-                  color="info"
-                  icon="mdi-cog"
-                />
+              <div v-if="cloudUrlResult.configured" class="mb-2">
+                <v-icon class="mr-1" color="info" icon="mdi-cog"/>
                 云端配置已自动设置
               </div>
             </div>
@@ -392,16 +279,10 @@
             @click:append-inner="copyCloudUrl"
           />
 
-          <v-expansion-panels
-            v-if="cloudUrlResult && cloudUrlResult.url"
-            class="mt-4"
-          >
+          <v-expansion-panels v-if="cloudUrlResult && cloudUrlResult.url" class="mt-4">
             <v-expansion-panel>
               <v-expansion-panel-title>
-                <v-icon
-                  class="mr-2"
-                  icon="mdi-cog"
-                />
+                <v-icon class="mr-2" icon="mdi-cog"/>
                 高级选项
               </v-expansion-panel-title>
               <v-expansion-panel-text>
@@ -422,10 +303,7 @@
                   variant="tonal"
                   @click="refreshCloudUrl"
                 >
-                  <v-icon
-                    class="mr-1"
-                    icon="mdi-refresh"
-                  />
+                  <v-icon class="mr-1" icon="mdi-refresh"/>
                   重新获取
                 </v-btn>
               </v-expansion-panel-text>
@@ -434,11 +312,8 @@
         </v-card-text>
 
         <v-card-actions>
-          <v-spacer />
-          <v-btn
-            variant="text"
-            @click="cloudUrlDialog = false"
-          >
+          <v-spacer/>
+          <v-btn variant="text" @click="cloudUrlDialog = false">
             关闭
           </v-btn>
           <v-btn
@@ -447,10 +322,7 @@
             variant="tonal"
             @click="openCloudUrl"
           >
-            <v-icon
-              class="mr-1"
-              icon="mdi-open-in-new"
-            />
+            <v-icon class="mr-1" icon="mdi-open-in-new"/>
             在新窗口打开
           </v-btn>
         </v-card-actions>
@@ -458,37 +330,24 @@
     </v-dialog>
 
     <!-- 删除确认对话框 -->
-    <v-dialog
-      v-model="deleteDialog"
-      max-width="400px"
-    >
+    <v-dialog v-model="deleteDialog" max-width="400px">
       <v-card>
         <v-card-title class="d-flex align-center text-error">
-          <v-icon
-            class="mr-2"
-            icon="mdi-alert"
-          />
+          <v-icon class="mr-2" icon="mdi-alert"/>
           确认删除
         </v-card-title>
 
         <v-card-text>
           确定要删除键名为 <code>{{ itemToDelete?.key }}</code> 的数据吗？
           <br><br>
-          <v-alert
-            class="mt-2"
-            type="warning"
-            variant="tonal"
-          >
+          <v-alert class="mt-2" type="warning" variant="tonal">
             此操作不可撤销，请谨慎操作！
           </v-alert>
         </v-card-text>
 
         <v-card-actions>
-          <v-spacer />
-          <v-btn
-            variant="text"
-            @click="deleteDialog = false"
-          >
+          <v-spacer/>
+          <v-btn variant="text" @click="deleteDialog = false">
             取消
           </v-btn>
           <v-btn
