@@ -33,6 +33,10 @@
               <v-icon class="mr-1" icon="mdi-plus"/>
               新建
             </v-btn>
+            <v-btn @click="showMigrationDialog = true">
+              <v-icon class="mr-1" icon="mdi-cloud-upload"/>
+              从本地迁移
+            </v-btn>
           </v-btn-group>
         </template>
       </v-list-item>
@@ -361,11 +365,14 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <cloud-migration-dialog v-model="showMigrationDialog" />
   </settings-card>
 </template>
 
 <script>
 import SettingsCard from '@/components/SettingsCard.vue';
+import CloudMigrationDialog from '../CloudMigrationDialog.vue';
 import dataProvider from '@/utils/dataProvider';
 import {getSetting} from '@/utils/settings';
 import {openDB} from 'idb';
@@ -373,7 +380,8 @@ import {openDB} from 'idb';
 export default {
   name: 'KvDatabaseCard',
   components: {
-    SettingsCard
+    SettingsCard,
+    CloudMigrationDialog
   },
 
   data() {
@@ -391,6 +399,7 @@ export default {
       deleteDialog: false,
       createDialog: false,
       cloudUrlDialog: false,
+      showMigrationDialog: false,
 
       // 选中的项目
       selectedItem: null,

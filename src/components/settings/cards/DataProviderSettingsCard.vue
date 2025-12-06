@@ -53,33 +53,7 @@
           </template>
         </v-list-item>
       </template>
-      <v-list-item>
-        <template #prepend>
-          <v-icon class="mr-3" icon="mdi-database-import"/>
-        </template>
-        <v-list-item-title>迁移旧数据</v-list-item-title>
-        <v-list-item-subtitle
-        >将旧的存储格式数据转移到新的KV存储
-        </v-list-item-subtitle
-        >
-        <template #append>
-          <v-btn :loading="migrateLoading" variant="tonal" @click="migrateData">
-            迁移
-          </v-btn>
-        </template>
-      </v-list-item
-      ><!-- 显示机器ID -->
-      <v-list-item>
-        <template #prepend>
-          <v-icon class="mr-3" icon="mdi-identifier"/>
-        </template>
-        <v-list-item-title>本机唯一标识符</v-list-item-title>
-        <v-list-item-subtitle v-if="machineId">{{
-          machineId
-          }}
-        </v-list-item-subtitle>
-        <v-list-item-subtitle v-else>正在加载...</v-list-item-subtitle>
-      </v-list-item>
+
       <v-list-item>
         <template #prepend>
           <v-icon class="mr-3" icon="mdi-lan-connect"/>

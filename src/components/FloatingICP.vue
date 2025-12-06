@@ -1,12 +1,13 @@
 <template>
   <a
-    aria-label="浙ICP备2024068645号"
+    aria-label="xICP备x号"
     class="floating-icp-link"
     href="https://beian.miit.gov.cn/"
     rel="noopener noreferrer"
     target="_blank"
+    style="display: none;"
   >
-    浙ICP备2024068645号
+    xICP备x号
   </a>
 </template>
 
