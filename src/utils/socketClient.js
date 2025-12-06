@@ -28,7 +28,7 @@ export function getSocket() {
       socket = null;
     }
     connectedDomain = serverUrl;
-    socket = io(serverUrl, {transports: ['websocket']});
+    socket = io(serverUrl, {transports:  ["polling","websocket"]});
 
     // Re-attach previously registered event handlers on new socket instance
     listeners.forEach(({event, handler}) => {
