@@ -21,7 +21,7 @@ import {createApp} from 'vue'
 //import '@examaware-cs/player/dist/player.css'
 
 import messageService from './utils/message';
-import { getVisitorId } from './utils/fingerprint';
+import { getVisitorId } from './utils/visitorId';
 
 const app = createApp(App)
 

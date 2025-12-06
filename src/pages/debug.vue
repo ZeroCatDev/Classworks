@@ -22,7 +22,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getVisitorId, getFingerprintData } from '@/utils/fingerprint'
+import { getVisitorId, getFingerprintData } from '@/utils/visitorId'
 
 const visitorId = ref('')
 const fingerprintData = ref({})

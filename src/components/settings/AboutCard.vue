@@ -226,7 +226,7 @@
 <script>
 import {ref, onMounted, computed} from "vue";
 import { useRouter } from 'vue-router'
-import { getVisitorId } from '@/utils/fingerprint'
+import { getVisitorId } from '@/utils/visitorId'
 import packageJson from "../../../package.json";
 
 export default {
