@@ -113,7 +113,7 @@ export default {
         if (res && res.data) {
           data = res.data
         }
-        
+
         if (data) {
           this.kvConfig = {
             sources: Array.isArray(data.sources) ? data.sources : ['hitokoto'],
