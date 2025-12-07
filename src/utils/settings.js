@@ -106,7 +106,7 @@ const settingsDefinitions = {
   // 一言设置
   "hitokoto.enabled": {
     type: "boolean",
-    default: false,
+    default: true,
     description: "启用一言",
     icon: "mdi-comment-quote",
   },
