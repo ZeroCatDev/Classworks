@@ -1143,6 +1143,16 @@ export default {
         this.state.boardData.homework[this.currentEditSubject]?.content || "";
 
       if (content !== originalContent.trim()) {
+          // 如果内容为空且是自定义卡片，则删除该卡片
+        if (!content && this.currentEditSubject.startsWith('custom-')) {
+          delete this.state.boardData.homework[this.currentEditSubject];
+          this.state.synced = false;
+          if (this.autoSave) {
+            await this.trySave(true);
+          }
+          this.state.dialogVisible = false;
+          return;
+        }
         // 如果是自定义卡片，保留其他属性
         if (this.state.boardData.homework[this.currentEditSubject].type === 'custom') {
           this.state.boardData.homework[this.currentEditSubject].content = content;
