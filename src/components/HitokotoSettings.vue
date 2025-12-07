@@ -41,6 +41,10 @@
             @update:model-value="saveKvSettings"
           />
         </div>
+        <div class="text-caption text-orange mt-2">
+          <v-icon size="x-small" color="orange" class="mr-1">mdi-alert</v-icon>
+          一言（Hitokoto）数据源已收到关于存在负面内容的大量反馈，请用户谨慎启用。
+        </div>
       </v-list-item>
 
       <v-list-item v-if="kvConfig.sources.includes('jinrishici')">
@@ -94,7 +98,7 @@ export default {
   data() {
     return {
       kvConfig: {
-        sources: ['hitokoto'],
+        sources: ['zhaoyu'],
         sensitiveWords: '',
         jinrishiciToken: null
       },
@@ -116,7 +120,7 @@ export default {
 
         if (data) {
           this.kvConfig = {
-            sources: Array.isArray(data.sources) ? data.sources : ['hitokoto'],
+            sources: Array.isArray(data.sources) ? data.sources : ['zhaoyu'],
             sensitiveWords: data.sensitiveWords || '',
             jinrishiciToken: data.jinrishiciToken
           }

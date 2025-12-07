@@ -32,7 +32,7 @@ export default {
       enabled: false,
       refreshInterval: 60,
       kvConfig: {
-        sources: ['hitokoto'],
+        sources: ['zhaoyu'],
         sensitiveWords: []
       },
       sentence: '',
@@ -76,7 +76,7 @@ export default {
 
         if (data) {
           this.kvConfig = {
-            sources: Array.isArray(data.sources) && data.sources.length > 0 ? data.sources : ['hitokoto'],
+            sources: Array.isArray(data.sources) && data.sources.length > 0 ? data.sources : ['zhaoyu'],
             sensitiveWords: data.sensitiveWords ? data.sensitiveWords.split(/[,，]/).map(w => w.trim()).filter(w => w) : [],
             jinrishiciToken: data.jinrishiciToken
           }
