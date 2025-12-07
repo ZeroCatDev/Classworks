@@ -146,6 +146,8 @@
   gap: 16px;
   padding: 8px;
   grid-auto-flow: dense;
+  grid-auto-rows: 1px;
+  align-items: start;
 }
 
 .grid-item {

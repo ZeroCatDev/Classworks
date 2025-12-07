@@ -102,6 +102,20 @@ const settingsDefinitions = {
     description: "空科目的显示方式",
     icon: "mdi-card-outline",
   },
+
+  // 一言设置
+  "hitokoto.enabled": {
+    type: "boolean",
+    default: false,
+    description: "启用一言",
+    icon: "mdi-comment-quote",
+  },
+  "hitokoto.refreshInterval": {
+    type: "number",
+    default: 300,
+    description: "刷新时间（秒，0为不自动刷新）",
+    icon: "mdi-timer-refresh",
+  },
   "display.dynamicSort": {
     type: "boolean",
     default: true,

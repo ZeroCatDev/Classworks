@@ -4,15 +4,21 @@
       <div
         v-for="item in sortedItems"
         :key="item.key"
+        ref="items"
+        :data-key="item.key"
         :style="{
-          'grid-row-end': `span ${item.rowSpan}`,
           order: item.order,
         }"
         class="grid-item"
       >
+        <!-- 一言卡片 -->
+        <div v-if="item.type === 'hitokoto'" style="height: 100%">
+          <hitokoto-card />
+        </div>
+
         <!-- 出勤卡片 -->
         <v-card
-          v-if="item.type === 'attendance'"
+          v-else-if="item.type === 'attendance'"
           :class="{ 'glow-highlight': highlightedCards[item.key], 'cursor-not-allowed': isEditingDisabled, 'cursor-pointer': !isEditingDisabled }"
           border
           class="glow-track"
@@ -178,8 +184,13 @@
 </template>
 
 <script>
+import HitokotoCard from "@/components/HitokotoCard.vue";
+
 export default {
   name: "HomeworkGrid",
+  components: {
+    HitokotoCard,
+  },
   props: {
     sortedItems: {
       type: Array,
@@ -212,7 +223,76 @@ export default {
       return this.$vuetify.display.mobile;
     },
   },
+  mounted() {
+    this.resizeObserver = new ResizeObserver(() => {
+      this.resizeAllGridItems();
+    });
+
+    // Observe the grid container for width changes
+    if (this.$refs.gridContainer) {
+      this.resizeObserver.observe(this.$refs.gridContainer);
+    }
+
+    // Initial resize
+    this.$nextTick(() => {
+      this.resizeAllGridItems();
+      // Observe all items
+      if (this.$refs.items) {
+        this.$refs.items.forEach(item => {
+          // Observe the content inside the grid item
+          if (item.firstElementChild) {
+            this.resizeObserver.observe(item.firstElementChild);
+          }
+        });
+      }
+    });
+  },
+  updated() {
+    // When items change, re-observe new items
+    this.$nextTick(() => {
+      this.resizeAllGridItems();
+      if (this.$refs.items) {
+        this.$refs.items.forEach(item => {
+          if (item.firstElementChild) {
+            this.resizeObserver.observe(item.firstElementChild);
+          }
+        });
+      }
+    });
+  },
+  beforeUnmount() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
+  },
   methods: {
+    resizeGridItem(item) {
+      const grid = this.$refs.gridContainer;
+      if (!grid) return;
+
+      const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
+      const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('gap'));
+
+      // Find the content element (v-card or div)
+      const content = item.firstElementChild;
+      if (!content) return;
+
+      // Calculate required span
+      // We use scrollHeight to get the full height of content
+      // Add a small buffer to prevent scrollbars
+      const contentHeight = content.getBoundingClientRect().height;
+
+      // Formula: span = ceil((contentHeight + gap) / (rowHeight + gap))
+      const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
+
+      item.style.gridRowEnd = `span ${rowSpan}`;
+    },
+    resizeAllGridItems() {
+      const items = this.$refs.items;
+      if (items) {
+        items.forEach(item => this.resizeGridItem(item));
+      }
+    },
     handleCardClick(type, key) {
       if (this.isEditingDisabled) {
         this.$emit('disabled-click');

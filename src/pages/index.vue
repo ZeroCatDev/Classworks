@@ -331,6 +331,7 @@ import AttendanceSidebar from "@/components/attendance/AttendanceSidebar.vue";
 import AttendanceManagementDialog from "@/components/attendance/AttendanceManagementDialog.vue";
 import HomeworkGrid from "@/components/home/HomeworkGrid.vue";
 import HomeActions from "@/components/home/HomeActions.vue";
+import HitokotoCard from "@/components/HitokotoCard.vue";
 import dataProvider from "@/utils/dataProvider";
 import {
   getSetting,
@@ -550,28 +551,46 @@ export default {
         const subjectData = this.state.boardData.homework[subjectKey];
 
         if (subjectData && subjectData.content) {
+          const lineCount = subjectData.content.split("\n").filter((line) => line.trim()).length;
+          // Estimate height in pixels: title(64) + padding(32) + lines * line-height(24) + extra
+          const estimatedHeight = 100 + lineCount * 24;
+
           items.push({
             key: subjectKey,
             name: subjectKey,
             type: 'homework',
             content: subjectData.content,
             order: subject.order,
-            rowSpan: Math.ceil((subjectData.content.split("\n").filter((line) => line.trim()).length + 1) * 0.8),
+            rowSpan: estimatedHeight, // Used for sorting only
           });
         }
+      }
+
+      // 添加一言卡片
+      if (getSetting("hitokoto.enabled")) {
+        items.push({
+          key: "hitokoto-card",
+          name: "一言",
+          type: "hitokoto",
+          order: 9998,
+          rowSpan: 150, // Default estimated height
+        });
       }
 
       // 添加自定义卡片
       for (const key in this.state.boardData.homework) {
         if (key.startsWith('custom-')) {
           const card = this.state.boardData.homework[key];
+          const lineCount = card.content.split("\n").filter((line) => line.trim()).length;
+          const estimatedHeight = 100 + lineCount * 24;
+
           items.push({
             key: key,
             name: card.name,
             type: 'custom',
             content: card.content,
             order: 9999, // Put at the end
-            rowSpan: Math.ceil((card.content.split("\n").filter((line) => line.trim()).length + 1) * 0.8),
+            rowSpan: estimatedHeight, // Used for sorting only
           });
         }
       }

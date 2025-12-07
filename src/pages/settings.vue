@@ -181,6 +181,10 @@
           />
         </v-tabs-window-item>
 
+        <v-tabs-window-item value="hitokoto">
+          <hitokoto-settings border />
+        </v-tabs-window-item>
+
         <v-tabs-window-item value="randomPicker">
           <random-picker-card :is-mobile="isMobile" border/>
         </v-tabs-window-item>
@@ -272,6 +276,7 @@ import RandomPickerCard from "@/components/settings/cards/RandomPickerCard.vue";
 import HomeworkTemplateCard from "@/components/settings/cards/HomeworkTemplateCard.vue";
 import SubjectManagementCard from "@/components/settings/cards/SubjectManagementCard.vue";
 import KvDatabaseCard from "@/components/settings/cards/KvDatabaseCard.vue";
+import HitokotoSettings from "@/components/HitokotoSettings.vue";
 
 export default {
   name: "Settings",
@@ -293,6 +298,7 @@ export default {
     HomeworkTemplateCard,
     SubjectManagementCard,
     KvDatabaseCard,
+    HitokotoSettings,
   },
   setup() {
     const {mobile} = useDisplay();
@@ -413,6 +419,11 @@ export default {
           title: "主题",
           icon: "mdi-theme-light-dark",
           value: "theme",
+        },
+        {
+          title: "一言",
+          icon: "mdi-comment-quote",
+          value: "hitokoto",
         },
 
         {
