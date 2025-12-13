@@ -55,6 +55,24 @@
                   新建配置
                 </v-btn>
                 <v-btn
+                  class="mr-2"
+                  color="success"
+                  prepend-icon="mdi-import"
+                  variant="outlined"
+                  @click="showImportDialog"
+                >
+                  导入配置
+                </v-btn>
+                <v-btn
+                  class="mr-2"
+                  color="purple"
+                  prepend-icon="mdi-brain"
+                  variant="outlined"
+                  @click="showAIDialog"
+                >
+                  AI生成
+                </v-btn>
+                <v-btn
                   :loading="loading"
                   color="info"
                   prepend-icon="mdi-refresh"
@@ -272,6 +290,227 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- 导入配置弹框 -->
+    <v-dialog v-model="importDialog" max-width="800" persistent>
+      <v-card>
+        <v-card-title class="d-flex align-center primary lighten-1 white--text py-3 px-4">
+          <v-icon class="mr-2" color="white">mdi-import</v-icon>
+          导入考试配置
+          <v-spacer></v-spacer>
+          <v-btn
+            color="white"
+            icon="mdi-close"
+            variant="text"
+            @click="closeImportDialog"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text class="pa-4">
+          <v-alert
+            v-if="importError"
+            border="start"
+            class="mb-4"
+            closable
+            type="error"
+            variant="tonal"
+            @click:close="importError = ''"
+          >
+            {{ importError }}
+          </v-alert>
+
+          <v-textarea
+            v-model="importJson"
+            :rules="[v => !!v || 'JSON内容不能为空']"
+            label="请输入JSON配置"
+            placeholder='{
+  "examName": "期末考试",
+  "message": "考试信息",
+  "room": "01",
+  "examInfos": [
+    {
+      "name": "语文",
+      "start": "2025/12/14 09:00",
+      "end": "2025/12/14 11:00"
+    }
+  ]
+}'
+            prepend-inner-icon="mdi-code-json"
+            rows="15"
+            variant="outlined"
+          ></v-textarea>
+
+          <v-alert
+            border="start"
+            class="mt-2"
+            density="compact"
+            type="info"
+            variant="tonal"
+          >
+            <div class="text-caption">
+              <strong>提示:</strong>
+              <ul class="mt-1">
+                <li>日期格式支持: YYYY/MM/DD HH:mm 或 YYYY-MM-DD HH:mm:ss</li>
+                <li>虚拟日期格式: 0000-00-01 (表示第1天), 0000-00-02 (第2天)...</li>
+                <li>如使用虚拟日期,系统会要求您指定起始日期</li>
+                <li>缺省字段将自动填充默认值</li>
+              </ul>
+            </div>
+          </v-alert>
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-btn
+            color="grey"
+            prepend-icon="mdi-close"
+            variant="outlined"
+            @click="closeImportDialog"
+          >
+            取消
+          </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn
+            :disabled="!importJson"
+            :loading="importing"
+            color="success"
+            prepend-icon="mdi-check"
+            variant="outlined"
+            @click="processImport"
+          >
+            导入
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- 日期选择弹框 -->
+    <v-dialog v-model="datePickerDialog" max-width="500" persistent>
+      <v-card>
+        <v-card-title class="d-flex align-center primary lighten-1 white--text py-3 px-4">
+          <v-icon class="mr-2" color="white">mdi-calendar</v-icon>
+          选择起始日期
+        </v-card-title>
+        <v-card-text class="pa-4">
+          <p class="mb-4 text-body-2">
+            检测到配置中使用了虚拟日期格式 (0000-00-XX)，请选择第一天的日期，系统将自动推算其他日期。
+          </p>
+
+          <v-text-field
+            v-model="baseDate"
+            label="起始日期"
+            prepend-inner-icon="mdi-calendar"
+            type="date"
+            variant="outlined"
+          ></v-text-field>
+
+          <v-alert
+            v-if="virtualDateInfo"
+            border="start"
+            class="mt-2"
+            density="compact"
+            type="info"
+            variant="tonal"
+          >
+            <div class="text-caption">
+              检测到 {{ virtualDateInfo.count }} 个虚拟日期，跨度 {{ virtualDateInfo.span }} 天
+            </div>
+          </v-alert>
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-btn
+            color="grey"
+            prepend-icon="mdi-close"
+            variant="outlined"
+            @click="cancelDatePicker"
+          >
+            取消
+          </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn
+            :disabled="!baseDate"
+            color="primary"
+            prepend-icon="mdi-check"
+            variant="outlined"
+            @click="confirmDatePicker"
+          >
+            确认
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- AI生成提示词弹框 -->
+    <v-dialog v-model="aiDialog" max-width="900" persistent>
+      <v-card>
+        <v-card-title class="d-flex align-center purple lighten-1 white--text py-3 px-4">
+          <v-icon class="mr-2" color="white">mdi-brain</v-icon>
+          AI生成考试配置
+          <v-spacer></v-spacer>
+          <v-btn
+            color="white"
+            icon="mdi-close"
+            variant="text"
+            @click="closeAIDialog"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text class="pa-4">
+          <v-alert
+            border="start"
+            class="mb-4"
+            type="info"
+            variant="tonal"
+          >
+            <div class="d-flex align-center">
+              <div>
+                复制下方提示词到任意AI工具（如ChatGPT、Claude、Copilot等），描述您的考试安排，AI将生成符合格式的JSON配置。生成后复制JSON内容，通过“导入配置”按钮导入即可。
+              </div>
+            </div>
+          </v-alert>
+
+          <div class="mb-3">
+            <div class="d-flex justify-space-between align-center mb-2">
+              <h3 class="text-h6">提示词模板</h3>
+              <v-btn
+                :color="copied ? 'success' : 'primary'"
+                :prepend-icon="copied ? 'mdi-check' : 'mdi-content-copy'"
+                size="small"
+                variant="tonal"
+                @click="copyPrompt"
+              >
+                {{ copied ? '已复制' : '复制提示词' }}
+              </v-btn>
+            </div>
+
+            <v-card class="pa-4" variant="outlined">
+              <pre class="ai-prompt-text">{{ aiPrompt }}</pre>
+            </v-card>
+          </div>
+
+
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-btn
+            color="grey"
+            prepend-icon="mdi-close"
+            variant="outlined"
+            @click="closeAIDialog"
+          >
+            关闭
+          </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="success"
+            prepend-icon="mdi-import"
+            variant="outlined"
+            @click="goToImport"
+          >
+            去导入配置
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -297,11 +536,72 @@ export default {
       editingConfig: null,
       newConfigName: '',
       renaming: false,
-      saving: false
+      saving: false,
+      // 导入相关
+      importDialog: false,
+      importJson: '',
+      importError: '',
+      importing: false,
+      // 日期选择相关
+      datePickerDialog: false,
+      baseDate: '',
+      virtualDateInfo: null,
+      pendingImportConfig: null,
+      // AI生成相关
+      aiDialog: false,
+      copied: false
     }
   },
   async mounted() {
     await this.loadConfigs()
+  },
+  computed: {
+    /**
+     * AI生成提示词
+     */
+    aiPrompt() {
+      const currentDate = new Date()
+      const dateStr = `${currentDate.getFullYear()}年${currentDate.getMonth() + 1}月${currentDate.getDate()}日`
+
+      return `Your task is to generate a JSON configuration file for an exam dashboard. Based on the exam information input by the user, generate the configuration strictly following these rules.
+
+Generation Requirements:
+* Output using JSON blocks in Markdown
+* Use Chinese for all text
+
+Field Definitions:
+
+examName (string)
+* The general name of the exam
+* Fill with "考试" when not provided by user
+
+message (string)
+* Exam reminder message
+* Prioritize user-provided content
+* When not provided by user, fill with "请保持卷面整洁，字迹清晰，遵守考场纪律，诚信应考。听到终考铃声时，请立即起立并停止作答。"
+
+room (string)
+* Exam room number
+* Fill in if provided by user, otherwise use empty string ""
+
+examInfos (array)
+* Array of information for each exam session
+* Each object must include:
+   * name: The subject or name of that exam session
+   * start: Start time, format "YYYY-MM-DD HH:mm:ss"
+   * end: End time, format "YYYY-MM-DD HH:mm:ss"
+   * alertTime: Minutes before exam end for reminder, fill with 15
+
+Date and Time Handling:
+* Current date: ${dateStr}
+* When user provides specific dates, use actual dates
+* When user does not provide dates, use virtual date format "0000-00-XX"
+* XX represents day number: 01=first day, 02=second day, 03=third day...
+* Time portion filled according to user description
+* For multiple exams, calculate dates sequentially in order
+
+Now please generate the exam configuration based on the above rules:`
+    }
   },
   methods: {
     /**
@@ -678,6 +978,390 @@ export default {
       } else {
         this.error = result.message || "删除失败"
       }
+    },
+
+    /**
+     * 显示导入对话框
+     */
+    showImportDialog() {
+      this.importDialog = true
+      this.importJson = ''
+      this.importError = ''
+    },
+
+    /**
+     * 关闭导入对话框
+     */
+    closeImportDialog() {
+      this.importDialog = false
+      this.importJson = ''
+      this.importError = ''
+      this.importing = false
+    },
+
+    /**
+     * 检测JSON中是否包含虚拟日期
+     * @param {Object} config - 配置对象
+     * @returns {Object|null} { hasVirtual: boolean, count: number, span: number }
+     */
+    detectVirtualDates(config) {
+      const virtualDatePattern = /^0000-00-(\d{2})/
+      let hasVirtual = false
+      let minDay = Infinity
+      let maxDay = -Infinity
+      let count = 0
+
+      if (config.examInfos && Array.isArray(config.examInfos)) {
+        for (let exam of config.examInfos) {
+          if (exam.start) {
+            const match = exam.start.match(virtualDatePattern)
+            if (match) {
+              hasVirtual = true
+              count++
+              const day = parseInt(match[1])
+              minDay = Math.min(minDay, day)
+              maxDay = Math.max(maxDay, day)
+            }
+          }
+          if (exam.end) {
+            const match = exam.end.match(virtualDatePattern)
+            if (match) {
+              hasVirtual = true
+              const day = parseInt(match[1])
+              minDay = Math.min(minDay, day)
+              maxDay = Math.max(maxDay, day)
+            }
+          }
+        }
+      }
+
+      if (hasVirtual) {
+        return {
+          hasVirtual: true,
+          count,
+          span: maxDay - minDay + 1,
+          minDay,
+          maxDay
+        }
+      }
+
+      return null
+    },
+
+    /**
+     * 将虚拟日期转换为真实日期
+     * @param {string} virtualDateTime - 虚拟日期时间字符串，如 "0000-00-01 09:00:00"
+     * @param {string} baseDate - 基准日期，如 "2025-12-14"
+     * @returns {string} 真实日期时间字符串
+     */
+    convertVirtualDate(virtualDateTime, baseDate) {
+      const virtualPattern = /^0000-00-(\d{2})\s+(.+)$/
+      const match = virtualDateTime.match(virtualPattern)
+
+      if (!match) {
+        return virtualDateTime // 不是虚拟日期，直接返回
+      }
+
+      const dayNum = parseInt(match[1])
+      const timePart = match[2]
+
+      // 解析基准日期
+      const base = new Date(baseDate)
+      // 计算目标日期（第1天对应基准日期，第2天是基准日期+1天）
+      const target = new Date(base)
+      target.setDate(base.getDate() + (dayNum - 1))
+
+      // 格式化为 YYYY/MM/DD HH:mm
+      const year = target.getFullYear()
+      const month = String(target.getMonth() + 1).padStart(2, '0')
+      const day = String(target.getDate()).padStart(2, '0')
+
+      // 解析时间部分，支持 HH:mm 或 HH:mm:ss
+      const timeMatch = timePart.match(/(\d{2}):(\d{2})(?::(\d{2}))?/)
+      if (timeMatch) {
+        const hours = timeMatch[1]
+        const minutes = timeMatch[2]
+        return `${year}/${month}/${day} ${hours}:${minutes}`
+      }
+
+      return `${year}/${month}/${day} ${timePart}`
+    },
+
+    /**
+     * 规范化日期格式
+     * @param {string} dateStr - 日期字符串
+     * @returns {string} 规范化后的日期字符串 YYYY/MM/DD HH:mm
+     */
+    normalizeDateFormat(dateStr) {
+      if (!dateStr) return ''
+
+      // 已经是标准格式 YYYY/MM/DD HH:mm
+      if (/^\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}$/.test(dateStr)) {
+        return dateStr
+      }
+
+      // 转换 YYYY-MM-DD HH:mm:ss 格式
+      const pattern1 = /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/
+      const match1 = dateStr.match(pattern1)
+      if (match1) {
+        return `${match1[1]}/${match1[2]}/${match1[3]} ${match1[4]}:${match1[5]}`
+      }
+
+      // 转换 YYYY-MM-DD 格式（添加默认时间）
+      const pattern2 = /^(\d{4})-(\d{2})-(\d{2})$/
+      const match2 = dateStr.match(pattern2)
+      if (match2) {
+        return `${match2[1]}/${match2[2]}/${match2[3]} 08:00`
+      }
+
+      return dateStr
+    },
+
+    /**
+     * 验证并补全配置数据
+     * @param {Object} config - 原始配置对象
+     * @returns {Object} 补全后的配置对象
+     */
+    validateAndFillConfig(config) {
+      const examTypeInfo = this.inferExamType()
+
+      // 补全基本字段
+      const filledConfig = {
+        examName: config.examName || examTypeInfo.examName,
+        message: config.message || examTypeInfo.message,
+        room: config.room || getSetting('server.classNumber') || '',
+        examInfos: []
+      }
+
+      // 验证和补全 examInfos
+      if (!config.examInfos || !Array.isArray(config.examInfos)) {
+        throw new Error('配置中缺少 examInfos 数组')
+      }
+
+      if (config.examInfos.length === 0) {
+        throw new Error('examInfos 数组不能为空')
+      }
+
+      for (let i = 0; i < config.examInfos.length; i++) {
+        const exam = config.examInfos[i]
+
+        if (!exam.name) {
+          throw new Error(`第 ${i + 1} 个考试缺少 name 字段`)
+        }
+
+        if (!exam.start) {
+          throw new Error(`第 ${i + 1} 个考试缺少 start 字段`)
+        }
+
+        if (!exam.end) {
+          throw new Error(`第 ${i + 1} 个考试缺少 end 字段`)
+        }
+
+        // 补全可选字段
+        filledConfig.examInfos.push({
+          name: exam.name,
+          start: exam.start,
+          end: exam.end,
+          alertTime: exam.alertTime !== undefined ? exam.alertTime : 15,
+          materials: exam.materials || []
+        })
+      }
+
+      return filledConfig
+    },
+
+    /**
+     * 处理导入
+     */
+    async processImport() {
+      this.importing = true
+      this.importError = ''
+
+      try {
+        // 解析 JSON
+        let config
+        try {
+          config = JSON.parse(this.importJson)
+        } catch (e) {
+          throw new Error('JSON 格式错误: ' + e.message)
+        }
+
+        // 验证和补全数据
+        const filledConfig = this.validateAndFillConfig(config)
+
+        // 检测虚拟日期
+        const virtualInfo = this.detectVirtualDates(filledConfig)
+
+        if (virtualInfo) {
+          // 包含虚拟日期，显示日期选择对话框
+          this.virtualDateInfo = virtualInfo
+          this.pendingImportConfig = filledConfig
+
+          // 设置默认基准日期为明天
+          const tomorrow = new Date()
+          tomorrow.setDate(tomorrow.getDate() + 1)
+          const year = tomorrow.getFullYear()
+          const month = String(tomorrow.getMonth() + 1).padStart(2, '0')
+          const day = String(tomorrow.getDate()).padStart(2, '0')
+          this.baseDate = `${year}-${month}-${day}`
+
+          this.datePickerDialog = true
+        } else {
+          // 不包含虚拟日期，直接导入
+          await this.finalizeImport(filledConfig)
+        }
+      } catch (err) {
+        this.importError = err.message
+      } finally {
+        this.importing = false
+      }
+    },
+
+    /**
+     * 取消日期选择
+     */
+    cancelDatePicker() {
+      this.datePickerDialog = false
+      this.baseDate = ''
+      this.virtualDateInfo = null
+      this.pendingImportConfig = null
+    },
+
+    /**
+     * 确认日期选择
+     */
+    async confirmDatePicker() {
+      if (!this.baseDate || !this.pendingImportConfig) return
+
+      try {
+        // 转换虚拟日期
+        const config = JSON.parse(JSON.stringify(this.pendingImportConfig))
+
+        for (let exam of config.examInfos) {
+          if (exam.start && exam.start.startsWith('0000-00-')) {
+            exam.start = this.convertVirtualDate(exam.start, this.baseDate)
+          }
+          if (exam.end && exam.end.startsWith('0000-00-')) {
+            exam.end = this.convertVirtualDate(exam.end, this.baseDate)
+          }
+        }
+
+        // 关闭日期选择对话框
+        this.datePickerDialog = false
+        this.baseDate = ''
+        this.virtualDateInfo = null
+        this.pendingImportConfig = null
+
+        // 完成导入
+        await this.finalizeImport(config)
+      } catch (err) {
+        this.importError = '日期转换失败: ' + err.message
+        this.datePickerDialog = false
+      }
+    },
+
+    /**
+     * 完成导入（保存配置）
+     * @param {Object} config - 处理好的配置对象
+     */
+    async finalizeImport(config) {
+      const newId = Date.now().toString()
+
+      // 规范化所有日期格式
+      for (let exam of config.examInfos) {
+        exam.start = this.normalizeDateFormat(exam.start)
+        exam.end = this.normalizeDateFormat(exam.end)
+      }
+
+      try {
+        // 保存新配置
+        const saveResponse = await dataProvider.saveData(`es_${newId}`, config)
+        if (!saveResponse) {
+          throw new Error(saveResponse.error?.message || '保存失败')
+        }
+
+        // 更新本地配置列表
+        this.configs.push({
+          id: newId,
+          ...config
+        })
+
+        // 更新存储的配置列表
+        const currentList = this.configs.map(c => ({id: c.id}))
+        const listResponse = await dataProvider.saveData('es_list', currentList)
+        if (!listResponse) {
+          throw new Error(listResponse.error?.message || '更新列表失败')
+        }
+
+        this.success = '配置导入成功！'
+        this.closeImportDialog()
+
+        // 直接打开编辑对话框
+        const newConfig = this.configs.find(c => c.id === newId)
+        if (newConfig) {
+          this.editingConfig = newConfig
+          this.editDialog = true
+        }
+      } catch (err) {
+        throw new Error('保存配置失败: ' + err.message)
+      }
+    },
+
+    /**
+     * 显示AI生成对话框
+     */
+    showAIDialog() {
+      this.aiDialog = true
+      this.copied = false
+    },
+
+    /**
+     * 关闭AI生成对话框
+     */
+    closeAIDialog() {
+      this.aiDialog = false
+      this.copied = false
+    },
+
+    /**
+     * 复制提示词到剪贴板
+     */
+    async copyPrompt() {
+      try {
+        await navigator.clipboard.writeText(this.aiPrompt)
+        this.copied = true
+
+        // 3秒后恢复按钮状态
+        setTimeout(() => {
+          this.copied = false
+        }, 3000)
+      } catch (err) {
+        // 如果剪贴板API不可用，使用备用方案
+        const textArea = document.createElement('textarea')
+        textArea.value = this.aiPrompt
+        textArea.style.position = 'fixed'
+        textArea.style.left = '-999999px'
+        document.body.appendChild(textArea)
+        textArea.select()
+        try {
+          document.execCommand('copy')
+          this.copied = true
+          setTimeout(() => {
+            this.copied = false
+          }, 3000)
+        } catch (err) {
+          this.error = '复制失败，请手动复制'
+        }
+        document.body.removeChild(textArea)
+      }
+    },
+
+    /**
+     * 从AI对话框跳转到导入对话框
+     */
+    goToImport() {
+      this.aiDialog = false
+      this.showImportDialog()
     }
   }
 }
@@ -690,5 +1374,24 @@ export default {
 
 .border-b:last-child {
   border-bottom: none;
+}
+
+.ai-prompt-text {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+}
+
+.ai-example-json {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre;
+  overflow-x: auto;
+  margin: 0;
+  color: #1976d2;
 }
 </style>
