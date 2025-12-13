@@ -839,8 +839,7 @@ Now please generate the exam configuration based on the above rules:`
           throw new Error(listResponse.error?.message || '更新列表失败')
         }
 
-        this.success = '新配置创建成功'
-
+this.$message.success('新配置创建成功')
         // 直接打开编辑对话框
         const newConfig = this.configs.find(c => c.id === newId)
         if (newConfig) {
@@ -848,7 +847,7 @@ Now please generate the exam configuration based on the above rules:`
           this.editDialog = true
         }
       } catch (err) {
-        this.error = '创建配置失败: ' + err.message
+        this.$message.error('创建配置失败: ' + err.message)
       }
     },
 
@@ -889,12 +888,13 @@ Now please generate the exam configuration based on the above rules:`
           this.configs[configIndex].examName = this.newConfigName
         }
 
-        this.success = '配置重命名成功'
+
+        this.$message.success('配置重命名成功')
         this.renameDialog = false
         this.configToRename = null
         this.newConfigName = ''
       } catch (err) {
-        this.error = '重命名配置失败: ' + err.message
+        this.$message.error('重命名配置失败: ' + err.message)
       } finally {
         this.renaming = false
       }
@@ -938,31 +938,35 @@ Now please generate the exam configuration based on the above rules:`
      * 配置保存成功回调
      */
     onConfigSaved() {
-      this.success = '配置保存成功！'
+
+
+      this.$message.success('配置保存成功！')
       this.loadConfigs() // 重新加载配置列表
-      setTimeout(() => {
-        this.success = ''
-      }, 3000)
+
+
+          this.$message.success('配置保存成功！')
     },
 
     /**
      * 配置保存错误回调
      */
     onConfigError(error) {
-      this.error = error || '保存配置时发生错误'
-      setTimeout(() => {
-        this.error = ''
-      }, 5000)
+
+      this.$message.error(error || '保存配置时发生错误')
+
+        this.$message.error(error || '保存配置时发生错误')
     },
 
     /**
      * 配置打开成功回调
      */
     onConfigOpened() {
-      this.success = '配置已在新窗口中打开'
-      setTimeout(() => {
-        this.success = ''
-      }, 3000)
+
+      this.$message.success('配置已在新窗口中打开')
+
+
+
+        this.$message.success('配置已在新窗口中打开')
     },
 
     /**
@@ -970,13 +974,15 @@ Now please generate the exam configuration based on the above rules:`
      */
     onConfigDeleted(result) {
       if (result.success) {
-        this.success = result.message || "配置删除成功"
+
+        this.$message.success(result.message || "配置删除成功")
         // 关闭编辑对话框
         this.editDialog = false
         // 刷新配置列表
         this.loadConfigs()
       } else {
-        this.error = result.message || "删除失败"
+
+        this.$message.error(result.message || "删除失败")
       }
     },
 
