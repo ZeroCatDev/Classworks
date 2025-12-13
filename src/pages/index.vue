@@ -147,6 +147,7 @@
         @open-dialog="openDialog"
         @open-attendance="setAttendanceArea"
         @disabled-click="handleDisabledClick"
+        @open-exam-detail="openExamDetail"
       />
 
       <home-actions
@@ -164,7 +165,41 @@
         @open-random-picker="openRandomPicker"
         @toggle-fullscreen="toggleFullscreen"
         @add-test-card="addTestCard"
+        @add-exam-card="showAddExamDialog = true"
       />
+
+      <!-- 推荐添加考试提示 -->
+      <v-alert
+        v-if="upcomingExams.length > 0 && !hasExamCard"
+        class="mt-4"
+        color="info"
+        variant="tonal"
+        closable
+        icon="mdi-calendar-clock"
+        title="近期有考试安排"
+      >
+        <div class="d-flex align-center flex-wrap">
+          <span class="mr-2">检测到未来两天内有以下考试：</span>
+          <v-chip
+            v-for="exam in upcomingExams"
+            :key="exam.id"
+            size="small"
+            class="mr-1 mb-1"
+            color="primary"
+          >
+            {{ exam.examName }}
+          </v-chip>
+        </div>
+        <template #append>
+          <v-btn
+            color="primary"
+            variant="text"
+            @click="addAllUpcomingExams"
+          >
+            一键添加
+          </v-btn>
+        </template>
+      </v-alert>
     </v-container>
 
     <!-- 出勤统计区域 -->
@@ -298,6 +333,80 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <!-- 考试详情/编辑对话框 -->
+  <v-dialog v-model="showExamDetailDialog" persistent fullscreen>
+    <v-card v-if="selectedExamId">
+      <v-card-title class="d-flex align-center pa-4">
+        编辑考试配置
+        <v-spacer></v-spacer>
+        <v-btn icon="mdi-close" variant="text" @click="showExamDetailDialog = false"></v-btn>
+      </v-card-title>
+      <v-card-text class="pa-4" style="max-height: 70vh; overflow-y: auto;">
+        <exam-config-editor
+          :config-id="selectedExamId"
+          :dialog-mode="true"
+          @saved="onExamConfigSaved"
+          @deleted="onExamConfigDeleted"
+        />
+      </v-card-text>
+      <v-divider></v-divider>
+      <v-card-actions class="pa-4">
+        <v-btn
+          color="error"
+          prepend-icon="mdi-delete"
+          variant="tonal"
+          @click="removeCurrentExamCard"
+        >
+          移除卡片
+        </v-btn>
+        <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          variant="text"
+          @click="showExamDetailDialog = false"
+        >
+          关闭
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- 添加考试卡片对话框 -->
+  <v-dialog v-model="showAddExamDialog" max-width="500">
+    <v-card>
+      <v-card-title class="text-h6">预览考试看板</v-card-title>
+      <v-card-text>
+        <v-list v-if="examStore.examList.length > 0">
+          <v-list-item
+            v-for="exam in examStore.examList"
+            :key="exam.id"
+            :title="examStore.exams[exam.id]?.examName || exam.id"
+            :subtitle="exam.id"
+            @click="addExamCard(exam.id)"
+          >
+            <template #prepend>
+              <v-icon color="primary">mdi-calendar-text</v-icon>
+            </template>
+            <template #append>
+              <v-btn
+                :icon="isExamCardAdded(exam.id) ? 'mdi-check' : 'mdi-plus'"
+                :color="isExamCardAdded(exam.id) ? 'success' : 'grey'"
+                variant="text"
+              ></v-btn>
+            </template>
+          </v-list-item>
+        </v-list>
+        <div v-else class="text-center py-4 text-grey">
+          暂无考试配置
+        </div>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" variant="text" @click="showAddExamDialog = false">关闭</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
   <!-- 通知详情对话框 -->
   <v-dialog v-model="notificationDetailDialog" max-width="600">
     <v-card v-if="currentNotification">
@@ -331,8 +440,11 @@ import AttendanceSidebar from "@/components/attendance/AttendanceSidebar.vue";
 import AttendanceManagementDialog from "@/components/attendance/AttendanceManagementDialog.vue";
 import HomeworkGrid from "@/components/home/HomeworkGrid.vue";
 import HomeActions from "@/components/home/HomeActions.vue";
+import ExamScheduleCard from "@/components/home/ExamScheduleCard.vue";
+import ExamConfigEditor from "@/components/ExamConfigEditor.vue";
 import HitokotoCard from "@/components/HitokotoCard.vue";
 import dataProvider from "@/utils/dataProvider";
+import { useExamStore } from "@/stores/examStore";
 import {
   getSetting,
   watchSettings,
@@ -372,10 +484,13 @@ export default {
     AttendanceManagementDialog,
     HomeworkGrid,
     HomeActions,
+    ExamScheduleCard,
+    ExamConfigEditor,
   },
   setup() {
     const { mobile } = useDisplay();
-    return { mobile };
+    const examStore = useExamStore();
+    return { mobile, examStore };
   },
   data() {
     const defaultSubjects = [
@@ -392,6 +507,11 @@ export default {
     ];
 
     return {
+      // examCards: [], // Removed
+      showAddExamDialog: false,
+      showExamDetailDialog: false,
+      selectedExamId: null,
+      upcomingExams: [],
       dataKey: "",
       provider: "",
       useDisplay: useDisplay,
@@ -543,6 +663,23 @@ export default {
             exclude: this.state.boardData.attendance.exclude
           }
         });
+      }
+
+      // 添加考试卡片
+      for (const key in this.state.boardData.homework) {
+        if (key.startsWith('exam-')) {
+          const card = this.state.boardData.homework[key];
+          items.push({
+            key: key,
+            name: '考试安排',
+            type: 'exam',
+            data: {
+              examId: card.examId,
+            },
+            order: -100, // Ensure they appear at the top
+            rowSpan: 200 // Estimated height
+          });
+        }
       }
 
       // 添加作业卡片
@@ -713,6 +850,13 @@ export default {
       return onHome && isKv && (!token || token === "");
     },
     // 是否显示紧急通知测试按钮（仅教师和课堂令牌）
+    hasExamCard() {
+      for (const key in this.state.boardData.homework) {
+        if (key.startsWith('exam-')) return true;
+      }
+      return false;
+    },
+
     shouldShowUrgentTestButton() {
       // 检查是否使用 KV 服务器
       const provider = getSetting("server.provider");
@@ -1062,6 +1206,102 @@ export default {
         this.state.classNumber = classNum;
       }
       await Promise.all([this.downloadData(), this.loadConfig()]);
+
+      // Load exam data
+      await this.examStore.fetchExamList();
+      // Preload details for list items to show names in dialog
+      for (const exam of this.examStore.examList) {
+        this.examStore.fetchExam(exam.id);
+      }
+
+      this.checkUpcomingExams();
+      // this.loadExamCards(); // Removed
+    },
+
+    async checkUpcomingExams() {
+      this.upcomingExams = await this.examStore.getUpcomingExams();
+    },
+
+    loadExamCards() {
+      // No longer needed as exam cards are part of boardData
+    },
+
+    saveExamCards() {
+      // No longer needed
+    },
+
+    addExamCard(examId, forceAdd = false, skipSave = false) {
+      const key = `exam-${examId}`;
+      if (!forceAdd && this.state.boardData.homework[key]) {
+        delete this.state.boardData.homework[key];
+      } else {
+        this.state.boardData.homework[key] = {
+          type: 'exam',
+          examId: examId,
+          name: '考试安排',
+          content: '' // Placeholder
+        };
+      }
+      this.state.synced = false;
+      if (!skipSave) {
+        this.trySave(true);
+      }
+    },
+
+    openExamDetail(examId) {
+      this.selectedExamId = examId;
+      this.showExamDetailDialog = true;
+    },
+
+    removeCurrentExamCard() {
+      if (this.selectedExamId) {
+        this.addExamCard(this.selectedExamId); // Toggle off
+        this.showExamDetailDialog = false;
+      }
+    },
+
+    async onExamConfigSaved() {
+      if (this.selectedExamId) {
+        // Force refresh the exam data in store
+        // We need to clear the cache first or force fetch
+        // The store implementation checks loadingDetails[id] but not if it's already loaded?
+        // Actually fetchExam checks if (this.exams[id]) return this.exams[id]
+        // So we need to manually clear it or add a force parameter to fetchExam
+
+        // Simple hack: clear the entry in store
+        delete this.examStore.exams[this.selectedExamId];
+        await this.examStore.fetchExam(this.selectedExamId);
+        this.$message.success("保存成功", "考试配置已更新");
+      }
+    },
+
+    onExamConfigDeleted() {
+      this.removeCurrentExamCard();
+      this.$message.success("删除成功", "考试配置已删除");
+    },
+
+    isExamCardAdded(examId) {
+      return !!this.state.boardData.homework[`exam-${examId}`];
+    },
+
+    removeExamCard(index) {
+       // Deprecated
+    },
+
+    addAllUpcomingExams() {
+      let addedCount = 0;
+      for (const exam of this.upcomingExams) {
+        if (!this.isExamCardAdded(exam.id)) {
+          this.addExamCard(exam.id, true, true); // skipSave = true
+          addedCount++;
+        }
+      }
+      if (addedCount > 0) {
+        this.trySave(true); // 统一保存一次
+        this.$message.success('添加成功', `已添加 ${addedCount} 个考试安排`);
+      } else {
+        this.$message.info('提示', '所有考试已添加');
+      }
     },
 
     async downloadData(forceClear = false) {

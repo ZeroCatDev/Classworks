@@ -24,16 +24,26 @@
     >
       随机点名
     </v-btn>
-    <v-btn
+    <v-btn-group
       v-if="showExamScheduleButton"
       class="ml-2"
       color="green"
-      prepend-icon="mdi-calendar-check"
-      size="large"
-      @click="$router.push('/examschedule')"
+      variant="elevated"
+      divided
     >
-      考试看板
-    </v-btn>
+      <v-btn
+        prepend-icon="mdi-calendar-check"
+        size="large"
+        @click="$router.push('/examschedule')"
+      >
+        考试看板
+      </v-btn>
+      <v-btn
+        icon="mdi-plus"
+        size="large"
+        @click="$emit('add-exam-card')"
+      />
+    </v-btn-group>
     <v-btn
       v-if="showListCardButton"
       class="ml-2"

@@ -24,6 +24,19 @@
 import { SettingsManager, watchSettings } from '@/utils/settings'
 import dataProvider from '@/utils/dataProvider'
 import axios from 'axios'
+import { Base64 } from 'js-base64'
+
+// 全局敏感词列表，强制生效。
+const GLOBAL_SENSITIVE_WORDS_ENCODED = [
+  '6IO4',
+  '5Lmz',
+  '6JCd6I6J',
+  '5rer',
+  '5aW4',
+]
+
+// 解码敏感词列表
+const GLOBAL_SENSITIVE_WORDS = GLOBAL_SENSITIVE_WORDS_ENCODED.map(word => Base64.decode(word))
 
 export default {
   name: 'HitokotoCard',
@@ -123,10 +136,7 @@ export default {
           }
         } else if (source === 'jinrishici') {
           if (this.kvConfig.jinrishiciToken) {
-            const res = await axios.get('https://v2.jinrishici.com/sentence', {
-              headers: {
-                'X-User-Token': this.kvConfig.jinrishiciToken
-              }
+            const res = await axios.get('https://v2.jinrishici.com/one.json?client=npm-sdk/1.0&X-User-Token='+encodeURIComponent(this.kvConfig.jinrishiciToken), {
             })
             if (res.data.status === 'success') {
               data = res.data.data
@@ -145,8 +155,9 @@ export default {
         }
 
         if (content) {
-          // Sensitive word check
-          const hasSensitiveWord = this.kvConfig.sensitiveWords.some(word => content.includes(word))
+          // Sensitive word check (global + KV)
+          const combinedWords = [...GLOBAL_SENSITIVE_WORDS, ...this.kvConfig.sensitiveWords]
+          const hasSensitiveWord = combinedWords.some(word => word && content.includes(word))
           if (hasSensitiveWord) {
             // Retry
             this.loading = false

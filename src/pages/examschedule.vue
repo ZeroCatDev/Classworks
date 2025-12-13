@@ -305,7 +305,74 @@ export default {
   },
   methods: {
     /**
-     * 初始化示例数据（仅在首次访问时）
+     * 根据当前日期推算考试类型
+     * @returns {Object} { examName: string, message: string }
+     */
+    inferExamType() {
+      const now = new Date()
+      const month = now.getMonth() + 1 // 1-12
+      const day = now.getDate()
+
+      // 中国学校常见时间节点
+      // 春季学期: 2月中旬-7月初 (寒假结束-暑假开始)
+      // 秋季学期: 9月初-次年1月底 (暑假结束-寒假开始)
+
+      let examName = '新考试'
+      let message = '请保持卷面整洁，字迹清晰，遵守考场纪律，诚信应考。\n听到终考铃声时,请立即起立并停止作答。'
+
+      // 秋季学期 (9-1月)
+      if (month >= 9 || month <= 1) {
+        if (month === 9 && day <= 15) {
+          // 9月初 - 开学考试
+          examName = '开学摸底考试'
+        } else if (month === 9 && day > 15) {
+          // 9月中下旬 - 第一次月考
+          examName = '第一次月考'
+        } else if (month === 10) {
+          // 10月 - 第二次月考
+          examName = '第二次月考'
+        } else if (month === 11 && day <= 20) {
+          // 11月上中旬 - 期中考试
+          examName = '期中考试'
+        } else if (month === 11 && day > 20) {
+          // 11月下旬 - 第三次月考
+          examName = '第三次月考'
+        } else if (month === 12) {
+          // 12月 - 第四次月考
+          examName = '第四次月考'
+        } else if (month === 1 ) {
+          // 1月上旬 - 期末考试
+          examName = '期末考试'
+        }
+      }
+      // 春季学期 (2-7月)
+      else if (month >= 2 && month <= 7) {
+        if (month === 2 || (month === 3 && day <= 10)) {
+          // 2月-3月初 - 开学考试
+          examName = '开学摸底考试'
+        } else if (month === 3 && day > 10) {
+          // 3月中下旬 - 第一次月考
+          examName = '第一次月考'
+        } else if (month === 4 && day <= 25) {
+          // 4月 - 期中考试
+          examName = '期中考试'
+        } else if (month === 4 && day > 25) {
+          // 4月底 - 第二次月考
+          examName = '第二次月考'
+        } else if (month === 5) {
+          // 5月 - 第三次月考
+          examName = '第三次月考'
+        } else if (month === 6 || month === 7) {
+          // 6月上中旬 - 期末考试
+          examName = '期末考试'
+        }
+      }
+
+      return { examName, message }
+    },
+
+    /**
+     * 初始化示例数据(仅在首次访问时)
      */
     async initializeExampleData() {
       const exampleConfigs = [
@@ -417,15 +484,37 @@ export default {
     async createNewConfig() {
       const newId = Date.now().toString()
 
+      // 获取明天早上8点的时间
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      tomorrow.setHours(8, 0, 0, 0)
+
+      // 获取结束时间（开始时间 + 2小时）
+      const endTime = new Date(tomorrow)
+      endTime.setHours(endTime.getHours() + 2)
+
+      // 格式化时间为 YYYY/MM/DD HH:mm
+      const formatTime = (date) => {
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        const hours = String(date.getHours()).padStart(2, '0')
+        const minutes = String(date.getMinutes()).padStart(2, '0')
+        return `${year}/${month}/${day} ${hours}:${minutes}`
+      }
+
+      // 自动推算考试类型
+      const examTypeInfo = this.inferExamType()
+
       const defaultConfig = {
-        examName: '新考试配置',
-        message: '请编辑此配置',
-        room: getSetting('server.classNumber') || '待定',
+        examName: examTypeInfo.examName,
+        message: examTypeInfo.message,
+        room: getSetting('server.classNumber') || '',
         examInfos: [
           {
-            name: '科目1',
-            start: '2025/08/29 16:27',
-            end: '2025/08/29 17:27'
+            name: '语文',
+            start: formatTime(tomorrow),
+            end: formatTime(endTime)
           }
         ]
       }

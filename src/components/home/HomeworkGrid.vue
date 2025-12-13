@@ -16,6 +16,15 @@
           <hitokoto-card />
         </div>
 
+        <!-- 考试卡片 -->
+        <div v-else-if="item.type === 'exam'" style="height: 100%">
+          <concise-exam-card
+            :exam-id="item.data.examId"
+            :content-style="contentStyle"
+            @click="$emit('open-exam-detail', item.data.examId)"
+          />
+        </div>
+
         <!-- 出勤卡片 -->
         <v-card
           v-else-if="item.type === 'attendance'"
@@ -185,11 +194,13 @@
 
 <script>
 import HitokotoCard from "@/components/HitokotoCard.vue";
+import ConciseExamCard from "@/components/home/ConciseExamCard.vue";
 
 export default {
   name: "HomeworkGrid",
   components: {
     HitokotoCard,
+    ConciseExamCard,
   },
   props: {
     sortedItems: {
