@@ -141,6 +141,7 @@
         :sorted-items="sortedItems"
         :unused-subjects="unusedSubjects"
         :empty-subject-display="emptySubjectDisplay"
+        :is-mobile="isMobile"
         :is-editing-disabled="isEditingDisabled"
         :content-style="state.contentStyle"
         :highlighted-cards="highlightedCards"
@@ -204,7 +205,7 @@
 
     <!-- 出勤统计区域 -->
     <attendance-sidebar
-      v-if="!mobile"
+      v-if="!isMobile"
       :student-list="state.studentList"
       :attendance="state.boardData.attendance"
       :is-editing-disabled="isEditingDisabled"
@@ -622,6 +623,11 @@ export default {
 
   computed: {
     isMobile() {
+      // 如果启用了强制一体机UI模式，返回false（使用桌面UI）
+      const forceDesktopMode = getSetting('display.forceDesktopMode');
+      if (forceDesktopMode) {
+        return false;
+      }
       return this.mobile;
     },
     titleText() {
@@ -651,7 +657,7 @@ export default {
       const items = [];
 
       // 如果是移动端，添加出勤卡片
-      if (this.mobile) {
+      if (this.isMobile) {
         items.push({
           key: 'attendance-card',
           name: '出勤统计',

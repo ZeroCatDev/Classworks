@@ -175,6 +175,13 @@ const settingsDefinitions = {
     description: "是否显示快捷键盘",
     icon: "mdi-dialpad",
   },
+  "display.forceDesktopMode": {
+    type: "boolean",
+    default: false,
+    description: "强制使用一体机UI模式",
+    icon: "mdi-monitor",
+    // 启用后将不判断屏幕大小，强制使用一体机（桌面端）UI布局
+  },
   // 服务器设置（合并了数据提供者设置）
   "server.domain": {
     type: "string",

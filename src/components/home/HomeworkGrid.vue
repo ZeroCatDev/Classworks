@@ -215,6 +215,10 @@ export default {
       type: String,
       default: "button",
     },
+    isMobile: {
+      type: Boolean,
+      default: false,
+    },
     isEditingDisabled: {
       type: Boolean,
       default: false,
@@ -229,11 +233,6 @@ export default {
     },
   },
   emits: ["open-dialog", "open-attendance", "disabled-click"],
-  computed: {
-    isMobile() {
-      return this.$vuetify.display.mobile;
-    },
-  },
   mounted() {
     this.resizeObserver = new ResizeObserver(() => {
       this.resizeAllGridItems();
