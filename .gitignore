@@ -172,3 +172,11 @@ dist
 vite.config.*.timestamp-*.mjs
 *.timestamp-*
 
+# Auto-generated TypeScript declaration files
+auto-imports.d.ts
+components.d.ts
+typed-router.d.ts
+
+# Package lock files (using pnpm)
+package-lock.json
+
