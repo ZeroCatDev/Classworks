@@ -139,8 +139,6 @@
             </div>
           </div>
         </v-card>
-
-
       </div>
 
       <!-- 步骤 3: 询问使用场景 -->
@@ -553,7 +551,7 @@
         </v-icon>
         上一步
       </v-btn>
-      <v-spacer/>
+      <v-spacer />
       <v-btn
         v-if="currentStep < totalSteps && currentStep !== 4"
         :disabled="currentStep === 3 && !storageType"

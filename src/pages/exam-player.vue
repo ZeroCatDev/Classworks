@@ -11,16 +11,26 @@
     {{ error }}
   </v-alert>
 
-  <v-skeleton-loader v-if="loading" type="article"/>
+  <v-skeleton-loader
+    v-if="loading"
+    type="article"
+  />
 
   <div v-else-if="!config">
-    <v-alert border="start" type="warning" variant="tonal">
+    <v-alert
+      border="start"
+      type="warning"
+      variant="tonal"
+    >
       缺少配置，请通过 URL 参数 id 或 url 传入配置。
     </v-alert>
   </div>
 
   <div v-else>
-    <div ref="playerRef" class="player">
+    <div
+      ref="playerRef"
+      class="player"
+    >
       <ExamPlayer
         v-model:room-number="roomNumberLocal"
         :config="playerConfigObj"

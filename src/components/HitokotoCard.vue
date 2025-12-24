@@ -8,12 +8,26 @@
     height="100%"
     @click="fetchSentence"
   >
-    <v-card-text class="pa-6 d-flex flex-column justify-center" style="height: 100%">
-      <div class="text-h6 font-weight-medium mb-4 serif-font" style="white-space: pre-wrap; line-height: 1.6;">
+    <v-card-text
+      class="pa-6 d-flex flex-column justify-center"
+      style="height: 100%"
+    >
+      <div
+        class="font-weight-medium mb-4 serif-font"
+        :style="contentStyle"
+        style="white-space: pre-wrap; line-height: 1.6; text-align: left;"
+      >
         {{ sentence }}
       </div>
-      <div class="text-subtitle-2 text-medium-emphasis text-right serif-font">
-        <span v-if="author" class="mr-2">{{ author }}</span>
+      <div
+        class="text-medium-emphasis serif-font"
+        :style="authorStyle"
+        style="text-align: left;"
+      >
+        <span
+          v-if="author"
+          class="mr-2"
+        >{{ author }}</span>
         <span v-if="origin">《{{ origin }}》</span>
       </div>
     </v-card-text>
@@ -53,7 +67,21 @@ export default {
       origin: '',
       loading: false,
       timer: null,
-      unwatch: null
+      unwatch: null,
+      fontSize: 28
+    }
+  },
+  computed: {
+    contentStyle() {
+      return {
+        'font-size': `${this.fontSize}px`
+      }
+    },
+    authorStyle() {
+      // Author font size is 60% of the main font size
+      return {
+        'font-size': `${this.fontSize * 0.6}px`
+      }
     }
   },
   async mounted() {
@@ -78,6 +106,7 @@ export default {
     loadLocalSettings() {
       this.enabled = SettingsManager.getSetting('hitokoto.enabled')
       this.refreshInterval = SettingsManager.getSetting('hitokoto.refreshInterval')
+      this.fontSize = SettingsManager.getSetting('font.size')
     },
     async loadKvSettings() {
       try {
