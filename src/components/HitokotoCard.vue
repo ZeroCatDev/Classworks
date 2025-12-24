@@ -66,7 +66,7 @@ export default {
       loading: false,
       timer: null,
       unwatch: null,
-      fontSize: SettingsManager.getSetting('font.size')
+      fontSize: 28 // Will be updated in mounted()
     }
   },
   computed: {
@@ -79,9 +79,9 @@ export default {
       }
     },
     authorStyle() {
-      // Author font size is 60% of the main font size
+      const AUTHOR_FONT_RATIO = 0.6 // Author font size is 60% of the main font size
       return {
-        'font-size': `${this.fontSize * 0.6}px`,
+        'font-size': `${this.fontSize * AUTHOR_FONT_RATIO}px`,
         'text-align': 'left'
       }
     }
