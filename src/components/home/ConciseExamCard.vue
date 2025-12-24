@@ -11,19 +11,13 @@
       <span class="text-truncate">{{ exam?.examName || "加载中..." }}</span>
     </v-card-title>
 
-    <v-card-text
-      class="flex-grow-1 pa-4 overflow-y-auto"
-      :style="contentStyle"
-    >
-      <div
-        v-if="loading"
-        class="d-flex justify-center align-center py-4"
-      >
+    <v-card-text class="flex-grow-1 pa-4 overflow-y-auto" :style="contentStyle">
+      <div v-if="loading" class="d-flex justify-center align-center py-4">
         <v-progress-circular
           indeterminate
           size="24"
           color="primary"
-        />
+        ></v-progress-circular>
       </div>
 
       <template v-else-if="exam">
@@ -32,11 +26,7 @@
         </div>-->
 
         <div class="d-flex flex-column">
-          <div
-            v-for="(group, gIndex) in groupedExamInfos"
-            :key="gIndex"
-            class="mb-3"
-          >
+          <div v-for="(group, gIndex) in groupedExamInfos" :key="gIndex" class="mb-3">
             <div class="text-subtitle-2 font-weight-bold text-primary mb-1">
               <RelativeTimeDisplay :time="group.date" />
             </div>
@@ -49,10 +39,7 @@
                 'text-grey': isPast(info.end),
               }"
             >
-              <div
-                class="font-weight-bold mr-2"
-                style="font-size: 1.1em"
-              >
+              <div class="font-weight-bold mr-2" style="font-size: 1.1em">
                 {{ info.name }}
               </div>
               <div
@@ -67,12 +54,7 @@
         </div>
       </template>
 
-      <div
-        v-else
-        class="text-center text-caption text-grey py-2"
-      >
-        无法加载
-      </div>
+      <div v-else class="text-center text-caption text-grey py-2">无法加载</div>
     </v-card-text>
   </v-card>
 </template>

@@ -43,7 +43,7 @@
         >
           稍后设置
         </v-btn>
-        <v-spacer />
+        <v-spacer/>
         <v-btn
           :disabled="!selectedName || saving"
           :loading="saving"

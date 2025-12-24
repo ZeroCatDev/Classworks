@@ -1,8 +1,5 @@
 <template>
-  <v-card
-    class="settings-card rounded-lg"
-    elevation="2"
-  >
+  <v-card class="settings-card rounded-lg" elevation="2">
     <v-card-item>
       <template #prepend>
         <v-icon
@@ -11,9 +8,7 @@
           size="large"
         />
       </template>
-      <v-card-title class="text-h6">
-        {{ title }}
-      </v-card-title>
+      <v-card-title class="text-h6">{{ title }}</v-card-title>
     </v-card-item>
 
     <v-card-text>
@@ -23,14 +18,11 @@
         color="primary"
         indeterminate
       />
-      <slot />
+      <slot/>
     </v-card-text>
 
-    <v-card-actions
-      v-if="$slots.actions"
-      class="pa-4"
-    >
-      <slot name="actions" />
+    <v-card-actions v-if="$slots.actions" class="pa-4">
+      <slot name="actions"/>
     </v-card-actions>
   </v-card>
 </template>

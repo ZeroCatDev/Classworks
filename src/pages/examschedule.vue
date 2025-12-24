@@ -2,17 +2,9 @@
   <v-container class="fill-height">
     <v-row>
       <v-col cols="12">
-        <v-card
-          border
-          class="elevation-12"
-        >
+        <v-card border class="elevation-12">
           <v-card-title class="d-flex align-center primary lighten-1 white--text py-3 px-4">
-            <v-icon
-              class="mr-2"
-              color="white"
-            >
-              mdi-calendar-check
-            </v-icon>
+            <v-icon class="mr-2" color="white">mdi-calendar-check</v-icon>
             考试看板
           </v-card-title>
           <v-card-subtitle>
@@ -30,9 +22,7 @@
               @click:close="error = ''"
             >
               <div class="d-flex align-center">
-                <v-icon class="mr-2">
-                  mdi-alert-circle
-                </v-icon>
+                <v-icon class="mr-2">mdi-alert-circle</v-icon>
                 {{ error }}
               </div>
             </v-alert>
@@ -48,9 +38,7 @@
               @click:close="success = ''"
             >
               <div class="d-flex align-center">
-                <v-icon class="mr-2">
-                  mdi-check-circle
-                </v-icon>
+                <v-icon class="mr-2">mdi-check-circle</v-icon>
                 {{ success }}
               </div>
             </v-alert>
@@ -104,29 +92,19 @@
             </div>
 
             <!-- 加载状态 -->
-            <v-card
-              v-if="loading"
-              class="my-4"
-              outlined
-            >
+            <v-card v-if="loading" class="my-4" outlined>
               <v-card-text>
                 <v-skeleton-loader
                   class="mx-auto"
                   type="list-item-avatar-two-line@3"
-                />
+                ></v-skeleton-loader>
               </v-card-text>
             </v-card>
 
             <!-- 配置列表 -->
-            <v-card
-              v-if="!loading && configs.length > 0"
-              class="my-4"
-              elevation="1"
-            >
+            <v-card v-if="!loading && configs.length > 0" class="my-4" elevation="1">
               <v-card-title class="d-flex align-center pa-4 bg-primary-lighten-5">
-                <v-icon class="mr-2">
-                  mdi-format-list-bulleted
-                </v-icon>
+                <v-icon class="mr-2">mdi-format-list-bulleted</v-icon>
                 <span class="font-weight-bold">配置列表</span>
               </v-card-title>
               <v-list>
@@ -138,13 +116,8 @@
                   @click="showEditDialog(config)"
                 >
                   <template #prepend>
-                    <v-avatar
-                      class="mr-2"
-                      color="primary"
-                    >
-                      <v-icon color="white">
-                        mdi-calendar-text
-                      </v-icon>
+                    <v-avatar class="mr-2" color="primary">
+                      <v-icon color="white">mdi-calendar-text</v-icon>
                     </v-avatar>
                   </template>
 
@@ -153,21 +126,11 @@
                   </v-list-item-title>
                   <v-list-item-subtitle class="text-caption mt-1">
                     <div class="d-flex align-center">
-                      <v-icon
-                        class="mr-1"
-                        size="small"
-                      >
-                        mdi-information-outline
-                      </v-icon>
+                      <v-icon class="mr-1" size="small">mdi-information-outline</v-icon>
                       {{ config.message || '无描述' }}
                     </div>
                     <div class="d-flex align-center mt-1">
-                      <v-icon
-                        class="mr-1"
-                        size="small"
-                      >
-                        mdi-book-multiple
-                      </v-icon>
+                      <v-icon class="mr-1" size="small">mdi-book-multiple</v-icon>
                       {{ config.examInfos ? config.examInfos.length : 0 }} 堂考试
                     </div>
                   </v-list-item-subtitle>
@@ -195,6 +158,8 @@
                       >
                         <v-icon>mdi-eye</v-icon>
                       </v-btn>
+
+
                     </div>
                   </template>
                 </v-list-item>
@@ -202,22 +167,12 @@
             </v-card>
 
             <!-- 空状态 -->
-            <v-card
-              v-if="!loading && configs.length === 0"
-              class="my-4"
-              elevation="1"
-            >
+            <v-card v-if="!loading && configs.length === 0" class="my-4" elevation="1">
               <v-card-text class="text-center py-8">
-                <v-icon
-                  class="mb-4"
-                  color="grey-lighten-1"
-                  size="64"
-                >
+                <v-icon class="mb-4" color="grey-lighten-1" size="64">
                   mdi-calendar-blank
                 </v-icon>
-                <h3 class="text-h6 mb-2 text-grey-darken-1">
-                  暂无配置
-                </h3>
+                <h3 class="text-h6 mb-2 text-grey-darken-1">暂无配置</h3>
                 <p class="text-body-2 text-grey-darken-1 mb-4">
                   点击"新建配置"按钮创建您的第一个考试配置
                 </p>
@@ -236,18 +191,10 @@
     </v-row>
 
     <!-- 重命名对话框 -->
-    <v-dialog
-      v-model="renameDialog"
-      max-width="500"
-    >
+    <v-dialog v-model="renameDialog" max-width="500">
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon
-            class="mr-2"
-            color="primary"
-          >
-            mdi-rename-box
-          </v-icon>
+          <v-icon class="mr-2" color="primary">mdi-rename-box</v-icon>
           重命名配置
         </v-card-title>
         <v-card-text>
@@ -258,10 +205,10 @@
             prepend-inner-icon="mdi-calendar-text"
             variant="outlined"
             @keyup.enter="renameConfig"
-          />
+          ></v-text-field>
         </v-card-text>
         <v-card-actions>
-          <v-spacer />
+          <v-spacer></v-spacer>
           <v-btn
             color="grey"
             variant="text"
@@ -283,21 +230,12 @@
     </v-dialog>
 
     <!-- 编辑配置弹框 -->
-    <v-dialog
-      v-model="editDialog"
-      max-width="1200"
-      persistent
-    >
+    <v-dialog v-model="editDialog" max-width="1200" persistent>
       <v-card>
         <v-card-title class="d-flex align-center primary lighten-1 white--text py-3 px-4">
-          <v-icon
-            class="mr-2"
-            color="white"
-          >
-            mdi-pencil
-          </v-icon>
+          <v-icon class="mr-2" color="white">mdi-pencil</v-icon>
           编辑考试配置
-          <v-spacer />
+          <v-spacer></v-spacer>
           <v-chip
             v-if="editingConfig"
             class="mr-2"
@@ -317,10 +255,8 @@
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text
-          class="pa-4"
-          style="max-height: 70vh; overflow-y: auto;"
-        >
+        <v-card-text class="pa-4"
+                     style="max-height: 70vh; overflow-y: auto;">
           <ExamConfigEditor
             v-if="editingConfig"
             ref="configEditor"
@@ -341,7 +277,7 @@
           >
             关闭
           </v-btn>
-          <v-spacer />
+          <v-spacer></v-spacer>
           <v-btn
             :loading="saving"
             color="success"
@@ -356,21 +292,12 @@
     </v-dialog>
 
     <!-- 导入配置弹框 -->
-    <v-dialog
-      v-model="importDialog"
-      max-width="800"
-      persistent
-    >
+    <v-dialog v-model="importDialog" max-width="800" persistent>
       <v-card>
         <v-card-title class="d-flex align-center primary lighten-1 white--text py-3 px-4">
-          <v-icon
-            class="mr-2"
-            color="white"
-          >
-            mdi-import
-          </v-icon>
+          <v-icon class="mr-2" color="white">mdi-import</v-icon>
           导入考试配置
-          <v-spacer />
+          <v-spacer></v-spacer>
           <v-btn
             color="white"
             icon="mdi-close"
@@ -397,22 +324,22 @@
             v-model="importJson"
             :rules="[v => !!v || 'JSON内容不能为空']"
             label="请输入JSON配置"
-            placeholder="{
-  &quot;examName&quot;: &quot;期末考试&quot;,
-  &quot;message&quot;: &quot;考试信息&quot;,
-  &quot;room&quot;: &quot;01&quot;,
-  &quot;examInfos&quot;: [
+            placeholder='{
+  "examName": "期末考试",
+  "message": "考试信息",
+  "room": "01",
+  "examInfos": [
     {
-      &quot;name&quot;: &quot;语文&quot;,
-      &quot;start&quot;: &quot;2025/12/14 09:00&quot;,
-      &quot;end&quot;: &quot;2025/12/14 11:00&quot;
+      "name": "语文",
+      "start": "2025/12/14 09:00",
+      "end": "2025/12/14 11:00"
     }
   ]
-}"
+}'
             prepend-inner-icon="mdi-code-json"
             rows="15"
             variant="outlined"
-          />
+          ></v-textarea>
 
           <v-alert
             border="start"
@@ -441,7 +368,7 @@
           >
             取消
           </v-btn>
-          <v-spacer />
+          <v-spacer></v-spacer>
           <v-btn
             :disabled="!importJson"
             :loading="importing"
@@ -457,19 +384,10 @@
     </v-dialog>
 
     <!-- 日期选择弹框 -->
-    <v-dialog
-      v-model="datePickerDialog"
-      max-width="500"
-      persistent
-    >
+    <v-dialog v-model="datePickerDialog" max-width="500" persistent>
       <v-card>
         <v-card-title class="d-flex align-center primary lighten-1 white--text py-3 px-4">
-          <v-icon
-            class="mr-2"
-            color="white"
-          >
-            mdi-calendar
-          </v-icon>
+          <v-icon class="mr-2" color="white">mdi-calendar</v-icon>
           选择起始日期
         </v-card-title>
         <v-card-text class="pa-4">
@@ -483,7 +401,7 @@
             prepend-inner-icon="mdi-calendar"
             type="date"
             variant="outlined"
-          />
+          ></v-text-field>
 
           <v-alert
             v-if="virtualDateInfo"
@@ -507,7 +425,7 @@
           >
             取消
           </v-btn>
-          <v-spacer />
+          <v-spacer></v-spacer>
           <v-btn
             :disabled="!baseDate"
             color="primary"
@@ -522,21 +440,12 @@
     </v-dialog>
 
     <!-- AI生成提示词弹框 -->
-    <v-dialog
-      v-model="aiDialog"
-      max-width="900"
-      persistent
-    >
+    <v-dialog v-model="aiDialog" max-width="900" persistent>
       <v-card>
         <v-card-title class="d-flex align-center purple lighten-1 white--text py-3 px-4">
-          <v-icon
-            class="mr-2"
-            color="white"
-          >
-            mdi-brain
-          </v-icon>
+          <v-icon class="mr-2" color="white">mdi-brain</v-icon>
           AI生成考试配置
-          <v-spacer />
+          <v-spacer></v-spacer>
           <v-btn
             color="white"
             icon="mdi-close"
@@ -562,9 +471,7 @@
 
           <div class="mb-3">
             <div class="d-flex justify-space-between align-center mb-2">
-              <h3 class="text-h6">
-                提示词模板
-              </h3>
+              <h3 class="text-h6">提示词模板</h3>
               <v-btn
                 :color="copied ? 'success' : 'primary'"
                 :prepend-icon="copied ? 'mdi-check' : 'mdi-content-copy'"
@@ -576,13 +483,12 @@
               </v-btn>
             </div>
 
-            <v-card
-              class="pa-4"
-              variant="outlined"
-            >
+            <v-card class="pa-4" variant="outlined">
               <pre class="ai-prompt-text">{{ aiPrompt }}</pre>
             </v-card>
           </div>
+
+
         </v-card-text>
         <v-card-actions class="pa-4">
           <v-btn
@@ -593,7 +499,7 @@
           >
             关闭
           </v-btn>
-          <v-spacer />
+          <v-spacer></v-spacer>
           <v-btn
             color="success"
             prepend-icon="mdi-import"
@@ -646,6 +552,9 @@ export default {
       copied: false
     }
   },
+  async mounted() {
+    await this.loadConfigs()
+  },
   computed: {
     /**
      * AI生成提示词
@@ -693,9 +602,6 @@ Date and Time Handling:
 
 Now please generate the exam configuration based on the above rules:`
     }
-  },
-  async mounted() {
-    await this.loadConfigs()
   },
   methods: {
     /**

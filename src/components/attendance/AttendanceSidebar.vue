@@ -27,9 +27,9 @@
       <span style="white-space: nowrap">
         {{
           studentList.length -
-            attendance.absent.length -
-            attendance.late.length -
-            attendance.exclude.length
+          attendance.absent.length -
+          attendance.late.length -
+          attendance.exclude.length
         }}人
       </span>
     </h2>
@@ -45,7 +45,8 @@
       :key="'absent-' + index"
       class="gray-text"
     >
-      <span v-if="display.lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name }}</span>
+      <span v-if="display.lgAndUp.value">{{ `${index + 1}. ` }}</span
+      ><span style="white-space: nowrap">{{ name }}</span>
     </h3>
     <h2>
       <span style="white-space: nowrap">迟到</span>
@@ -59,7 +60,8 @@
       :key="'late-' + index"
       class="gray-text"
     >
-      <span v-if="display.lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name }}</span>
+      <span v-if="display.lgAndUp.value">{{ `${index + 1}. ` }}</span
+      ><span style="white-space: nowrap">{{ name }}</span>
     </h3>
     <h2>
       <span style="white-space: nowrap">不参与</span>
@@ -73,7 +75,8 @@
       :key="'exclude-' + index"
       class="gray-text"
     >
-      <span v-if="display.lgAndUp.value">{{ `${index + 1}. ` }}</span><span style="white-space: nowrap">{{ name }}</span>
+      <span v-if="display.lgAndUp.value">{{ `${index + 1}. ` }}</span
+      ><span style="white-space: nowrap">{{ name }}</span>
     </h3>
   </v-col>
 </template>

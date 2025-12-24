@@ -1,46 +1,30 @@
 <template>
   <div class="settings-explorer">
+
+
     <div>
-      <v-text-field
-        v-model="searchQuery"
-        class="mb-4"
-        clearable
-        density="comfortable"
-        label="搜索设置"
-        prepend-inner-icon="mdi-magnify"
-        variant="outlined"
-      />
+      <v-text-field v-model="searchQuery" class="mb-4" clearable density="comfortable" label="搜索设置"
+                    prepend-inner-icon="mdi-magnify" variant="outlined"/>
 
 
       <v-list>
-        <div
-          v-for="setting in allSettings"
-          :key="setting.key"
-        >
-          <setting-item
-            :key="setting.key"
-            :disabled="setting.requireDeveloper && !isDeveloperMode"
-            :setting-key="setting.key"
-            @error="onSettingError"
-            @update="onSettingUpdate"
-          />
-          <v-divider class="my-2" />
+        <div v-for="setting in allSettings" :key="setting.key">
+          <setting-item :key="setting.key" :disabled="setting.requireDeveloper && !isDeveloperMode"
+                        :setting-key="setting.key" @error="onSettingError"
+                        @update="onSettingUpdate"/>
+          <v-divider class="my-2"/>
         </div>
       </v-list>
       <v-card border>
-        <v-card-title class="text-subtitle-1">
-          当前配置
-        </v-card-title>
+        <v-card-title class="text-subtitle-1">当前配置</v-card-title>
         <v-card-text>
           <pre class="settings-json">{{ formattedSettings }}</pre>
         </v-card-text>
         <v-card-actions>
-          <v-spacer />
+          <v-spacer></v-spacer>
           <v-btn @click="copySettingsToClipboard">
             复制到剪贴板
-            <v-icon right>
-              mdi-content-copy
-            </v-icon>
+            <v-icon right>mdi-content-copy</v-icon>
           </v-btn>
         </v-card-actions>
       </v-card>

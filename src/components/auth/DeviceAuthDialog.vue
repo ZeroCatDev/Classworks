@@ -41,7 +41,9 @@
           label="命名空间"
           prepend-inner-icon="mdi-identifier"
           variant="outlined"
-        />
+        >
+
+        </v-text-field>
 
         <v-text-field
           v-model="form.password"
@@ -49,7 +51,9 @@
           prepend-inner-icon="mdi-lock-outline"
           type="text"
           variant="outlined"
-        />
+        >
+
+        </v-text-field>
 
         <v-alert
           v-if="error"
@@ -73,7 +77,7 @@
       >
         取消
       </v-btn>
-      <v-spacer />
+      <v-spacer/>
       <v-btn
         :disabled="!form.namespace || authenticating"
         :loading="authenticating"

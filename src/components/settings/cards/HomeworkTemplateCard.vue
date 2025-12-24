@@ -48,15 +48,8 @@
     </div>
 
     <v-row>
-      <v-col
-        cols="12"
-        md="6"
-      >
-        <setting-group
-          border
-          icon="mdi-book"
-          title="科目配置"
-        >
+      <v-col cols="12" md="6">
+        <setting-group border icon="mdi-book" title="科目配置">
           <v-list>
             <v-list-item>
               <v-text-field
@@ -70,14 +63,8 @@
               />
             </v-list-item>
 
-            <v-list-item
-              v-for="subject in subjectList"
-              :key="subject"
-            >
-              <v-card
-                border
-                class="w-100 mb-2"
-              >
+            <v-list-item v-for="subject in subjectList" :key="subject">
+              <v-card border class="w-100 mb-2">
                 <v-card-title class="d-flex align-center">
                   <v-text-field
                     v-model="editedSubjects[subject]"
@@ -87,7 +74,7 @@
                     variant="plain"
                     @blur="updateSubject(subject)"
                   />
-                  <v-spacer />
+                  <v-spacer/>
                   <v-btn
                     color="error"
                     icon="mdi-delete"
@@ -108,24 +95,17 @@
                     @keyup.enter="() => addBookType(subject)"
                   />
 
-                  <v-list
-                    border
-                    density="compact"
-                    rounded
-                  >
+                  <v-list border density="compact" rounded>
                     <v-list-item
                       v-for="(books, bookType) in config.subjects[subject].books"
                       :key="bookType"
                       :title="bookType"
                       @click="openSubjectBookDialog(subject, bookType, books)"
                     >
-                      <template #prepend>
-                        <v-icon
-                          class="mr-2"
-                          icon="mdi-book-open-variant"
-                        />
+                      <template v-slot:prepend>
+                        <v-icon class="mr-2" icon="mdi-book-open-variant"/>
                       </template>
-                      <template #append>
+                      <template v-slot:append>
                         <v-chip
                           class="mr-2"
                           color="info"
@@ -150,15 +130,8 @@
         </setting-group>
       </v-col>
 
-      <v-col
-        cols="12"
-        md="6"
-      >
-        <setting-group
-          border
-          icon="mdi-cog"
-          title="通用配置"
-        >
+      <v-col cols="12" md="6">
+        <setting-group border icon="mdi-cog" title="通用配置">
           <v-list>
             <v-list-item>
               <v-text-field
@@ -173,24 +146,17 @@
             </v-list-item>
 
             <v-list-item>
-              <v-list
-                border
-                density="compact"
-                rounded
-              >
+              <v-list border density="compact" rounded>
                 <v-list-item
                   v-for="(books, bookType) in config.commonSubject.books"
                   :key="bookType"
                   :title="bookType"
                   @click="openSubjectBookDialog('common', bookType, books)"
                 >
-                  <template #prepend>
-                    <v-icon
-                      class="mr-2"
-                      icon="mdi-book-multiple"
-                    />
+                  <template v-slot:prepend>
+                    <v-icon class="mr-2" icon="mdi-book-multiple"/>
                   </template>
-                  <template #append>
+                  <template v-slot:append>
                     <v-chip
                       class="mr-2"
                       color="info"
@@ -210,7 +176,7 @@
               </v-list>
             </v-list-item>
 
-            <v-divider class="my-2" />
+            <v-divider class="my-2"/>
 
             <v-list-item>
               <v-text-field
@@ -225,18 +191,14 @@
             </v-list-item>
 
             <v-list-item>
-              <v-list
-                border
-                density="compact"
-                rounded
-              >
+              <v-list border density="compact" rounded>
                 <v-list-item
                   v-for="action in config.actions"
                   :key="action"
                   :title="action"
                   @click="openActionDialog(action)"
                 >
-                  <template #append>
+                  <template v-slot:append>
                     <v-btn
                       color="error"
                       icon="mdi-delete"
@@ -254,10 +216,7 @@
     </v-row>
 
     <!-- 编辑弹框 -->
-    <v-dialog
-      v-model="dialog.show"
-      max-width="600px"
-    >
+    <v-dialog v-model="dialog.show" max-width="600px">
       <v-card>
         <v-card-title class="text-h5 pa-4">
           {{ dialog.title }}
@@ -276,43 +235,22 @@
                 />
               </v-col>
 
-              <v-col
-                v-if="dialog.editedItem.type === 'subjectBook'"
-                cols="12"
-              >
-                <div class="text-subtitle-2 mb-2">
-                  所属科目
-                </div>
-                <v-chip color="primary">
-                  {{ dialog.editedItem.subject }}
-                </v-chip>
+              <v-col v-if="dialog.editedItem.type === 'subjectBook'" cols="12">
+                <div class="text-subtitle-2 mb-2">所属科目</div>
+                <v-chip color="primary">{{ dialog.editedItem.subject }}</v-chip>
               </v-col>
 
-              <v-col
-                v-if="['subjectBook', 'commonBook'].includes(dialog.editedItem.type)"
-                cols="12"
-              >
+              <v-col v-if="['subjectBook', 'commonBook'].includes(dialog.editedItem.type)" cols="12">
                 <v-card variant="outlined">
-                  <v-card-title class="text-subtitle-1 py-2">
-                    需完成部分
-                  </v-card-title>
+                  <v-card-title class="text-subtitle-1 py-2">需完成部分</v-card-title>
                   <v-card-text class="pt-0">
-                    <v-list
-                      border
-                      class="mb-2"
-                      density="compact"
-                      rounded
-                    >
+                    <v-list border class="mb-2" density="compact" rounded>
                       <v-list-item
                         v-for="(task, index) in dialog.editedItem.tasks"
                         :key="index"
                       >
-                        <template #prepend>
-                          <v-icon
-                            class="mr-2"
-                            icon="mdi-checkbox-blank-circle-outline"
-                            size="small"
-                          />
+                        <template v-slot:prepend>
+                          <v-icon class="mr-2" icon="mdi-checkbox-blank-circle-outline" size="small"/>
                         </template>
                         <v-text-field
                           v-model="dialog.editedItem.tasks[index]"
@@ -320,7 +258,7 @@
                           hide-details
                           variant="plain"
                         />
-                        <template #append>
+                        <template v-slot:append>
                           <v-btn
                             color="error"
                             icon="mdi-delete"
@@ -349,7 +287,7 @@
         </v-card-text>
 
         <v-card-actions class="pa-4">
-          <v-spacer />
+          <v-spacer></v-spacer>
           <v-btn
             color="primary"
             variant="elevated"
