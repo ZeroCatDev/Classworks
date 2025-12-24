@@ -15,14 +15,12 @@
       <div
         class="font-weight-medium mb-4 serif-font"
         :style="contentStyle"
-        style="white-space: pre-wrap; line-height: 1.6; text-align: left;"
       >
         {{ sentence }}
       </div>
       <div
         class="text-medium-emphasis serif-font"
         :style="authorStyle"
-        style="text-align: left;"
       >
         <span
           v-if="author"
@@ -68,19 +66,23 @@ export default {
       loading: false,
       timer: null,
       unwatch: null,
-      fontSize: 28
+      fontSize: SettingsManager.getSetting('font.size')
     }
   },
   computed: {
     contentStyle() {
       return {
-        'font-size': `${this.fontSize}px`
+        'font-size': `${this.fontSize}px`,
+        'white-space': 'pre-wrap',
+        'line-height': '1.6',
+        'text-align': 'left'
       }
     },
     authorStyle() {
       // Author font size is 60% of the main font size
       return {
-        'font-size': `${this.fontSize * 0.6}px`
+        'font-size': `${this.fontSize * 0.6}px`,
+        'text-align': 'left'
       }
     }
   },
