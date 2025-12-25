@@ -50,8 +50,8 @@ const GLOBAL_SENSITIVE_WORDS_ENCODED = [
 // 解码敏感词列表
 const GLOBAL_SENSITIVE_WORDS = GLOBAL_SENSITIVE_WORDS_ENCODED.map(word => Base64.decode(word))
 
-// 一言字体大小比例（相对于全局字体大小）
-const HITOKOTO_FONT_RATIO = 0.75 // Hitokoto font size is 85% of the general font size
+// 一言字体大小比例（75%的全局字体大小）
+const HITOKOTO_FONT_RATIO = 0.75
 
 export default {
   name: 'HitokotoCard',
