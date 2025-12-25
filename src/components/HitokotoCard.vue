@@ -71,17 +71,19 @@ export default {
   },
   computed: {
     contentStyle() {
+      const HITOKOTO_FONT_RATIO = 0.85 // Hitokoto font size is 85% of the general font size
       return {
-        'font-size': `${this.fontSize}px`,
+        'font-size': `${this.fontSize * HITOKOTO_FONT_RATIO}px`,
         'white-space': 'pre-wrap',
         'line-height': '1.6',
         'text-align': 'left'
       }
     },
     authorStyle() {
+      const HITOKOTO_FONT_RATIO = 0.85 // Hitokoto font size is 85% of the general font size
       const AUTHOR_FONT_RATIO = 0.6 // Author font size is 60% of the main font size
       return {
-        'font-size': `${this.fontSize * AUTHOR_FONT_RATIO}px`,
+        'font-size': `${this.fontSize * HITOKOTO_FONT_RATIO * AUTHOR_FONT_RATIO}px`,
         'text-align': 'left'
       }
     }
