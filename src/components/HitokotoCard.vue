@@ -50,6 +50,9 @@ const GLOBAL_SENSITIVE_WORDS_ENCODED = [
 // 解码敏感词列表
 const GLOBAL_SENSITIVE_WORDS = GLOBAL_SENSITIVE_WORDS_ENCODED.map(word => Base64.decode(word))
 
+// 一言字体大小比例（相对于全局字体大小）
+const HITOKOTO_FONT_RATIO = 0.85 // Hitokoto font size is 85% of the general font size
+
 export default {
   name: 'HitokotoCard',
   data() {
@@ -71,7 +74,6 @@ export default {
   },
   computed: {
     contentStyle() {
-      const HITOKOTO_FONT_RATIO = 0.85 // Hitokoto font size is 85% of the general font size
       return {
         'font-size': `${this.fontSize * HITOKOTO_FONT_RATIO}px`,
         'white-space': 'pre-wrap',
@@ -80,7 +82,6 @@ export default {
       }
     },
     authorStyle() {
-      const HITOKOTO_FONT_RATIO = 0.85 // Hitokoto font size is 85% of the general font size
       const AUTHOR_FONT_RATIO = 0.6 // Author font size is 60% of the main font size
       return {
         'font-size': `${this.fontSize * HITOKOTO_FONT_RATIO * AUTHOR_FONT_RATIO}px`,
