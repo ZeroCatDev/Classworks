@@ -23,6 +23,12 @@ onMounted(() => {
   // 应用保存的主题设置
   const savedTheme = getSetting("theme.mode");
   theme.global.name.value = savedTheme;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    window.deferredPwaPrompt = e;
+    window.dispatchEvent(new Event('pwa-prompt-ready'));
+  });
 });
 </script>
 <style>

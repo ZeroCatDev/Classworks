@@ -34,7 +34,7 @@ jobs:
       - name: Build
         env:
           VITE_APP_ID: d158067f53627d2b98babe8bffd2fd7d
-          VITE_DEFAULT_KV_SERVER: https://kv.wuyuan.dev
+          VITE_DEFAULT_KV_SERVER: https://kv-service.houlang.cloud
           VITE_DEFAULT_AUTH_SERVER: https://kv.houlang.cloud
         run: |
           npm install

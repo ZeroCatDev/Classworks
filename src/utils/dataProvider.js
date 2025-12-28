@@ -143,7 +143,7 @@ export default {
    * // 成功时返回:
    * {
    *   success: true,
-   *   url: "https://kv.wuyuan.dev/device-uuid-123/exam_configs?token=abc123",  // 私有访问时包含token
+   *   url: "https://kv-service.houlang.cloud/device-uuid-123/exam_configs?token=abc123",  // 私有访问时包含token
    *   migrated: true,              // 是否成功迁移了本地数据
    *   configured: false            // 是否自动配置了云端设置
    * }
@@ -151,7 +151,7 @@ export default {
    * // 公开访问时返回:
    * {
    *   success: true,
-   *   url: "https://kv.wuyuan.dev/device-uuid-123/exam_configs",  // 公开访问不包含token
+   *   url: "https://kv-service.houlang.cloud/device-uuid-123/exam_configs",  // 公开访问不包含token
    *   migrated: false,
    *   configured: true
    * }
@@ -183,7 +183,7 @@ export default {
         if (autoConfigureCloud) {
           // 使用classworksCloudDefaults配置
           const classworksCloudDefaults = {
-            "server.domain": import.meta.env.VITE_DEFAULT_KV_SERVER || "https://kv.wuyuan.dev",
+            "server.domain": import.meta.env.VITE_DEFAULT_KV_SERVER || "https://kv-service.houlang.cloud",
             "server.siteKey": "",
           };
 

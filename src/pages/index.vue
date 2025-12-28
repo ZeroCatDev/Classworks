@@ -169,6 +169,8 @@
         @add-exam-card="showAddExamDialog = true"
       />
 
+      <pwa-install-card />
+
       <!-- 推荐添加考试提示 -->
       <v-alert
         v-if="upcomingExams.length > 0 && !hasExamCard"
@@ -441,6 +443,7 @@ import AttendanceSidebar from "@/components/attendance/AttendanceSidebar.vue";
 import AttendanceManagementDialog from "@/components/attendance/AttendanceManagementDialog.vue";
 import HomeworkGrid from "@/components/home/HomeworkGrid.vue";
 import HomeActions from "@/components/home/HomeActions.vue";
+import PwaInstallCard from "@/components/PwaInstallCard.vue";
 import ExamScheduleCard from "@/components/home/ExamScheduleCard.vue";
 import ExamConfigEditor from "@/components/ExamConfigEditor.vue";
 import HitokotoCard from "@/components/HitokotoCard.vue";
@@ -485,6 +488,7 @@ export default {
     AttendanceManagementDialog,
     HomeworkGrid,
     HomeActions,
+    PwaInstallCard,
     ExamScheduleCard,
     ExamConfigEditor,
   },

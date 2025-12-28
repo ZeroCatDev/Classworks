@@ -1,6 +1,6 @@
 // 请求通知权限
 async function requestNotificationPermission() {
-  if (Notification && Notification.requestPermission) {
+  if (typeof Notification !== "undefined" && Notification.requestPermission) {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
       console.log("通知权限已授予");
@@ -45,10 +45,7 @@ async function initializeStorage() {
   }
 }
 
-// 在页面加载时初始化
-if (typeof window !== "undefined") {
-  window.addEventListener("load", initializeStorage);
-}
+// 初始化将由显式触发方调用，避免页面加载时立即请求权限
 
 /**
  * 配置项定义
@@ -68,7 +65,7 @@ const SETTINGS_STORAGE_KEY = "Classworks_settings";
 
 // 新增: Classworks云端存储的默认设置
 const classworksCloudDefaults = {
-  "server.domain": import.meta.env.VITE_DEFAULT_KV_SERVER || "https://kv.wuyuan.dev",
+  "server.domain": import.meta.env.VITE_DEFAULT_KV_SERVER || "https://kv-service.houlang.cloud",
   //"server.domain": "http://localhost:3030",
   "server.siteKey": "",
 };
@@ -462,6 +459,14 @@ const settingsDefinitions = {
     description: "学号模式最小值",
     icon: "mdi-numeric-negative-1",
   },
+
+  // PWA 设置
+  "pwa.hideInstallCard": {
+    type: "boolean",
+    default: false,
+    description: "不显示PWA安装卡片",
+    icon: "mdi-download-off",
+  },
 };
 
 /**
@@ -752,4 +757,6 @@ export {
   watchSettings,
   getSettingDefinition,
   exportSettingsAsKeyValue,
+  requestNotificationPermission,
+  requestPersistentStorage,
 };
