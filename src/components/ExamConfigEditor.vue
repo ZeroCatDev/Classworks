@@ -108,7 +108,18 @@
           variant="elevated"
           @click="downloadAsEa2"
         >
-          部署到 ExamAware2 知试
+          .ea2 文件
+        </v-btn>
+
+        <v-btn
+          :disabled="!isValidConfig"
+          class="text-none"
+          color="secondary"
+          prepend-icon="mdi-play-circle"
+          variant="elevated"
+          @click="openInEa2Player"
+        >
+          拉起EA2播放器
         </v-btn>
 
         <v-tooltip
@@ -1828,6 +1839,42 @@ export default {
         });
       } finally {
         this.deleting = false;
+      }
+    },
+
+    /**
+     * 拉起EA2播放器
+     * 将配置JSON转换为base64并通过examaware://协议打开
+     */
+    openInEa2Player() {
+      try {
+        // 获取存储格式的JSON字符串
+        const configToSave = {
+          examName: this.localConfig.examName,
+          message: this.localConfig.message,
+          room: this.localConfig.room,
+          examInfos: this.localConfig.examInfos.map((info) => ({
+            name: info.name,
+            start: this.formatDisplayDateTime(info.start),
+            end: this.formatDisplayDateTime(info.end),
+            alertTime: parseInt(info.alertTime) || 15,
+          })),
+        };
+
+        const jsonString = JSON.stringify(configToSave);
+
+        // 转换为base64
+        const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
+
+        // 构建examaware://协议URL
+        const ea2Url = `examaware://player?data=${base64Data}`;
+
+        // 尝试打开
+        window.location.href = ea2Url;
+
+        this.$message?.success('正在拉起 ExamAware2 播放器...');
+      } catch (err) {
+        this.error = '拉起播放器失败: ' + err.message;
       }
     },
   },
