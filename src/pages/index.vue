@@ -693,8 +693,9 @@ export default {
       if (!safeUrl) return { display: "none" };
 
       const blur = Math.min(Math.max(this.backgroundBlurAmount, 0), 50);
+      const escaped = this.cssEscape(encodeURI(safeUrl));
       return {
-        backgroundImage: `url("${encodeURI(safeUrl)}")`,
+        backgroundImage: `url("${escaped}")`,
         filter: `blur(${blur}px)`,
       };
     },
@@ -2217,7 +2218,7 @@ export default {
       try {
         const parsed = new URL(trimmed, window.location.origin);
         const protocol = parsed.protocol.replace(":", "");
-        if (["http", "https", "data", "blob"].includes(protocol)) return true;
+        if (["http", "https", "blob"].includes(protocol)) return true;
       } catch (e) {
         // Allow relative paths
         if (
@@ -2237,8 +2238,14 @@ export default {
         return parsed.href;
       } catch (e) {
         // Fallback for relative paths when URL parsing fails
-        return url.replace(/[^a-zA-Z0-9-._~!$&'()*+,;=/:@%]/g, "");
+        return url.replace(/[^a-zA-Z0-9-._~/:@%+#?&=]/g, "");
       }
+    },
+    cssEscape(value) {
+      if (typeof CSS !== "undefined" && CSS.escape) {
+        return CSS.escape(value);
+      }
+      return value.replace(/[^a-zA-Z0-9_\-]/g, (char) => `\\${char}`);
     },
 
     safeBase64Decode(base64String) {
