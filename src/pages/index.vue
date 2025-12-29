@@ -688,11 +688,11 @@ export default {
     },
     backgroundImageStyle() {
       const url = this.backgroundImageUrl;
-      if (!url) return { display: "none" };
+      if (!this.isSafeBackgroundUrl(url)) return { display: "none" };
 
       const blur = Math.min(Math.max(this.backgroundBlurAmount, 0), 50);
       return {
-        backgroundImage: `url("${url}")`,
+        backgroundImage: `url("${this.sanitizeBackgroundUrl(url)}")`,
         filter: `blur(${blur}px)`,
       };
     },
@@ -700,8 +700,10 @@ export default {
       if (!this.hasBackgroundImage) return { display: "none" };
 
       const dim = Math.min(Math.max(this.backgroundDimAmount, 0), 100);
+      const overlayBlur = Math.min(Math.max(this.backgroundBlurAmount, 0), 50) / 3;
       return {
         backgroundColor: `rgba(0, 0, 0, ${dim / 100})`,
+        backdropFilter: `blur(${overlayBlur}px)`,
       };
     },
     sortedItems() {
@@ -2203,6 +2205,30 @@ export default {
 
       return nameMap[lastPart] || lastPart;
     },
+    isSafeBackgroundUrl(url) {
+      if (!url) return false;
+      const trimmed = url.trim();
+      if (trimmed.toLowerCase().startsWith("javascript:")) return false;
+
+      try {
+        const parsed = new URL(trimmed, window.location.origin);
+        const protocol = parsed.protocol.replace(":", "");
+        if (["http", "https", "data", "blob"].includes(protocol)) return true;
+      } catch (e) {
+        // Allow relative paths
+        if (
+          trimmed.startsWith("/") ||
+          trimmed.startsWith("./") ||
+          trimmed.startsWith("../")
+        ) {
+          return true;
+        }
+      }
+      return false;
+    },
+    sanitizeBackgroundUrl(url) {
+      return url.replace(/["'()]/g, "");
+    },
 
     safeBase64Decode(base64String) {
       try {
@@ -2414,10 +2440,9 @@ export default {
 }
 
 .home-background {
-  transform: scale(1.04);
+  transform: scale(1.02);
 }
 
 .home-background-overlay {
-  backdrop-filter: blur(2px);
 }
 </style>

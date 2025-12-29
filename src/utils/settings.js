@@ -156,7 +156,7 @@ const settingsDefinitions = {
   "display.backgroundBlur": {
     type: "number",
     default: 12,
-    validate: (value) => value >= 0 && value <= 30,
+    validate: (value) => value >= 0 && value <= 50,
     description: "背景模糊强度",
     icon: "mdi-blur",
   },
