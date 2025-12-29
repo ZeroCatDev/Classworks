@@ -305,8 +305,6 @@ export default {
     return {isMobile: mobile};
   },
   data() {
-    const provider = getSetting("server.provider");
-
     const settings = {
       server: {
         domain: getSetting("server.domain"),
