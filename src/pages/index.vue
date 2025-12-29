@@ -689,10 +689,12 @@ export default {
     backgroundImageStyle() {
       const url = this.backgroundImageUrl;
       if (!this.isSafeBackgroundUrl(url)) return { display: "none" };
+      const safeUrl = this.sanitizeBackgroundUrl(url);
+      if (!safeUrl) return { display: "none" };
 
       const blur = Math.min(Math.max(this.backgroundBlurAmount, 0), 50);
       return {
-        backgroundImage: `url("${this.sanitizeBackgroundUrl(url)}")`,
+        backgroundImage: `url("${encodeURI(safeUrl)}")`,
         filter: `blur(${blur}px)`,
       };
     },
@@ -700,7 +702,9 @@ export default {
       if (!this.hasBackgroundImage) return { display: "none" };
 
       const dim = Math.min(Math.max(this.backgroundDimAmount, 0), 90);
-      const overlayBlur = Math.min(Math.max(this.backgroundBlurAmount, 0), 50) / 3;
+      // Slightly reduce overlay blur to avoid overwhelming foreground
+      const overlayBlur =
+        Math.min(Math.max(this.backgroundBlurAmount, 0), 50) / 3;
       return {
         backgroundColor: `rgba(0, 0, 0, ${dim / 100})`,
         backdropFilter: `blur(${overlayBlur}px)`,
@@ -2232,7 +2236,8 @@ export default {
         const parsed = new URL(url, window.location.origin);
         return parsed.href;
       } catch (e) {
-        return url.replace(/["'()\\]/g, "");
+        // Fallback for relative paths when URL parsing fails
+        return url.replace(/[^a-zA-Z0-9-._~!$&'()*+,;=/:@%]/g, "");
       }
     },
 
