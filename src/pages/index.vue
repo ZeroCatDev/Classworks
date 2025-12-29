@@ -2213,7 +2213,7 @@ export default {
     isSafeBackgroundUrl(url) {
       if (!url) return false;
       const trimmed = url.trim();
-      if (trimmed.toLowerCase().startsWith("javascript:")) return false;
+      if (/^(javascript|data|vbscript):/i.test(trimmed)) return false;
 
       try {
         const parsed = new URL(trimmed, window.location.origin);
