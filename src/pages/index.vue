@@ -1,4 +1,16 @@
 <template>
+  <div
+    v-if="hasBackgroundImage"
+    class="home-background"
+    :style="backgroundImageStyle"
+    aria-hidden="true"
+  ></div>
+  <div
+    v-if="hasBackgroundImage"
+    class="home-background-overlay"
+    :style="backgroundOverlayStyle"
+    aria-hidden="true"
+  ></div>
   <v-app-bar class="no-select">
     <v-app-bar-title>
       {{ titleText }}
@@ -656,6 +668,41 @@ export default {
       } else {
         return `${deviceName} - ${currentDateStr}的作业`;
       }
+    },
+    hasBackgroundImage() {
+      return !!this.backgroundImageUrl;
+    },
+    backgroundImageUrl() {
+      void this.settingsTick;
+      return (getSetting("display.backgroundImage") || "").trim();
+    },
+    backgroundBlurAmount() {
+      void this.settingsTick;
+      const value = Number(getSetting("display.backgroundBlur"));
+      return Number.isFinite(value) ? value : 0;
+    },
+    backgroundDimAmount() {
+      void this.settingsTick;
+      const value = Number(getSetting("display.backgroundDim"));
+      return Number.isFinite(value) ? value : 0;
+    },
+    backgroundImageStyle() {
+      const url = this.backgroundImageUrl;
+      if (!url) return { display: "none" };
+
+      const blur = Math.min(Math.max(this.backgroundBlurAmount, 0), 50);
+      return {
+        backgroundImage: `url("${url}")`,
+        filter: `blur(${blur}px)`,
+      };
+    },
+    backgroundOverlayStyle() {
+      if (!this.hasBackgroundImage) return { display: "none" };
+
+      const dim = Math.min(Math.max(this.backgroundDimAmount, 0), 100);
+      return {
+        backgroundColor: `rgba(0, 0, 0, ${dim / 100})`,
+      };
     },
     sortedItems() {
       const items = [];
@@ -2353,3 +2400,24 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.home-background,
+.home-background-overlay {
+  position: fixed;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  transition: opacity 0.3s ease, filter 0.3s ease, background-color 0.3s ease;
+}
+
+.home-background {
+  transform: scale(1.04);
+}
+
+.home-background-overlay {
+  backdrop-filter: blur(2px);
+}
+</style>
