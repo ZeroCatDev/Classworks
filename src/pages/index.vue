@@ -699,7 +699,7 @@ export default {
     backgroundOverlayStyle() {
       if (!this.hasBackgroundImage) return { display: "none" };
 
-      const dim = Math.min(Math.max(this.backgroundDimAmount, 0), 100);
+      const dim = Math.min(Math.max(this.backgroundDimAmount, 0), 90);
       const overlayBlur = Math.min(Math.max(this.backgroundBlurAmount, 0), 50) / 3;
       return {
         backgroundColor: `rgba(0, 0, 0, ${dim / 100})`,
@@ -2227,7 +2227,13 @@ export default {
       return false;
     },
     sanitizeBackgroundUrl(url) {
-      return url.replace(/["'()]/g, "");
+      if (!this.isSafeBackgroundUrl(url)) return "";
+      try {
+        const parsed = new URL(url, window.location.origin);
+        return parsed.href;
+      } catch (e) {
+        return url.replace(/["'()\\]/g, "");
+      }
     },
 
     safeBase64Decode(base64String) {
@@ -2441,8 +2447,5 @@ export default {
 
 .home-background {
   transform: scale(1.02);
-}
-
-.home-background-overlay {
 }
 </style>
