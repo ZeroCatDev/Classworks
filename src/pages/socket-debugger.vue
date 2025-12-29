@@ -339,7 +339,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
-import { getSocket, getServerUrl, disconnect, on, off } from '@/utils/socketClient';
+import { getSocket, getServerUrl, disconnect } from '@/utils/socketClient';
 
 // 状态数据
 const serverUrl = ref(getServerUrl());
@@ -582,7 +582,7 @@ function cleanupSocketListeners() {
     if (socket.io?.engine) {
       socket.io.engine.off('upgrade', onUpgrade);
     }
-  } catch (e) {
+  } catch {
     // 忽略清理错误
   }
 
