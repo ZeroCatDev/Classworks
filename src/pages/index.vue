@@ -693,7 +693,7 @@ export default {
       if (!safeUrl) return { display: "none" };
 
       const blur = Math.min(Math.max(this.backgroundBlurAmount, 0), 50);
-      const escaped = this.cssEscape(encodeURI(safeUrl));
+      const escaped = this.cssEscape(safeUrl);
       return {
         backgroundImage: `url("${escaped}")`,
         filter: `blur(${blur}px)`,
@@ -2218,18 +2218,12 @@ export default {
       try {
         const parsed = new URL(trimmed, window.location.origin);
         const protocol = parsed.protocol.replace(":", "");
-        if (["http", "https", "blob"].includes(protocol)) return true;
+        if (!["http", "https", "blob"].includes(protocol)) return false;
+        if (parsed.pathname.includes("..")) return false;
+        return true;
       } catch (e) {
-        // Allow relative paths
-        if (
-          trimmed.startsWith("/") ||
-          trimmed.startsWith("./") ||
-          trimmed.startsWith("../")
-        ) {
-          return true;
-        }
+        return false;
       }
-      return false;
     },
     sanitizeBackgroundUrl(url) {
       if (!this.isSafeBackgroundUrl(url)) return "";
@@ -2237,15 +2231,17 @@ export default {
         const parsed = new URL(url, window.location.origin);
         return parsed.href;
       } catch (e) {
-        // Fallback for relative paths when URL parsing fails
-        return url.replace(/[^a-zA-Z0-9-._~/:@%+#?&=]/g, "");
+        return "";
       }
     },
     cssEscape(value) {
       if (typeof CSS !== "undefined" && CSS.escape) {
         return CSS.escape(value);
       }
-      return value.replace(/[^a-zA-Z0-9_\-]/g, (char) => `\\${char}`);
+      return value
+        .replace(/["'\\]/g, "\\$&")
+        .replace(/[\n\r\f]/g, "")
+        .replace(/[^a-zA-Z0-9_\-/:.@%?#=&]/g, (char) => `\\${char}`);
     },
 
     safeBase64Decode(base64String) {
