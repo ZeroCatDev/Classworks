@@ -2218,7 +2218,7 @@ export default {
       try {
         const parsed = new URL(trimmed, window.location.origin);
         const protocol = parsed.protocol.replace(":", "");
-        if (!["http", "https", "blob"].includes(protocol)) return false;
+        if (!["http", "https"].includes(protocol)) return false;
         if (parsed.pathname.includes("..")) return false;
         return true;
       } catch (e) {
@@ -2238,10 +2238,7 @@ export default {
       if (typeof CSS !== "undefined" && CSS.escape) {
         return CSS.escape(value);
       }
-      return value
-        .replace(/["'\\]/g, "\\$&")
-        .replace(/[\n\r\f]/g, "")
-        .replace(/[^a-zA-Z0-9_\-/:.@%?#=&]/g, (char) => `\\${char}`);
+      return encodeURI(value);
     },
 
     safeBase64Decode(base64String) {
@@ -2454,6 +2451,6 @@ export default {
 }
 
 .home-background {
-  transform: scale(1.02);
+  transform: scale(1.02); /* slight zoom to mask blur edges */
 }
 </style>
