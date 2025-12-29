@@ -1,6 +1,5 @@
 import js from '@eslint/js'
 import pluginVue from 'eslint-plugin-vue'
-import globals from 'globals'
 
 export default [
   {
@@ -19,9 +18,25 @@ export default [
   {
     languageOptions: {
       globals: {
-        ...globals.browser,
-        ...globals.node,
-        ...globals.serviceworker,
+        window: 'readonly',
+        document: 'readonly',
+        navigator: 'readonly',
+        location: 'readonly',
+        localStorage: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
+        CSS: 'readonly',
+        Notification: 'readonly',
+        requestAnimationFrame: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        console: 'readonly',
+        require: 'readonly',
+        self: 'readonly',
+        caches: 'readonly',
+        Blob: 'readonly',
       },
     },
     rules: {
