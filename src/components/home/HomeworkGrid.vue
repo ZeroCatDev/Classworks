@@ -153,7 +153,9 @@
         variant="tonal"
         @click="handleCardClick('dialog', subject.name)"
       >
-        <v-icon start size="small">mdi-plus</v-icon>
+        <v-icon start size="small">
+          {{ isReadOnlyToken ? 'mdi-cancel' : 'mdi-plus' }}
+        </v-icon>
         {{ subject.name }}
       </v-chip>
     </div>
@@ -165,7 +167,9 @@
           :key="subject.name"
           @click="handleCardClick('dialog', subject.name)"
         >
-          <v-icon start> mdi-plus</v-icon>
+          <v-icon start>
+            {{ isReadOnlyToken ? 'mdi-cancel' : 'mdi-plus' }}
+          </v-icon>
           {{ subject.name }}
         </v-btn>
       </v-btn-group>
@@ -183,8 +187,14 @@
             {{ subject.name }}
           </v-card-title>
           <v-card-text class="text-center">
-            <v-icon color="grey" size="small"> mdi-plus</v-icon>
-            <div class="text-caption text-grey">点击添加作业</div>
+            <template v-if="isReadOnlyToken">
+              <v-icon color="grey" size="small"> mdi-cancel </v-icon>
+              <div class="text-caption text-grey"> 当日无作业 </div>
+            </template>
+            <template v-else>
+              <v-icon color="grey" size="small"> mdi-plus </v-icon>
+              <div class="text-caption text-grey"> 点击添加作业 </div>
+            </template>
           </v-card-text>
         </v-card>
       </TransitionGroup>
@@ -233,10 +243,17 @@ export default {
     },
   },
   emits: ["open-dialog", "open-attendance", "disabled-click"],
-  mounted() {
+  data() {
+    return {
+      isReadOnlyToken: false,
+    }
+  },
+  async mounted() {
+    /* eslint-disable no-undef */
     this.resizeObserver = new ResizeObserver(() => {
       this.resizeAllGridItems();
     });
+    /* eslint-enable no-undef */
 
     // Observe the grid container for width changes
     if (this.$refs.gridContainer) {
@@ -256,6 +273,9 @@ export default {
         });
       }
     });
+
+    // 检查只读状态
+    await this.checkReadOnlyStatus();
   },
   updated() {
     // When items change, re-observe new items
@@ -276,6 +296,53 @@ export default {
     }
   },
   methods: {
+    async checkReadOnlyStatus() {
+      // 尝试获取父组件中的StudentNameManager引用
+      try {
+        // 在Vue 2中，通过$parent或$root访问父组件
+        let manager = null;
+
+        // 首先尝试直接访问父组件的引用
+        if (this.$parent && this.$parent.$refs && this.$parent.$refs.studentNameManager) {
+          manager = this.$parent.$refs.studentNameManager;
+        } else if (this.$root && this.$root.$refs && this.$root.$refs.studentNameManager) {
+          manager = this.$root.$refs.studentNameManager;
+        }
+
+        if (manager && typeof manager.isReadOnly !== 'undefined') {
+          this.isReadOnlyToken = manager.isReadOnly;
+        } else {
+          // 如果无法直接访问manager，尝试通过全局设置获取token信息
+          // 这里需要使用utils/settings中的函数
+          const { getSetting } = await import('@/utils/settings');
+          const token = getSetting('server.kvToken');
+
+          if (token) {
+            // 通过API获取token信息来判断是否只读
+            const { default: axios } = await import('@/axios/axios');
+            const serverUrl = getSetting('server.domain');
+
+            if (serverUrl) {
+              try {
+                const tokenResponse = await axios.get(`${serverUrl}/kv/_token`, {
+                  headers: {
+                    Authorization: `Bearer ${token}`
+                  }
+                });
+
+                if (tokenResponse.data && typeof tokenResponse.data.isReadOnly !== 'undefined') {
+                  this.isReadOnlyToken = tokenResponse.data.isReadOnly;
+                }
+              } catch (err) {
+                console.error('获取Token信息失败:', err);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('检查只读状态失败:', error);
+      }
+    },
     resizeGridItem(item) {
       const grid = this.$refs.gridContainer;
       if (!grid) return;
