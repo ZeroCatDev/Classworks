@@ -47,7 +47,7 @@
                 {{ item.data.total - item.data.exclude.length }}/{{
                   item.data.total -
                   item.data.absent.length -
-                  item.data.late.length -
+                    (!getSetting("display.lateStudentsArePresent")) * item.data.late.length -
                   item.data.exclude.length
                 }}
               </span>
@@ -205,9 +205,15 @@
 <script>
 import HitokotoCard from "@/components/HitokotoCard.vue";
 import ConciseExamCard from "@/components/home/ConciseExamCard.vue";
+import {getSetting} from "@/utils/settings.js";
 
 export default {
   name: "HomeworkGrid",
+  computed: {
+    settings() {
+      return settings
+    }
+  },
   components: {
     HitokotoCard,
     ConciseExamCard,
@@ -296,6 +302,7 @@ export default {
     }
   },
   methods: {
+    getSetting,
     async checkReadOnlyStatus() {
       // 尝试获取父组件中的StudentNameManager引用
       try {

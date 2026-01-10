@@ -28,7 +28,7 @@
         {{
           studentList.length -
           attendance.absent.length -
-          attendance.late.length -
+          (!getSetting("display.lateStudentsArePresent")) * attendance.late.length -
           attendance.exclude.length
         }}人
       </span>
@@ -83,6 +83,7 @@
 
 <script>
 import { useDisplay } from "vuetify";
+import {getSetting} from "@/utils/settings.js";
 
 export default {
   name: "AttendanceSidebar",
@@ -106,6 +107,7 @@ export default {
     return { display };
   },
   methods: {
+    getSetting,
     handleClick() {
       if (this.isEditingDisabled) {
         this.$emit('disabled-click');

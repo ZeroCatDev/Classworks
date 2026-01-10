@@ -31,6 +31,9 @@
       <v-divider class="my-2"/>
       <setting-item :setting-key="'display.forceDesktopMode'"/>
 
+      <v-divider class="my-2"/>
+      <setting-item :setting-key="'display.lateStudentsArePresent'"/>
+
     </v-list>
   </settings-card>
 </template>
