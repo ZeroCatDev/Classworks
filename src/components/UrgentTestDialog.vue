@@ -28,11 +28,36 @@
           <v-row>
             <v-col cols="12">
               <v-card>
-
-
                 <v-card-text>
                   <v-form>
                     <v-row>
+                      <v-col cols="12">
+                        <v-combobox
+                          v-model="notificationForm.senderName"
+                          :items="teacherList"
+                          :loading="loadingTeachers"
+                          label="发送者姓名"
+                          placeholder="选择或输入您的姓名"
+                          prepend-inner-icon="mdi-account-tie"
+                          variant="outlined"
+                          hide-details="auto"
+                          class="mb-4"
+                          item-title="name"
+                          item-value="name"
+                          :return-object="false"
+                          auto-select-first
+                          clearable
+                        >
+                          <template v-slot:no-data>
+                            <v-list-item>
+                              <v-list-item-title>
+                                输入姓名后发送，将自动保存到列表
+                              </v-list-item-title>
+                            </v-list-item>
+                          </template>
+                        </v-combobox>
+                      </v-col>
+
                       <v-col
                         cols="12"
                         md="6"
@@ -81,14 +106,11 @@
                   </v-btn>
 
                   <v-spacer />
-
-
                 </v-card-actions>
               </v-card>
             </v-col>
           </v-row>
 
-          <!-- 常驻通知管理 -->
           <v-row class="mt-4">
             <v-col cols="12">
               <v-card>
@@ -124,7 +146,6 @@
             </v-col>
           </v-row>
 
-          <!-- 消息发送历史 -->
           <v-row class="mt-4">
             <v-col cols="12">
               <v-card>
@@ -158,7 +179,6 @@
                       md="6"
                       lg="4"
                     >
-                      <!-- 主消息卡片 -->
                       <v-card
                         :color="getMainCardColor(message.receipts)"
                         class="mb-2"
@@ -182,16 +202,13 @@
                           </div>
 
                           <div class="text-caption">
+                            <div>发送者：{{ message.senderName }}</div>
                             <div>发送时间：{{ formatTime(message.timestamp) }}</div>
-                            <div>事件ID：{{ message.id }}</div>
-                            <div>通知ID：{{ message.notificationId }}</div>
                           </div>
                         </v-card-text>
                       </v-card>
 
-                      <!-- 设备回执小卡片 -->
                       <div v-if="hasAnyReceipts(message.receipts)">
-                        <!-- 已读设备 -->
                         <v-card
                           v-for="device in message.receipts.read"
                           :key="`${device.senderId}-read`"
@@ -203,7 +220,7 @@
                             <div class="align-center">
 
                               <span class="text-body-2 font-weight-medium">{{ device.deviceName }}  </span>
-      <br/>
+                              <br/>
 
                               {{ device.deviceType }}
 
@@ -215,7 +232,6 @@
                           </v-card-text>
                         </v-card>
 
-                        <!-- 已显示设备（排除已读的设备） -->
                         <v-card
                           v-for="device in getDisplayedOnlyDevices(message.receipts)"
                           :key="`${device.senderId}-displayed`"
@@ -242,16 +258,16 @@
                       </div>
                       <div v-else> <v-card
 
-                          color="info-lighten-4"
-                          variant="outlined"
-                          class="mb-1"
-                          size="small"
-                          title="无设备在线"
-                        >
-                          <v-card-text>
-如果数秒后任然显示这个提示，则可能没有任何设备在线接收通知。
-                          </v-card-text>
-                        </v-card></div>
+                        color="info-lighten-4"
+                        variant="outlined"
+                        class="mb-1"
+                        size="small"
+                        title="无设备在线"
+                      >
+                        <v-card-text>
+                          如果数秒后任然显示这个提示，则可能没有任何设备在线接收通知。
+                        </v-card-text>
+                      </v-card></div>
                     </v-col>
                   </v-row>
                 </v-card-text>
@@ -265,7 +281,6 @@
     <ChatWidget />
     <EventSender ref="eventSender" />
 
-    <!-- 编辑常驻通知对话框 -->
     <v-dialog v-model="editDialog" max-width="500" :fullscreen="$vuetify.display.xs">
       <v-card>
         <v-toolbar flat density="compact">
@@ -303,7 +318,6 @@
       </v-card>
     </v-dialog>
 
-    <!-- 删除确认对话框 -->
     <v-dialog v-model="deleteConfirmDialog" max-width="400">
       <v-card>
         <v-card-title class="text-h5">确认删除</v-card-title>
@@ -343,7 +357,8 @@ export default {
       notificationForm: {
         isUrgent: false,
         message: '',
-        isPersistent: false
+        isPersistent: false,
+        senderName: '' // 发送者姓名
       },
       sentMessages: [],
       receiptCleanup: [],
@@ -358,6 +373,10 @@ export default {
       savingEdit: false,
       deleteConfirmDialog: false,
       itemToDelete: null,
+
+      // 教师名单相关
+      teacherList: [],
+      loadingTeachers: false
     }
   },
   computed: {
@@ -373,6 +392,13 @@ export default {
   mounted() {
     this.setupEventListeners()
     this.loadPersistentNotifications()
+    this.loadTeacherList() // 加载教师列表
+
+    // 从本地存储加载上次使用的名字作为默认值
+    const savedName = localStorage.getItem('classworks_sender_name')
+    if (savedName) {
+      this.notificationForm.senderName = savedName
+    }
   },
   beforeUnmount() {
     this.cleanup()
@@ -388,22 +414,76 @@ export default {
       return result
     },
 
+    // 加载教师名单
+    async loadTeacherList() {
+      this.loadingTeachers = true
+      try {
+        const data = await dataProvider.loadData('classworks-teacher-list')
+        if (Array.isArray(data)) {
+          // 过滤掉非字符串或空字符串，并去重
+          this.teacherList = [...new Set(data.filter(item => typeof item === 'string' && item.trim()))]
+        }
+      } catch (e) {
+        console.warn('加载教师名单失败或名单为空', e)
+      } finally {
+        this.loadingTeachers = false
+      }
+    },
+
+    // 更新教师名单（如果输入了新名字）
+    async updateTeacherList(newName) {
+      if (!newName || typeof newName !== 'string') return
+      const name = newName.trim()
+      if (!name) return
+
+      // 如果名字已存在，无需更新
+      if (this.teacherList.includes(name)) return
+
+      // 添加到本地列表
+      this.teacherList.push(name)
+      this.teacherList.sort((a, b) => a.localeCompare(b, 'zh-Hans-CN')) // 简单的拼音排序
+
+      // 异步保存到云端
+      try {
+        await dataProvider.saveData('classworks-teacher-list', this.teacherList)
+        console.log('教师名单已更新:', name)
+      } catch (e) {
+        console.error('保存教师名单失败:', e)
+      }
+    },
+
     async sendNotification() {
       if (!this.notificationForm.message.trim()) return
 
       this.sending = true
       try {
+        // 准备发送者信息
+        const senderName = this.notificationForm.senderName?.trim() || '教师终端'
+
+        // 1. 保存到本地存储，方便下次自动填充
+        localStorage.setItem('classworks_sender_name', senderName)
+
+        // 2. 尝试更新云端教师名单
+        await this.updateTeacherList(senderName)
+
         // 生成32位随机通知ID
         const notificationId = this.generateNotificationId()
         const messageContent = this.notificationForm.message
         const isUrgent = this.notificationForm.isUrgent
         const isPersistent = this.notificationForm.isPersistent
 
+        // 构建发送者信息对象
+        const senderInfo = {
+          deviceName: senderName,
+          deviceType: 'teacher',
+          isReadOnly: false
+        }
+
         const result = await this.$refs.eventSender.sendNotification(
           messageContent,
           isUrgent,
           [],
-          { deviceName: '测试设备', deviceType: 'system', isReadOnly: false },
+          senderInfo, // 传递发送者信息
           notificationId
         )
 
@@ -413,6 +493,7 @@ export default {
           id: eventId,
           notificationId: notificationId,
           message: messageContent,
+          senderName: senderName, // 记录发送者名字用于显示
           isUrgent: isUrgent,
           timestamp: new Date().toISOString(),
           receipts: {
@@ -430,14 +511,14 @@ export default {
             if (existingData && Array.isArray(existingData)) {
               list = existingData
             } else if (existingData && existingData.success !== false && Array.isArray(existingData.data)) {
-            // list = existingData.data
-               list = existingData.data
+              list = existingData.data
             }
 
             const newNotification = {
               id: notificationId,
               message: messageContent,
               isUrgent: isUrgent,
+              senderName: senderName, // 保存发送者
               timestamp: new Date().toISOString()
             }
 
@@ -452,9 +533,15 @@ export default {
         }
 
         console.log('通知已发送，事件ID:', eventId, '通知ID:', notificationId)
+
+        // 重置表单，但保留名字
+        const currentName = this.notificationForm.senderName
         this.resetForm()
+        this.notificationForm.senderName = currentName
+
       } catch (error) {
         console.error('发送通知失败:', error)
+        this.$message?.error('发送失败: ' + error.message)
       } finally {
         this.sending = false
       }
@@ -464,7 +551,8 @@ export default {
       this.notificationForm = {
         isUrgent: false,
         message: '',
-        isPersistent: false
+        isPersistent: false,
+        senderName: ''
       }
     },
 
@@ -594,15 +682,17 @@ export default {
 
           // 如果需要重新发送
           if (this.editForm.resend) {
-             const notificationId = this.editForm.id
-             const messageContent = this.editForm.message
-             const isUrgent = this.editForm.isUrgent
+            const notificationId = this.editForm.id
+            const messageContent = this.editForm.message
+            const isUrgent = this.editForm.isUrgent
+            // 使用当前表单的发送者名字或默认名字
+            const senderName = this.notificationForm.senderName || '教师终端'
 
-             const result = await this.$refs.eventSender.sendNotification(
+            const result = await this.$refs.eventSender.sendNotification(
               messageContent,
               isUrgent,
               [],
-              { deviceName: '测试设备', deviceType: 'system', isReadOnly: false },
+              { deviceName: senderName, deviceType: 'teacher', isReadOnly: false },
               notificationId
             )
 
@@ -613,6 +703,7 @@ export default {
               id: eventId,
               notificationId: notificationId,
               message: messageContent,
+              senderName: senderName,
               isUrgent: isUrgent,
               timestamp: new Date().toISOString(),
               receipts: {
@@ -658,8 +749,6 @@ export default {
 
         // 从常驻通知列表中删除
         this.persistentNotifications = this.persistentNotifications.filter(notif => notif.id !== notificationId)
-
-        // TODO: 调用接口删除通知（如果有的话）
 
         console.log('通知已删除，通知ID:', notificationId)
       } catch (error) {
