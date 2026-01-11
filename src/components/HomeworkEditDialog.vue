@@ -277,7 +277,7 @@ export default {
   emits: ["update:modelValue", "save"],
   setup() {
     const { mobile } = useDisplay();
-    return { isMobile: mobile };
+    return { mobile };
   },
   data() {
     return {
@@ -290,6 +290,14 @@ export default {
     };
   },
   computed: {
+    isMobile() {
+      // 如果启用了强制一体机UI模式，返回false（使用桌面UI）
+      const forceDesktopMode = getSetting('display.forceDesktopMode');
+      if (forceDesktopMode) {
+        return false;
+      }
+      return this.mobile;
+    },
     dialogVisible: {
       get() {
         return this.modelValue;

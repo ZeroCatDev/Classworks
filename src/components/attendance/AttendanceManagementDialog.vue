@@ -244,6 +244,7 @@
 <script>
 import { pinyin } from "pinyin-pro";
 import { useDisplay } from "vuetify";
+import { getSetting } from "@/utils/settings";
 
 export default {
   name: "AttendanceManagementDialog",
@@ -268,7 +269,7 @@ export default {
   emits: ["update:modelValue", "save", "change"],
   setup() {
     const { mobile } = useDisplay();
-    return { isMobile: mobile };
+    return { mobile };
   },
   data() {
     return {
@@ -277,6 +278,14 @@ export default {
     };
   },
   computed: {
+    isMobile() {
+      // 如果启用了强制一体机UI模式，返回false（使用桌面UI）
+      const forceDesktopMode = getSetting('display.forceDesktopMode');
+      if (forceDesktopMode) {
+        return false;
+      }
+      return this.mobile;
+    },
     filteredStudents() {
       let students = [...this.studentList];
 
