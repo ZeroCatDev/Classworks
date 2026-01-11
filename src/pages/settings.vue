@@ -144,6 +144,7 @@
 
         <v-tabs-window-item value="student">
           <student-list-card :is-mobile="isMobile" border/>
+          <teacher-list-card :is-mobile="isMobile" border class="mt-4"/>
         </v-tabs-window-item>
         <v-tabs-window-item value="share">
           <settings-link-generator border class="mt-4"/>
@@ -272,6 +273,7 @@ import {
 import MessageLog from "@/components/MessageLog.vue";
 import SettingsCard from "@/components/SettingsCard.vue";
 import StudentListCard from "@/components/settings/StudentListCard.vue";
+import TeacherListCard from "@/components/settings/TeacherListCard.vue";
 import AboutCard from "@/components/settings/AboutCard.vue";
 import "../styles/settings.scss";
 import SettingsExplorer from "@/components/settings/SettingsExplorer.vue";
@@ -293,6 +295,7 @@ export default {
     MessageLog,
     SettingsCard,
     StudentListCard,
+    TeacherListCard,
     AboutCard,
     DataProviderSettingsCard,
     ThemeSettingsCard,
@@ -397,7 +400,7 @@ export default {
           value: "subject",
         },
         {
-          title: "学生列表",
+          title: "花名册",
           icon: "mdi-account-group",
           value: "student",
         },

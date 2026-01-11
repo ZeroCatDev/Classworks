@@ -9,7 +9,7 @@
     <v-card>
       <v-card-title class="d-flex align-center">
         <v-icon class="mr-2" icon="mdi-account-group" />
-        出勤状态管理
+        考勤
         <v-spacer />
         <v-chip v-if="!isMobile" class="ml-2" color="primary" size="small">
           {{ dateString }}
