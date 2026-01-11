@@ -393,7 +393,7 @@ const settingsDefinitions = {
   // 主题设置
   "theme.mode": {
     type: "string",
-    default: "dark",
+    default: "light",
     validate: (value) => ["light", "dark"].includes(value),
     description: "主题模式",
     icon: "mdi-theme-light-dark",
