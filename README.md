@@ -25,7 +25,7 @@ QQ：[964979747](https://qm.qq.com/q/4RX45b1Oac)
 
 ```bash
 # 克隆项目
-git clone https://github.com:ZeroCatDev/Classworks.git
+git clone https://github.com/ZeroCatDev/Classworks.git
 cd Classworks
 
 # 安装依赖
