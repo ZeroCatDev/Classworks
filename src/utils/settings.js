@@ -400,6 +400,22 @@ const settingsDefinitions = {
     // 设置应用的主题模式，可选亮色或暗色主题
   },
 
+  // 通知铃声设置
+  "notification.singleSound": {
+    type: "string",
+    default: "Teams 默认.mp3",
+    description: "单次通知铃声",
+    icon: "mdi-bell-ring",
+    // 设置单次通知时播放的音频文件
+  },
+  "notification.urgentSound": {
+    type: "string",
+    default: "Teams 默认通话铃.mp3",
+    description: "持续通知铃声",
+    icon: "mdi-bell-alert",
+    // 设置紧急通知时循环播放的音频文件
+  },
+
   // 随机点名设置
   "randomPicker.enabled": {
     type: "boolean",

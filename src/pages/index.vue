@@ -944,12 +944,14 @@ export default {
         this.updateSettings();
       });
 
-      // 连接学生姓名管理组件
+      // 连接学生姓名管理组件（支持学生和教师）
       this.$nextTick(() => {
         const studentNameManager = this.$refs.studentNameManager;
         if (studentNameManager) {
-          this.studentNameInfo.name = studentNameManager.currentStudentName;
+          // 优先使用学生名称，如果不是学生则使用教师名称
+          this.studentNameInfo.name = studentNameManager.currentStudentName || studentNameManager.currentTeacherName || '';
           this.studentNameInfo.isStudent = studentNameManager.isStudentToken;
+          this.studentNameInfo.isTeacher = studentNameManager.isTeacherToken;
           this.studentNameInfo.openDialog = () =>
             studentNameManager.openDialog();
 
@@ -958,12 +960,31 @@ export default {
             () => studentNameManager.currentStudentName,
             (newName) => {
               this.studentNameInfo.name = newName;
+              this.updateTokenDisplayInfo();
+            }
+          );
+          // 监听教师姓名变化
+          this.$watch(
+            () => studentNameManager.currentTeacherName,
+            (newName) => {
+              if (studentNameManager.isTeacherToken) {
+                this.studentNameInfo.name = newName;
+                this.updateTokenDisplayInfo();
+              }
             }
           );
           this.$watch(
             () => studentNameManager.isStudentToken,
             (isStudent) => {
               this.studentNameInfo.isStudent = isStudent;
+              this.updateTokenDisplayInfo();
+            }
+          );
+          this.$watch(
+            () => studentNameManager.isTeacherToken,
+            (isTeacher) => {
+              this.studentNameInfo.isTeacher = isTeacher;
+              this.updateTokenDisplayInfo();
             }
           );
         }
@@ -1116,32 +1137,35 @@ export default {
       const displayName = manager.displayName;
       const isReadOnly = manager.isReadOnly;
       const isStudent = manager.isStudentToken;
+      const isTeacher = manager.isTeacherToken;
 
       // 设置只读状态（对所有类型的 token 都显示）
       this.tokenDisplayInfo.readonly = isReadOnly;
 
-      // 只有学生类型的 token 才显示名称 chip
-      if (!isStudent) {
+      // 学生和教师都显示名称 chip
+      if (!isStudent && !isTeacher) {
         this.tokenDisplayInfo.show = false;
         return;
       }
 
-      // 设置学生名称显示（始终蓝色）
+      // 设置名称显示（始终蓝色）
       this.tokenDisplayInfo.text = displayName;
       this.tokenDisplayInfo.color = "primary";
-      this.tokenDisplayInfo.icon = "mdi-account";
+      // 学生用人头图标，教师用学校图标
+      this.tokenDisplayInfo.icon = isTeacher ? "mdi-school" : "mdi-account";
       this.tokenDisplayInfo.disabled = isReadOnly; // 只读时不可点击
       this.tokenDisplayInfo.show = true;
     },
 
-    // 处理 Token Chip 点击
+    // 处理 Token Chip 点击（学生和教师都支持）
     handleTokenChipClick() {
       console.log("Token chip clicked");
       const manager = this.$refs.studentNameManager;
       console.log("Manager:", manager);
       console.log("Is student token:", manager?.isStudentToken);
+      console.log("Is teacher token:", manager?.isTeacherToken);
 
-      if (manager && manager.isStudentToken) {
+      if (manager && (manager.isStudentToken || manager.isTeacherToken)) {
         console.log("Opening dialog...");
         manager.openDialog();
       } else {

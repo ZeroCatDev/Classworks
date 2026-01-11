@@ -181,6 +181,10 @@
           />
         </v-tabs-window-item>
 
+        <v-tabs-window-item value="notification">
+          <notification-sound-settings border />
+        </v-tabs-window-item>
+
         <v-tabs-window-item value="hitokoto">
           <hitokoto-settings border />
         </v-tabs-window-item>
@@ -277,6 +281,7 @@ import HomeworkTemplateCard from "@/components/settings/cards/HomeworkTemplateCa
 import SubjectManagementCard from "@/components/settings/cards/SubjectManagementCard.vue";
 import KvDatabaseCard from "@/components/settings/cards/KvDatabaseCard.vue";
 import HitokotoSettings from "@/components/HitokotoSettings.vue";
+import NotificationSoundSettings from "@/components/settings/NotificationSoundSettings.vue";
 
 export default {
   name: "Settings",
@@ -299,6 +304,7 @@ export default {
     SubjectManagementCard,
     KvDatabaseCard,
     HitokotoSettings,
+    NotificationSoundSettings,
   },
   setup() {
     const {mobile} = useDisplay();
@@ -419,6 +425,11 @@ export default {
           title: "主题",
           icon: "mdi-theme-light-dark",
           value: "theme",
+        },
+        {
+          title: "通知铃声",
+          icon: "mdi-bell-ring",
+          value: "notification",
         },
         {
           title: "一言",

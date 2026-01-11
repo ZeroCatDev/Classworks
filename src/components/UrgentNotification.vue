@@ -15,40 +15,11 @@
         <div class="urgent-title mb-6">
           {{ currentNotification?.content?.message || "无内容" }}
         </div>
+ <div class="urgent-subtitle mb-6">
+          {{ senderName }} {{ deviceType }} {{ formatTime(currentNotification?.timestamp) }}
+        </div>
 
-        <!-- 发送者信息（使用 Vuetify Card） -->
-        <v-card variant="flat" color="white">
-          <v-card-title>发送者信息</v-card-title>
-          <v-card-text>
-            <v-chip
-              class="mr-2 mb-2"
-              color="primary"
-              variant="outlined"
-              size="small"
-            >
-              <v-icon left size="16"> mdi-account </v-icon>
-              {{ senderName }}
-            </v-chip>
-            <v-chip
-              class="mr-2 mb-2"
-              color="info"
-              variant="outlined"
-              size="small"
-            >
-              <v-icon left size="16"> mdi-devices </v-icon>
-              {{ deviceType }}
-            </v-chip>
-            <v-chip
-              class="mb-2"
-              color="success"
-              variant="outlined"
-              size="small"
-            >
-              <v-icon left size="16"> mdi-clock </v-icon>
-              {{ formatTime(currentNotification?.timestamp) }}
-            </v-chip>
-          </v-card-text>
-        </v-card>
+
 
         <!-- 多通知导航 -->
         <div v-if="hasMultipleNotifications" class="navigation-controls mt-6">
@@ -103,6 +74,8 @@
 
 <script>
 import EventSender from "@/components/EventSender.vue";
+import { getSetting } from "@/utils/settings.js";
+import { playSound, stopSound } from "@/utils/soundList.js";
 
 export default {
   name: "UrgentNotification",
@@ -116,6 +89,7 @@ export default {
       currentIndex: 0, // 当前显示的通知索引
       autoCloseTimer: null,
       urgentSoundTimer: null,
+      currentAudio: null, // 当前播放的音频对象
     };
   },
   computed: {
@@ -165,6 +139,9 @@ export default {
       const senderInfo =
         this.currentNotification?.senderInfo ||
         this.currentNotification?.content?.senderInfo;
+      if(senderInfo?.deviceType=='teacher') return "教师";
+      if(senderInfo?.deviceType=='student') return "学生";
+      if(senderInfo?.deviceType=='classroom') return "教室";
       return senderInfo?.deviceType || "未知类型";
     },
     targetDevices() {
@@ -178,6 +155,8 @@ export default {
     if (this.urgentSoundTimer) {
       clearInterval(this.urgentSoundTimer);
     }
+    // 停止音频播放
+    this.stopNotificationSound();
   },
   methods: {
     show(notificationData) {
@@ -202,6 +181,9 @@ export default {
         this.sendDisplayedReceipt();
         this.playNotificationSound();
 
+        // 发送浏览器通知
+        this.sendBrowserNotification(notificationData);
+
         // 如果是加急通知，启动定时音效
         if (this.isUrgent) {
           this.startUrgentSound();
@@ -212,7 +194,11 @@ export default {
           this.currentIndex = this.notificationQueue.length - 1;
           this.sendDisplayedReceipt();
           this.playNotificationSound();
+          this.sendBrowserNotification(notificationData);
           this.startUrgentSound();
+        } else {
+          // 即使不立即显示，也发送浏览器通知
+          this.sendBrowserNotification(notificationData);
         }
       }
     },
@@ -313,7 +299,29 @@ export default {
     },
     playNotificationSound() {
       try {
-        // 统一的通知音效
+        // 停止之前的音频
+        this.stopNotificationSound();
+
+        // 根据通知类型选择铃声
+        const soundFile = this.isUrgent
+          ? getSetting('notification.urgentSound')
+          : getSetting('notification.singleSound');
+
+        // 使用配置的铃声文件
+        this.currentAudio = playSound(soundFile, false);
+
+        if (!this.currentAudio) {
+          // 如果播放失败，使用备用蜂鸣音
+          this.playFallbackSound();
+        }
+      } catch (error) {
+        console.warn("无法播放通知音效:", error);
+        this.playFallbackSound();
+      }
+    },
+    // 备用蜂鸣音（原有的实现）
+    playFallbackSound() {
+      try {
         const audioContext = new (window.AudioContext ||
           window.webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
@@ -330,7 +338,14 @@ export default {
         oscillator.start();
         oscillator.stop(audioContext.currentTime + 0.3); // 300ms
       } catch (error) {
-        console.warn("无法播放通知音效:", error);
+        console.warn("无法播放备用音效:", error);
+      }
+    },
+    // 停止通知音效
+    stopNotificationSound() {
+      if (this.currentAudio) {
+        stopSound(this.currentAudio);
+        this.currentAudio = null;
       }
     },
     // 发送显示回执
@@ -393,20 +408,88 @@ export default {
     startUrgentSound() {
       this.stopUrgentSound(); // 先清除之前的定时器
 
-      // 每秒播放一次提示音
-      this.urgentSoundTimer = setInterval(() => {
-        if (this.visible && this.isUrgent) {
-          this.playNotificationSound();
-        } else {
-          this.stopUrgentSound();
-        }
-      }, 1000);
+      // 停止之前的音频
+      this.stopNotificationSound();
+
+      // 播放循环铃声
+      const soundFile = getSetting('notification.urgentSound');
+      this.currentAudio = playSound(soundFile, true); // 循环播放
+
+      if (!this.currentAudio) {
+        // 如果播放失败，使用备用方案：每秒播放一次提示音
+        this.urgentSoundTimer = setInterval(() => {
+          if (this.visible && this.isUrgent) {
+            this.playFallbackSound();
+          } else {
+            this.stopUrgentSound();
+          }
+        }, 1000);
+      }
     },
     // 停止加急音效
     stopUrgentSound() {
       if (this.urgentSoundTimer) {
         clearInterval(this.urgentSoundTimer);
         this.urgentSoundTimer = null;
+      }
+      this.stopNotificationSound();
+    },
+    // 发送浏览器通知
+    async sendBrowserNotification(notificationData) {
+      // 检查浏览器是否支持通知API
+      if (!('Notification' in window)) {
+        console.warn('浏览器不支持通知API');
+        return;
+      }
+
+      // 请求通知权限
+      try {
+        let permission = Notification.permission;
+
+        if (permission === 'default') {
+          permission = await Notification.requestPermission();
+        }
+
+        if (permission !== 'granted') {
+          console.warn('用户未授予通知权限');
+          return;
+        }
+
+        // 构建通知内容
+        const message = notificationData.content?.message || '新通知';
+        const senderInfo = notificationData.senderInfo || notificationData.content?.senderInfo;
+        const senderName = senderInfo?.deviceName || senderInfo?.deviceType || '未知发送者';
+        const isUrgent = notificationData.content?.isUrgent || false;
+
+        // 创建浏览器通知
+        const notification = new Notification(
+          isUrgent ? '🚨 紧急通知' : '📢 通知消息',
+          {
+            body: `${message}\n\n来自: ${senderName}`,
+            icon: '/pwa/image/icon-192.png', // 使用应用图标
+            badge: '/pwa/image/icon-192.png',
+            tag: notificationData.content?.notificationId || `notification-${Date.now()}`,
+            requireInteraction: isUrgent, // 紧急通知需要用户交互
+            silent: false, // 使用系统默认声音
+            vibrate: isUrgent ? [200, 100, 200, 100, 200] : [200], // 震动模式
+            timestamp: notificationData.timestamp || Date.now(),
+          }
+        );
+
+        // 点击通知时聚焦到窗口
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
+        };
+
+        // 自动关闭非紧急通知
+        if (!isUrgent) {
+          setTimeout(() => {
+            notification.close();
+          }, 10000); // 10秒后自动关闭
+        }
+      } catch (error) {
+        console.error('发送浏览器通知失败:', error);
       }
     },
   },
@@ -448,6 +531,12 @@ export default {
   line-height: 1.2;
 }
 
+.urgent-subtitle {
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  line-height: 1.2;
+}
 .notification-content {
   font-size: 1.4rem;
   color: rgba(255, 255, 255, 0.95);
