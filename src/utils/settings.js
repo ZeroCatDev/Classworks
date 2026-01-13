@@ -179,6 +179,13 @@ const settingsDefinitions = {
     icon: "mdi-monitor",
     // 启用后将不判断屏幕大小，强制使用一体机（桌面端）UI布局
   },
+  "display.lateStudentsArePresent": {
+    type: "boolean",
+    default: false,
+    description: "将迟到人数算入出勤人数",
+    icon: "mdi-clock-fast",
+    // 启用后，迟到的人数也会计入出勤人数
+  },
   // 服务器设置（合并了数据提供者设置）
   "server.domain": {
     type: "string",
