@@ -52,9 +52,9 @@ export const defaultUrgentSound = 'Teams 默认通话铃.mp3';
 // 获取音频文件的完整路径
 export function getSoundPath(filename) {
   if (!filename) return null;
-  // 使用动态路径，避免Vite在构建时加载所有音频文件
-  // 这样只有在真正需要播放时才会加载对应的音频文件
-  return `/src/assets/sounds/${filename}`;
+  // 使用public目录路径，Vite会在构建时将public目录的文件复制到dist根目录
+  // 这样开发和生产环境都能正确加载音频文件
+  return `/sounds/${filename}`;
 }
 
 // 播放音频文件

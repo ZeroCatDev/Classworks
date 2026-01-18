@@ -242,9 +242,9 @@ export default {
     getSoundPath(filename) {
       if (!filename) return null;
       try {
-        // 使用相对于public目录的路径，这样Vite不会在构建时打包所有音频
-        // 而是按需加载
-        return `/src/assets/sounds/${filename}`;
+        // 使用public目录路径，Vite会在构建时将public目录的文件复制到dist根目录
+        // 这样开发和生产环境都能正确加载音频文件
+        return `/sounds/${filename}`;
       } catch {
         return null;
       }
