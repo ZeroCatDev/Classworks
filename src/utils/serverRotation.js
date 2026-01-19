@@ -11,9 +11,6 @@ const CLASSWORKS_CLOUD_SERVERS = [
   "https://kv-service.wuyuan.dev",
 ];
 
-// Track the current primary server (the one that's currently working)
-let primaryServerUrl = null;
-
 /**
  * Get the list of servers to try for the given provider
  * @param {string} provider - The provider type
@@ -62,11 +59,6 @@ export async function tryWithRotation(operation, options = {}) {
         onServerTried({ url: serverUrl, status: "success", tried: [...triedServers] });
       }
       
-      // Update primary server on success (for classworkscloud provider)
-      if (provider === "classworkscloud") {
-        primaryServerUrl = serverUrl;
-      }
-      
       return result;
     } catch (error) {
       lastError = error;
@@ -90,8 +82,7 @@ export async function tryWithRotation(operation, options = {}) {
 
 /**
  * Get the effective server URL for the current provider
- * For classworkscloud, returns the primary server (last successful in current session) or first server in the list
- * Note: Primary server tracking resets on page reload
+ * For classworkscloud, returns the first server in the list
  * For other providers, returns the configured domain
  * @returns {string} Server URL
  */
@@ -99,8 +90,7 @@ export function getEffectiveServerUrl() {
   const provider = getSetting("server.provider");
   
   if (provider === "classworkscloud") {
-    // Return primary server if available, otherwise first in list
-    return primaryServerUrl || CLASSWORKS_CLOUD_SERVERS[0];
+    return CLASSWORKS_CLOUD_SERVERS[0];
   }
   
   return getSetting("server.domain") || "";
@@ -113,34 +103,4 @@ export function getEffectiveServerUrl() {
 export function isRotationEnabled() {
   const provider = getSetting("server.provider");
   return provider === "classworkscloud";
-}
-
-/**
- * Try operation with primary server first, fallback to rotation on any error
- * Uses the last successful server first for efficiency
- * @param {Function} operation - Async function that takes a serverUrl and returns a promise
- * @param {Object} options - Options
- * @param {string} options.provider - Provider type (optional, defaults to current setting)
- * @returns {Promise} Result from the operation
- */
-export async function tryWithPrimaryServer(operation, options = {}) {
-  const provider = options.provider || getSetting("server.provider");
-  
-  // For non-classworkscloud providers, just use the configured domain
-  if (provider !== "classworkscloud") {
-    const serverUrl = getSetting("server.domain");
-    return await operation(serverUrl);
-  }
-  
-  // For classworkscloud, try primary server first
-  const primaryUrl = getEffectiveServerUrl();
-  
-  try {
-    return await operation(primaryUrl);
-  } catch (error) {
-    // On any error, try rotation with all servers
-    console.warn(`Primary server ${primaryUrl} failed, trying rotation...`);
-    // Use full rotation, which will update the primary server if a different one succeeds
-    return await tryWithRotation(operation, options);
-  }
 }

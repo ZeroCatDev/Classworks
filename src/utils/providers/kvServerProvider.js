@@ -1,7 +1,7 @@
 import axios from "@/axios/axios";
 import {formatResponse, formatError} from "../dataProvider";
 import {getSetting} from "../settings";
-import {tryWithPrimaryServer, isRotationEnabled} from "../serverRotation";
+import {tryWithRotation, isRotationEnabled} from "../serverRotation";
 
 // Helper function to get request headers with kvtoken
 const getHeaders = () => {
@@ -23,9 +23,9 @@ const getHeaders = () => {
 export const kvServerProvider = {
   async loadNamespaceInfo() {
     try {
-      // Use primary server with fallback for classworkscloud provider
+      // Use rotation for classworkscloud provider
       if (isRotationEnabled()) {
-        return await tryWithPrimaryServer(async (serverUrl) => {
+        return await tryWithRotation(async (serverUrl) => {
           const res = await axios.get(`${serverUrl}/kv/_info`, {
             headers: getHeaders(),
           });
@@ -52,9 +52,9 @@ export const kvServerProvider = {
 
   async updateNamespaceInfo(data) {
     try {
-      // Use primary server with fallback for classworkscloud provider
+      // Use rotation for classworkscloud provider
       if (isRotationEnabled()) {
-        return await tryWithPrimaryServer(async (serverUrl) => {
+        return await tryWithRotation(async (serverUrl) => {
           const res = await axios.put(`${serverUrl}/kv/_info`, data, {
             headers: getHeaders(),
           });
@@ -78,9 +78,9 @@ export const kvServerProvider = {
 
   async loadData(key) {
     try {
-      // Use primary server with fallback for classworkscloud provider
+      // Use rotation for classworkscloud provider
       if (isRotationEnabled()) {
-        return await tryWithPrimaryServer(async (serverUrl) => {
+        return await tryWithRotation(async (serverUrl) => {
           const res = await axios.get(`${serverUrl}/kv/${key}`, {
             headers: getHeaders(),
           });
@@ -108,9 +108,9 @@ export const kvServerProvider = {
 
   async saveData(key, data) {
     try {
-      // Use primary server with fallback for classworkscloud provider
+      // Use rotation for classworkscloud provider
       if (isRotationEnabled()) {
-        return await tryWithPrimaryServer(async (serverUrl) => {
+        return await tryWithRotation(async (serverUrl) => {
           await axios.post(`${serverUrl}/kv/${key}`, data, {
             headers: getHeaders(),
           });
@@ -171,9 +171,9 @@ export const kvServerProvider = {
         skip: skip.toString()
       });
 
-      // Use primary server with fallback for classworkscloud provider
+      // Use rotation for classworkscloud provider
       if (isRotationEnabled()) {
-        return await tryWithPrimaryServer(async (serverUrl) => {
+        return await tryWithRotation(async (serverUrl) => {
           const res = await axios.get(`${serverUrl}/kv/_keys?${params}`, {
             headers: getHeaders(),
           });
