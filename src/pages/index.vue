@@ -34,11 +34,16 @@
       <v-btn
         v-if="shouldShowUrgentTestButton"
         prepend-icon="mdi-chat"
-        @click="urgentTestDialog = true"
         variant="tonal"
-        >发送通知</v-btn
+        @click="urgentTestDialog = true"
       >
-      <v-btn icon="mdi-chat" variant="text" @click="isChatOpen = true" />
+        发送通知
+      </v-btn>
+      <v-btn
+        icon="mdi-chat"
+        variant="text"
+        @click="isChatOpen = true"
+      />
       <v-btn
         :badge="unreadCount || undefined"
         :badge-color="unreadCount ? 'error' : undefined"
@@ -46,7 +51,11 @@
         variant="text"
         @click="$refs.messageLog.drawer = true"
       />
-      <v-btn icon="mdi-cog" variant="text" @click="$router.push('/settings')" />
+      <v-btn
+        icon="mdi-cog"
+        variant="text"
+        @click="$router.push('/settings')"
+      />
     </template>
   </v-app-bar>
   <!-- 初始化选择卡片，仅在首页且需要授权时显示；不影响顶栏 -->
@@ -63,11 +72,20 @@
     @token-info-updated="updateTokenDisplayInfo"
   />
 
-  <div v-if="!shouldShowInit" class="d-flex">
+  <div
+    v-if="!shouldShowInit"
+    class="d-flex"
+  >
     <!-- 主要内容区域 -->
-    <v-container class="main-window flex-grow-1 no-select bloom-container" fluid>
+    <v-container
+      class="main-window flex-grow-1 no-select bloom-container"
+      fluid
+    >
       <!-- 常驻通知区域 -->
-      <v-row v-if="persistentNotifications.length > 0" class="mb-4">
+      <v-row
+        v-if="persistentNotifications.length > 0"
+        class="mb-4"
+      >
         <v-col cols="12">
           <v-card
             v-for="notification in persistentNotifications"
@@ -78,31 +96,49 @@
             @click="showNotificationDetail(notification)"
           >
             <v-card-text class="d-flex align-center py-3">
-
               <span class="text-h6 text-truncate font-weight-bold">{{ notification.message }}</span>
-              <v-spacer></v-spacer>
-              <v-btn icon="mdi-chevron-right" variant="text"></v-btn>
+              <v-spacer />
+              <v-btn
+                icon="mdi-chevron-right"
+                variant="text"
+              />
             </v-card-text>
           </v-card>
         </v-col>
       </v-row>
 
       <!-- 通知详情对话框 -->
-      <v-dialog v-model="notificationDetailDialog" max-width="700" scrollable>
-        <v-card v-if="currentNotification" class="rounded-xl">
+      <v-dialog
+        v-model="notificationDetailDialog"
+        max-width="700"
+        scrollable
+      >
+        <v-card
+          v-if="currentNotification"
+          class="rounded-xl"
+        >
           <v-card-title class="d-flex align-center pa-4 text-h5">
-
-            <span :class="currentNotification.isUrgent ? 'text-error' : ''" class="font-weight-bold">
+            <span
+              :class="currentNotification.isUrgent ? 'text-error' : ''"
+              class="font-weight-bold"
+            >
               {{ currentNotification.isUrgent ? '强调通知' : '通知详情' }}
             </span>
-            <v-spacer></v-spacer>
-            <v-btn icon="mdi-close" variant="text" @click="notificationDetailDialog = false"></v-btn>
+            <v-spacer />
+            <v-btn
+              icon="mdi-close"
+              variant="text"
+              @click="notificationDetailDialog = false"
+            />
           </v-card-title>
 
-          <v-divider></v-divider>
+          <v-divider />
 
           <v-card-text class="pa-6">
-            <div class="text-h4 font-weight-medium mb-4" style="line-height: 1.5;">
+            <div
+              class="text-h4 font-weight-medium mb-4"
+              style="line-height: 1.5;"
+            >
               {{ currentNotification.message }}
             </div>
             <div class="text-subtitle-1 text-grey">
@@ -110,7 +146,7 @@
             </div>
           </v-card-text>
 
-          <v-divider></v-divider>
+          <v-divider />
 
           <v-card-actions class="pa-4">
             <v-btn
@@ -123,7 +159,7 @@
             >
               删除通知
             </v-btn>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-btn
               color="primary"
               size="x-large"
@@ -226,7 +262,10 @@
     @save="handleHomeworkSave"
   />
 
-  <v-snackbar v-model="state.snackbar" :timeout="2000">
+  <v-snackbar
+    v-model="state.snackbar"
+    :timeout="2000"
+  >
     {{ state.snackbarText }}
   </v-snackbar>
 
@@ -262,24 +301,41 @@
   <FloatingICP />
 
   <!-- 设备聊天室（右下角浮窗） -->
-  <ChatWidget v-model="isChatOpen" :show-button="false" />
+  <ChatWidget
+    v-model="isChatOpen"
+    :show-button="false"
+  />
 
   <!-- 紧急通知测试对话框 -->
   <UrgentTestDialog v-model="urgentTestDialog" />
 
   <!-- 添加确认对话框 -->
-  <v-dialog v-model="confirmDialog.show" max-width="400">
+  <v-dialog
+    v-model="confirmDialog.show"
+    max-width="400"
+  >
     <v-card>
-      <v-card-title class="text-h6"> 确认保存</v-card-title>
+      <v-card-title class="text-h6">
+        确认保存
+      </v-card-title>
       <v-card-text>
         您正在修改 {{ state.dateString }} 的数据，确定要保存吗？
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="grey" variant="text" @click="confirmDialog.reject">
+        <v-btn
+          color="grey"
+          variant="text"
+          @click="confirmDialog.reject"
+        >
           取消
         </v-btn>
-        <v-btn color="primary" @click="confirmDialog.resolve"> 确认保存</v-btn>
+        <v-btn
+          color="primary"
+          @click="confirmDialog.resolve"
+        >
+          确认保存
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -292,9 +348,14 @@
   />
 
   <!-- 添加URL配置确认对话框 -->
-  <v-dialog v-model="urlConfigDialog.show" max-width="500">
+  <v-dialog
+    v-model="urlConfigDialog.show"
+    max-width="500"
+  >
     <v-card>
-      <v-card-title class="text-h6"> 确认应用URL配置</v-card-title>
+      <v-card-title class="text-h6">
+        确认应用URL配置
+      </v-card-title>
       <v-card-text>
         <p>以下配置将应用于当前班级：</p>
         <v-list density="compact">
@@ -303,17 +364,28 @@
             :key="change.key"
           >
             <template #prepend>
-              <v-icon :icon="change.icon" class="mr-2" size="small" />
+              <v-icon
+                :icon="change.icon"
+                class="mr-2"
+                size="small"
+              />
             </template>
             <v-list-item-title class="d-flex align-center">
               <span class="text-subtitle-1">{{ change.name }}</span>
-              <v-tooltip activator="parent" location="top"
-                >{{ change.description || change.key }}
+              <v-tooltip
+                activator="parent"
+                location="top"
+              >
+                {{ change.description || change.key }}
               </v-tooltip>
             </v-list-item-title>
             <v-list-item-subtitle>
               <span class="text-grey-darken-1">{{ change.oldValue }}</span>
-              <v-icon class="mx-1" icon="mdi-arrow-right" size="small" />
+              <v-icon
+                class="mx-1"
+                icon="mdi-arrow-right"
+                size="small"
+              />
               <span class="text-primary font-weight-medium">{{
                 change.newValue
               }}</span>
@@ -330,7 +402,10 @@
         >
           取消
         </v-btn>
-        <v-btn color="primary" @click="urlConfigDialog.confirmHandler">
+        <v-btn
+          color="primary"
+          @click="urlConfigDialog.confirmHandler"
+        >
           确认应用
         </v-btn>
       </v-card-actions>
@@ -338,14 +413,25 @@
   </v-dialog>
 
   <!-- 考试详情/编辑对话框 -->
-  <v-dialog v-model="showExamDetailDialog" persistent fullscreen>
+  <v-dialog
+    v-model="showExamDetailDialog"
+    persistent
+    fullscreen
+  >
     <v-card v-if="selectedExamId">
       <v-card-title class="d-flex align-center pa-4">
         编辑考试配置
-        <v-spacer></v-spacer>
-        <v-btn icon="mdi-close" variant="text" @click="showExamDetailDialog = false"></v-btn>
+        <v-spacer />
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="showExamDetailDialog = false"
+        />
       </v-card-title>
-      <v-card-text class="pa-4" style="max-height: 70vh; overflow-y: auto;">
+      <v-card-text
+        class="pa-4"
+        style="max-height: 70vh; overflow-y: auto;"
+      >
         <exam-config-editor
           :config-id="selectedExamId"
           :dialog-mode="true"
@@ -353,7 +439,7 @@
           @deleted="onExamConfigDeleted"
         />
       </v-card-text>
-      <v-divider></v-divider>
+      <v-divider />
       <v-card-actions class="pa-4">
         <v-btn
           color="error"
@@ -363,7 +449,7 @@
         >
           移除卡片
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           color="primary"
           variant="text"
@@ -376,9 +462,14 @@
   </v-dialog>
 
   <!-- 添加考试卡片对话框 -->
-  <v-dialog v-model="showAddExamDialog" max-width="500">
+  <v-dialog
+    v-model="showAddExamDialog"
+    max-width="500"
+  >
     <v-card>
-      <v-card-title class="text-h6">预览考试看板</v-card-title>
+      <v-card-title class="text-h6">
+        预览考试看板
+      </v-card-title>
       <v-card-text>
         <v-list v-if="examStore.examList.length > 0">
           <v-list-item
@@ -389,44 +480,72 @@
             @click="addExamCard(exam.id)"
           >
             <template #prepend>
-              <v-icon color="primary">mdi-calendar-text</v-icon>
+              <v-icon color="primary">
+                mdi-calendar-text
+              </v-icon>
             </template>
             <template #append>
               <v-btn
                 :icon="isExamCardAdded(exam.id) ? 'mdi-check' : 'mdi-plus'"
                 :color="isExamCardAdded(exam.id) ? 'success' : 'grey'"
                 variant="text"
-              ></v-btn>
+              />
             </template>
           </v-list-item>
         </v-list>
-        <div v-else class="text-center py-4 text-grey">
+        <div
+          v-else
+          class="text-center py-4 text-grey"
+        >
           暂无考试配置
         </div>
       </v-card-text>
       <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" variant="text" @click="showAddExamDialog = false">关闭</v-btn>
+        <v-spacer />
+        <v-btn
+          color="primary"
+          variant="text"
+          @click="showAddExamDialog = false"
+        >
+          关闭
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
   <!-- 通知详情对话框 -->
-  <v-dialog v-model="notificationDetailDialog" max-width="600">
+  <v-dialog
+    v-model="notificationDetailDialog"
+    max-width="600"
+  >
     <v-card v-if="currentNotification">
-      <v-card-title class="headline" :class="currentNotification.isUrgent ? 'text-error' : 'text-primary'">
+      <v-card-title
+        class="headline"
+        :class="currentNotification.isUrgent ? 'text-error' : 'text-primary'"
+      >
         {{ currentNotification.isUrgent ? '强调通知' : '通知详情' }}
       </v-card-title>
       <v-card-text class="text-h5 py-4">
         {{ currentNotification.message }}
       </v-card-text>
       <v-card-actions>
-        <v-btn color="error" variant="text" @click="removePersistentNotification(currentNotification.id)">删除</v-btn>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" @click="notificationDetailDialog = false">关闭</v-btn>
+        <v-btn
+          color="error"
+          variant="text"
+          @click="removePersistentNotification(currentNotification.id)"
+        >
+          删除
+        </v-btn>
+        <v-spacer />
+        <v-btn
+          color="primary"
+          @click="notificationDetailDialog = false"
+        >
+          关闭
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
-  <br /><br /><br />
+  <br><br><br>
 </template>
 
 <script>

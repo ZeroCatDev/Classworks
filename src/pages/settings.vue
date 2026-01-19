@@ -11,10 +11,11 @@
           icon="mdi-menu"
           variant="text"
           @click="drawer = !drawer"
-
         />
       </template>
-      <v-app-bar-title class="text-h6">设置</v-app-bar-title>
+      <v-app-bar-title class="text-h6">
+        设置
+      </v-app-bar-title>
     </v-app-bar>
 
     <v-container fluid>
@@ -43,14 +44,23 @@
         direction="vertical"
         style="width: 100%"
       >
-        <v-tabs-window-item value="index"
-        >
-          <v-card border class="service-card gradient-right clickable mb-4" color="primary" elevation="8" hover
-                  rounded="xl" variant="tonal" @click="openClassworksKV">
+        <v-tabs-window-item value="index">
+          <v-card
+            border
+            class="service-card gradient-right clickable mb-4"
+            color="primary"
+            elevation="8"
+            hover
+            rounded="xl"
+            variant="tonal"
+            @click="openClassworksKV"
+          >
             <v-card-item>
               <div class="card-title">
                 <div>
-                  <div class="text-h6">在寻找 Classworks KV ？</div>
+                  <div class="text-h6">
+                    在寻找 Classworks KV ？
+                  </div>
                   <div class="text-caption text-medium-emphasis">
                     文档形键值数据库
                   </div>
@@ -71,50 +81,53 @@
               </div>
             </v-card-text>
           </v-card>
-          <v-card border class="rounded-xl mb-4" subtitle="设置" title="Classworks">
+          <v-card
+            border
+            class="rounded-xl mb-4"
+            subtitle="设置"
+            title="Classworks"
+          >
             <v-card-text>
               <v-alert
                 class="rounded-xl"
                 color="error"
                 icon="mdi-alert-circle"
                 variant="tonal"
-              >Classworks
+              >
+                Classworks
                 是开源免费的软件，官方没有提供任何形式的付费支持服务，源代码仓库地址在
                 <a
                   href="https://github.com/ZeroCatDev/Classworks"
                   target="_blank"
-                >https://github.com/ZeroCatDev/Classworks</a
-                >。如果您通过有偿协助等付费方式取得本应用，在遇到问题时请在与卖家约定的服务框架下，优先向卖家求助。如果卖家没有提供您预期的服务，请退款或通过其它形式积极维护您的合法权益。
-              </v-alert
-              >
+                >https://github.com/ZeroCatDev/Classworks</a>。如果您通过有偿协助等付费方式取得本应用，在遇到问题时请在与卖家约定的服务框架下，优先向卖家求助。如果卖家没有提供您预期的服务，请退款或通过其它形式积极维护您的合法权益。
+              </v-alert>
               <v-alert
                 class="mt-4 rounded-xl"
                 color="info"
                 icon="mdi-information"
                 variant="tonal"
-              >请不要使用浏览器清除缓存功能，否则会导致配置丢失。
-                <del
-                >恶意的操作可能导致您受到贵校教师的处理
-                </del
-                >
-              </v-alert
               >
+                请不要使用浏览器清除缓存功能，否则会导致配置丢失。
+                <del>恶意的操作可能导致您受到贵校教师的处理
+                </del>
+              </v-alert>
               <v-alert
                 class="mt-4 rounded-xl"
                 color="warning"
                 icon="mdi-information"
                 variant="tonal"
-              ><p>
-                请不要使用包括但不限于360极速浏览器、360安全浏览器、夸克浏览器、QQ浏览器等浏览器使用
-                Classworks
-                ，这些浏览器过时且存在严重的一致性问题。在Windows上，使用新版
-                Microsoft Edge 浏览器是最推荐的选择。
-              </p>
+              >
+                <p>
+                  请不要使用包括但不限于360极速浏览器、360安全浏览器、夸克浏览器、QQ浏览器等浏览器使用
+                  Classworks
+                  ，这些浏览器过时且存在严重的一致性问题。在Windows上，使用新版
+                  Microsoft Edge 浏览器是最推荐的选择。
+                </p>
                 <p style="color: #666">
                   上述浏览器商标为其所属公司所有，Classworks™
                   与上述浏览器所属公司无竞争关系。
                 </p>
-                <br/>
+                <br>
                 <v-btn
                   append-icon="mdi-open-in-new"
                   class="text-none rounded-xl"
@@ -122,14 +135,13 @@
                   href="https://www.microsoft.com/zh-cn/windows/microsoft-edge"
                   target="_blank"
                   variant="tonal"
-                >下载 Microsoft Edge（微软边缘浏览器）
-                </v-btn
                 >
-              </v-alert
-              >
+                  下载 Microsoft Edge（微软边缘浏览器）
+                </v-btn>
+              </v-alert>
             </v-card-text>
           </v-card>
-          <about-card/>
+          <about-card />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="server">
@@ -138,16 +150,32 @@
             border
             @saved="onSettingsSaved"
           />
-          <data-provider-settings-card border class="mt-4"/>
-          <kv-database-card border class="mt-4"/>
+          <data-provider-settings-card
+            border
+            class="mt-4"
+          />
+          <kv-database-card
+            border
+            class="mt-4"
+          />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="student">
-          <student-list-card :is-mobile="isMobile" border/>
-          <teacher-list-card :is-mobile="isMobile" border class="mt-4"/>
+          <student-list-card
+            :is-mobile="isMobile"
+            border
+          />
+          <teacher-list-card
+            :is-mobile="isMobile"
+            border
+            class="mt-4"
+          />
         </v-tabs-window-item>
         <v-tabs-window-item value="share">
-          <settings-link-generator border class="mt-4"/>
+          <settings-link-generator
+            border
+            class="mt-4"
+          />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="refresh">
@@ -191,27 +219,35 @@
         </v-tabs-window-item>
 
         <v-tabs-window-item value="randomPicker">
-          <random-picker-card :is-mobile="isMobile" border/>
+          <random-picker-card
+            :is-mobile="isMobile"
+            border
+          />
         </v-tabs-window-item>
         <v-tabs-window-item value="subject">
-          <subject-management-card border/>
-          <br/>
-          <homework-template-card border/>
+          <subject-management-card border />
+          <br>
+          <homework-template-card border />
         </v-tabs-window-item>
 
-        <v-tabs-window-item value="developer"
-        >
-          <settings-card border icon="mdi-developer-board" title="开发者选项">
+        <v-tabs-window-item value="developer">
+          <settings-card
+            border
+            icon="mdi-developer-board"
+            title="开发者选项"
+          >
             <v-list>
               <v-list-item>
                 <template #prepend>
-                  <v-icon class="mr-3" icon="mdi-code-tags"/>
+                  <v-icon
+                    class="mr-3"
+                    icon="mdi-code-tags"
+                  />
                 </template>
                 <v-list-item-title>启用开发者选项</v-list-item-title>
-                <v-list-item-subtitle
-                >启用后可以查看和修改开发者设置
-                </v-list-item-subtitle
-                >
+                <v-list-item-subtitle>
+                  启用后可以查看和修改开发者设置
+                </v-list-item-subtitle>
                 <template #append>
                   <v-switch
                     v-model="settings.developer.enabled"
@@ -229,29 +265,41 @@
             @saved="onSettingsSaved"
           />
           <template v-if="settings.developer.enabled">
-            <v-card border class="mt-4 rounded-lg">
+            <v-card
+              border
+              class="mt-4 rounded-lg"
+            >
               <v-card-title class="d-flex align-center">
-                <v-icon class="mr-2" icon="mdi-cog-outline"/>
+                <v-icon
+                  class="mr-2"
+                  icon="mdi-cog-outline"
+                />
                 所有设置
               </v-card-title>
               <v-card-subtitle> 浏览和修改所有可用设置</v-card-subtitle>
               <v-card-text>
-                <settings-explorer @update="onSettingUpdate"/>
+                <settings-explorer @update="onSettingUpdate" />
               </v-card-text>
             </v-card>
           </template>
-          <v-col v-if="settings.developer.enabled" cols="12"></v-col>
+          <v-col
+            v-if="settings.developer.enabled"
+            cols="12"
+          />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="about">
-          <about-card/>
-          <echo-chamber-card border class="mt-4"/>
+          <about-card />
+          <echo-chamber-card
+            border
+            class="mt-4"
+          />
         </v-tabs-window-item>
       </v-tabs-window>
     </v-container>
 
     <!-- 消息记录组件 -->
-    <message-log ref="messageLog"/>
+    <message-log ref="messageLog" />
   </div>
 </template>
 

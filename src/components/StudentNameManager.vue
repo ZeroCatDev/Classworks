@@ -35,7 +35,6 @@
 
         <!-- 教师模式 -->
         <template v-else-if="isTeacherToken">
-
           <!-- 名称输入框 -->
           <v-text-field
             v-model="teacherForm.name"
@@ -48,7 +47,6 @@
 
             class="mt-2 mb-4"
           >
-
             <div class="d-flex flex-wrap gap-2">
               <v-chip
                 v-for="teacher in filteredTeacherSuggestions"

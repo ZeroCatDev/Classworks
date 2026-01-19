@@ -1,5 +1,5 @@
 import {kvLocalProvider} from "./providers/kvLocalProvider";
-import {kvServerProvider} from "./providers/kvServerProvider";
+import {kvServerProvider, getServerUrl, CLASSWORKS_CLOUD_SERVERS} from "./providers/kvServerProvider";
 import {getSetting, setSetting} from "./settings";
 
 export const formatResponse = (data) => data;
@@ -176,6 +176,7 @@ export default {
       let serverUrl = getSetting("server.domain");
       let siteKey = getSetting("server.siteKey");
       const machineId = getSetting("device.uuid");
+      const provider = getSetting("server.provider");
       let configured = false;
 
       // 检查云端配置是否为空或错误，如果是则使用默认配置
@@ -183,7 +184,7 @@ export default {
         if (autoConfigureCloud) {
           // 使用classworksCloudDefaults配置
           const classworksCloudDefaults = {
-            "server.domain": import.meta.env.VITE_DEFAULT_KV_SERVER || "https://kv-service.houlang.cloud",
+            "server.domain": import.meta.env.VITE_DEFAULT_KV_SERVER || CLASSWORKS_CLOUD_SERVERS[0],
             "server.siteKey": "",
           };
 
@@ -203,6 +204,11 @@ export default {
         } else {
           return formatError("云端配置无效，请检查服务器域名和设备UUID", "CONFIG_ERROR");
         }
+      }
+
+      // 如果使用classworkscloud，使用当前激活的服务器URL
+      if (provider === "classworkscloud") {
+        serverUrl = getServerUrl();
       }
 
       let migrated = false;

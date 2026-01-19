@@ -1,16 +1,22 @@
 <template>
-  <settings-card icon="mdi-database-cog" title="数据源设置">
+  <settings-card
+    icon="mdi-database-cog"
+    title="数据源设置"
+  >
     <v-list>
       <!-- 服务器模式设置 -->
       <template
         v-if="
           currentProvider === 'kv-server' ||
-          currentProvider === 'classworkscloud'
+            currentProvider === 'classworkscloud'
         "
       >
         <v-list-item>
           <template #prepend>
-            <v-icon class="mr-3" icon="mdi-lan-connect"/>
+            <v-icon
+              class="mr-3"
+              icon="mdi-lan-connect"
+            />
           </template>
           <v-list-item-title>检查服务器连接</v-list-item-title>
           <template #append>
@@ -22,64 +28,94 @@
               测试连接
             </v-btn>
           </template>
-        </v-list-item
-        ><!-- 数据迁移，仅对KV本地存储有效 -->
+        </v-list-item><!-- 数据迁移，仅对KV本地存储有效 -->
       </template>
 
       <!-- 本地存储设置 -->
       <template v-if="currentProvider === 'kv-local'">
         <v-list-item>
           <template #prepend>
-            <v-icon class="mr-3" icon="mdi-database"/>
+            <v-icon
+              class="mr-3"
+              icon="mdi-database"
+            />
           </template>
           <v-list-item-title>清除数据库缓存</v-list-item-title>
-          <v-list-item-subtitle
-          >这将清除所有本地数据库中的数据
-          </v-list-item-subtitle
-          >
+          <v-list-item-subtitle>
+            这将清除所有本地数据库中的数据
+          </v-list-item-subtitle>
           <template #append>
-            <v-btn color="error" variant="tonal" @click="confirmClearIndexedDB">
+            <v-btn
+              color="error"
+              variant="tonal"
+              @click="confirmClearIndexedDB"
+            >
               清除
             </v-btn>
           </template>
         </v-list-item>
         <v-list-item>
           <template #prepend>
-            <v-icon class="mr-3" icon="mdi-database-export"/>
+            <v-icon
+              class="mr-3"
+              icon="mdi-database-export"
+            />
           </template>
           <v-list-item-title>导出数据库</v-list-item-title>
           <template #append>
-            <v-btn variant="tonal" @click="exportData"> 导出</v-btn>
+            <v-btn
+              variant="tonal"
+              @click="exportData"
+            >
+              导出
+            </v-btn>
           </template>
         </v-list-item>
       </template>
 
       <v-list-item>
         <template #prepend>
-          <v-icon class="mr-3" icon="mdi-lan-connect"/>
+          <v-icon
+            class="mr-3"
+            icon="mdi-lan-connect"
+          />
         </template>
         <v-list-item-title>查看本地缓存</v-list-item-title>
         <template #append>
-          <v-btn to="/cachemanagement" variant="tonal"> 查看</v-btn>
+          <v-btn
+            to="/cachemanagement"
+            variant="tonal"
+          >
+            查看
+          </v-btn>
         </template>
       </v-list-item>
     </v-list>
 
     <!-- 确认对话框 -->
-    <v-dialog v-model="confirmDialog" max-width="400">
+    <v-dialog
+      v-model="confirmDialog"
+      max-width="400"
+    >
       <v-card>
         <v-card-title>{{ confirmTitle }}</v-card-title>
         <v-card-text>{{ confirmMessage }}</v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="grey" variant="text" @click="confirmDialog = false"
-          >取消
-          </v-btn
+          <v-spacer />
+          <v-btn
+            color="grey"
+            variant="text"
+            @click="confirmDialog = false"
           >
-          <v-btn color="error" variant="tonal" @click="handleConfirm"
-          >确认
-          </v-btn
+            取消
+          </v-btn>
+          <v-btn
+            color="error"
+            variant="tonal"
+            @click="handleConfirm"
           >
+            确认
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

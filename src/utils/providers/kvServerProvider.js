@@ -2,6 +2,15 @@ import axios from "@/axios/axios";
 import {formatResponse, formatError} from "../dataProvider";
 import {getSetting} from "../settings";
 
+// Classworks云服务器地址列表（按优先级从上到下）
+const CLASSWORKS_CLOUD_SERVERS = [
+  "https://kv-service.houlang.cloud",
+  "https://kv-service.wuyuan.dev"
+];
+
+// 当前正在使用的服务器索引
+let currentServerIndex = 0;
+
 // Helper function to get request headers with kvtoken
 const getHeaders = () => {
   const headers = {Accept: "application/json"};
@@ -19,18 +28,76 @@ const getHeaders = () => {
   return headers;
 };
 
+/**
+ * 获取服务器URL，支持Classworks云服务的自动故障转移
+ * @returns {string} 服务器URL
+ */
+const getServerUrl = () => {
+  const provider = getSetting("server.provider");
+  
+  // 如果使用classworkscloud，使用服务器列表
+  if (provider === "classworkscloud") {
+    return CLASSWORKS_CLOUD_SERVERS[currentServerIndex];
+  }
+  
+  // 否则使用用户配置的服务器域名
+  return getSetting("server.domain");
+};
+
+/**
+ * 尝试下一个服务器（仅对classworkscloud生效）
+ */
+const tryNextServer = () => {
+  const provider = getSetting("server.provider");
+  
+  if (provider === "classworkscloud") {
+    currentServerIndex = (currentServerIndex + 1) % CLASSWORKS_CLOUD_SERVERS.length;
+    console.log(`切换到备用服务器: ${CLASSWORKS_CLOUD_SERVERS[currentServerIndex]}`);
+  }
+};
+
+/**
+ * 带自动故障转移的请求包装器
+ * @param {Function} requestFn - 执行请求的函数
+ * @returns {Promise} 请求结果
+ */
+const requestWithFailover = async (requestFn) => {
+  const provider = getSetting("server.provider");
+  const maxRetries = provider === "classworkscloud" ? CLASSWORKS_CLOUD_SERVERS.length : 1;
+  
+  let lastError = null;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      lastError = error;
+      
+      // 只有在使用classworkscloud且还有其他服务器可尝试时才切换
+      if (provider === "classworkscloud" && attempt < maxRetries - 1) {
+        console.warn(`服务器请求失败，尝试备用服务器...`, error.message);
+        tryNextServer();
+      }
+    }
+  }
+  
+  // 所有服务器都失败后抛出最后一个错误
+  throw lastError;
+};
+
 export const kvServerProvider = {
   async loadNamespaceInfo() {
     try {
-      // 使用 Classworks Cloud 或者用户配置的服务器域名
-      const serverUrl = getSetting("server.domain");
+      return await requestWithFailover(async () => {
+        const serverUrl = getServerUrl();
 
-      const res = await axios.get(`${serverUrl}/kv/_info`, {
-        headers: getHeaders(),
+        const res = await axios.get(`${serverUrl}/kv/_info`, {
+          headers: getHeaders(),
+        });
+
+        // 直接返回新格式 API 数据，包含 device 和 account 信息
+        return formatResponse(res.data);
       });
-
-      // 直接返回新格式 API 数据，包含 device 和 account 信息
-      return formatResponse(res.data);
     } catch (error) {
       console.error("获取命名空间信息失败:", error);
       return formatError(
@@ -42,13 +109,15 @@ export const kvServerProvider = {
 
   async updateNamespaceInfo(data) {
     try {
-      const serverUrl = getSetting("server.domain");
+      return await requestWithFailover(async () => {
+        const serverUrl = getServerUrl();
 
-      const res = await axios.put(`${serverUrl}/kv/_info`, data, {
-        headers: getHeaders(),
+        const res = await axios.put(`${serverUrl}/kv/_info`, data, {
+          headers: getHeaders(),
+        });
+
+        return res;
       });
-
-      return res;
     } catch (error) {
       return formatError(
         error.response?.data?.message || "更新命名空间信息失败",
@@ -59,13 +128,15 @@ export const kvServerProvider = {
 
   async loadData(key) {
     try {
-      const serverUrl = getSetting("server.domain");
+      return await requestWithFailover(async () => {
+        const serverUrl = getServerUrl();
 
-      const res = await axios.get(`${serverUrl}/kv/${key}`, {
-        headers: getHeaders(),
+        const res = await axios.get(`${serverUrl}/kv/${key}`, {
+          headers: getHeaders(),
+        });
+
+        return formatResponse(res.data);
       });
-
-      return formatResponse(res.data);
     } catch (error) {
       if (error.response?.status === 404) {
         return formatError("数据不存在", "NOT_FOUND");
@@ -80,11 +151,13 @@ export const kvServerProvider = {
 
   async saveData(key, data) {
     try {
-      const serverUrl = getSetting("server.domain");
-      await axios.post(`${serverUrl}/kv/${key}`, data, {
-        headers: getHeaders(),
+      return await requestWithFailover(async () => {
+        const serverUrl = getServerUrl();
+        await axios.post(`${serverUrl}/kv/${key}`, data, {
+          headers: getHeaders(),
+        });
+        return formatResponse(true);
       });
-      return formatResponse(true);
     } catch (error) {
       console.log(error);
       return formatError(
@@ -117,29 +190,31 @@ export const kvServerProvider = {
    */
   async loadKeys(options = {}) {
     try {
-      const serverUrl = getSetting("server.domain");
+      return await requestWithFailover(async () => {
+        const serverUrl = getServerUrl();
 
-      // 设置默认参数
-      const {
-        sortBy = "key",
-        sortDir = "asc",
-        limit = 100,
-        skip = 0
-      } = options;
+        // 设置默认参数
+        const {
+          sortBy = "key",
+          sortDir = "asc",
+          limit = 100,
+          skip = 0
+        } = options;
 
-      // 构建查询参数
-      const params = new URLSearchParams({
-        sortBy,
-        sortDir,
-        limit: limit.toString(),
-        skip: skip.toString()
+        // 构建查询参数
+        const params = new URLSearchParams({
+          sortBy,
+          sortDir,
+          limit: limit.toString(),
+          skip: skip.toString()
+        });
+
+        const res = await axios.get(`${serverUrl}/kv/_keys?${params}`, {
+          headers: getHeaders(),
+        });
+
+        return formatResponse(res.data);
       });
-
-      const res = await axios.get(`${serverUrl}/kv/_keys?${params}`, {
-        headers: getHeaders(),
-      });
-
-      return formatResponse(res.data);
     } catch (error) {
       if (error.response?.status === 404) {
         return formatError("命名空间不存在", "NOT_FOUND");
@@ -158,3 +233,6 @@ export const kvServerProvider = {
     }
   },
 };
+
+// 导出服务器列表和URL获取函数供其他模块使用
+export { CLASSWORKS_CLOUD_SERVERS, getServerUrl };

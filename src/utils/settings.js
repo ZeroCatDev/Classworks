@@ -64,8 +64,14 @@ const SETTINGS_STORAGE_KEY = "Classworks_settings";
 
 
 // 新增: Classworks云端存储的默认设置
+// Classworks云服务器地址列表（按优先级从上到下）
+const CLASSWORKS_CLOUD_SERVERS = [
+  "https://kv-service.houlang.cloud",
+  "https://kv-service.wuyuan.dev"
+];
+
 const classworksCloudDefaults = {
-  "server.domain": import.meta.env.VITE_DEFAULT_KV_SERVER || "https://kv-service.houlang.cloud",
+  "server.domain": import.meta.env.VITE_DEFAULT_KV_SERVER || CLASSWORKS_CLOUD_SERVERS[0],
   //"server.domain": "http://localhost:3030",
   "server.siteKey": "",
 };

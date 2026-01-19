@@ -42,7 +42,7 @@
                 <v-list-item-subtitle>{{ currentDataKey }}</v-list-item-subtitle>
               </v-list-item>
             </v-list>
-            <v-divider class="my-4"/>
+            <v-divider class="my-4" />
             <v-row>
               <v-col
                 cols="12"
@@ -83,11 +83,17 @@
                 </v-btn>
               </v-col>
             </v-row>
-            <v-divider class="my-4"/>
+            <v-divider class="my-4" />
             <v-row>
               <v-col cols="12">
-                <v-card border color="primary" variant="tonal">
-                  <v-card-title class="text-subtitle-1">聊天室消息</v-card-title>
+                <v-card
+                  border
+                  color="primary"
+                  variant="tonal"
+                >
+                  <v-card-title class="text-subtitle-1">
+                    聊天室消息
+                  </v-card-title>
                   <v-card-text>
                     <v-textarea
                       v-model="chatInput"
@@ -97,7 +103,7 @@
                       rows="2"
                     />
                     <div class="d-flex">
-                      <v-spacer/>
+                      <v-spacer />
                       <v-btn
                         :disabled="!canSendChat"
                         color="primary"
@@ -178,7 +184,7 @@
         <v-card border>
           <v-card-title class="d-flex align-center">
             事件日志
-            <v-spacer/>
+            <v-spacer />
             <v-btn
               color="error"
               size="small"

@@ -15,7 +15,9 @@
         @click:close="showAutoplayWarning = false"
       >
         <div class="d-flex align-center">
-          <v-icon class="mr-2">mdi-information</v-icon>
+          <v-icon class="mr-2">
+            mdi-information
+          </v-icon>
           <span>首次使用请点击试听按钮测试音频播放是否正常</span>
         </div>
       </v-alert>
@@ -25,7 +27,9 @@
         <v-col cols="12">
           <v-card border>
             <v-card-title class="text-subtitle-1">
-              <v-icon left>mdi-bell-ring</v-icon>
+              <v-icon left>
+                mdi-bell-ring
+              </v-icon>
               单次通知铃声
             </v-card-title>
             <v-card-text>
@@ -66,13 +70,17 @@
                   variant="tonal"
                   @click="previewSound(singleSound)"
                 >
-                  <v-icon left>mdi-play</v-icon>
+                  <v-icon left>
+                    mdi-play
+                  </v-icon>
                   试听
                 </v-btn>
                 <v-btn
                   @click="resetSingleSound"
                 >
-                  <v-icon left>mdi-restore</v-icon>
+                  <v-icon left>
+                    mdi-restore
+                  </v-icon>
                   恢复
                 </v-btn>
               </div>
@@ -84,7 +92,12 @@
         <v-col cols="12">
           <v-card border>
             <v-card-title class="text-subtitle-1">
-              <v-icon left color="error">mdi-bell-alert</v-icon>
+              <v-icon
+                left
+                color="error"
+              >
+                mdi-bell-alert
+              </v-icon>
               紧急通知铃声
             </v-card-title>
             <v-card-text>
@@ -125,13 +138,17 @@
                   variant="tonal"
                   @click="previewSound(urgentSound)"
                 >
-                  <v-icon left>mdi-play</v-icon>
+                  <v-icon left>
+                    mdi-play
+                  </v-icon>
                   试听
                 </v-btn>
                 <v-btn
                   @click="resetUrgentSound"
                 >
-                  <v-icon left>mdi-restore</v-icon>
+                  <v-icon left>
+                    mdi-restore
+                  </v-icon>
                   恢复
                 </v-btn>
               </div>
