@@ -90,6 +90,7 @@
 import SettingsCard from "@/components/SettingsCard.vue";
 import {getSetting} from "@/utils/settings";
 import axios from "axios";
+import {tryWithRotation, isRotationEnabled} from "@/utils/serverRotation";
 
 export default {
   name: "DataProviderSettingsCard",
@@ -132,31 +133,82 @@ export default {
     async checkServerConnection() {
       this.loading = true;
       this.serverchecktime = new Date();
+      const triedServers = [];
+      
       try {
-        const domain = getSetting("server.domain");
         const siteKey = getSetting("server.siteKey");
-
+        
         // Prepare headers including site key if available
         const headers = {Accept: "application/json"};
         if (siteKey) {
           headers["x-site-key"] = siteKey;
         }
 
-        const response = await axios.get(`${domain}/check`, {
-          method: "GET",
-          headers,
-        });
-
-        if (response.data.status === "success") {
-          this.$message.success(
-            "连接成功",
-            "服务器连接正常 延迟" + (new Date() - this.serverchecktime) + "ms"
+        // Use rotation for classworkscloud provider
+        if (isRotationEnabled()) {
+          const response = await tryWithRotation(
+            async (serverUrl) => {
+              const res = await axios.get(`${serverUrl}/check`, {
+                method: "GET",
+                headers,
+              });
+              if (res.data.status !== "success") {
+                throw new Error("服务器响应异常");
+              }
+              return res;
+            },
+            {
+              onServerTried: ({url, status, tried}) => {
+                triedServers.length = 0;
+                triedServers.push(...tried);
+              }
+            }
           );
+
+          // Build success message with tried servers info
+          const latency = new Date() - this.serverchecktime;
+          const successServer = triedServers.find(s => s.status === "success");
+          let message = `服务器连接正常 延迟${latency}ms`;
+          
+          if (triedServers.length > 1) {
+            const serverList = triedServers.map((s, i) => 
+              `${i + 1}. ${s.url} (${s.status === "success" ? "成功" : "失败"})`
+            ).join("\n");
+            message += `\n\n依次尝试的服务器:\n${serverList}`;
+          } else if (successServer) {
+            message += `\n服务器: ${successServer.url}`;
+          }
+
+          this.$message.success("连接成功", message);
         } else {
-          throw new Error("服务器响应异常");
+          // Standard single-server check for other providers
+          const domain = getSetting("server.domain");
+          const response = await axios.get(`${domain}/check`, {
+            method: "GET",
+            headers,
+          });
+
+          if (response.data.status === "success") {
+            this.$message.success(
+              "连接成功",
+              "服务器连接正常 延迟" + (new Date() - this.serverchecktime) + "ms"
+            );
+          } else {
+            throw new Error("服务器响应异常");
+          }
         }
       } catch (error) {
-        this.$message.error("连接失败", error.message || "无法连接到服务器");
+        // Build error message with tried servers info
+        let errorMessage = error.message || "无法连接到服务器";
+        
+        if (triedServers.length > 0) {
+          const serverList = triedServers.map((s, i) => 
+            `${i + 1}. ${s.url} (失败${s.error ? `: ${s.error}` : ""})`
+          ).join("\n");
+          errorMessage += `\n\n依次尝试的服务器:\n${serverList}\n\n所有服务器均连接失败`;
+        }
+        
+        this.$message.error("连接失败", errorMessage);
       } finally {
         this.loading = false;
       }

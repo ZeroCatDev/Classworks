@@ -4,12 +4,18 @@
 
 import {io} from 'socket.io-client';
 import {getSetting} from '@/utils/settings';
+import {getEffectiveServerUrl, isRotationEnabled, tryWithRotation} from '@/utils/serverRotation';
 
 let socket = null;
 let connectedDomain = null;
 const listeners = new Set();
 
 export function getServerUrl() {
+  // For classworkscloud provider, use the effective server URL from rotation
+  if (isRotationEnabled()) {
+    return getEffectiveServerUrl();
+  }
+  
   // Prefer configured server domain; fallback to env; then current origin
   const cfg = getSetting('server.domain');
   const envUrl = import.meta?.env?.VITE_SERVER_URL;
@@ -28,6 +34,11 @@ export function getSocket() {
       socket = null;
     }
     connectedDomain = serverUrl;
+    
+    // For classworkscloud, create socket with the first server in rotation
+    // Note: Socket.IO's built-in reconnection will retry the same server URL.
+    // Server rotation is handled at the HTTP request level, not Socket.IO level.
+    // If the Socket.IO server goes down, the connection will fail until the server recovers.
     socket = io(serverUrl, {transports:  ["polling","websocket"]});
 
     // Re-attach previously registered event handlers on new socket instance

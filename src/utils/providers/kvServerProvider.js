@@ -1,6 +1,7 @@
 import axios from "@/axios/axios";
 import {formatResponse, formatError} from "../dataProvider";
 import {getSetting} from "../settings";
+import {tryWithRotation, isRotationEnabled} from "../serverRotation";
 
 // Helper function to get request headers with kvtoken
 const getHeaders = () => {
@@ -22,9 +23,18 @@ const getHeaders = () => {
 export const kvServerProvider = {
   async loadNamespaceInfo() {
     try {
-      // 使用 Classworks Cloud 或者用户配置的服务器域名
-      const serverUrl = getSetting("server.domain");
+      // Use rotation for classworkscloud provider
+      if (isRotationEnabled()) {
+        return await tryWithRotation(async (serverUrl) => {
+          const res = await axios.get(`${serverUrl}/kv/_info`, {
+            headers: getHeaders(),
+          });
+          return formatResponse(res.data);
+        });
+      }
 
+      // Standard single-server mode
+      const serverUrl = getSetting("server.domain");
       const res = await axios.get(`${serverUrl}/kv/_info`, {
         headers: getHeaders(),
       });
@@ -42,8 +52,17 @@ export const kvServerProvider = {
 
   async updateNamespaceInfo(data) {
     try {
-      const serverUrl = getSetting("server.domain");
+      // Use rotation for classworkscloud provider
+      if (isRotationEnabled()) {
+        return await tryWithRotation(async (serverUrl) => {
+          const res = await axios.put(`${serverUrl}/kv/_info`, data, {
+            headers: getHeaders(),
+          });
+          return res;
+        });
+      }
 
+      const serverUrl = getSetting("server.domain");
       const res = await axios.put(`${serverUrl}/kv/_info`, data, {
         headers: getHeaders(),
       });
@@ -59,8 +78,17 @@ export const kvServerProvider = {
 
   async loadData(key) {
     try {
-      const serverUrl = getSetting("server.domain");
+      // Use rotation for classworkscloud provider
+      if (isRotationEnabled()) {
+        return await tryWithRotation(async (serverUrl) => {
+          const res = await axios.get(`${serverUrl}/kv/${key}`, {
+            headers: getHeaders(),
+          });
+          return formatResponse(res.data);
+        });
+      }
 
+      const serverUrl = getSetting("server.domain");
       const res = await axios.get(`${serverUrl}/kv/${key}`, {
         headers: getHeaders(),
       });
@@ -80,6 +108,16 @@ export const kvServerProvider = {
 
   async saveData(key, data) {
     try {
+      // Use rotation for classworkscloud provider
+      if (isRotationEnabled()) {
+        return await tryWithRotation(async (serverUrl) => {
+          await axios.post(`${serverUrl}/kv/${key}`, data, {
+            headers: getHeaders(),
+          });
+          return formatResponse(true);
+        });
+      }
+
       const serverUrl = getSetting("server.domain");
       await axios.post(`${serverUrl}/kv/${key}`, data, {
         headers: getHeaders(),
@@ -117,8 +155,6 @@ export const kvServerProvider = {
    */
   async loadKeys(options = {}) {
     try {
-      const serverUrl = getSetting("server.domain");
-
       // 设置默认参数
       const {
         sortBy = "key",
@@ -135,6 +171,17 @@ export const kvServerProvider = {
         skip: skip.toString()
       });
 
+      // Use rotation for classworkscloud provider
+      if (isRotationEnabled()) {
+        return await tryWithRotation(async (serverUrl) => {
+          const res = await axios.get(`${serverUrl}/kv/_keys?${params}`, {
+            headers: getHeaders(),
+          });
+          return formatResponse(res.data);
+        });
+      }
+
+      const serverUrl = getSetting("server.domain");
       const res = await axios.get(`${serverUrl}/kv/_keys?${params}`, {
         headers: getHeaders(),
       });
