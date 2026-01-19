@@ -1,6 +1,6 @@
 import axios from "@/axios/axios";
 import {getSetting} from "@/utils/settings";
-import {tryWithRotation, isRotationEnabled} from "@/utils/serverRotation";
+import {tryWithPrimaryServer, isRotationEnabled} from "@/utils/serverRotation";
 
 // Helper function to check if provider is valid for API calls
 const isValidProvider = () => {
@@ -35,9 +35,9 @@ export const getNamespaceInfo = async () => {
   }
 
   try {
-    // Use rotation for classworkscloud provider
+    // Use primary server with fallback for classworkscloud provider
     if (isRotationEnabled()) {
-      const response = await tryWithRotation(async (serverUrl) => {
+      const response = await tryWithPrimaryServer(async (serverUrl) => {
         return await axios.get(`${serverUrl}/kv/_info`, {
           headers: getHeaders(),
         });
