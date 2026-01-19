@@ -36,7 +36,8 @@ export function getServerList(provider) {
  */
 export async function tryWithRotation(operation, options = {}) {
   const provider = options.provider || getSetting("server.provider");
-  const onServerTried = options.onServerTried || (() => {});
+  const onServerTried = options.onServerTried;
+  const hasCallback = typeof onServerTried === 'function';
   
   const servers = getServerList(provider);
   const triedServers = [];
@@ -45,19 +46,25 @@ export async function tryWithRotation(operation, options = {}) {
   for (const serverUrl of servers) {
     try {
       triedServers.push({ url: serverUrl, status: "trying" });
-      onServerTried({ url: serverUrl, status: "trying", tried: [...triedServers] });
+      if (hasCallback) {
+        onServerTried({ url: serverUrl, status: "trying", tried: [...triedServers] });
+      }
       
       const result = await operation(serverUrl);
       
       triedServers[triedServers.length - 1].status = "success";
-      onServerTried({ url: serverUrl, status: "success", tried: [...triedServers] });
+      if (hasCallback) {
+        onServerTried({ url: serverUrl, status: "success", tried: [...triedServers] });
+      }
       
       return result;
     } catch (error) {
       lastError = error;
       triedServers[triedServers.length - 1].status = "failed";
       triedServers[triedServers.length - 1].error = error.message || String(error);
-      onServerTried({ url: serverUrl, status: "failed", error, tried: [...triedServers] });
+      if (hasCallback) {
+        onServerTried({ url: serverUrl, status: "failed", error, tried: [...triedServers] });
+      }
       
       // Continue to next server
       console.warn(`Server ${serverUrl} failed:`, error.message);

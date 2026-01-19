@@ -35,9 +35,10 @@ export function getSocket() {
     }
     connectedDomain = serverUrl;
     
-    // For classworkscloud, create socket with rotation support
-    // The socket will initially connect to the first server
-    // If connection fails, Socket.IO will handle reconnection
+    // For classworkscloud, create socket with the first server in rotation
+    // Note: Socket.IO's built-in reconnection will retry the same server URL.
+    // Server rotation is handled at the HTTP request level, not Socket.IO level.
+    // If the Socket.IO server goes down, the connection will fail until the server recovers.
     socket = io(serverUrl, {transports:  ["polling","websocket"]});
 
     // Re-attach previously registered event handlers on new socket instance
