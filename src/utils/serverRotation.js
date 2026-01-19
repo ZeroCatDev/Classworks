@@ -90,7 +90,8 @@ export async function tryWithRotation(operation, options = {}) {
 
 /**
  * Get the effective server URL for the current provider
- * For classworkscloud, returns the primary server (last known working) or first server in the list
+ * For classworkscloud, returns the primary server (last successful in current session) or first server in the list
+ * Note: Primary server tracking resets on page reload
  * For other providers, returns the configured domain
  * @returns {string} Server URL
  */
@@ -115,34 +116,8 @@ export function isRotationEnabled() {
 }
 
 /**
- * Check if an error is a network error that should trigger server rotation
- * @param {Error} error - The error to check
- * @returns {boolean}
- */
-function isNetworkError(error) {
-  // Network errors from axios typically have no response or specific error codes
-  if (!error.response) {
-    return true; // No response = network issue
-  }
-  
-  // Server timeout or connection errors
-  if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || 
-      error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-    return true;
-  }
-  
-  // 5xx errors might indicate server issues worth retrying
-  const status = error.response?.status;
-  if (status >= 500) {
-    return true;
-  }
-  
-  return false;
-}
-
-/**
- * Try operation with primary server first, fallback to rotation on network errors only
- * This is more efficient than always trying rotation for every request
+ * Try operation with primary server first, fallback to rotation on any error
+ * Uses the last successful server first for efficiency
  * @param {Function} operation - Async function that takes a serverUrl and returns a promise
  * @param {Object} options - Options
  * @param {string} options.provider - Provider type (optional, defaults to current setting)
@@ -163,14 +138,9 @@ export async function tryWithPrimaryServer(operation, options = {}) {
   try {
     return await operation(primaryUrl);
   } catch (error) {
-    // Only rotate to other servers if it's a network error
-    if (isNetworkError(error)) {
-      console.warn(`Primary server ${primaryUrl} failed with network error, trying rotation...`);
-      // Use full rotation, which will update the primary server if a different one succeeds
-      return await tryWithRotation(operation, options);
-    }
-    
-    // For non-network errors (e.g., 404, 401, validation errors), don't retry with other servers
-    throw error;
+    // On any error, try rotation with all servers
+    console.warn(`Primary server ${primaryUrl} failed, trying rotation...`);
+    // Use full rotation, which will update the primary server if a different one succeeds
+    return await tryWithRotation(operation, options);
   }
 }
