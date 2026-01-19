@@ -32,6 +32,7 @@ export function getServerList(provider) {
  * @param {Object} options - Options
  * @param {string} options.provider - Provider type (optional, defaults to current setting)
  * @param {Function} options.onServerTried - Callback called when a server is tried (optional)
+ *                                           Receives: { url, status, tried } where tried is a snapshot of attempts
  * @returns {Promise} Result from the first successful server, or throws the last error
  */
 export async function tryWithRotation(operation, options = {}) {
@@ -47,6 +48,7 @@ export async function tryWithRotation(operation, options = {}) {
     try {
       triedServers.push({ url: serverUrl, status: "trying" });
       if (hasCallback) {
+        // Provide a snapshot to prevent callback from mutating internal state
         onServerTried({ url: serverUrl, status: "trying", tried: [...triedServers] });
       }
       
