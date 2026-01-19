@@ -4,7 +4,7 @@
 
 import {io} from 'socket.io-client';
 import {getSetting} from '@/utils/settings';
-import {getEffectiveServerUrl, isRotationEnabled, tryWithRotation} from '@/utils/serverRotation';
+import {getEffectiveServerUrl, isRotationEnabled} from '@/utils/serverRotation';
 
 let socket = null;
 let connectedDomain = null;
