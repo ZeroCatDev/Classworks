@@ -1,5 +1,6 @@
 import axios from "@/axios/axios";
 import {getSetting} from "@/utils/settings";
+import {tryWithRotation, isRotationEnabled} from "@/utils/serverRotation";
 
 // Helper function to check if provider is valid for API calls
 const isValidProvider = () => {
@@ -33,9 +34,18 @@ export const getNamespaceInfo = async () => {
     throw new Error("当前数据提供者不支持此操作");
   }
 
-  const serverUrl = getSetting("server.domain");
-
   try {
+    // Use rotation for classworkscloud provider
+    if (isRotationEnabled()) {
+      const response = await tryWithRotation(async (serverUrl) => {
+        return await axios.get(`${serverUrl}/kv/_info`, {
+          headers: getHeaders(),
+        });
+      });
+      return response.data;
+    }
+
+    const serverUrl = getSetting("server.domain");
     const response = await axios.get(`${serverUrl}/kv/_info`, {
       headers: getHeaders(),
     });

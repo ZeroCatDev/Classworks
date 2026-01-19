@@ -4,12 +4,18 @@
 
 import {io} from 'socket.io-client';
 import {getSetting} from '@/utils/settings';
+import {getEffectiveServerUrl, isRotationEnabled, tryWithRotation} from '@/utils/serverRotation';
 
 let socket = null;
 let connectedDomain = null;
 const listeners = new Set();
 
 export function getServerUrl() {
+  // For classworkscloud provider, use the effective server URL from rotation
+  if (isRotationEnabled()) {
+    return getEffectiveServerUrl();
+  }
+  
   // Prefer configured server domain; fallback to env; then current origin
   const cfg = getSetting('server.domain');
   const envUrl = import.meta?.env?.VITE_SERVER_URL;
@@ -28,6 +34,10 @@ export function getSocket() {
       socket = null;
     }
     connectedDomain = serverUrl;
+    
+    // For classworkscloud, create socket with rotation support
+    // The socket will initially connect to the first server
+    // If connection fails, Socket.IO will handle reconnection
     socket = io(serverUrl, {transports:  ["polling","websocket"]});
 
     // Re-attach previously registered event handlers on new socket instance

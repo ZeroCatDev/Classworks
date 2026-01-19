@@ -1,6 +1,7 @@
 import {kvLocalProvider} from "./providers/kvLocalProvider";
 import {kvServerProvider} from "./providers/kvServerProvider";
 import {getSetting, setSetting} from "./settings";
+import {getEffectiveServerUrl} from "./serverRotation";
 
 export const formatResponse = (data) => data;
 
@@ -173,7 +174,16 @@ export default {
     } = options;
 
     try {
-      let serverUrl = getSetting("server.domain");
+      const provider = getSetting("server.provider");
+      let serverUrl;
+      
+      // Use effective server URL for classworkscloud provider
+      if (provider === "classworkscloud") {
+        serverUrl = getEffectiveServerUrl();
+      } else {
+        serverUrl = getSetting("server.domain");
+      }
+      
       let siteKey = getSetting("server.siteKey");
       const machineId = getSetting("device.uuid");
       let configured = false;
@@ -200,6 +210,8 @@ export default {
 
           // 设置provider为classworkscloud
           setSetting("server.provider", "classworkscloud");
+          // Get effective URL after setting provider
+          serverUrl = getEffectiveServerUrl();
         } else {
           return formatError("云端配置无效，请检查服务器域名和设备UUID", "CONFIG_ERROR");
         }
