@@ -1,12 +1,7 @@
 import axios from "@/axios/axios";
 import {formatResponse, formatError} from "../dataProvider";
 import {getSetting} from "../settings";
-
-// Classworks云服务器地址列表（按优先级从上到下）
-const CLASSWORKS_CLOUD_SERVERS = [
-  "https://kv-service.houlang.cloud",
-  "https://kv-service.wuyuan.dev"
-];
+import {CLASSWORKS_CLOUD_SERVERS} from "../constants";
 
 // 当前正在使用的服务器索引
 let currentServerIndex = 0;
@@ -52,7 +47,7 @@ const tryNextServer = () => {
   
   if (provider === "classworkscloud") {
     currentServerIndex = (currentServerIndex + 1) % CLASSWORKS_CLOUD_SERVERS.length;
-    console.log(`切换到备用服务器: ${CLASSWORKS_CLOUD_SERVERS[currentServerIndex]}`);
+    console.warn(`切换到备用服务器: ${CLASSWORKS_CLOUD_SERVERS[currentServerIndex]}`);
   }
 };
 
@@ -234,5 +229,5 @@ export const kvServerProvider = {
   },
 };
 
-// 导出服务器列表和URL获取函数供其他模块使用
-export { CLASSWORKS_CLOUD_SERVERS, getServerUrl };
+// 导出URL获取函数供其他模块使用
+export { getServerUrl };

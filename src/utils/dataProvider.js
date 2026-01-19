@@ -1,6 +1,7 @@
 import {kvLocalProvider} from "./providers/kvLocalProvider";
-import {kvServerProvider, getServerUrl, CLASSWORKS_CLOUD_SERVERS} from "./providers/kvServerProvider";
+import {kvServerProvider, getServerUrl} from "./providers/kvServerProvider";
 import {getSetting, setSetting} from "./settings";
+import {CLASSWORKS_CLOUD_SERVERS} from "./constants";
 
 export const formatResponse = (data) => data;
 
