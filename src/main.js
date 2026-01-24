@@ -7,6 +7,7 @@
 // Plugins
 import {registerPlugins} from '@/plugins'
 import {createPinia} from 'pinia'
+import router from './router'
 
 const pinia = createPinia()
 
@@ -23,7 +24,30 @@ import {createApp} from 'vue'
 import messageService from './utils/message';
 import { getVisitorId } from './utils/visitorId';
 
+import * as Sentry from "@sentry/vue";
+
 const app = createApp(App)
+
+Sentry.init({
+  app,
+  dsn: "https://2f8e5e4ec986c6077d3798ba9f683fdd@o4510762489151488.ingest.us.sentry.io/4510762503438336",
+  // Setting this option to true will send default PII data to Sentry.
+  // For example, automatic IP address collection on events
+  sendDefaultPii: true,
+  integrations: [
+    Sentry.browserTracingIntegration({ router }),
+    Sentry.replayIntegration()
+  ],
+  // Tracing
+  tracesSampleRate: 1.0, // Capture 100% of the transactions
+  // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+  tracePropagationTargets: ["localhost", /^https:\/\/yourserver\.io\/api/],
+  // Session Replay
+  replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
+  replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.,
+  // Logs
+  enableLogs: true
+});
 
 registerPlugins(app)
 //app.use(TDesign)
