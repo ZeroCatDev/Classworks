@@ -190,6 +190,18 @@
                     <v-btn size="small" variant="text" prepend-icon="mdi-open-in-new" @click="goToDebug">查看 /debug 页面</v-btn>
                   </div>
                   <v-alert v-if="copyOk" type="success" density="compact" class="mb-4">已复制到剪贴板</v-alert>
+                  <div class="d-flex gap-2 mb-4">
+                    <v-btn
+                      size="small"
+                      color="primary"
+                      variant="elevated"
+                      prepend-icon="mdi-message-alert"
+                      @click="openFeedback"
+                      block
+                    >
+                      发送错误反馈到 Sentry
+                    </v-btn>
+                  </div>
                   <h4 class="text-subtitle-1 mb-2">反馈渠道</h4>
                   <v-list lines="one" class="bg-transparent">
                     <v-list-item :href="qqGroupLink" target="_blank" prepend-icon="mdi-qqchat">
@@ -357,6 +369,15 @@ export default {
       return `mailto:sun@wuyuan.dev?subject=${subject}&body=${body}`;
     });
 
+    const openFeedback = () => {
+      // 打开反馈对话框
+      if (typeof window.openSentryFeedback === 'function') {
+        window.openSentryFeedback();
+      } else {
+        console.warn('Sentry Feedback 功能不可用');
+      }
+    };
+
     onMounted(() => {
       loadDependencies();
     });
@@ -374,6 +395,7 @@ export default {
       reloadVisitorId,
       openReportDialog,
       copyEnvInfo,
+      openFeedback,
       envBoxText,
       envInfo,
       reportBody,
