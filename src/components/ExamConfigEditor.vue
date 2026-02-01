@@ -1867,7 +1867,7 @@ export default {
         const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
 
         // 构建examaware://协议URL
-        const ea2Url = `examaware://player?file=${base64Data}`;
+        const ea2Url = `examaware://player?data=${encodeURIComponent(base64Data)}`;
 
         // 尝试打开
         window.location.href = ea2Url;
