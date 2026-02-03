@@ -10,6 +10,47 @@
     <v-card-text>
       <v-row>
         <v-col class="mx-auto" cols="12" md="8">
+          <!-- 捐赠卡片 -->
+          <v-card
+            border
+            class="donation-card gradient-donation clickable mb-6"
+            color="pink-lighten-4"
+            elevation="8"
+            hover
+            rounded="xl"
+            variant="tonal"
+            @click="openDonationLink"
+          >
+            <v-card-item>
+              <div class="card-content">
+                <div>
+                  <div class="text-h6 font-weight-bold">❤️ 支持 Classworks</div>
+                  <div class="text-caption text-medium-emphasis mt-1">
+                    您的捐赠将帮助项目持续发展
+                  </div>
+                </div>
+              </div>
+            </v-card-item>
+            <v-card-text>
+              <p class="text-body-2 mb-3">
+                Classworks 是一个完全开源免费的项目，由社区开发者们利用业余时间维护。
+                如果这个工具对您有帮助，您可以考虑通过爱发电支持开发者。
+              </p>
+              <div class="mt-4">
+                <v-btn
+                  append-icon="mdi-heart"
+                  class="text-none"
+                  color="pink"
+                  rounded="xl"
+                  variant="elevated"
+                  @click="openDonationLink"
+                >
+                  前往爱发电支持开发者
+                </v-btn>
+              </div>
+            </v-card-text>
+          </v-card>
+
           <div class="d-flex flex-column align-start">
             <v-avatar class="mb-4" size="120">
               <v-img
@@ -378,6 +419,10 @@ export default {
       }
     };
 
+    const openDonationLink = () => {
+      window.open('https://afdian.com/a/wydev', '_blank');
+    };
+
     onMounted(() => {
       loadDependencies();
     });
@@ -396,6 +441,7 @@ export default {
       openReportDialog,
       copyEnvInfo,
       openFeedback,
+      openDonationLink,
       envBoxText,
       envInfo,
       reportBody,
@@ -405,3 +451,31 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.gradient-donation {
+  background: linear-gradient(135deg, rgba(236, 64, 122, 0.15), rgba(233, 30, 99, 0.08) 60%);
+  border: 2px solid rgba(236, 64, 122, 0.25);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.gradient-donation:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(236, 64, 122, 0.3) !important;
+}
+
+.gradient-donation:active {
+  transform: translateY(-2px);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.card-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+</style>
