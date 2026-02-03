@@ -39,6 +39,7 @@
               <div class="mt-4">
                 <v-btn
                   append-icon="mdi-heart"
+                  aria-label="Support Classworks on Aifadian"
                   class="text-none"
                   color="pink"
                   rounded="xl"
@@ -467,10 +468,6 @@ export default {
 
 .gradient-donation:active {
   transform: translateY(-2px);
-}
-
-.clickable {
-  cursor: pointer;
 }
 
 .card-content {
