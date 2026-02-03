@@ -24,16 +24,14 @@
             <v-card-item>
               <div class="card-content">
                 <div>
-                  <div class="text-h6 font-weight-bold">请捐赠给 Classworks</div>
-                  <div class="text-caption text-medium-emphasis mt-1">
-                    您的捐赠将帮助项目持续发展
-                  </div>
+                  <div class="text-h6 font-weight-bold">请支持我们 Classworks</div>
+ 
                 </div>
               </div>
             </v-card-item>
             <v-card-text>
               <p class="text-body-2 mb-3">
-                我是Classworks的开发者孙悟元，是一名高二的中国在校学生。Classworks 是一个完全开源免费的项目。如果可以，请捐赠我们。
+                我是Classworks的开发者孙悟元，是一名高二的中国在校学生。Classworks 是一个完全开源免费的项目。如果可以，欢迎打赏。
               </p>
               <div class="mt-4">
                 <v-btn
