@@ -24,7 +24,7 @@
             <v-card-item>
               <div class="card-content">
                 <div>
-                  <div class="text-h6 font-weight-bold">❤️ 支持 Classworks</div>
+                  <div class="text-h6 font-weight-bold">请捐赠给 Classworks</div>
                   <div class="text-caption text-medium-emphasis mt-1">
                     您的捐赠将帮助项目持续发展
                   </div>
@@ -33,8 +33,7 @@
             </v-card-item>
             <v-card-text>
               <p class="text-body-2 mb-3">
-                Classworks 是一个完全开源免费的项目，由社区开发者们利用业余时间维护。
-                如果这个工具对您有帮助，您可以考虑通过爱发电支持开发者。
+                我是Classworks的开发者孙悟元，是一名高二的中国在校学生。Classworks 是一个完全开源免费的项目。如果可以，请捐赠我们。
               </p>
               <div class="mt-4">
                 <v-btn
@@ -46,7 +45,7 @@
                   variant="elevated"
                   @click="openDonationLink"
                 >
-                  前往爱发电支持开发者
+                  爱发电
                 </v-btn>
               </div>
             </v-card-text>
