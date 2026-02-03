@@ -10,6 +10,45 @@
     <v-card-text>
       <v-row>
         <v-col class="mx-auto" cols="12" md="8">
+          <!-- 捐赠卡片 -->
+          <v-card
+            border
+            class="donation-card gradient-donation clickable mb-6"
+            color="pink-lighten-4"
+            elevation="8"
+            hover
+            rounded="xl"
+            variant="tonal"
+            @click="openDonationLink"
+          >
+            <v-card-item>
+              <div class="card-content">
+                <div>
+                  <div class="text-h6 font-weight-bold">请支持我们 Classworks</div>
+ 
+                </div>
+              </div>
+            </v-card-item>
+            <v-card-text>
+              <p class="text-body-2 mb-3">
+                我是Classworks的开发者孙悟元，是一名高二的中国在校学生。Classworks 是一个完全开源免费的项目。如果可以，欢迎打赏。
+              </p>
+              <div class="mt-4">
+                <v-btn
+                  append-icon="mdi-heart"
+                  aria-label="Support Classworks on Aifadian"
+                  class="text-none"
+                  color="pink"
+                  rounded="xl"
+                  variant="elevated"
+                  @click="openDonationLink"
+                >
+                  爱发电
+                </v-btn>
+              </div>
+            </v-card-text>
+          </v-card>
+
           <div class="d-flex flex-column align-start">
             <v-avatar class="mb-4" size="120">
               <v-img
@@ -378,6 +417,10 @@ export default {
       }
     };
 
+    const openDonationLink = () => {
+      window.open('https://afdian.com/a/wydev', '_blank');
+    };
+
     onMounted(() => {
       loadDependencies();
     });
@@ -396,6 +439,7 @@ export default {
       openReportDialog,
       copyEnvInfo,
       openFeedback,
+      openDonationLink,
       envBoxText,
       envInfo,
       reportBody,
@@ -405,3 +449,27 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.gradient-donation {
+  background: linear-gradient(135deg, rgba(236, 64, 122, 0.15), rgba(233, 30, 99, 0.08) 60%);
+  border: 2px solid rgba(236, 64, 122, 0.25);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.gradient-donation:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(236, 64, 122, 0.3) !important;
+}
+
+.gradient-donation:active {
+  transform: translateY(-2px);
+}
+
+.card-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+</style>
