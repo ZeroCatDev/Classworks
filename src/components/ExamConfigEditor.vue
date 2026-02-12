@@ -1782,7 +1782,7 @@ export default {
 
         if (result.success && result.url) {
           // 构建考试页面URL
-          const examUrl = `https://es.examaware.tech/exam/?configUrl=${encodeURIComponent(result.url)}`;
+          const examUrl = `https://es.examaware.cn/exam/?configUrl=${encodeURIComponent(result.url)}`;
 
           // 在新窗口中打开
           window.open(examUrl, '_blank');
