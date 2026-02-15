@@ -8,7 +8,7 @@
 
 适用于班级大屏的作业板小工具
 
-请打开 [https://cs.houlangs.com](https://cs.houlangs.com) 立刻使用
+请打开 [https://cs.houlangs.com](https://cs.houlang.cloud) 立刻使用
 
 ## 交流
 
