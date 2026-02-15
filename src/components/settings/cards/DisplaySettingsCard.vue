@@ -20,6 +20,15 @@
       <setting-item :setting-key="'display.enhancedTouchMode'"/>
 
       <v-divider class="my-2"/>
+      <setting-item :setting-key="'display.backgroundImage'"/>
+
+      <v-divider class="my-2"/>
+      <setting-item :setting-key="'display.backgroundBlur'"/>
+
+      <v-divider class="my-2"/>
+      <setting-item :setting-key="'display.backgroundDim'"/>
+
+      <v-divider class="my-2"/>
       <setting-item :setting-key="'display.showQuickTools'"/>
 
       <v-divider class="my-2"/>
