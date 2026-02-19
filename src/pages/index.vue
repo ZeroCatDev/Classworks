@@ -1,4 +1,16 @@
 <template>
+  <div
+    v-if="hasBackgroundImage"
+    class="home-background"
+    :style="backgroundImageStyle"
+    aria-hidden="true"
+  ></div>
+  <div
+    v-if="hasBackgroundImage"
+    class="home-background-overlay"
+    :style="backgroundOverlayStyle"
+    aria-hidden="true"
+  ></div>
   <v-app-bar class="no-select">
     <v-app-bar-title>
       {{ titleText }}
@@ -656,6 +668,48 @@ export default {
       } else {
         return `${deviceName} - ${currentDateStr}的作业`;
       }
+    },
+    hasBackgroundImage() {
+      return !!this.backgroundImageUrl;
+    },
+    backgroundImageUrl() {
+      void this.settingsTick;
+      return (getSetting("display.backgroundImage") || "").trim();
+    },
+    backgroundBlurAmount() {
+      void this.settingsTick;
+      const value = Number(getSetting("display.backgroundBlur"));
+      return Number.isFinite(value) ? value : 0;
+    },
+    backgroundDimAmount() {
+      void this.settingsTick;
+      const value = Number(getSetting("display.backgroundDim"));
+      return Number.isFinite(value) ? value : 0;
+    },
+    backgroundImageStyle() {
+      const url = this.backgroundImageUrl;
+      if (!this.isSafeBackgroundUrl(url)) return { display: "none" };
+      const safeUrl = this.sanitizeBackgroundUrl(url);
+      if (!safeUrl) return { display: "none" };
+
+      const blur = Math.min(Math.max(this.backgroundBlurAmount, 0), 50);
+      const escaped = this.cssEscape(safeUrl);
+      return {
+        backgroundImage: `url("${escaped}")`,
+        filter: `blur(${blur}px)`,
+      };
+    },
+    backgroundOverlayStyle() {
+      if (!this.hasBackgroundImage) return { display: "none" };
+
+      const dim = Math.min(Math.max(this.backgroundDimAmount, 0), 90);
+      // Slightly reduce overlay blur to avoid overwhelming foreground
+      const overlayBlur =
+        Math.min(Math.max(this.backgroundBlurAmount, 0), 50) / 3;
+      return {
+        backgroundColor: `rgba(0, 0, 0, ${dim / 100})`,
+        backdropFilter: `blur(${overlayBlur}px)`,
+      };
     },
     sortedItems() {
       const items = [];
@@ -2180,6 +2234,36 @@ export default {
 
       return nameMap[lastPart] || lastPart;
     },
+    isSafeBackgroundUrl(url) {
+      if (!url) return false;
+      const trimmed = url.trim();
+      if (/^(javascript|data|vbscript):/i.test(trimmed)) return false;
+
+      try {
+        const parsed = new URL(trimmed, window.location.origin);
+        const protocol = parsed.protocol.replace(":", "");
+        if (!["http", "https"].includes(protocol)) return false;
+        if (parsed.pathname.includes("..")) return false;
+        return true;
+      } catch (e) {
+        return false;
+      }
+    },
+    sanitizeBackgroundUrl(url) {
+      if (!this.isSafeBackgroundUrl(url)) return "";
+      try {
+        const parsed = new URL(url, window.location.origin);
+        return parsed.href;
+      } catch (e) {
+        return "";
+      }
+    },
+    cssEscape(value) {
+      if (typeof CSS !== "undefined" && CSS.escape) {
+        return CSS.escape(value);
+      }
+      return encodeURI(value);
+    },
 
     safeBase64Decode(base64String) {
       try {
@@ -2377,3 +2461,20 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.home-background,
+.home-background-overlay {
+  position: fixed;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  transition: opacity 0.3s ease, filter 0.3s ease, background-color 0.3s ease;
+}
+
+.home-background {
+  transform: scale(1.02); /* slight zoom to mask blur edges */
+}
+</style>

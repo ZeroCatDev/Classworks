@@ -147,6 +147,26 @@ const settingsDefinitions = {
     description: "是否启用增强触摸模式",
     icon: "mdi-gesture-tap-button",
   },
+  "display.backgroundImage": {
+    type: "string",
+    default: "",
+    description: "主页背景图地址",
+    icon: "mdi-image-outline",
+  },
+  "display.backgroundBlur": {
+    type: "number",
+    default: 12,
+    validate: (value) => value >= 0 && value <= 50,
+    description: "背景模糊强度",
+    icon: "mdi-blur",
+  },
+  "display.backgroundDim": {
+    type: "number",
+    default: 35,
+    validate: (value) => value >= 0 && value <= 90,
+    description: "背景暗色程度（%）",
+    icon: "mdi-weather-night",
+  },
   "display.showAntiScreenBurnCard": {
     type: "boolean",
     default: false,
