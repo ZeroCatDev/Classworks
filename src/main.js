@@ -34,7 +34,7 @@ let feedbackIntegration = null;
 // 初始化 Sentry，但暂不启用 Replay
 Sentry.init({
   app,
-  dsn: "https://2f8e5e4ec986c6077d3798ba9f683fdd@o4510762489151488.ingest.us.sentry.io/4510762503438336",
+  dsn: "https://c7f4eeab1055a53941738c36868bc2df@report.houlang.cloud/4",
   // Setting this option to true will send default PII data to Sentry.
   // For example, automatic IP address collection on events
   sendDefaultPii: true,
@@ -71,7 +71,7 @@ Sentry.init({
   // Tracing
   tracesSampleRate: 1.0, // Capture 100% of the transactions
   // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-  tracePropagationTargets: ["localhost", /^https:\/\/kv-service\.(houlang\.cloud|wuyuan\.dev)/],
+  tracePropagationTargets: ["localhost", /^https?:\/\/cs\.(houlang\.cloud|houlangs\.com)/],
   // Session Replay - 关闭自动录制
   replaysSessionSampleRate: 0, // 不自动录制会话
   replaysOnErrorSampleRate: 0, // 不在错误时自动录制（改为手动触发）
