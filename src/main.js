@@ -34,7 +34,7 @@ let feedbackIntegration = null;
 // 初始化 Sentry，但暂不启用 Replay
 Sentry.init({
   app,
-  dsn: "https://c7f4eeab1055a53941738c36868bc2df@report.houlang.cloud/4",
+  dsn: "https://dc34ab47426f49c0925445f0d87b7007@report.houlang.cloud/6",
   // Setting this option to true will send default PII data to Sentry.
   // For example, automatic IP address collection on events
   sendDefaultPii: true,
