@@ -11,8 +11,13 @@
         }"
         class="grid-item"
       >
+        <!-- 时间卡片 -->
+        <div v-if="item.type === 'time'" style="height: 100%">
+          <time-card />
+        </div>
+
         <!-- 一言卡片 -->
-        <div v-if="item.type === 'hitokoto'" style="height: 100%">
+        <div v-else-if="item.type === 'hitokoto'" style="height: 100%">
           <hitokoto-card />
         </div>
 
@@ -204,6 +209,7 @@
 
 <script>
 import HitokotoCard from "@/components/HitokotoCard.vue";
+import TimeCard from "@/components/TimeCard.vue";
 import ConciseExamCard from "@/components/home/ConciseExamCard.vue";
 import {getSetting} from "@/utils/settings.js";
 
@@ -216,6 +222,7 @@ export default {
   },
   components: {
     HitokotoCard,
+    TimeCard,
     ConciseExamCard,
   },
   props: {

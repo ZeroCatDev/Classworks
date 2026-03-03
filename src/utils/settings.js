@@ -100,6 +100,14 @@ const settingsDefinitions = {
     icon: "mdi-card-outline",
   },
 
+  // 时间卡片设置
+  "timeCard.enabled": {
+    type: "boolean",
+    default: true,
+    description: "启用时间卡片",
+    icon: "mdi-clock-outline",
+  },
+
   // 一言设置
   "hitokoto.enabled": {
     type: "boolean",

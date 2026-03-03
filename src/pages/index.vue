@@ -713,6 +713,17 @@ export default {
         }
       }
 
+      // 添加时间卡片
+      if (getSetting("timeCard.enabled")) {
+        items.push({
+          key: "time-card",
+          name: "时间",
+          type: "time",
+          order: 9997,
+          rowSpan: 150,
+        });
+      }
+
       // 添加一言卡片
       if (getSetting("hitokoto.enabled")) {
         items.push({
