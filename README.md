@@ -8,7 +8,7 @@
 
 适用于班级大屏的作业板小工具
 
-请打开 [https://cs.houlangs.com](https://cs.houlangs.com) 立刻使用
+请打开 [https://cs.houlangs.com](https://cs.houlang.cloud) 立刻使用
 
 ## 交流
 
@@ -61,5 +61,4 @@ ZeroCat 的项目 遵循 [Contributor Covenant](http://contributor-covenant.org/
 ZeroCat 社区项目遵循 [AGPL-3.0 许可证](LICENSE)。
 
 
-版权所有 (C) 2020-2024 孙悟元。
-Copyright (C) 2020-2024  Sun Wuyuan.
+Copyright (C) 2020-2026  Sunwuyuan.

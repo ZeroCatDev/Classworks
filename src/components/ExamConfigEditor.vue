@@ -1782,7 +1782,7 @@ export default {
 
         if (result.success && result.url) {
           // 构建考试页面URL
-          const examUrl = `https://es.examaware.tech/exam/?configUrl=${encodeURIComponent(result.url)}`;
+          const examUrl = `https://es.examaware.cn/exam/?configUrl=${encodeURIComponent(result.url)}`;
 
           // 在新窗口中打开
           window.open(examUrl, '_blank');
@@ -1867,7 +1867,7 @@ export default {
         const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
 
         // 构建examaware://协议URL
-        const ea2Url = `examaware://player?data=${base64Data}`;
+        const ea2Url = `examaware://player?data=${encodeURIComponent(base64Data)}`;
 
         // 尝试打开
         window.location.href = ea2Url;
