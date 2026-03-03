@@ -218,8 +218,16 @@
 <script>
 import UnsavedWarning from "../common/UnsavedWarning.vue";
 import "@/styles/warnings.scss";
-import {pinyin} from "pinyin-pro";
 import dataProvider from "@/utils/dataProvider";
+
+// pinyin-pro (~100KB) 按需动态加载
+let _pinyin = null;
+async function loadPinyin() {
+  if (!_pinyin) {
+    _pinyin = (await import('pinyin-pro')).pinyin;
+  }
+  return _pinyin;
+}
 import {getSetting} from "@/utils/settings";
 
 export default {
@@ -440,10 +448,11 @@ export default {
       }
     },
 
-    sortStudentsByPinyin() {
+    async sortStudentsByPinyin() {
+      const pinyinFn = await loadPinyin();
       const sorted = [...this.modelValue.list].sort((a, b) => {
-        const pinyinA = pinyin(a.name, {toneType: "none"});
-        const pinyinB = pinyin(b.name, {toneType: "none"});
+        const pinyinA = pinyinFn(a.name, {toneType: "none"});
+        const pinyinB = pinyinFn(b.name, {toneType: "none"});
         return pinyinA.localeCompare(pinyinB);
       });
       sorted.forEach((s, i) => s.id = i + 1);

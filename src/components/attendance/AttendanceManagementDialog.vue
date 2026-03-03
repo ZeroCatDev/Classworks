@@ -242,7 +242,6 @@
 </template>
 
 <script>
-import { pinyin } from "pinyin-pro";
 import { useDisplay } from "vuetify";
 import { getSetting } from "@/utils/settings";
 
@@ -328,11 +327,7 @@ export default {
 
       return Array.from(surnameMap.entries())
         .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => {
-          const pinyinA = pinyin(a.name, { toneType: "none" });
-          const pinyinB = pinyin(b.name, { toneType: "none" });
-          return pinyinA.localeCompare(pinyinB);
-        });
+        .sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
     },
   },
   methods: {

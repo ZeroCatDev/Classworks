@@ -63,7 +63,10 @@
     @token-info-updated="updateTokenDisplayInfo"
   />
 
-  <div v-if="!shouldShowInit" class="d-flex">
+  <!-- 首屏骨架屏（数据加载中显示） -->
+  <HomeSkeleton v-if="!shouldShowInit && !dataReady" />
+
+  <div v-if="!shouldShowInit && dataReady" class="d-flex">
     <!-- 主要内容区域 -->
     <v-container class="main-window flex-grow-1 no-select bloom-container" fluid>
       <!-- 常驻通知区域 -->
@@ -430,23 +433,73 @@
 </template>
 
 <script>
-import MessageLog from "@/components/MessageLog.vue";
-import RandomPicker from "@/components/RandomPicker.vue";
-import FloatingToolbar from "@/components/FloatingToolbar.vue";
-import FloatingICP from "@/components/FloatingICP.vue";
-import ChatWidget from "@/components/ChatWidget.vue";
-import HomeworkEditDialog from "@/components/HomeworkEditDialog.vue";
-import InitServiceChooser from "@/components/InitServiceChooser.vue";
-import StudentNameManager from "@/components/StudentNameManager.vue";
-import UrgentTestDialog from "@/components/UrgentTestDialog.vue";
-import AttendanceSidebar from "@/components/attendance/AttendanceSidebar.vue";
-import AttendanceManagementDialog from "@/components/attendance/AttendanceManagementDialog.vue";
+import { defineAsyncComponent } from "vue";
+import AsyncLoadingPlaceholder from "@/components/common/AsyncLoadingPlaceholder.vue";
+
+// ===== 首屏核心组件（同步加载）=====
 import HomeworkGrid from "@/components/home/HomeworkGrid.vue";
 import HomeActions from "@/components/home/HomeActions.vue";
-import PwaInstallCard from "@/components/PwaInstallCard.vue";
-import ExamScheduleCard from "@/components/home/ExamScheduleCard.vue";
-import ExamConfigEditor from "@/components/ExamConfigEditor.vue";
+import FloatingICP from "@/components/FloatingICP.vue";
 import HitokotoCard from "@/components/HitokotoCard.vue";
+import HomeSkeleton from "@/components/common/HomeSkeleton.vue";
+
+// ===== 非首屏 / 条件渲染组件（异步懒加载）=====
+const MessageLog = defineAsyncComponent({
+  loader: () => import("@/components/MessageLog.vue"),
+  loadingComponent: AsyncLoadingPlaceholder,
+  delay: 200,
+});
+const RandomPicker = defineAsyncComponent({
+  loader: () => import("@/components/RandomPicker.vue"),
+  delay: 0,
+});
+const FloatingToolbar = defineAsyncComponent({
+  loader: () => import("@/components/FloatingToolbar.vue"),
+  delay: 200,
+});
+const ChatWidget = defineAsyncComponent({
+  loader: () => import("@/components/ChatWidget.vue"),
+  delay: 0,
+});
+const HomeworkEditDialog = defineAsyncComponent({
+  loader: () => import("@/components/HomeworkEditDialog.vue"),
+  delay: 0,
+});
+const InitServiceChooser = defineAsyncComponent({
+  loader: () => import("@/components/InitServiceChooser.vue"),
+  loadingComponent: AsyncLoadingPlaceholder,
+  delay: 200,
+});
+const StudentNameManager = defineAsyncComponent({
+  loader: () => import("@/components/StudentNameManager.vue"),
+  delay: 200,
+});
+const UrgentTestDialog = defineAsyncComponent({
+  loader: () => import("@/components/UrgentTestDialog.vue"),
+  delay: 0,
+});
+const AttendanceSidebar = defineAsyncComponent({
+  loader: () => import("@/components/attendance/AttendanceSidebar.vue"),
+  loadingComponent: AsyncLoadingPlaceholder,
+  delay: 200,
+});
+const AttendanceManagementDialog = defineAsyncComponent({
+  loader: () => import("@/components/attendance/AttendanceManagementDialog.vue"),
+  delay: 0,
+});
+const PwaInstallCard = defineAsyncComponent({
+  loader: () => import("@/components/PwaInstallCard.vue"),
+  delay: 200,
+});
+const ExamScheduleCard = defineAsyncComponent({
+  loader: () => import("@/components/home/ExamScheduleCard.vue"),
+  loadingComponent: AsyncLoadingPlaceholder,
+  delay: 200,
+});
+const ExamConfigEditor = defineAsyncComponent({
+  loader: () => import("@/components/ExamConfigEditor.vue"),
+  delay: 0,
+});
 import dataProvider from "@/utils/dataProvider";
 import { useExamStore } from "@/stores/examStore";
 import {
@@ -457,9 +510,6 @@ import {
 } from "@/utils/settings";
 import { kvServerProvider } from "@/utils/providers/kvServerProvider";
 import { useDisplay } from "vuetify";
-import "../styles/index.scss";
-import "../styles/transitions.scss";
-import "../styles/global.scss";
 import { debounce, throttle } from "@/utils/debounce";
 import { Base64 } from "js-base64";
 import {
@@ -491,6 +541,7 @@ export default {
     PwaInstallCard,
     ExamScheduleCard,
     ExamConfigEditor,
+    HomeSkeleton,
   },
   setup() {
     const { mobile } = useDisplay();
@@ -563,6 +614,7 @@ export default {
         students: false,
         copyToToday: false,
       },
+      dataReady: false,
       debouncedUpload: null,
       debouncedAttendanceSave: null,
       throttledReflow: null,
@@ -948,6 +1000,7 @@ export default {
     try {
       this.updateBackendUrl();
       await this.initializeData();
+      this.dataReady = true;
       // 拉取设备/命名空间信息用于标题显示
       await this.loadDeviceInfo();
       this.setupAutoRefresh();

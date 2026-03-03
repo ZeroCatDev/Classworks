@@ -32,6 +32,11 @@ onMounted(() => {
 });
 </script>
 <style>
+/* 全局样式（从 index.vue 迁移，确保全局可用且仅加载一次） */
+@import "@/styles/index.scss";
+@import "@/styles/transitions.scss";
+@import "@/styles/global.scss";
+
 .md3-enter-active,
 .md3-leave-active {
   transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),

@@ -158,11 +158,11 @@ export default defineConfig({
       },
     }),
     Components({
-      //resolvers: [
-      //  TDesignResolver({
-      //    library: 'vue-next'
-      //  })
-      //]
+      // 排除已在 index.vue 中通过 defineAsyncComponent 手动懒加载的组件
+      // 避免 unplugin-vue-components 生成冲突的静态 import
+      directoryAsNamespace: false,
+      globs: ['src/components/**/[A-Z]*.vue'],
+      exclude: [/pages\/index\.vue$/],
     }),
     Fonts({
       google: {
@@ -197,6 +197,26 @@ export default defineConfig({
       '.tsx',
       '.vue',
     ],
+  },
+  build: {
+    // ===== Chunk 分割优化 =====
+    chunkSizeWarningLimit: 500,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // 核心框架（极少变动，长缓存）
+          'vendor-vue': ['vue', 'vue-router', 'pinia'],
+          // UI 框架
+          'vendor-vuetify': ['vuetify'],
+          // 监控（异步加载，独立 chunk）
+          'vendor-sentry': ['@sentry/vue'],
+          // 实时通信
+          'vendor-socket': ['socket.io-client'],
+          // 通用工具库
+          'vendor-utils': ['axios', 'uuid', 'js-base64'],
+        },
+      },
+    },
   },
   server: {
     port: 3031,

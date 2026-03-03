@@ -21,8 +21,16 @@
 </template>
 
 <script>
-import Typewriter from "typewriter-effect/dist/core";
 import quotes from "@/data/echoChamber.json";
+
+// typewriter-effect 按需动态加载
+let TypewriterClass = null;
+async function getTypewriter() {
+  if (!TypewriterClass) {
+    TypewriterClass = (await import('typewriter-effect/dist/core')).default;
+  }
+  return TypewriterClass;
+}
 import SettingsCard from "@/components/SettingsCard.vue";
 
 const INITIAL_STATE = {
@@ -50,7 +58,8 @@ export default {
   },
 
   methods: {
-    initTypewriters() {
+    async initTypewriters() {
+      const Typewriter = await getTypewriter();
       this.typewriter = new Typewriter(this.$refs.typewriter, TYPEWRITER_CONFIG.main);
       this.sourceWriter = new Typewriter(this.$refs.sourceWriter, TYPEWRITER_CONFIG.source);
       this.typeQuote(INITIAL_STATE);
