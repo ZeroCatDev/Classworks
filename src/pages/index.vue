@@ -687,11 +687,21 @@ export default {
       return this.mobile;
     },
     titleText() {
-      // 优先展示当前设备名称（如果已从云端获取）
-      const deviceName =
-        this.state.namespaceInfo?.device?.name ||
-        this.state.classNumber ||
-        "高三八班";
+      const provider = getSetting("server.provider");
+      const isOnline = provider === "kv-server" || provider === "classworkscloud";
+
+      let displayName;
+      if (isOnline && this.state.namespaceInfo) {
+        // 非离线模式：优先使用自动获取的命名空间名称
+        displayName =
+          this.state.namespaceInfo?.name ||
+          this.state.namespaceInfo?.device?.name ||
+          this.state.classNumber ||
+          "高三八班";
+      } else {
+        // 离线模式：使用本地设置的班级编号
+        displayName = this.state.classNumber || "高三八班";
+      }
 
       const today = this.getToday();
       const yesterday = new Date(today);
@@ -702,11 +712,11 @@ export default {
       const yesterdayStr = this.formatDate(yesterday);
 
       if (currentDateStr === todayStr) {
-        return deviceName + " - 今天的作业";
+        return displayName + " - 今天的作业";
       } else if (currentDateStr === yesterdayStr) {
-        return deviceName + " - 昨天的作业";
+        return displayName + " - 昨天的作业";
       } else {
-        return `${deviceName} - ${currentDateStr}的作业`;
+        return `${displayName} - ${currentDateStr}的作业`;
       }
     },
     sortedItems() {
