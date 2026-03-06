@@ -174,14 +174,6 @@
           />
         </v-tabs-window-item>
 
-        <v-tabs-window-item value="theme">
-          <theme-settings-card
-            :loading="loading.theme"
-            border
-            @saved="onSettingsSaved"
-          />
-        </v-tabs-window-item>
-
         <v-tabs-window-item value="notification">
           <notification-sound-settings border />
         </v-tabs-window-item>
@@ -262,7 +254,6 @@ import EditSettingsCard from "@/components/settings/cards/EditSettingsCard.vue";
 import RefreshSettingsCard from "@/components/settings/cards/RefreshSettingsCard.vue";
 import DisplaySettingsCard from "@/components/settings/cards/DisplaySettingsCard.vue";
 import DataProviderSettingsCard from "@/components/settings/cards/DataProviderSettingsCard.vue";
-import ThemeSettingsCard from "@/components/settings/cards/ThemeSettingsCard.vue";
 import EchoChamberCard from "@/components/settings/cards/EchoChamberCard.vue";
 import {
   getSetting,
@@ -298,7 +289,6 @@ export default {
     TeacherListCard,
     AboutCard,
     DataProviderSettingsCard,
-    ThemeSettingsCard,
     EchoChamberCard,
     SettingsExplorer,
     SettingsLinkGenerator,
@@ -423,11 +413,6 @@ export default {
           title: "显示",
           icon: "mdi-eye",
           value: "display",
-        },
-        {
-          title: "主题",
-          icon: "mdi-theme-light-dark",
-          value: "theme",
         },
         {
           title: "通知铃声",
