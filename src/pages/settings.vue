@@ -172,10 +172,10 @@
             border
             @saved="onSettingsSaved"
           />
-          <noise-settings-card
-            border
-            class="mt-4"
-          />
+        </v-tabs-window-item>
+
+        <v-tabs-window-item value="noise">
+          <noise-settings-card border />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="notification">
@@ -419,6 +419,11 @@ export default {
           title: "显示",
           icon: "mdi-eye",
           value: "display",
+        },
+        {
+          title: "噪音监测",
+          icon: "mdi-microphone",
+          value: "noise",
         },
         {
           title: "通知铃声",

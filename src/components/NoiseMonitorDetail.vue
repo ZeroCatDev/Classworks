@@ -72,15 +72,6 @@
           </v-icon>
           统计报告
         </v-tab>
-        <v-tab value="settings">
-          <v-icon
-            start
-            size="18"
-          >
-            mdi-cog
-          </v-icon>
-          自习配置
-        </v-tab>
       </v-tabs>
 
       <v-divider />
@@ -370,14 +361,12 @@
               </v-btn>
               <v-spacer />
               <v-btn
-                color="deep-purple"
                 variant="tonal"
+                color="deep-purple"
                 prepend-icon="mdi-crosshairs-gps"
-                :disabled="!isMonitoring"
-                :loading="isCalibrating"
-                @click="doCalibrate"
+                @click="openCalibrateDialog"
               >
-                校准({{ calibrateTarget }}dB)
+                校准
               </v-btn>
             </div>
           </v-tabs-window-item>
@@ -772,176 +761,194 @@
               </div>
             </template>
           </v-tabs-window-item>
-
-          <!-- ==================== 自习配置 ==================== -->
-          <v-tabs-window-item value="settings">
-            <div class="pa-5">
-              <div class="d-flex align-center mb-4">
-                <v-icon
-                  class="mr-2"
-                  color="teal"
-                >
-                  mdi-clock-edit-outline
-                </v-icon>
-                <span class="text-subtitle-1 font-weight-bold">晚自习时间段</span>
-                <v-spacer />
-                <v-btn
-                  color="primary"
-                  variant="tonal"
-                  size="small"
-                  prepend-icon="mdi-plus"
-                  @click="addSession"
-                >
-                  添加时段
-                </v-btn>
-              </div>
-
-              <div class="text-caption text-medium-emphasis mb-4">
-                配置晚自习时间段后，系统会在对应时段内自动开启噪音监测并记录统计报告。时间段外不会长期记录。
-              </div>
-
-              <div
-                v-for="(session, idx) in editSessions"
-                :key="idx"
-                class="mb-3"
-              >
-                <v-card
-                  variant="outlined"
-                  rounded="xl"
-                >
-                  <v-card-text class="pa-4">
-                    <div class="d-flex align-center ga-3 flex-wrap">
-                      <v-text-field
-                        v-model="session.name"
-                        density="compact"
-                        variant="outlined"
-                        label="名称"
-                        hide-details
-                        style="max-width: 160px;"
-                      />
-                      <v-menu
-                        v-model="timePickerMenus[idx]"
-                        :close-on-content-click="false"
-                        location="bottom"
-                      >
-                        <template #activator="{ props: menuProps }">
-                          <v-text-field
-                            v-bind="menuProps"
-                            :model-value="session.start"
-                            density="compact"
-                            variant="outlined"
-                            label="开始时间"
-                            readonly
-                            hide-details
-                            prepend-inner-icon="mdi-clock-outline"
-                            style="max-width: 170px;"
-                          />
-                        </template>
-                        <v-time-picker
-                          v-model="session.start"
-                          color="primary"
-                          format="24hr"
-                          scrollable
-                          @update:model-value="timePickerMenus[idx] = false"
-                        />
-                      </v-menu>
-                      <v-text-field
-                        v-model.number="session.duration"
-                        density="compact"
-                        variant="outlined"
-                        type="number"
-                        label="时长"
-                        suffix="分钟"
-                        hide-details
-                        style="max-width: 130px;"
-                        :min="10"
-                        :max="300"
-                      />
-                      <span class="text-caption text-medium-emphasis">
-                        至 {{ sessionEndTime(session) }}
-                      </span>
-                      <v-switch
-                        v-model="session.enabled"
-                        density="compact"
-                        color="primary"
-                        hide-details
-                        label="启用"
-                      />
-                      <v-btn
-                        icon="mdi-delete"
-                        color="error"
-                        size="x-small"
-                        variant="text"
-                        @click="editSessions.splice(idx, 1)"
-                      />
-                    </div>
-                  </v-card-text>
-                </v-card>
-              </div>
-
-              <v-divider class="my-5" />
-
-              <!-- 报警阈值 -->
-              <div class="d-flex align-center mb-4">
-                <v-icon
-                  class="mr-2"
-                  color="orange"
-                >
-                  mdi-alert-decagram
-                </v-icon>
-                <span class="text-subtitle-1 font-weight-bold">监测参数</span>
-              </div>
-
-              <div class="d-flex align-center flex-wrap ga-4 mb-4">
-                <v-text-field
-                  v-model.number="editAlertThreshold"
-                  density="compact"
-                  variant="outlined"
-                  type="number"
-                  label="噪音报警阈值"
-                  suffix="dB"
-                  hide-details
-                  style="max-width: 200px;"
-                  :min="30"
-                  :max="90"
-                />
-                <v-text-field
-                  v-model.number="calibrateTarget"
-                  density="compact"
-                  variant="outlined"
-                  type="number"
-                  label="校准基准"
-                  suffix="dB"
-                  hide-details
-                  style="max-width: 200px;"
-                  :min="20"
-                  :max="80"
-                />
-              </div>
-
-              <v-divider class="my-5" />
-
-              <div class="d-flex justify-end ga-3">
-                <v-btn
-                  variant="text"
-                  @click="resetEditConfig"
-                >
-                  重置
-                </v-btn>
-                <v-btn
-                  color="primary"
-                  variant="elevated"
-                  prepend-icon="mdi-content-save"
-                  @click="saveConfig"
-                >
-                  保存配置
-                </v-btn>
-              </div>
-            </div>
-          </v-tabs-window-item>
         </v-tabs-window>
       </v-card-text>
     </v-card>
+
+    <!-- 校准对话框 -->
+    <v-dialog
+      v-model="showCalibrateDialog"
+      max-width="560"
+      scrollable
+    >
+      <v-card class="rounded-xl">
+        <v-card-title class="d-flex align-center pa-4">
+          <v-icon
+            class="mr-2"
+            color="deep-purple"
+          >
+            mdi-crosshairs-gps
+          </v-icon>
+          <span class="text-h6 font-weight-bold">分贝校准</span>
+          <v-spacer />
+          <v-btn
+            icon="mdi-close"
+            size="small"
+            variant="text"
+            @click="showCalibrateDialog = false"
+          />
+        </v-card-title>
+
+        <v-divider />
+
+        <v-card-text class="pa-5">
+          <!-- 当前校准状态 -->
+          <v-card
+            variant="outlined"
+            class="mb-5"
+          >
+            <v-card-text class="py-3">
+              <div class="text-caption text-medium-emphasis mb-1">
+                当前校准值
+              </div>
+              <div class="d-flex align-center ga-6 flex-wrap">
+                <div>
+                  <span class="text-body-2 text-medium-emphasis">基准分贝：</span>
+                  <span class="text-body-1 font-weight-bold">
+                    {{ calibrationSettings.baselineDb }} dB
+                  </span>
+                </div>
+                <div>
+                  <span class="text-body-2 text-medium-emphasis">基准 RMS：</span>
+                  <span class="text-body-1 font-weight-bold font-monospace">
+                    {{ calibrationSettings.baselineRms != null ? calibrationSettings.baselineRms.toFixed(6) : '未校准' }}
+                  </span>
+                </div>
+                <div>
+                  <span class="text-body-2 text-medium-emphasis">最大分贝：</span>
+                  <span class="text-body-1 font-weight-bold">
+                    {{ calibrationSettings.maxLevelDb }} dB
+                  </span>
+                </div>
+              </div>
+            </v-card-text>
+          </v-card>
+
+          <!-- 自动校准 -->
+          <div class="d-flex align-center mb-2">
+            <v-icon
+              size="18"
+              class="mr-2"
+              color="primary"
+            >
+              mdi-auto-fix
+            </v-icon>
+            <span class="text-subtitle-2 font-weight-medium">自动校准</span>
+          </div>
+          <div class="text-caption text-medium-emphasis mb-3">
+            在已知环境分贝的场景下，输入当前环境的真实分贝值，点击开始后保持环境安静 3 秒。
+          </div>
+          <div class="d-flex align-center ga-3 mb-5 flex-wrap">
+            <v-text-field
+              v-model.number="calibrateTargetDb"
+              density="compact"
+              variant="outlined"
+              type="number"
+              label="目标分贝"
+              suffix="dB"
+              hide-details
+              style="max-width: 160px;"
+              :min="20"
+              :max="80"
+            />
+            <v-btn
+              color="deep-purple"
+              variant="tonal"
+              prepend-icon="mdi-crosshairs-gps"
+              :loading="isCalibrating"
+              :disabled="!isMonitoring"
+              @click="doAutoCalibrate"
+            >
+              开始校准
+            </v-btn>
+            <span
+              v-if="!isMonitoring"
+              class="text-caption text-warning"
+            >
+              需先开启监测
+            </span>
+            <span
+              v-if="calibrateMessage"
+              class="text-caption"
+              :class="calibrateSuccess ? 'text-success' : 'text-error'"
+            >
+              {{ calibrateMessage }}
+            </span>
+          </div>
+
+          <v-divider class="mb-5" />
+
+          <!-- 手动校准 -->
+          <div class="d-flex align-center mb-2">
+            <v-icon
+              size="18"
+              class="mr-2"
+              color="orange"
+            >
+              mdi-pencil-ruler
+            </v-icon>
+            <span class="text-subtitle-2 font-weight-medium">手动校准 / 参数调整</span>
+          </div>
+          <div class="text-caption text-medium-emphasis mb-3">
+            直接输入校准参数。修改后点击保存生效。
+          </div>
+          <div class="d-flex align-center ga-3 mb-4 flex-wrap">
+            <v-text-field
+              v-model.number="editBaselineDb"
+              density="compact"
+              variant="outlined"
+              type="number"
+              label="基准分贝"
+              suffix="dB"
+              hide-details
+              style="max-width: 160px;"
+              :min="20"
+              :max="80"
+            />
+            <v-text-field
+              v-model="editBaselineRms"
+              density="compact"
+              variant="outlined"
+              label="基准 RMS"
+              hide-details
+              style="max-width: 200px;"
+              placeholder="如 0.003200"
+            />
+            <v-text-field
+              v-model.number="editMaxLevelDb"
+              density="compact"
+              variant="outlined"
+              type="number"
+              label="最大显示分贝"
+              suffix="dB"
+              hide-details
+              style="max-width: 180px;"
+              :min="40"
+              :max="120"
+            />
+          </div>
+        </v-card-text>
+
+        <v-card-actions class="px-4 pb-4">
+          <v-btn
+            variant="text"
+            prepend-icon="mdi-restore"
+            @click="resetCalibration"
+          >
+            恢复默认
+          </v-btn>
+          <v-spacer />
+          <v-btn
+            color="primary"
+            variant="elevated"
+            prepend-icon="mdi-content-save"
+            @click="saveManualCalibration"
+          >
+            保存校准
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!-- 清空报告确认 -->
     <v-dialog
@@ -977,6 +984,13 @@
 </template>
 
 <script>
+import {
+  noiseService,
+  getNoiseControlSettings,
+  saveNoiseControlSettings,
+  resetNoiseControlSettings,
+} from '@wydev/noise-core';
+
 export default {
   name: 'NoiseMonitorDetail',
   props: {
@@ -992,27 +1006,31 @@ export default {
     lastSlice: { type: Object, default: null },
     history: { type: Array, default: () => [] },
     isMonitoring: { type: Boolean, default: false },
-    sessionConfig: { type: Object, default: null },
     sessionActive: { type: Boolean, default: false },
     sessionData: { type: Object, default: null },
     reportMeta: { type: Object, default: () => ({ dates: {} }) },
     selectedDate: { type: String, default: '' },
     dateReports: { type: Array, default: () => [] },
   },
-  emits: ['update:modelValue', 'start', 'stop', 'calibrate', 'clear-history', 'save-config', 'select-date', 'clear-date-reports', 'clear-all-reports'],
+  emits: ['update:modelValue', 'start', 'stop', 'clear-history', 'select-date', 'clear-date-reports', 'clear-all-reports'],
   data() {
     return {
       activeTab: 'realtime',
-      calibrateTarget: 40,
-      isCalibrating: false,
       confirmClearMode: '', // '' | 'date' | 'all'
       waveformWidth: 600,
       reportChartWidth: 600,
       selectedReportIndex: 0,
-      // 编辑态配置
-      editSessions: [],
-      editAlertThreshold: 55,
-      timePickerMenus: {},
+      // 校准
+      showCalibrateDialog: false,
+      calibrationSettings: {},
+      calibrateTargetDb: 40,
+      isCalibrating: false,
+      calibrateMessage: '',
+      calibrateSuccess: false,
+      editBaselineDb: 40,
+      editBaselineRms: '',
+      editMaxLevelDb: 100,
+
     }
   },
   computed: {
@@ -1150,7 +1168,6 @@ export default {
           this.updateWaveformWidth()
           this.updateReportChartWidth()
         })
-        this.resetEditConfig()
       }
     },
     activeTab() {
@@ -1169,7 +1186,6 @@ export default {
   mounted() {
     this.updateWaveformWidth()
     window.addEventListener('resize', this.handleResize)
-    this.resetEditConfig()
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.handleResize)
@@ -1195,11 +1211,6 @@ export default {
     reportDbToY(db) {
       return 140 - Math.max(0, Math.min(100, db)) / 100 * 140
     },
-    doCalibrate() {
-      this.isCalibrating = true
-      this.$emit('calibrate', this.calibrateTarget)
-      setTimeout(() => { this.isCalibrating = false }, 3500)
-    },
     doClearReports() {
       if (this.confirmClearMode === 'all') {
         this.$emit('clear-all-reports')
@@ -1208,34 +1219,6 @@ export default {
       }
       this.confirmClearMode = ''
       this.selectedReportIndex = 0
-    },
-    resetEditConfig() {
-      if (this.sessionConfig) {
-        this.editSessions = JSON.parse(JSON.stringify(this.sessionConfig.sessions || []))
-        this.editAlertThreshold = this.sessionConfig.alertThresholdDb || 55
-      }
-    },
-    addSession() {
-      this.editSessions.push({
-        name: `第${this.editSessions.length + 1}节晚自习`,
-        start: '19:00',
-        duration: 70,
-        enabled: true,
-      })
-    },
-    sessionEndTime(session) {
-      if (!session?.start || !session?.duration) return '--:--'
-      const [h, m] = session.start.split(':').map(Number)
-      const totalMin = h * 60 + m + (session.duration || 0)
-      const eh = Math.floor(totalMin / 60) % 24
-      const em = totalMin % 60
-      return `${String(eh).padStart(2, '0')}:${String(em).padStart(2, '0')}`
-    },
-    saveConfig() {
-      this.$emit('save-config', {
-        sessions: this.editSessions,
-        alertThresholdDb: this.editAlertThreshold,
-      })
     },
     formatDateLabel(dateStr) {
       if (!dateStr) return ''
@@ -1284,6 +1267,48 @@ export default {
       if (score >= 60) return '一般'
       if (score >= 40) return '较差'
       return '极差'
+    },
+
+    // ===== 校准 =====
+    openCalibrateDialog() {
+      this.refreshCalibrationSettings()
+      this.showCalibrateDialog = true
+    },
+    refreshCalibrationSettings() {
+      const s = getNoiseControlSettings()
+      this.calibrationSettings = s
+      this.editBaselineDb = s.baselineDb
+      this.editBaselineRms = s.baselineRms != null ? String(s.baselineRms) : ''
+      this.editMaxLevelDb = s.maxLevelDb
+    },
+    doAutoCalibrate() {
+      this.isCalibrating = true
+      this.calibrateMessage = ''
+      noiseService.calibrate(this.calibrateTargetDb, (success, msg) => {
+        this.isCalibrating = false
+        this.calibrateSuccess = success
+        this.calibrateMessage = msg
+        if (success) {
+          this.refreshCalibrationSettings()
+        }
+        setTimeout(() => { this.calibrateMessage = '' }, 5000)
+      })
+    },
+    saveManualCalibration() {
+      const patch = {
+        baselineDb: this.editBaselineDb,
+        maxLevelDb: this.editMaxLevelDb,
+      }
+      const rmsVal = parseFloat(this.editBaselineRms)
+      if (!isNaN(rmsVal) && rmsVal > 0) {
+        patch.baselineRms = rmsVal
+      }
+      saveNoiseControlSettings(patch)
+      this.refreshCalibrationSettings()
+    },
+    resetCalibration() {
+      resetNoiseControlSettings()
+      this.refreshCalibrationSettings()
     },
   },
 }

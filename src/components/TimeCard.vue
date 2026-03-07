@@ -80,7 +80,6 @@
       :last-slice="noiseLastSlice"
       :history="noiseHistory"
       :is-monitoring="noiseMonitoring"
-      :session-config="noiseSessionConfig"
       :session-active="noiseSessionActive"
       :session-data="noiseSessionData"
       :report-meta="noiseReportMeta"
@@ -88,9 +87,7 @@
       :date-reports="noiseCurrentDateReports"
       @start="startNoise"
       @stop="stopNoise"
-      @calibrate="calibrateNoise"
       @clear-history="clearNoiseHistory"
-      @save-config="onSaveSessionConfig"
       @select-date="onSelectReportDate"
       @clear-date-reports="onClearDateReports"
       @clear-all-reports="onClearAllReports"
@@ -1200,11 +1197,6 @@ export default {
       this.noiseScore = null
       this.noiseScoreDetail = null
     },
-    calibrateNoise(targetDb) {
-      noiseService.calibrate(targetDb, (success, msg) => {
-        console.log(success ? '校准成功' : `校准失败: ${msg}`)
-      })
-    },
     clearNoiseHistory() {
       noiseService.clearHistory()
       this.noiseHistory = []
@@ -1469,10 +1461,6 @@ export default {
         result.push(arr[Math.floor(i * step)])
       }
       return result
-    },
-    onSaveSessionConfig(config) {
-      this.noiseSessionConfig = config
-      this.saveNoiseSessionConfig()
     },
     async onSelectReportDate(dateStr) {
       await this.loadReportsForDate(dateStr)
