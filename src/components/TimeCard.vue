@@ -38,6 +38,7 @@
     v-model="showFullscreen"
     fullscreen
     :scrim="false"
+    persistent
     transition="dialog-bottom-transition"
   >
     <v-card
@@ -111,7 +112,7 @@
                 />
               </div>
               <div class="fullscreen-extra mt-8 text-medium-emphasis d-flex ga-8">
-                <div class="text-center">
+                <!--<div class="text-center">
                   <div class="text-h6 font-weight-bold">
                     {{ dayOfYear }}
                   </div>
@@ -134,7 +135,7 @@
                   <div class="text-caption">
                     距离新年
                   </div>
-                </div>
+                </div>-->
               </div>
             </div>
           </v-tabs-window-item>
@@ -379,6 +380,61 @@
     </v-card>
   </v-dialog>
 
+  <!-- 倒计时结束弹框 -->
+  <v-dialog
+    v-model="countdownEndedDialog"
+    max-width="480"
+    persistent
+  >
+    <v-card rounded="xl">
+      <v-card-title class="d-flex align-center justify-center pt-6">
+        <v-icon
+          color="error"
+          size="32"
+          class="mr-2"
+          icon="mdi-alarm"
+        />
+        时间到！
+      </v-card-title>
+      <v-card-text class="text-center pb-2">
+        <div
+          class="text-h4 font-weight-bold my-4"
+          style="font-variant-numeric: tabular-nums;"
+        >
+          {{ formatCountdownTotal(countdownTotal) }}
+        </div>
+        <div class="text-body-1 text-medium-emphasis">
+          设定的倒计时已结束
+        </div>
+        <div
+          v-if="overtimeElapsed > 0"
+          class="mt-4"
+        >
+          <v-chip
+            color="error"
+            variant="tonal"
+            size="large"
+            prepend-icon="mdi-clock-alert-outline"
+          >
+            已超时 {{ overtimeDisplay }}
+          </v-chip>
+        </div>
+      </v-card-text>
+      <v-card-actions class="justify-center pb-6">
+        <v-btn
+          color="primary"
+          variant="tonal"
+          size="large"
+          rounded="xl"
+          prepend-icon="mdi-check"
+          @click="dismissCountdownDialog"
+        >
+          知道了
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
   <!-- 设置弹框 -->
   <v-dialog
     v-model="showSettings"
@@ -471,6 +527,11 @@ export default {
         { label: '30 分钟', h: 0, m: 30, s: 0 },
         { label: '1 小时', h: 1, m: 0, s: 0 },
       ],
+      // 倒计时结束弹框
+      countdownEndedDialog: false,
+      overtimeElapsed: 0,
+      overtimeTimer: null,
+      overtimeLastTick: null,
       // 秒表
       stopwatchRunning: false,
       stopwatchElapsed: 0,  // 已走毫秒
@@ -517,24 +578,7 @@ export default {
       const totalSeconds = h * 3600 + m * 60 + s
       return ((totalSeconds / 86400) * 100).toFixed(1)
     },
-    dayOfYear() {
-      const start = new Date(this.now.getFullYear(), 0, 0)
-      const diff = this.now - start
-      const oneDay = 1000 * 60 * 60 * 24
-      return Math.floor(diff / oneDay)
-    },
-    weekOfYear() {
-      const d = new Date(Date.UTC(this.now.getFullYear(), this.now.getMonth(), this.now.getDate()))
-      const dayNum = d.getUTCDay() || 7
-      d.setUTCDate(d.getUTCDate() + 4 - dayNum)
-      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-      return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
-    },
-    daysLeftInYear() {
-      const endOfYear = new Date(this.now.getFullYear(), 11, 31)
-      const diff = endOfYear - this.now
-      return Math.ceil(diff / (1000 * 60 * 60 * 24))
-    },
+
     timeStyle() {
       return {
         'font-size': `${this.fontSize * TIME_FONT_RATIO}px`,
@@ -577,6 +621,19 @@ export default {
       if (this.countdownTotal <= 0) return 0
       return ((this.countdownTotal - this.countdownRemaining) / this.countdownTotal) * 100
     },
+    overtimeDisplay() {
+      const totalSec = Math.floor(this.overtimeElapsed / 1000)
+      const h = Math.floor(totalSec / 3600)
+      const m = Math.floor((totalSec % 3600) / 60)
+      const s = totalSec % 60
+      if (h > 0) {
+        return `${h}小时${m}分${s}秒`
+      }
+      if (m > 0) {
+        return `${m}分${s}秒`
+      }
+      return `${s}秒`
+    },
     // 秒表 computed
     stopwatchDisplay() {
       const ms = this.stopwatchElapsed
@@ -598,9 +655,10 @@ export default {
           if (e.key === 'Escape') {
             if (this.showSettings) {
               this.showSettings = false
-            } else {
-              this.showFullscreen = false
+            } else if (this.countdownEndedDialog) {
+              this.dismissCountdownDialog()
             }
+            // 不关闭全屏弹框，阻止默认行为
             e.preventDefault()
             e.stopPropagation()
           }
@@ -628,6 +686,7 @@ export default {
     this.clearCountdownTimer()
     this.clearStopwatchTimer()
     this.clearToolbarTimer()
+    this.dismissCountdownDialog()
     if (this.unwatch) {
       this.unwatch()
     }
@@ -697,6 +756,7 @@ export default {
         this.countdownRunning = false
         this.clearCountdownTimer()
         playSound(defaultSingleSound)
+        this.showCountdownEndedDialog()
       }
     },
     toggleCountdown() {
@@ -716,6 +776,36 @@ export default {
       this.countdownRemaining = 0
       this.countdownTotal = 0
       this.clearCountdownTimer()
+      this.dismissCountdownDialog()
+    },
+    showCountdownEndedDialog() {
+      this.countdownEndedDialog = true
+      this.overtimeElapsed = 0
+      this.overtimeLastTick = Date.now()
+      this.overtimeTimer = setInterval(() => {
+        const now = Date.now()
+        this.overtimeElapsed += now - this.overtimeLastTick
+        this.overtimeLastTick = now
+      }, 200)
+    },
+    dismissCountdownDialog() {
+      this.countdownEndedDialog = false
+      this.overtimeElapsed = 0
+      if (this.overtimeTimer) {
+        clearInterval(this.overtimeTimer)
+        this.overtimeTimer = null
+      }
+    },
+    formatCountdownTotal(ms) {
+      const totalSec = Math.round(ms / 1000)
+      const h = Math.floor(totalSec / 3600)
+      const m = Math.floor((totalSec % 3600) / 60)
+      const s = totalSec % 60
+      const parts = []
+      if (h > 0) parts.push(`${h}小时`)
+      if (m > 0) parts.push(`${m}分钟`)
+      if (s > 0) parts.push(`${s}秒`)
+      return parts.join('') || '0秒'
     },
     clearCountdownTimer() {
       if (this.countdownTimer) {
