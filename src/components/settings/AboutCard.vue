@@ -25,7 +25,7 @@
               <div class="card-content">
                 <div>
                   <div class="text-h6 font-weight-bold">请支持我们 Classworks</div>
- 
+
                 </div>
               </div>
             </v-card-item>
@@ -127,14 +127,14 @@
               </v-list-item>
               <v-list-item
                 append-icon="mdi-link"
-                href="https://zerocat.houlangs.com"
+                href="https://clock.qqhkx.com/"
                 target="_blank"
               >
                 <v-list-item-title>
-                  感谢 ZeroCat 社区的开发者们
+                  感谢 沉浸式时钟
                 </v-list-item-title>
                 <v-list-item-subtitle>
-                  新一代，开源，编程社区
+                  https://clock.qqhkx.com/
                 </v-list-item-subtitle>
               </v-list-item>
               <v-divider class="ma-1"></v-divider>
