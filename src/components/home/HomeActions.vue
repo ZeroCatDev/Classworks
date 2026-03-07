@@ -7,10 +7,11 @@
       color="error"
       size="large"
       @click="$emit('upload')"
+      rounded="xl"
     >
       上传
     </v-btn>
-    <v-btn v-else color="success" size="large" @click="$emit('show-sync-message')">
+    <v-btn v-else color="success" size="large" @click="$emit('show-sync-message')" rounded="xl">
       同步完成
     </v-btn>
     <v-btn

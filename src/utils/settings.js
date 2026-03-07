@@ -100,6 +100,20 @@ const settingsDefinitions = {
     icon: "mdi-card-outline",
   },
 
+  // 噪音监测设置
+  "noiseMonitor.enabled": {
+    type: "boolean",
+    default: false,
+    description: "启用环境噪音监测卡片",
+    icon: "mdi-microphone",
+  },
+  "noiseMonitor.autoStart": {
+    type: "boolean",
+    default: false,
+    description: "打开页面时自动开始监测",
+    icon: "mdi-play-circle-outline",
+  },
+
   // 时间卡片设置
   "timeCard.enabled": {
     type: "boolean",

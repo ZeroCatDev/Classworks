@@ -12,25 +12,89 @@
       class="pa-6 d-flex flex-column"
       style="height: 100%"
     >
-      <!-- 时间显示 -->
-      <div
-        class="time-display"
-        :style="timeStyle"
-      >
-        {{ timeString }}<span
-          class="seconds-text"
-          :style="secondsStyle"
-        >{{ secondsString }}</span>
-      </div>
+      <div class="d-flex align-center" style="gap: 16px;">
+        <!-- 左侧：时间显示 -->
+        <div class="flex-grow-1">
+          <div
+            class="time-display"
+            :style="timeStyle"
+          >
+            {{ timeString }}<span
+              class="seconds-text"
+              :style="secondsStyle"
+            >{{ secondsString }}</span>
+          </div>
+          <div
+            class="date-line mt-3"
+            :style="dateStyle"
+          >
+            {{ dateString }}  {{ weekdayString }}  {{ periodOfDay }}
+          </div>
+        </div>
 
-      <!-- 日期 + 星期 + 时段 -->
-      <div
-        class="date-line mt-3"
-        :style="dateStyle"
-      >
-        {{ dateString }}  {{ weekdayString }}  {{ periodOfDay }}
+        <!-- 右侧：环境噪音状态 -->
+        <div
+          v-if="noiseEnabled"
+          class="d-flex flex-column align-center justify-center"
+          style="min-width: 80px;"
+          @click.stop="onNoiseClick"
+        >
+
+          <div
+            class="noise-side-db font-weight-bold"
+            :class="`text-${noiseDbColor}`"
+            :style="{ fontSize: `${fontSize * 0.9}px`, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }"
+          >
+            {{ noiseDisplayDb }}
+          </div>
+          <div
+            class="text-caption mt-1"
+            :class="`text-${noiseDbColor}`"
+            style="white-space: nowrap; font-size: 11px;"
+          >
+            {{ noiseStatusText }}
+          </div>
+          <div
+            v-if="!noiseMonitoring"
+            class="text-caption text-medium-emphasis mt-1"
+            style="font-size: 10px; cursor: pointer;"
+          >
+            点击开启
+          </div>
+        </div>
       </div>
     </v-card-text>
+
+    <!-- 噪音详情对话框 -->
+    <noise-monitor-detail
+      v-if="noiseEnabled"
+      v-model="showNoiseDetail"
+      :status="noiseStatus"
+      :current-db="noiseDisplayDb"
+      :current-dbfs="noiseCurrentDbfs"
+      :noise-level="noiseStatusText"
+      :db-color="noiseDbColor"
+      :current-score="noiseScore"
+      :score-detail="noiseScoreDetail"
+      :ring-buffer="noiseRingBuffer"
+      :last-slice="noiseLastSlice"
+      :history="noiseHistory"
+      :is-monitoring="noiseMonitoring"
+      :session-config="noiseSessionConfig"
+      :session-active="noiseSessionActive"
+      :session-data="noiseSessionData"
+      :report-meta="noiseReportMeta"
+      :selected-date="noiseSelectedDate"
+      :date-reports="noiseCurrentDateReports"
+      @start="startNoise"
+      @stop="stopNoise"
+      @calibrate="calibrateNoise"
+      @clear-history="clearNoiseHistory"
+      @save-config="onSaveSessionConfig"
+      @select-date="onSelectReportDate"
+      @clear-date-reports="onClearDateReports"
+      @clear-all-reports="onClearAllReports"
+    />
   </v-card>
 
   <!-- 全屏时间弹框 -->
@@ -487,6 +551,13 @@
 <script>
 import { SettingsManager, watchSettings, getSetting, setSetting } from '@/utils/settings'
 import { playSound, defaultSingleSound } from '@/utils/soundList'
+import { noiseService } from '@wydev/noise-core'
+import { defineAsyncComponent } from 'vue'
+import dataProvider from '@/utils/dataProvider'
+
+const NoiseMonitorDetail = defineAsyncComponent(() =>
+  import('@/components/NoiseMonitorDetail.vue')
+)
 
 // 时间字体大小比例（卡片场景）
 const TIME_FONT_RATIO = 2.0
@@ -495,6 +566,7 @@ const DATE_FONT_RATIO = 0.6
 
 export default {
   name: 'TimeCard',
+  components: { NoiseMonitorDetail },
   data() {
     return {
       now: new Date(),
@@ -539,6 +611,29 @@ export default {
       stopwatchLastTick: null,
       laps: [],
       lastLapElapsed: 0,
+      // 噪音监测
+      noiseEnabled: false,
+      noiseMonitoring: false,
+      noiseStatus: 'initializing',
+      noiseCurrentDbfs: -100,
+      noiseCurrentDisplayDb: 0,
+      noiseSmoothedDb: 0, // 防抖后的平滑值
+      noiseScore: null,
+      noiseScoreDetail: null,
+      noiseRingBuffer: [],
+      noiseLastSlice: null,
+      noiseHistory: [],
+      noiseUnsubscribe: null,
+      showNoiseDetail: false,
+      // 晚自习会话
+      noiseSessionConfig: null, // KV存储的配置
+      noiseSessionActive: false,
+      noiseSessionData: null, // 当前会话数据
+      noiseSessionCheckTimer: null,
+      // 按日期存储的报告系统
+      noiseReportMeta: {}, // { dates: { '2026-03-07': { count, avgScore, sessions } } }
+      noiseSelectedDate: '', // 当前查看的日期 YYYY-MM-DD
+      noiseCurrentDateReports: [], // 当前日期的报告列表
     }
   },
   computed: {
@@ -647,6 +742,35 @@ export default {
       }
       return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(centis).padStart(2, '0')}`
     },
+    // ===== 噪音监测 computed =====
+    noiseDisplayDb() {
+      if (!this.noiseMonitoring || this.noiseStatus !== 'active') return '--'
+      return Math.round(this.noiseSmoothedDb)
+    },
+    noiseDbColor() {
+      const db = typeof this.noiseDisplayDb === 'number' ? this.noiseDisplayDb : 0
+      if (db < 40) return 'success'
+      if (db < 55) return 'light-green'
+      if (db < 70) return 'warning'
+      if (db < 85) return 'orange'
+      return 'error'
+    },
+    noiseIconColor() {
+      if (!this.noiseMonitoring) return 'grey'
+      return this.noiseDbColor
+    },
+    noiseStatusText() {
+      if (!this.noiseMonitoring || this.noiseStatus !== 'active') return '未监测'
+      const db = typeof this.noiseDisplayDb === 'number' ? this.noiseDisplayDb : 0
+      if (db < 30) return '极其安静'
+      if (db < 40) return '非常安静'
+      if (db < 50) return '安静'
+      if (db < 60) return '正常交谈'
+      if (db < 70) return '较为嘈杂'
+      if (db < 80) return '嘈杂'
+      if (db < 90) return '非常嘈杂'
+      return '极度嘈杂'
+    },
   },
   watch: {
     showFullscreen(val) {
@@ -680,6 +804,15 @@ export default {
     this.unwatch = watchSettings(() => {
       this.loadSettings()
     })
+    // 噪音: 加载历史 & 自动启动
+    this.noiseEnabled = getSetting('noiseMonitor.enabled')
+    if (this.noiseEnabled) {
+      this.noiseHistory = noiseService.getHistory()
+      // 先加载配置，再启动会话检查（自动检测当前是否在晚自习时段并自动开始）
+      this.loadNoiseSessionConfig().then(() => {
+        this.startSessionCheck()
+      })
+    }
   },
   beforeUnmount() {
     this.stopTimer()
@@ -687,6 +820,8 @@ export default {
     this.clearStopwatchTimer()
     this.clearToolbarTimer()
     this.dismissCountdownDialog()
+    this.stopNoise()
+    this.stopSessionCheck()
     if (this.unwatch) {
       this.unwatch()
     }
@@ -698,6 +833,7 @@ export default {
     loadSettings() {
       this.fontSize = SettingsManager.getSetting('font.size')
       this.timeCardEnabled = getSetting('timeCard.enabled')
+      this.noiseEnabled = getSetting('noiseMonitor.enabled')
     },
     setTimeCardEnabled(val) {
       this.timeCardEnabled = val
@@ -857,6 +993,353 @@ export default {
       const centis = Math.floor((ms % 1000) / 10)
       return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(centis).padStart(2, '0')}`
     },
+    // ===== 噪音监测 methods =====
+    async startNoise() {
+      try {
+        await noiseService.start()
+        this.noiseMonitoring = true
+        this.noiseUnsubscribe = noiseService.subscribe((snapshot) => {
+          this.noiseStatus = snapshot.status
+          this.noiseCurrentDbfs = snapshot.currentDbfs
+          this.noiseCurrentDisplayDb = snapshot.currentDisplayDb
+          // 防抖平滑: 指数移动平均
+          const alpha = 0.25
+          const rawDb = snapshot.currentDisplayDb
+          this.noiseSmoothedDb = this.noiseSmoothedDb === 0
+            ? rawDb
+            : this.noiseSmoothedDb * (1 - alpha) + rawDb * alpha
+          this.noiseRingBuffer = snapshot.ringBuffer || []
+          this.noiseLastSlice = snapshot.lastSlice || null
+          this.noiseScore = snapshot.currentScore ?? null
+          this.noiseScoreDetail = snapshot.currentScoreDetail ?? null
+          this.noiseHistory = noiseService.getHistory()
+          // 会话数据采集
+          if (this.noiseSessionActive && this.noiseSessionData) {
+            this.collectSessionSample(snapshot)
+          }
+        })
+      } catch (e) {
+        console.error('噪音监测启动失败:', e)
+        this.noiseStatus = 'error'
+      }
+    },
+    stopNoise() {
+      if (this.noiseUnsubscribe) {
+        this.noiseUnsubscribe()
+        this.noiseUnsubscribe = null
+      }
+      if (this.noiseMonitoring) {
+        noiseService.stop()
+      }
+      this.noiseMonitoring = false
+      this.noiseStatus = 'initializing'
+      this.noiseSmoothedDb = 0
+      this.noiseScore = null
+      this.noiseScoreDetail = null
+    },
+    calibrateNoise(targetDb) {
+      noiseService.calibrate(targetDb, (success, msg) => {
+        console.log(success ? '校准成功' : `校准失败: ${msg}`)
+      })
+    },
+    clearNoiseHistory() {
+      noiseService.clearHistory()
+      this.noiseHistory = []
+    },
+    onNoiseClick() {
+      if (!this.noiseMonitoring) {
+        this.startNoise()
+      } else {
+        this.showNoiseDetail = true
+      }
+    },
+
+    // ===== 晚自习会话管理 =====
+    async loadNoiseSessionConfig() {
+      try {
+        const res = await dataProvider.loadData('noise-session-config')
+        const data = res?.data || res
+        if (data && data.sessions) {
+          this.noiseSessionConfig = data
+        } else {
+          // 默认配置
+          this.noiseSessionConfig = {
+            sessions: [
+              { name: '第1节晚自习', start: '19:20', duration: 70, enabled: true },
+              { name: '第2节晚自习', start: '20:20', duration: 110, enabled: true },
+            ],
+            alertThresholdDb: 55,
+          }
+        }
+        // 加载报告
+        await this.loadSessionReports()
+      } catch (e) {
+        console.error('加载噪音会话配置失败:', e)
+        this.noiseSessionConfig = {
+          sessions: [
+            { name: '第1节晚自习', start: '19:20', duration: 70, enabled: true },
+            { name: '第2节晚自习', start: '20:20', duration: 110, enabled: true },
+          ],
+          alertThresholdDb: 55,
+        }
+      }
+    },
+    async saveNoiseSessionConfig() {
+      try {
+        await dataProvider.saveData('noise-session-config', this.noiseSessionConfig)
+      } catch (e) {
+        console.error('保存噪音会话配置失败:', e)
+      }
+    },
+    // ===== 按日期的报告存储 =====
+    formatDateKey(ts) {
+      const d = new Date(ts)
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    },
+    async loadReportMeta() {
+      try {
+        const res = await dataProvider.loadData('noise-reports-meta')
+        const data = res?.data || res
+        if (data && data.dates) {
+          // 清理超过 30 天的元数据
+          const cutoffDate = new Date()
+          cutoffDate.setDate(cutoffDate.getDate() - 30)
+          const cutoffKey = this.formatDateKey(cutoffDate.getTime())
+          const cleaned = {}
+          for (const [key, val] of Object.entries(data.dates)) {
+            if (key >= cutoffKey) cleaned[key] = val
+          }
+          this.noiseReportMeta = { dates: cleaned }
+        } else {
+          this.noiseReportMeta = { dates: {} }
+        }
+      } catch {
+        this.noiseReportMeta = { dates: {} }
+      }
+    },
+    async saveReportMeta() {
+      try {
+        await dataProvider.saveData('noise-reports-meta', this.noiseReportMeta)
+      } catch {
+        console.error('保存报告元数据失败')
+      }
+    },
+    async loadReportsForDate(dateStr) {
+      this.noiseSelectedDate = dateStr
+      try {
+        const res = await dataProvider.loadData(`noise-reports-${dateStr}`)
+        const data = res?.data || res
+        this.noiseCurrentDateReports = Array.isArray(data) ? data : []
+      } catch {
+        this.noiseCurrentDateReports = []
+      }
+    },
+    async saveReportToDate(report) {
+      const dateStr = this.formatDateKey(report.startTime)
+      // 加载当天已有报告
+      let existing = []
+      try {
+        const res = await dataProvider.loadData(`noise-reports-${dateStr}`)
+        const data = res?.data || res
+        if (Array.isArray(data)) existing = data
+      } catch { /* empty */ }
+      existing.push(report)
+      await dataProvider.saveData(`noise-reports-${dateStr}`, existing)
+      // 更新元数据
+      if (!this.noiseReportMeta.dates) this.noiseReportMeta.dates = {}
+      const scores = existing.map(r => r.score)
+      this.noiseReportMeta.dates[dateStr] = {
+        count: existing.length,
+        avgScore: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
+        sessions: existing.map(r => r.sessionName),
+        lastUpdated: Date.now(),
+      }
+      await this.saveReportMeta()
+      // 如果当前正在查看该日期，刷新
+      if (this.noiseSelectedDate === dateStr) {
+        this.noiseCurrentDateReports = existing
+      }
+    },
+    async loadSessionReports() {
+      await this.loadReportMeta()
+      // 默认加载今天的报告
+      const today = this.formatDateKey(Date.now())
+      await this.loadReportsForDate(today)
+    },
+    startSessionCheck() {
+      // 每 30 秒检查是否在晚自习时间段
+      this.checkSessionTime()
+      this.noiseSessionCheckTimer = setInterval(() => {
+        this.checkSessionTime()
+      }, 30000)
+    },
+    stopSessionCheck() {
+      if (this.noiseSessionCheckTimer) {
+        clearInterval(this.noiseSessionCheckTimer)
+        this.noiseSessionCheckTimer = null
+      }
+    },
+    checkSessionTime() {
+      if (!this.noiseSessionConfig?.sessions) return
+      const now = new Date()
+      const nowMinutes = now.getHours() * 60 + now.getMinutes()
+      const activeSession = this.noiseSessionConfig.sessions.find(s => {
+        if (!s.enabled) return false
+        const [h, m] = s.start.split(':').map(Number)
+        const startMin = h * 60 + m
+        const endMin = startMin + (s.duration || 70)
+        return nowMinutes >= startMin && nowMinutes < endMin
+      })
+      if (activeSession && !this.noiseSessionActive) {
+        // 进入晚自习时段，自动开始
+        this.beginSession(activeSession)
+      } else if (!activeSession && this.noiseSessionActive) {
+        // 离开晚自习时段，自动结束并保存
+        this.endSession()
+      }
+    },
+    beginSession(session) {
+      this.noiseSessionActive = true
+      this.noiseSessionData = {
+        sessionName: session.name,
+        startTime: Date.now(),
+        endTime: null,
+        samples: [], // { t, db }
+        slices: [],
+        alertThresholdDb: this.noiseSessionConfig.alertThresholdDb || 55,
+      }
+      // 如果还没在监测，自动开始
+      if (!this.noiseMonitoring) {
+        this.startNoise()
+      }
+    },
+    endSession() {
+      if (!this.noiseSessionData) {
+        this.noiseSessionActive = false
+        return
+      }
+      this.noiseSessionData.endTime = Date.now()
+      this.noiseSessionData.slices = [...this.noiseHistory]
+      // 生成报告并按日期保存
+      const report = this.generateSessionReport(this.noiseSessionData)
+      this.saveReportToDate(report)
+      this.noiseSessionActive = false
+      this.noiseSessionData = null
+    },
+    collectSessionSample(snapshot) {
+      if (!this.noiseSessionData) return
+      const db = snapshot.currentDisplayDb
+      if (typeof db === 'number' && db > 0) {
+        // 每 2 秒采样一次（通过间隔控制）
+        const samples = this.noiseSessionData.samples
+        const lastT = samples.length > 0 ? samples[samples.length - 1].t : 0
+        if (Date.now() - lastT >= 2000) {
+          samples.push({ t: Date.now(), db: Math.round(db * 10) / 10 })
+        }
+      }
+    },
+    generateSessionReport(data) {
+      const samples = data.samples
+      const dbs = samples.map(s => s.db)
+      const threshold = data.alertThresholdDb
+      const duration = data.endTime - data.startTime
+
+      if (dbs.length === 0) {
+        return {
+          sessionName: data.sessionName,
+          startTime: data.startTime,
+          endTime: data.endTime,
+          duration,
+          avgDb: 0, maxDb: 0, score: 100,
+          overThresholdDuration: 0, overThresholdRatio: 0,
+          segmentCount: 0, samples: [],
+          scorePenalties: { sustained: 0, time: 0, segment: 0 },
+        }
+      }
+
+      // 统计
+      const avgDb = Math.round(dbs.reduce((a, b) => a + b, 0) / dbs.length * 10) / 10
+      const maxDb = Math.round(Math.max(...dbs) * 10) / 10
+
+      // 超阈时长
+      let overCount = 0
+      dbs.forEach(d => { if (d > threshold) overCount++ })
+      const overThresholdRatio = overCount / dbs.length
+      const overThresholdDuration = Math.round(overThresholdRatio * duration / 1000)
+
+      // 打断次数（超阈片段）
+      let segmentCount = 0
+      let inSegment = false
+      dbs.forEach(d => {
+        if (d > threshold && !inSegment) { segmentCount++; inSegment = true }
+        if (d <= threshold) inSegment = false
+      })
+
+      // 评分
+      const sustainedPenalty = Math.min(40, Math.max(0, (avgDb - threshold) / 30 * 40))
+      const timePenalty = Math.min(30, overThresholdRatio * 30)
+      const segmentPenalty = Math.min(30, (segmentCount / Math.max(1, duration / 60000) / 6) * 30)
+      const score = Math.max(0, Math.round(100 - sustainedPenalty - timePenalty - segmentPenalty))
+
+      return {
+        sessionName: data.sessionName,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        duration,
+        avgDb, maxDb, score,
+        overThresholdDuration,
+        overThresholdRatio: Math.round(overThresholdRatio * 1000) / 10,
+        segmentCount,
+        samples: samples.length > 500 ? this.downsampleArray(samples, 500) : samples,
+        scorePenalties: {
+          sustained: Math.round(sustainedPenalty),
+          time: Math.round(timePenalty),
+          segment: Math.round(segmentPenalty),
+        },
+        alertThresholdDb: threshold,
+      }
+    },
+    downsampleArray(arr, targetLen) {
+      const step = arr.length / targetLen
+      const result = []
+      for (let i = 0; i < targetLen; i++) {
+        result.push(arr[Math.floor(i * step)])
+      }
+      return result
+    },
+    onSaveSessionConfig(config) {
+      this.noiseSessionConfig = config
+      this.saveNoiseSessionConfig()
+    },
+    async onSelectReportDate(dateStr) {
+      await this.loadReportsForDate(dateStr)
+    },
+    async onClearDateReports(dateStr) {
+      try {
+        await dataProvider.saveData(`noise-reports-${dateStr}`, [])
+      } catch { /* empty */ }
+      // 更新元数据
+      if (this.noiseReportMeta.dates) {
+        delete this.noiseReportMeta.dates[dateStr]
+        await this.saveReportMeta()
+      }
+      if (this.noiseSelectedDate === dateStr) {
+        this.noiseCurrentDateReports = []
+      }
+    },
+    async onClearAllReports() {
+      // 清空所有日期的报告
+      if (this.noiseReportMeta.dates) {
+        for (const dateStr of Object.keys(this.noiseReportMeta.dates)) {
+          try {
+            await dataProvider.saveData(`noise-reports-${dateStr}`, [])
+          } catch { /* empty */ }
+        }
+      }
+      this.noiseReportMeta = { dates: {} }
+      await this.saveReportMeta()
+      this.noiseCurrentDateReports = []
+    },
   },
 }
 </script>
@@ -883,6 +1366,22 @@ export default {
 .date-line {
   opacity: 0.75;
   letter-spacing: 1px;
+}
+
+/* 噪音侧栏 */
+.noise-side {
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(var(--v-theme-surface-variant), 0.25);
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+.noise-side:hover {
+  background: rgba(var(--v-theme-surface-variant), 0.5);
+}
+.noise-side-db {
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 /* 全屏样式 */

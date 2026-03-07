@@ -126,6 +126,7 @@
           border
           class="glow-track"
           height="100%"
+          rounded="xl"
           @click="handleCardClick('dialog', item.key)"
           @mousemove="handleMouseMove"
           @touchmove="handleTouchMove"
@@ -185,6 +186,7 @@
           v-for="subject in unusedSubjects"
           :key="subject.name"
           border
+          rounded="xl"
           class="empty-subject-card"
           @click="handleCardClick('dialog', subject.name)"
         >

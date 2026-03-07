@@ -23,6 +23,9 @@ importers:
       '@vueuse/core':
         specifier: ^14.1.0
         version: 14.1.0(vue@3.5.25(typescript@5.9.3))
+      '@wydev/noise-core':
+        specifier: ^0.1.0
+        version: 0.1.0
       axios:
         specifier: ^1.13.2
         version: 1.13.2
@@ -1468,6 +1471,9 @@ packages:
     resolution: {integrity: sha512-EcKxtYvn6gx1F8z9J5/rsg3+lTQnvOruQd8fUecW99DCK04BkWD7z5KQ/wTAx+DazyoEE9dJt/zV8OIEQbM6kw==}
     peerDependencies:
       vue: ^3.5.0
+
+  '@wydev/noise-core@0.1.0':
+    resolution: {integrity: sha512-gHPDPasN8Iy3lHjv/3yhev3rpkMUd/o4iIQQKAKwK2Sewqu76dXMxqCsw9gGEf5ZZBf0YhwClsS7lcDlRo0Qxw==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -5082,6 +5088,10 @@ snapshots:
   '@vueuse/shared@14.1.0(vue@3.5.25(typescript@5.9.3))':
     dependencies:
       vue: 3.5.25(typescript@5.9.3)
+
+  '@wydev/noise-core@0.1.0':
+    dependencies:
+      uuid: 13.0.0
 
   acorn-jsx@5.3.2(acorn@8.15.0):
     dependencies:
