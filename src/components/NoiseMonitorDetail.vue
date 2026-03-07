@@ -83,6 +83,48 @@
         <v-tabs-window v-model="activeTab">
           <!-- ==================== 实时监测 ==================== -->
           <v-tabs-window-item value="realtime">
+            <!-- 麦克风不可用提示 -->
+            <v-alert
+              v-if="micPermissionState === 'denied'"
+              type="error"
+              variant="tonal"
+              class="ma-4 mb-0"
+              prominent
+            >
+              <template #prepend>
+                <v-icon
+                  icon="mdi-microphone-off"
+                  size="28"
+                />
+              </template>
+              <div class="text-subtitle-2 font-weight-bold mb-1">
+                麦克风权限被拒绝
+              </div>
+              <div class="text-body-2">
+                浏览器已拒绝麦克风访问，无法进行噪音监测。请在浏览器地址栏左侧的锁图标中重新授予麦克风权限，然后刷新页面。
+              </div>
+            </v-alert>
+            <v-alert
+              v-else-if="micPermissionState === 'unavailable'"
+              type="warning"
+              variant="tonal"
+              class="ma-4 mb-0"
+              prominent
+            >
+              <template #prepend>
+                <v-icon
+                  icon="mdi-microphone-question"
+                  size="28"
+                />
+              </template>
+              <div class="text-subtitle-2 font-weight-bold mb-1">
+                未检测到麦克风
+              </div>
+              <div class="text-body-2">
+                当前设备未检测到麦克风硬件，无法进行噪音监测。请连接麦克风后刷新页面重试。
+              </div>
+            </v-alert>
+
             <!-- 分贝仪表区 -->
             <div class="noise-dashboard pa-5">
               <div class="d-flex align-center justify-center">
@@ -344,6 +386,7 @@
                 prepend-icon="mdi-play"
                 size="large"
                 class="px-6"
+                :disabled="micPermissionState === 'denied' || micPermissionState === 'unavailable'"
                 @click="$emit('start')"
               >
                 开始监测
@@ -1006,6 +1049,7 @@ export default {
     lastSlice: { type: Object, default: null },
     history: { type: Array, default: () => [] },
     isMonitoring: { type: Boolean, default: false },
+    micPermissionState: { type: String, default: '' },
     sessionActive: { type: Boolean, default: false },
     sessionData: { type: Object, default: null },
     reportMeta: { type: Object, default: () => ({ dates: {} }) },

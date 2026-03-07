@@ -39,28 +39,58 @@
           style="min-width: 80px;"
           @click.stop="onNoiseClick"
         >
-
-          <div
-            class="noise-side-db font-weight-bold"
-            :class="`text-${noiseDbColor}`"
-            :style="{ fontSize: `${fontSize * 0.9}px`, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }"
-          >
-            {{ noiseDisplayDb }}
-          </div>
-          <div
-            class="text-caption mt-1"
-            :class="`text-${noiseDbColor}`"
-            style="white-space: nowrap; font-size: 11px;"
-          >
-            {{ noiseStatusText }}
-          </div>
-          <div
-            v-if="!noiseMonitoring"
-            class="text-caption text-medium-emphasis mt-1"
-            style="font-size: 10px; cursor: pointer;"
-          >
-            点击开启
-          </div>
+          <!-- 无麦克风权限提示 -->
+          <template v-if="micPermissionState === 'denied'">
+            <v-icon
+              color="error"
+              size="24"
+            >
+              mdi-microphone-off
+            </v-icon>
+            <div
+              class="text-caption text-error mt-1"
+              style="white-space: nowrap; font-size: 10px;"
+            >
+              权限被拒绝
+            </div>
+          </template>
+          <template v-else-if="micPermissionState === 'unavailable'">
+            <v-icon
+              color="warning"
+              size="24"
+            >
+              mdi-microphone-question
+            </v-icon>
+            <div
+              class="text-caption text-warning mt-1"
+              style="white-space: nowrap; font-size: 10px;"
+            >
+              无麦克风
+            </div>
+          </template>
+          <template v-else>
+            <div
+              class="noise-side-db font-weight-bold"
+              :class="`text-${noiseDbColor}`"
+              :style="{ fontSize: `${fontSize * 0.9}px`, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }"
+            >
+              {{ noiseDisplayDb }}
+            </div>
+            <div
+              class="text-caption mt-1"
+              :class="`text-${noiseDbColor}`"
+              style="white-space: nowrap; font-size: 11px;"
+            >
+              {{ noiseStatusText }}
+            </div>
+            <div
+              v-if="!noiseMonitoring"
+              class="text-caption text-medium-emphasis mt-1"
+              style="font-size: 10px; cursor: pointer;"
+            >
+              点击开启
+            </div>
+          </template>
         </div>
       </div>
     </v-card-text>
@@ -80,6 +110,7 @@
       :last-slice="noiseLastSlice"
       :history="noiseHistory"
       :is-monitoring="noiseMonitoring"
+      :mic-permission-state="micPermissionState"
       :session-active="noiseSessionActive"
       :session-data="noiseSessionData"
       :report-meta="noiseReportMeta"
@@ -749,6 +780,7 @@ export default {
       noiseCurrentDateReports: [], // 当前日期的报告列表
       // 麦克风权限引导
       showMicPermissionDialog: false,
+      micPermissionState: '', // 'granted' | 'prompt' | 'denied' | 'unavailable'
     }
   },
   computed: {
@@ -925,6 +957,7 @@ export default {
       this.noiseHistory = noiseService.getHistory()
       // 检查麦克风权限状态
       const micState = await this.checkMicPermission()
+      this.micPermissionState = micState
       if (micState === 'granted') {
         // 已授权 → 正常流程
         this.loadNoiseSessionConfig().then(() => {
@@ -939,7 +972,7 @@ export default {
           this.showMicPermissionDialog = true
         }
       }
-      // denied → 什么也不做
+      // denied / unavailable → 不自动启动，micPermissionState 已记录
     }
   },
   beforeUnmount() {
@@ -1124,7 +1157,13 @@ export default {
     // ===== 麦克风权限引导 =====
     async checkMicPermission() {
       try {
-        if (!navigator.permissions || !navigator.permissions.query) return 'granted' // 不支持 Permissions API 时视为已授权
+        // 先检查是否有麦克风硬件
+        if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+          const devices = await navigator.mediaDevices.enumerateDevices()
+          const hasMic = devices.some(d => d.kind === 'audioinput')
+          if (!hasMic) return 'unavailable'
+        }
+        if (!navigator.permissions || !navigator.permissions.query) return 'granted'
         const result = await navigator.permissions.query({ name: 'microphone' })
         return result.state // 'granted' | 'prompt' | 'denied'
       } catch {
@@ -1139,6 +1178,8 @@ export default {
       this.startSessionCheck()
       // 调用 startNoise 触发浏览器权限弹框
       await this.startNoise()
+      // 重新检查状态
+      this.micPermissionState = await this.checkMicPermission()
     },
     dismissMicPermission() {
       this.showMicPermissionDialog = false
@@ -1202,6 +1243,10 @@ export default {
       this.noiseHistory = []
     },
     onNoiseClick() {
+      if (this.micPermissionState === 'denied' || this.micPermissionState === 'unavailable') {
+        this.showNoiseDetail = true
+        return
+      }
       if (!this.noiseMonitoring) {
         this.startNoise()
       } else {
