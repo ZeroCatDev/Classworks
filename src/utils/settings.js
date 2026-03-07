@@ -103,13 +103,13 @@ const settingsDefinitions = {
   // 噪音监测设置
   "noiseMonitor.enabled": {
     type: "boolean",
-    default: false,
-    description: "启用环境噪音监测卡片",
+    default: true,
+    description: "启用环境噪音监测",
     icon: "mdi-microphone",
   },
   "noiseMonitor.autoStart": {
     type: "boolean",
-    default: false,
+    default: true,
     description: "打开页面时自动开始监测",
     icon: "mdi-play-circle-outline",
   },

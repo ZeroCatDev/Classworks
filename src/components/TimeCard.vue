@@ -811,6 +811,10 @@ export default {
       // 先加载配置，再启动会话检查（自动检测当前是否在晚自习时段并自动开始）
       this.loadNoiseSessionConfig().then(() => {
         this.startSessionCheck()
+        // autoStart: 不在自习时段时也自动开始监测（但不记录会话）
+        if (getSetting('noiseMonitor.autoStart') && !this.noiseMonitoring) {
+          this.startNoise()
+        }
       })
     }
   },
