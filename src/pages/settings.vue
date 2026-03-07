@@ -172,6 +172,10 @@
             border
             @saved="onSettingsSaved"
           />
+          <noise-settings-card
+            border
+            class="mt-4"
+          />
         </v-tabs-window-item>
 
         <v-tabs-window-item value="notification">
@@ -275,6 +279,7 @@ import SubjectManagementCard from "@/components/settings/cards/SubjectManagement
 import KvDatabaseCard from "@/components/settings/cards/KvDatabaseCard.vue";
 import HitokotoSettings from "@/components/HitokotoSettings.vue";
 import NotificationSoundSettings from "@/components/settings/NotificationSoundSettings.vue";
+import NoiseSettingsCard from "@/components/settings/cards/NoiseSettingsCard.vue";
 
 export default {
   name: "Settings",
@@ -298,6 +303,7 @@ export default {
     KvDatabaseCard,
     HitokotoSettings,
     NotificationSoundSettings,
+    NoiseSettingsCard,
   },
   setup() {
     const {mobile} = useDisplay();

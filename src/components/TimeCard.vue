@@ -95,6 +95,122 @@
       @clear-date-reports="onClearDateReports"
       @clear-all-reports="onClearAllReports"
     />
+
+    <!-- 麦克风权限引导弹框 -->
+    <v-dialog
+      v-model="showMicPermissionDialog"
+      max-width="480"
+      persistent
+    >
+      <v-card rounded="xl">
+        <div class="text-center pt-8 pb-2">
+          <v-avatar
+            color="primary"
+            size="72"
+          >
+            <v-icon
+              icon="mdi-microphone-outline"
+              size="36"
+            />
+          </v-avatar>
+        </div>
+
+        <v-card-title class="text-center text-h6 pt-4">
+          开启环境噪音监测
+        </v-card-title>
+
+        <v-card-text class="text-body-2 text-medium-emphasis px-6">
+          <p class="mb-3">
+            该功能可以实时监测教室环境噪音，帮助营造安静的学习氛围：
+          </p>
+          <div class="d-flex align-start mb-2">
+            <v-icon
+              icon="mdi-chart-line"
+              size="18"
+              color="primary"
+              class="mr-2 mt-1 flex-shrink-0"
+            />
+            <span>实时显示环境分贝数与噪音等级评估</span>
+          </div>
+          <div class="d-flex align-start mb-2">
+            <v-icon
+              icon="mdi-clock-check-outline"
+              size="18"
+              color="primary"
+              class="mr-2 mt-1 flex-shrink-0"
+            />
+            <span>在晚自习时段自动记录并生成统计报告</span>
+          </div>
+          <div class="d-flex align-start mb-4">
+            <v-icon
+              icon="mdi-shield-check-outline"
+              size="18"
+              color="primary"
+              class="mr-2 mt-1 flex-shrink-0"
+            />
+            <span>音频数据仅在本地处理，不会上传或存储录音</span>
+          </div>
+
+          <v-alert
+            type="info"
+            variant="tonal"
+            density="compact"
+            class="mb-2"
+          >
+            需要授予麦克风权限才能使用此功能。浏览器将弹出权限请求，请点击「允许」。
+          </v-alert>
+        </v-card-text>
+
+        <v-divider />
+
+        <v-card-text class="px-6 py-3">
+          <v-list
+            density="compact"
+            class="pa-0"
+          >
+            <v-list-item class="px-0">
+              <template #prepend>
+                <v-icon
+                  icon="mdi-microphone"
+                  class="mr-3"
+                />
+              </template>
+              <v-list-item-title>启用噪音监测</v-list-item-title>
+              <v-list-item-subtitle class="text-caption">
+                关闭后将不再提醒
+              </v-list-item-subtitle>
+              <template #append>
+                <v-switch
+                  :model-value="noiseEnabled"
+                  hide-details
+                  density="comfortable"
+                  @update:model-value="onPermissionDialogToggle"
+                />
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-card-text>
+
+        <v-card-actions class="px-6 pb-5">
+          <v-btn
+            variant="text"
+            @click="dismissMicPermission"
+          >
+            暂不开启
+          </v-btn>
+          <v-spacer />
+          <v-btn
+            color="primary"
+            variant="elevated"
+            prepend-icon="mdi-microphone"
+            :disabled="!noiseEnabled"
+            @click="grantMicPermission"
+          >
+            授权并开始
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 
   <!-- 全屏时间弹框 -->
@@ -634,6 +750,8 @@ export default {
       noiseReportMeta: {}, // { dates: { '2026-03-07': { count, avgScore, sessions } } }
       noiseSelectedDate: '', // 当前查看的日期 YYYY-MM-DD
       noiseCurrentDateReports: [], // 当前日期的报告列表
+      // 麦克风权限引导
+      showMicPermissionDialog: false,
     }
   },
   computed: {
@@ -798,24 +916,33 @@ export default {
       }
     },
   },
-  mounted() {
+  async mounted() {
     this.loadSettings()
     this.startTimer()
     this.unwatch = watchSettings(() => {
       this.loadSettings()
     })
-    // 噪音: 加载历史 & 自动启动
+    // 噪音: 加载历史 & 自动启动（带权限检测）
     this.noiseEnabled = getSetting('noiseMonitor.enabled')
     if (this.noiseEnabled) {
       this.noiseHistory = noiseService.getHistory()
-      // 先加载配置，再启动会话检查（自动检测当前是否在晚自习时段并自动开始）
-      this.loadNoiseSessionConfig().then(() => {
-        this.startSessionCheck()
-        // autoStart: 不在自习时段时也自动开始监测（但不记录会话）
-        if (getSetting('noiseMonitor.autoStart') && !this.noiseMonitoring) {
-          this.startNoise()
+      // 检查麦克风权限状态
+      const micState = await this.checkMicPermission()
+      if (micState === 'granted') {
+        // 已授权 → 正常流程
+        this.loadNoiseSessionConfig().then(() => {
+          this.startSessionCheck()
+          if (getSetting('noiseMonitor.autoStart') && !this.noiseMonitoring) {
+            this.startNoise()
+          }
+        })
+      } else if (micState === 'prompt') {
+        // 未授权也未拒绝 → 看是否已跳过引导
+        if (!getSetting('noiseMonitor.permissionDismissed')) {
+          this.showMicPermissionDialog = true
         }
-      })
+      }
+      // denied → 什么也不做
     }
   },
   beforeUnmount() {
@@ -996,6 +1123,38 @@ export default {
       const s = totalSec % 60
       const centis = Math.floor((ms % 1000) / 10)
       return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(centis).padStart(2, '0')}`
+    },
+    // ===== 麦克风权限引导 =====
+    async checkMicPermission() {
+      try {
+        if (!navigator.permissions || !navigator.permissions.query) return 'granted' // 不支持 Permissions API 时视为已授权
+        const result = await navigator.permissions.query({ name: 'microphone' })
+        return result.state // 'granted' | 'prompt' | 'denied'
+      } catch {
+        // Firefox 等部分浏览器不支持 query microphone，视为 prompt
+        return 'prompt'
+      }
+    },
+    async grantMicPermission() {
+      this.showMicPermissionDialog = false
+      // 先加载配置和会话
+      await this.loadNoiseSessionConfig()
+      this.startSessionCheck()
+      // 调用 startNoise 触发浏览器权限弹框
+      await this.startNoise()
+    },
+    dismissMicPermission() {
+      this.showMicPermissionDialog = false
+      setSetting('noiseMonitor.permissionDismissed', true)
+    },
+    onPermissionDialogToggle(val) {
+      this.noiseEnabled = val
+      setSetting('noiseMonitor.enabled', val)
+      if (!val) {
+        // 用户在弹框中关闭了功能
+        this.showMicPermissionDialog = false
+        setSetting('noiseMonitor.permissionDismissed', true)
+      }
     },
     // ===== 噪音监测 methods =====
     async startNoise() {

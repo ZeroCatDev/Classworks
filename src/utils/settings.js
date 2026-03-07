@@ -113,6 +113,12 @@ const settingsDefinitions = {
     description: "打开页面时自动开始监测",
     icon: "mdi-play-circle-outline",
   },
+  "noiseMonitor.permissionDismissed": {
+    type: "boolean",
+    default: false,
+    description: "已跳过麦克风权限引导（不再弹出介绍弹框）",
+    icon: "mdi-microphone-off",
+  },
 
   // 时间卡片设置
   "timeCard.enabled": {
