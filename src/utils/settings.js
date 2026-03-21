@@ -127,6 +127,12 @@ const settingsDefinitions = {
     description: "启用时间卡片",
     icon: "mdi-clock-outline",
   },
+  "timeCard.use12h": {
+    type: "boolean",
+    default: false,
+    description: "使用 12 小时制显示时间",
+    icon: "mdi-clock-time-six-outline",
+  },
 
   // 一言设置
   "hitokoto.enabled": {
