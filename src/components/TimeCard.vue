@@ -22,7 +22,11 @@
             {{ timeString }}<span
               class="seconds-text"
               :style="secondsStyle"
-            >{{ secondsString }}</span>
+            >{{ secondsString }}</span><span
+              v-if="use12hClock"
+              class="ampm-text"
+              :style="secondsStyle"
+            > {{ amPmString }}</span>
           </div>
           <div
             class="date-line mt-3"
@@ -302,7 +306,10 @@
           <v-tabs-window-item value="clock">
             <div class="d-flex flex-column align-center justify-center">
               <div class="fullscreen-time-display">
-                {{ timeString }}<span class="fullscreen-seconds">{{ secondsString }}</span>
+                {{ timeString }}<span class="fullscreen-seconds">{{ secondsString }}</span><span
+                  v-if="use12hClock"
+                  class="fullscreen-seconds"
+                > {{ amPmString }}</span>
               </div>
               <div class="fullscreen-date-line mt-6">
                 {{ dateString }}  {{ weekdayString }}  {{ periodOfDay }}
@@ -677,6 +684,24 @@
               />
             </template>
           </v-list-item>
+          <v-list-item>
+            <template #prepend>
+              <v-icon
+                class="mr-3"
+                icon="mdi-clock-time-six-outline"
+              />
+            </template>
+            <v-list-item-title>12 小时制</v-list-item-title>
+            <v-list-item-subtitle>以 12 小时制（AM/PM）显示时间。</v-list-item-subtitle>
+            <template #append>
+              <v-switch
+                :model-value="use12hClock"
+                hide-details
+                density="comfortable"
+                @update:model-value="setUse12hClock"
+              />
+            </template>
+          </v-list-item>
         </v-list>
       </v-card-text>
       <v-card-actions>
@@ -720,6 +745,7 @@ export default {
       showFullscreen: false,
       showSettings: false,
       timeCardEnabled: true,
+      use12hClock: false,
       // 全屏模式切换
       fullscreenMode: 'clock',
       // 工具栏自动隐藏
@@ -785,9 +811,16 @@ export default {
   },
   computed: {
     timeString() {
-      const h = String(this.now.getHours()).padStart(2, '0')
+      const hours = this.now.getHours()
       const m = String(this.now.getMinutes()).padStart(2, '0')
-      return `${h}:${m}`
+      if (this.use12hClock) {
+        const h12 = hours % 12 || 12
+        return `${h12}:${m}`
+      }
+      return `${String(hours).padStart(2, '0')}:${m}`
+    },
+    amPmString() {
+      return this.now.getHours() < 12 ? 'AM' : 'PM'
     },
     secondsString() {
       return `:${String(this.now.getSeconds()).padStart(2, '0')}`
@@ -994,11 +1027,16 @@ export default {
     loadSettings() {
       this.fontSize = SettingsManager.getSetting('font.size')
       this.timeCardEnabled = getSetting('timeCard.enabled')
+      this.use12hClock = getSetting('timeCard.use12h')
       this.noiseEnabled = getSetting('noiseMonitor.enabled')
     },
     setTimeCardEnabled(val) {
       this.timeCardEnabled = val
       setSetting('timeCard.enabled', val)
+    },
+    setUse12hClock(val) {
+      this.use12hClock = val
+      setSetting('timeCard.use12h', val)
     },
     startTimer() {
       this.timer = setInterval(() => {
