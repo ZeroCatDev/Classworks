@@ -61,7 +61,8 @@ export default {
       refreshInterval: 60,
       kvConfig: {
         sources: ['zhaoyu'],
-        sensitiveWords: []
+        sensitiveWords: [],
+        hitokotoCategories: []
       },
       sentence: '',
       author: '',
@@ -125,7 +126,8 @@ export default {
           this.kvConfig = {
             sources: Array.isArray(data.sources) && data.sources.length > 0 ? data.sources : ['zhaoyu'],
             sensitiveWords: data.sensitiveWords ? data.sensitiveWords.split(/[,，]/).map(w => w.trim()).filter(w => w) : [],
-            jinrishiciToken: data.jinrishiciToken
+            jinrishiciToken: data.jinrishiciToken,
+            hitokotoCategories: Array.isArray(data.hitokotoCategories) ? data.hitokotoCategories : []
           }
         }
       } catch (e) {
@@ -155,7 +157,13 @@ export default {
         let origin = ''
 
         if (source === 'hitokoto') {
-          const res = await axios.get('https://v1.hitokoto.cn/')
+          const params = new URLSearchParams()
+          const categories = this.kvConfig.hitokotoCategories
+          if (Array.isArray(categories) && categories.length > 0) {
+            categories.forEach(cat => params.append('c', cat))
+          }
+          const url = 'https://v1.hitokoto.cn/' + (params.toString() ? '?' + params.toString() : '')
+          const res = await axios.get(url)
           data = res.data
           content = data.hitokoto
           author = data.from_who
