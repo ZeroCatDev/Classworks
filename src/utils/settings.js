@@ -62,6 +62,9 @@ async function initializeStorage() {
 // 存储所有设置的localStorage键名
 const SETTINGS_STORAGE_KEY = "Classworks_settings";
 
+// 同标签页设置变化事件名
+const SETTINGS_CHANGED_EVENT = "classworks:settings:changed";
+
 
 // 新增: Classworks云端存储的默认设置
 const classworksCloudDefaults = {
@@ -441,6 +444,40 @@ const settingsDefinitions = {
     // 设置应用的主题模式，可选亮色或暗色主题
   },
 
+  // 背景设置
+  "background.enabled": {
+    type: "boolean",
+    default: false,
+    description: "启用自定义背景",
+    icon: "mdi-image",
+  },
+  "background.url": {
+    type: "string",
+    default: "",
+    description: "背景图片地址",
+    icon: "mdi-link",
+  },
+  "background.imageData": {
+    type: "string",
+    default: "",
+    description: "本地背景图片（Base64）",
+    icon: "mdi-image-area",
+  },
+  "background.blur": {
+    type: "number",
+    default: 10,
+    validate: (value) => value >= 0 && value <= 50,
+    description: "毛玻璃模糊幅度（px）",
+    icon: "mdi-blur",
+  },
+  "background.opacity": {
+    type: "number",
+    default: 30,
+    validate: (value) => value >= 0 && value <= 80,
+    description: "遮罩暗色程度（%）",
+    icon: "mdi-circle-half-full",
+  },
+
   // 通知铃声设置
   "notification.singleSound": {
     type: "string",
@@ -674,6 +711,13 @@ class SettingsManagerClass {
       this.saveSettings();
       this.logSettingsChange(key, oldValue, value);
 
+      // 触发同标签页内的设置变化事件
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent(SETTINGS_CHANGED_EVENT, {
+          detail: { key, value },
+        }));
+      }
+
       // 为了保持向后兼容，同时更新旧的localStorage键
       const legacyKey = definition.legacyKey;
       if (legacyKey && typeof localStorage !== "undefined") {
@@ -721,6 +765,13 @@ class SettingsManagerClass {
 
     this.settingsCache[key] = definition.default;
     this.saveSettings();
+
+    // 触发同标签页内的设置变化事件
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent(SETTINGS_CHANGED_EVENT, {
+        detail: { key, value: definition.default },
+      }));
+    }
   }
 
   /**
@@ -743,15 +794,23 @@ class SettingsManagerClass {
     if (typeof window === "undefined") return () => {
     };
 
-    const handler = (event) => {
+    const storageHandler = (event) => {
       if (event.key === SETTINGS_STORAGE_KEY) {
         this.settingsCache = JSON.parse(event.newValue);
-        callback(this.settingsCache);
+        callback(this.settingsCache, null);
       }
     };
 
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
+    const customHandler = (event) => {
+      callback(this.settingsCache, event);
+    };
+
+    window.addEventListener("storage", storageHandler);
+    window.addEventListener(SETTINGS_CHANGED_EVENT, customHandler);
+    return () => {
+      window.removeEventListener("storage", storageHandler);
+      window.removeEventListener(SETTINGS_CHANGED_EVENT, customHandler);
+    };
   }
 
   /**
