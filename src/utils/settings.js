@@ -441,6 +441,40 @@ const settingsDefinitions = {
     // 设置应用的主题模式，可选亮色或暗色主题
   },
 
+  // 背景设置
+  "background.enabled": {
+    type: "boolean",
+    default: false,
+    description: "启用自定义背景",
+    icon: "mdi-image",
+  },
+  "background.url": {
+    type: "string",
+    default: "",
+    description: "背景图片地址",
+    icon: "mdi-link",
+  },
+  "background.imageData": {
+    type: "string",
+    default: "",
+    description: "本地背景图片（Base64）",
+    icon: "mdi-image-area",
+  },
+  "background.blur": {
+    type: "number",
+    default: 10,
+    validate: (value) => value >= 0 && value <= 50,
+    description: "毛玻璃模糊幅度（px）",
+    icon: "mdi-blur",
+  },
+  "background.opacity": {
+    type: "number",
+    default: 30,
+    validate: (value) => value >= 0 && value <= 80,
+    description: "遮罩暗色程度（%）",
+    icon: "mdi-circle-half-full",
+  },
+
   // 通知铃声设置
   "notification.singleSound": {
     type: "string",
@@ -674,6 +708,13 @@ class SettingsManagerClass {
       this.saveSettings();
       this.logSettingsChange(key, oldValue, value);
 
+      // 触发同标签页内的设置变化事件
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("classworks-settings-changed", {
+          detail: { key, value },
+        }));
+      }
+
       // 为了保持向后兼容，同时更新旧的localStorage键
       const legacyKey = definition.legacyKey;
       if (legacyKey && typeof localStorage !== "undefined") {
@@ -721,6 +762,13 @@ class SettingsManagerClass {
 
     this.settingsCache[key] = definition.default;
     this.saveSettings();
+
+    // 触发同标签页内的设置变化事件
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("classworks-settings-changed", {
+        detail: { key, value: definition.default },
+      }));
+    }
   }
 
   /**
@@ -743,15 +791,23 @@ class SettingsManagerClass {
     if (typeof window === "undefined") return () => {
     };
 
-    const handler = (event) => {
+    const storageHandler = (event) => {
       if (event.key === SETTINGS_STORAGE_KEY) {
         this.settingsCache = JSON.parse(event.newValue);
         callback(this.settingsCache);
       }
     };
 
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
+    const customHandler = () => {
+      callback(this.settingsCache);
+    };
+
+    window.addEventListener("storage", storageHandler);
+    window.addEventListener("classworks-settings-changed", customHandler);
+    return () => {
+      window.removeEventListener("storage", storageHandler);
+      window.removeEventListener("classworks-settings-changed", customHandler);
+    };
   }
 
   /**
