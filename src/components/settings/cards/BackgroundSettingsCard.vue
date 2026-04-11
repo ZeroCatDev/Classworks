@@ -196,9 +196,10 @@ import SettingItem from '@/components/settings/SettingItem.vue';
 import { getSetting, setSetting, resetSetting } from '@/utils/settings';
 
 const URL_PRESETS = [
-  { label: 'Bing 每日壁纸', url: 'https://bing.img.run/rand_uhd.php' },
+  { label: 'Bing 随机壁纸', url: 'https://bing.img.run/rand.php' },
+  { label: 'Bing 每日壁纸', url: 'https://bing.img.run/1920x1080.php' },
   { label: '随机风景', url: 'https://picsum.photos/1920/1080?random=1' },
-  { label: '随机自然', url: 'https://source.unsplash.com/1920x1080/?nature' },
+  { label: '随机二次元', url: 'https://uapis.cn/api/v1/random/image?category=acg&type=pc' },
 ];
 
 const MAX_IMAGE_SIZE_MB = 2;
