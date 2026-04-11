@@ -47,6 +47,25 @@
         </div>
       </v-list-item>
 
+      <v-list-item v-if="kvConfig.sources.includes('hitokoto')">
+        <v-list-item-title class="mb-2">一言句子类型</v-list-item-title>
+        <div class="text-caption text-grey mb-2">不选则返回所有类型；可多选。</div>
+        <div class="d-flex flex-wrap gap-2">
+          <v-checkbox
+            v-for="cat in hitokotoCategories"
+            :key="cat.value"
+            v-model="kvConfig.hitokotoCategories"
+            :label="cat.label"
+            :value="cat.value"
+            hide-details
+            density="compact"
+            class="mr-4"
+            :disabled="loading"
+            @update:model-value="saveKvSettings"
+          />
+        </div>
+      </v-list-item>
+
       <v-list-item v-if="kvConfig.sources.includes('jinrishici')">
         <v-text-field
           v-model="kvConfig.jinrishiciToken"
@@ -278,8 +297,23 @@ export default {
       kvConfig: {
         sources: ['zhaoyu'],
         sensitiveWords: '',
-        jinrishiciToken: null
+        jinrishiciToken: null,
+        hitokotoCategories: []
       },
+      hitokotoCategories: [
+        { value: 'a', label: '动画' },
+        { value: 'b', label: '漫画' },
+        { value: 'c', label: '游戏' },
+        { value: 'd', label: '文学' },
+        { value: 'e', label: '原创' },
+        { value: 'f', label: '来自网络' },
+        { value: 'g', label: '其他' },
+        { value: 'h', label: '影视' },
+        { value: 'i', label: '诗词' },
+        { value: 'j', label: '网易云' },
+        { value: 'k', label: '哲学' },
+        { value: 'l', label: '抖机灵' }
+      ],
       loading: false,
       testLoading: false,
       testMessage: '',
@@ -306,7 +340,8 @@ export default {
           this.kvConfig = {
             sources: Array.isArray(data.sources) ? data.sources : ['zhaoyu'],
             sensitiveWords: data.sensitiveWords || '',
-            jinrishiciToken: data.jinrishiciToken
+            jinrishiciToken: data.jinrishiciToken,
+            hitokotoCategories: Array.isArray(data.hitokotoCategories) ? data.hitokotoCategories : []
           }
         }
       } catch (e) {
