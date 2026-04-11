@@ -74,7 +74,7 @@
         >
           <v-icon size="40" color="primary" class="mb-2">mdi-image-plus</v-icon>
           <div class="text-body-2">点击或拖拽图片到此处上传</div>
-          <div class="text-caption text-medium-emphasis mt-1">支持 JPG、PNG、WebP、GIF（建议小于 2MB）</div>
+          <div class="text-caption text-medium-emphasis mt-1">支持 JPG、PNG、WebP、GIF（建议小于 {{ maxImageSizeMB }}MB）</div>
           <input
             ref="fileInput"
             type="file"
@@ -222,6 +222,7 @@ export default {
       uploadWarning: '',
       urlPresets: URL_PRESETS,
       settingItemKey: 0,
+      maxImageSizeMB: MAX_IMAGE_SIZE_MB,
     };
   },
 
