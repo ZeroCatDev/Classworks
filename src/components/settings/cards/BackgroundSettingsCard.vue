@@ -202,7 +202,7 @@ const URL_PRESETS = [
   { label: '随机二次元', url: 'https://uapis.cn/api/v1/random/image?category=acg&type=pc' },
 ];
 
-const MAX_IMAGE_SIZE_MB = 2;
+const MAX_IMAGE_SIZE_MB = 10;
 
 export default {
   name: 'BackgroundSettingsCard',
