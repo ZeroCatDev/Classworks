@@ -312,7 +312,7 @@ export default {
         { value: 'i', label: '诗词' },
         { value: 'j', label: '网易云' },
         { value: 'k', label: '哲学' },
-        { value: 'l', label: '抖机灵' },
+        { value: 'l', label: '抖机灵' }
       ],
       loading: false,
       testLoading: false,
