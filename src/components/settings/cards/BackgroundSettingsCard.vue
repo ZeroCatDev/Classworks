@@ -1,7 +1,7 @@
 <template>
   <settings-card border icon="mdi-image" title="背景设置">
     <v-list>
-      <setting-item :setting-key="'background.enabled'" />
+      <setting-item :key="settingItemKey" :setting-key="'background.enabled'" />
     </v-list>
 
     <v-divider class="mb-4" />
@@ -221,6 +221,7 @@ export default {
       saving: false,
       uploadWarning: '',
       urlPresets: URL_PRESETS,
+      settingItemKey: 0,
     };
   },
 
@@ -332,7 +333,8 @@ export default {
 
       const sizeMB = file.size / 1024 / 1024;
       if (sizeMB > MAX_IMAGE_SIZE_MB) {
-        this.uploadWarning = `图片大小为 ${sizeMB.toFixed(1)}MB，超过 ${MAX_IMAGE_SIZE_MB}MB 建议大小，可能影响性能`;
+        this.uploadWarning = `图片大小为 ${sizeMB.toFixed(1)}MB，超过 ${MAX_IMAGE_SIZE_MB}MB 限制，请压缩后重试`;
+        return;
       }
 
       const reader = new FileReader();
@@ -379,6 +381,8 @@ export default {
       this.localOpacity = getSetting('background.opacity') ?? 30;
       this.imageSource = 'url';
       this.uploadWarning = '';
+      // Force re-render of SettingItem to reflect reset enabled state
+      this.settingItemKey++;
     },
   },
 };

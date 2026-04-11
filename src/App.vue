@@ -67,10 +67,13 @@ onMounted(() => {
 
   loadBgSettings();
 
-  unwatchSettings = watchSettings(() => {
-    loadBgSettings();
-    // Reapply theme on settings change too
-    theme.global.name.value = getSetting("theme.mode");
+  unwatchSettings = watchSettings((_, event) => {
+    // If event detail is available (same-tab change), only reload on background keys
+    const changedKey = event?.detail?.key;
+    if (!changedKey || changedKey.startsWith("background.") || changedKey === "theme.mode") {
+      loadBgSettings();
+      theme.global.name.value = getSetting("theme.mode");
+    }
   });
 
   window.addEventListener('beforeinstallprompt', (e) => {

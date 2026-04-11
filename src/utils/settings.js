@@ -62,6 +62,9 @@ async function initializeStorage() {
 // 存储所有设置的localStorage键名
 const SETTINGS_STORAGE_KEY = "Classworks_settings";
 
+// 同标签页设置变化事件名
+const SETTINGS_CHANGED_EVENT = "classworks:settings:changed";
+
 
 // 新增: Classworks云端存储的默认设置
 const classworksCloudDefaults = {
@@ -710,7 +713,7 @@ class SettingsManagerClass {
 
       // 触发同标签页内的设置变化事件
       if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("classworks-settings-changed", {
+        window.dispatchEvent(new CustomEvent(SETTINGS_CHANGED_EVENT, {
           detail: { key, value },
         }));
       }
@@ -765,7 +768,7 @@ class SettingsManagerClass {
 
     // 触发同标签页内的设置变化事件
     if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("classworks-settings-changed", {
+      window.dispatchEvent(new CustomEvent(SETTINGS_CHANGED_EVENT, {
         detail: { key, value: definition.default },
       }));
     }
@@ -794,19 +797,19 @@ class SettingsManagerClass {
     const storageHandler = (event) => {
       if (event.key === SETTINGS_STORAGE_KEY) {
         this.settingsCache = JSON.parse(event.newValue);
-        callback(this.settingsCache);
+        callback(this.settingsCache, null);
       }
     };
 
-    const customHandler = () => {
-      callback(this.settingsCache);
+    const customHandler = (event) => {
+      callback(this.settingsCache, event);
     };
 
     window.addEventListener("storage", storageHandler);
-    window.addEventListener("classworks-settings-changed", customHandler);
+    window.addEventListener(SETTINGS_CHANGED_EVENT, customHandler);
     return () => {
       window.removeEventListener("storage", storageHandler);
-      window.removeEventListener("classworks-settings-changed", customHandler);
+      window.removeEventListener(SETTINGS_CHANGED_EVENT, customHandler);
     };
   }
 
