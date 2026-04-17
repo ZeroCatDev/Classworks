@@ -1,6 +1,14 @@
 <template>
-  <div class="async-loading-placeholder d-flex justify-center align-center" :style="{ minHeight: height }">
-    <v-progress-circular indeterminate color="primary" size="28" width="2" />
+  <div
+    class="async-loading-placeholder d-flex justify-center align-center"
+    :style="{ minHeight: height }"
+  >
+    <v-progress-circular
+      indeterminate
+      color="primary"
+      size="28"
+      width="2"
+    />
   </div>
 </template>
 

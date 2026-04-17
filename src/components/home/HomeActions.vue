@@ -6,12 +6,18 @@
       class="ml-2"
       color="error"
       size="large"
-      @click="$emit('upload')"
       rounded="xl"
+      @click="$emit('upload')"
     >
       上传
     </v-btn>
-    <v-btn v-else color="success" size="large" @click="$emit('show-sync-message')" rounded="xl">
+    <v-btn
+      v-else
+      color="success"
+      size="large"
+      rounded="xl"
+      @click="$emit('show-sync-message')"
+    >
       同步完成
     </v-btn>
     <v-btn
@@ -87,7 +93,11 @@
     variant="tonal"
   >
     <v-card-title class="text-subtitle-1">
-      <v-icon icon="mdi-shield-check" size="small" start />
+      <v-icon
+        icon="mdi-shield-check"
+        size="small"
+        start
+      />
       屏幕保护技术已启用
     </v-card-title>
     <v-card-text class="text-body-2">

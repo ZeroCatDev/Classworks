@@ -16,7 +16,10 @@
         </v-card-subtitle>
 
         <v-card-text class="pt-0 pb-1">
-          <v-list density="comfortable" lines="two">
+          <v-list
+            density="comfortable"
+            lines="two"
+          >
             <v-list-item
               v-for="item in chipList"
               :key="item.key"
@@ -24,8 +27,12 @@
               @click="() => handleSingleRequest(item.key)"
             >
               <template #prepend>
-                <v-avatar :color="chipColors[item.status]" size="32" variant="tonal">
-                  <v-icon :icon="statusIcons[item.status]"></v-icon>
+                <v-avatar
+                  :color="chipColors[item.status]"
+                  size="32"
+                  variant="tonal"
+                >
+                  <v-icon :icon="statusIcons[item.status]" />
                 </v-avatar>
               </template>
 
@@ -33,7 +40,12 @@
               <v-list-item-subtitle>{{ item.description }}</v-list-item-subtitle>
 
               <template #append>
-                <v-chip :color="chipColors[item.status]" size="small" variant="tonal" class="me-2">
+                <v-chip
+                  :color="chipColors[item.status]"
+                  size="small"
+                  variant="tonal"
+                  class="me-2"
+                >
                   {{ statusText[item.status] }}
                 </v-chip>
                 <v-btn
@@ -42,7 +54,7 @@
                   size="small"
                   :disabled="isRequesting"
                   @click.stop="() => openHelp(item.key)"
-                ></v-btn>
+                />
               </template>
             </v-list-item>
           </v-list>
@@ -76,15 +88,25 @@
         size="100"
         rounded="0"
       >
-        <v-icon icon="mdi-monitor-cellphone" size="80"></v-icon>
+        <v-icon
+          icon="mdi-monitor-cellphone"
+          size="80"
+        />
       </v-avatar>
     </div>
 
-    <v-dialog v-model="helpDialog" max-width="520">
+    <v-dialog
+      v-model="helpDialog"
+      max-width="520"
+    >
       <v-card>
-        <v-card-title class="text-h6">{{ helpContent.title }}</v-card-title>
+        <v-card-title class="text-h6">
+          {{ helpContent.title }}
+        </v-card-title>
         <v-card-text>
-          <p class="mb-3">{{ helpContent.message }}</p>
+          <p class="mb-3">
+            {{ helpContent.message }}
+          </p>
           <v-list density="comfortable">
             <v-list-item
               v-for="(link, index) in helpContent.links"
@@ -99,8 +121,13 @@
           </v-list>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn variant="text" @click="helpDialog = false">我知道了</v-btn>
+          <v-spacer />
+          <v-btn
+            variant="text"
+            @click="helpDialog = false"
+          >
+            我知道了
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

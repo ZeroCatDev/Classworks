@@ -1,22 +1,45 @@
 <template>
-  <settings-card border icon="mdi-image" title="背景设置">
+  <settings-card
+    border
+    icon="mdi-image"
+    title="背景设置"
+  >
     <v-list>
-      <setting-item :key="settingItemKey" :setting-key="'background.enabled'" />
+      <setting-item
+        :key="settingItemKey"
+        :setting-key="'background.enabled'"
+      />
     </v-list>
 
     <v-divider class="mb-4" />
 
     <div class="px-4 pb-4">
       <!-- 预览区域 -->
-      <div class="preview-area mb-6" :style="previewContainerStyle">
-        <div class="preview-bg" :style="previewBgStyle" />
-        <div class="preview-overlay" :style="previewOverlayStyle" />
-        <div class="preview-text">背景预览</div>
+      <div
+        class="preview-area mb-6"
+        :style="previewContainerStyle"
+      >
+        <div
+          class="preview-bg"
+          :style="previewBgStyle"
+        />
+        <div
+          class="preview-overlay"
+          :style="previewOverlayStyle"
+        />
+        <div class="preview-text">
+          背景预览
+        </div>
       </div>
 
       <!-- 图片来源 -->
       <div class="d-flex align-center mb-4">
-        <v-icon class="mr-2" color="primary">mdi-image-search</v-icon>
+        <v-icon
+          class="mr-2"
+          color="primary"
+        >
+          mdi-image-search
+        </v-icon>
         <span class="text-subtitle-1 font-weight-bold">图片来源</span>
       </div>
 
@@ -29,12 +52,25 @@
         mandatory
         rounded="xl"
       >
-        <v-btn value="url" prepend-icon="mdi-link-variant">网络地址</v-btn>
-        <v-btn value="upload" prepend-icon="mdi-upload">本地上传</v-btn>
+        <v-btn
+          value="url"
+          prepend-icon="mdi-link-variant"
+        >
+          网络地址
+        </v-btn>
+        <v-btn
+          value="upload"
+          prepend-icon="mdi-upload"
+        >
+          本地上传
+        </v-btn>
       </v-btn-toggle>
 
       <!-- URL 输入 -->
-      <div v-if="imageSource === 'url'" class="mb-4">
+      <div
+        v-if="imageSource === 'url'"
+        class="mb-4"
+      >
         <v-text-field
           v-model="localUrl"
           label="图片地址"
@@ -63,7 +99,10 @@
       </div>
 
       <!-- 本地上传 -->
-      <div v-if="imageSource === 'upload'" class="mb-4">
+      <div
+        v-if="imageSource === 'upload'"
+        class="mb-4"
+      >
         <div
           class="upload-area rounded-xl pa-6 text-center mb-3"
           :class="{ 'upload-hover': isDragging }"
@@ -72,16 +111,26 @@
           @drop.prevent="handleDrop"
           @click="triggerFileInput"
         >
-          <v-icon size="40" color="primary" class="mb-2">mdi-image-plus</v-icon>
-          <div class="text-body-2">点击或拖拽图片到此处上传</div>
-          <div class="text-caption text-medium-emphasis mt-1">支持 JPG、PNG、WebP、GIF（建议小于 {{ maxImageSizeMB }}MB）</div>
+          <v-icon
+            size="40"
+            color="primary"
+            class="mb-2"
+          >
+            mdi-image-plus
+          </v-icon>
+          <div class="text-body-2">
+            点击或拖拽图片到此处上传
+          </div>
+          <div class="text-caption text-medium-emphasis mt-1">
+            支持 JPG、PNG、WebP、GIF（建议小于 {{ maxImageSizeMB }}MB）
+          </div>
           <input
             ref="fileInput"
             type="file"
             accept="image/*"
             style="display: none"
             @change="handleFileChange"
-          />
+          >
         </div>
 
         <v-alert
@@ -95,8 +144,15 @@
           {{ uploadWarning }}
         </v-alert>
 
-        <div v-if="localImageData" class="d-flex align-center ga-2">
-          <v-chip color="success" prepend-icon="mdi-check-circle" size="small">
+        <div
+          v-if="localImageData"
+          class="d-flex align-center ga-2"
+        >
+          <v-chip
+            color="success"
+            prepend-icon="mdi-check-circle"
+            size="small"
+          >
             已上传本地图片
           </v-chip>
           <v-btn
@@ -115,7 +171,12 @@
 
       <!-- 毛玻璃效果设置 -->
       <div class="d-flex align-center mb-4">
-        <v-icon class="mr-2" color="blue">mdi-blur</v-icon>
+        <v-icon
+          class="mr-2"
+          color="blue"
+        >
+          mdi-blur
+        </v-icon>
         <span class="text-subtitle-1 font-weight-bold">毛玻璃效果</span>
       </div>
 
@@ -136,10 +197,20 @@
           @update:model-value="onBlurChange"
         >
           <template #prepend>
-            <v-icon size="small" color="grey">mdi-blur-off</v-icon>
+            <v-icon
+              size="small"
+              color="grey"
+            >
+              mdi-blur-off
+            </v-icon>
           </template>
           <template #append>
-            <v-icon size="small" color="primary">mdi-blur</v-icon>
+            <v-icon
+              size="small"
+              color="primary"
+            >
+              mdi-blur
+            </v-icon>
           </template>
         </v-slider>
       </div>
@@ -161,10 +232,20 @@
           @update:model-value="onOpacityChange"
         >
           <template #prepend>
-            <v-icon size="small" color="grey">mdi-brightness-7</v-icon>
+            <v-icon
+              size="small"
+              color="grey"
+            >
+              mdi-brightness-7
+            </v-icon>
           </template>
           <template #append>
-            <v-icon size="small" color="blue-grey">mdi-brightness-2</v-icon>
+            <v-icon
+              size="small"
+              color="blue-grey"
+            >
+              mdi-brightness-2
+            </v-icon>
           </template>
         </v-slider>
       </div>
@@ -173,7 +254,11 @@
 
       <!-- 保存按钮 -->
       <div class="d-flex justify-end ga-3">
-        <v-btn variant="text" prepend-icon="mdi-restore" @click="resetAll">
+        <v-btn
+          variant="text"
+          prepend-icon="mdi-restore"
+          @click="resetAll"
+        >
           重置
         </v-btn>
         <v-btn

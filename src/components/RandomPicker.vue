@@ -5,16 +5,32 @@
     max-width="600"
     persistent
   >
-    <v-card border class="random-picker-card" rounded="xl">
+    <v-card
+      border
+      class="random-picker-card"
+      rounded="xl"
+    >
       <v-card-title class="text-h5 d-flex align-center">
-        <v-icon class="mr-2" icon="mdi-account-question"/>
+        <v-icon
+          class="mr-2"
+          icon="mdi-account-question"
+        />
         随机点名
-        <v-spacer/>
-        <v-btn icon="mdi-close" variant="text" @click="dialog = false"/>
+        <v-spacer />
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          @click="dialog = false"
+        />
       </v-card-title>
 
-      <v-card-text v-if="!isPickingStarted" class="text-center py-6">
-        <div class="text-h6 mb-4">请选择抽取人数</div>
+      <v-card-text
+        v-if="!isPickingStarted"
+        class="text-center py-6"
+      >
+        <div class="text-h6 mb-4">
+          请选择抽取人数
+        </div>
 
         <div class="d-flex justify-center align-center counter-container">
           <v-btn
@@ -52,14 +68,29 @@
             mandatory
             rounded="pill"
           >
-            <v-btn prepend-icon="mdi-account" value="name">姓名模式</v-btn>
-            <v-btn prepend-icon="mdi-numeric" value="number">学号模式</v-btn>
+            <v-btn
+              prepend-icon="mdi-account"
+              value="name"
+            >
+              姓名模式
+            </v-btn>
+            <v-btn
+              prepend-icon="mdi-numeric"
+              value="number"
+            >
+              学号模式
+            </v-btn>
           </v-btn-toggle>
         </div>
 
         <!-- 学号范围设置 -->
-        <div v-if="pickerMode === 'number'" class="number-range-container mt-4">
-          <div class="text-subtitle-1 mb-2">学号范围设置</div>
+        <div
+          v-if="pickerMode === 'number'"
+          class="number-range-container mt-4"
+        >
+          <div class="text-subtitle-1 mb-2">
+            学号范围设置
+          </div>
           <div class="d-flex justify-center align-center gap-4">
             <v-text-field
               v-model.number="minNumber"
@@ -98,7 +129,10 @@
           </v-btn>
         </div>
 
-        <div v-if="filteredStudents.length === 0" class="mt-4 text-error">
+        <div
+          v-if="filteredStudents.length === 0"
+          class="mt-4 text-error"
+        >
           <template v-if="pickerMode === 'name'">
             没有可抽取的学生，请调整过滤选项
           </template>
@@ -109,8 +143,11 @@
 
         <div class="mt-4 text-caption">
           当前可抽取学生: {{ filteredStudents.length }}人
-          <v-tooltip v-if="pickerMode === 'name'" location="bottom">
-            <template v-slot:activator="{ props }">
+          <v-tooltip
+            v-if="pickerMode === 'name'"
+            location="bottom"
+          >
+            <template #activator="{ props }">
               <v-icon
                 class="ml-1"
                 icon="mdi-information-outline"
@@ -132,7 +169,10 @@
           </v-tooltip>
 
           <!-- 添加临时过滤选项 -->
-          <div v-if="pickerMode === 'name'" class="d-flex flex-wrap justify-center gap-2 mt-4">
+          <div
+            v-if="pickerMode === 'name'"
+            class="d-flex flex-wrap justify-center gap-2 mt-4"
+          >
             <v-chip
               :color="tempFilters.excludeLate ? 'warning' : 'default'"
               :variant="tempFilters.excludeLate ? 'elevated' : 'text'"
@@ -165,8 +205,14 @@
         </div>
       </v-card-text>
 
-      <v-card-text v-else class="text-center py-6">
-        <div v-if="isAnimating" class="animation-container">
+      <v-card-text
+        v-else
+        class="text-center py-6"
+      >
+        <div
+          v-if="isAnimating"
+          class="animation-container"
+        >
           <div class="animation-wrapper">
             <transition-group
               class="shuffle-container"
@@ -185,8 +231,13 @@
           </div>
         </div>
 
-        <div v-else class="result-container">
-          <div class="text-h6 mb-4">抽取结果</div>
+        <div
+          v-else
+          class="result-container"
+        >
+          <div class="text-h6 mb-4">
+            抽取结果
+          </div>
           <v-card
             v-for="(student, index) in pickedStudents"
             :key="index"

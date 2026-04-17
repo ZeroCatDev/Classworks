@@ -2,14 +2,26 @@
   <v-app :style="vAppStyle">
     <!-- 自定义背景层 -->
     <template v-if="bgEnabled">
-      <div class="app-background-image" :style="bgImageStyle" />
-      <div class="app-background-overlay" :style="bgOverlayStyle" />
+      <div
+        class="app-background-image"
+        :style="bgImageStyle"
+      />
+      <div
+        class="app-background-overlay"
+        :style="bgOverlayStyle"
+      />
     </template>
 
     <!-- 正常路由 -->
     <router-view v-slot="{ Component, route }">
-      <transition mode="out-in" name="md3">
-        <component :is="Component" :key="route.path" />
+      <transition
+        mode="out-in"
+        name="md3"
+      >
+        <component
+          :is="Component"
+          :key="route.path"
+        />
       </transition>
     </router-view>
     <global-message />

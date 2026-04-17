@@ -12,7 +12,10 @@
       class="pa-6 d-flex flex-column"
       style="height: 100%"
     >
-      <div class="d-flex align-center" style="gap: 16px;">
+      <div
+        class="d-flex align-center"
+        style="gap: 16px;"
+      >
         <!-- 左侧：时间显示 -->
         <div class="flex-grow-1">
           <div

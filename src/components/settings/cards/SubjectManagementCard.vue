@@ -58,10 +58,16 @@
     </div>
 
     <!-- 添加新科目 -->
-    <v-card class="mb-4" variant="outlined">
+    <v-card
+      class="mb-4"
+      variant="outlined"
+    >
       <v-card-text>
         <v-row>
-          <v-col cols="12" sm="6">
+          <v-col
+            cols="12"
+            sm="6"
+          >
             <v-text-field
               v-model="newSubjectName"
               :rules="[v => !!v || '科目名称不能为空']"
@@ -85,7 +91,7 @@
             v-for="(subject, index) in subjects"
             :key="subject.order"
           >
-            <template v-slot:prepend>
+            <template #prepend>
               <div class="d-flex flex-column align-center mr-2">
                 <v-btn
                   :disabled="index === 0"
@@ -114,7 +120,7 @@
               />
             </v-list-item-title>
 
-            <template v-slot:append>
+            <template #append>
               <v-btn
                 color="error"
                 icon="mdi-delete"

@@ -15,18 +15,28 @@
         <div class="urgent-title mb-6">
           {{ currentNotification?.content?.message || "无内容" }}
         </div>
- <div class="urgent-subtitle mb-6">
+        <div class="urgent-subtitle mb-6">
           {{ senderName }} {{ deviceType }} {{ formatTime(currentNotification?.timestamp) }}
         </div>
 
 
 
         <!-- 多通知导航 -->
-        <div v-if="hasMultipleNotifications" class="navigation-controls mt-6">
-          <v-card variant="flat" color="rgba(255,255,255,0.1)">
+        <div
+          v-if="hasMultipleNotifications"
+          class="navigation-controls mt-6"
+        >
+          <v-card
+            variant="flat"
+            color="rgba(255,255,255,0.1)"
+          >
             <v-card-text class="text-center">
               <div class="notification-counter mb-3">
-                <v-chip color="white" variant="flat" size="small">
+                <v-chip
+                  color="white"
+                  variant="flat"
+                  size="small"
+                >
                   {{ notificationCountText }}
                 </v-chip>
               </div>
@@ -59,8 +69,15 @@
 
         <!-- 操作按钮 -->
         <div class="mt-8">
-          <v-btn color="white" size="large" variant="flat" @click="close">
-            <v-icon left> mdi-check </v-icon>
+          <v-btn
+            color="white"
+            size="large"
+            variant="flat"
+            @click="close"
+          >
+            <v-icon left>
+              mdi-check
+            </v-icon>
             我知道了
           </v-btn>
         </div>

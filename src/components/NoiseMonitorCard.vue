@@ -8,7 +8,10 @@
     style="cursor: pointer"
     @click="showDetail = true"
   >
-    <v-card-text class="pa-5 d-flex flex-column" style="height: 100%">
+    <v-card-text
+      class="pa-5 d-flex flex-column"
+      style="height: 100%"
+    >
       <!-- 顶部标题行 -->
       <div class="d-flex align-center mb-3">
         <v-icon
@@ -44,7 +47,10 @@
             </span>
             <span class="text-caption text-medium-emphasis ml-1 mb-1">dB</span>
           </div>
-          <div class="noise-level-label text-caption mt-1" :class="`text-${dbColor}`">
+          <div
+            class="noise-level-label text-caption mt-1"
+            :class="`text-${dbColor}`"
+          >
             {{ noiseLevel }}
           </div>
         </div>
@@ -53,7 +59,10 @@
       <!-- 底部迷你波形 + 分数 -->
       <div class="d-flex align-center mt-2">
         <!-- 迷你波形条 -->
-        <div class="noise-mini-bars d-flex align-end" style="height: 20px; gap: 2px; flex: 1;">
+        <div
+          class="noise-mini-bars d-flex align-end"
+          style="height: 20px; gap: 2px; flex: 1;"
+        >
           <div
             v-for="(val, i) in miniBarValues"
             :key="i"
@@ -71,14 +80,20 @@
         </div>
 
         <!-- 当前评分 -->
-        <div v-if="currentScore !== null" class="ml-3 text-center">
+        <div
+          v-if="currentScore !== null"
+          class="ml-3 text-center"
+        >
           <div
             class="font-weight-bold text-subtitle-1"
             :class="`text-${scoreColor}`"
           >
             {{ currentScore }}
           </div>
-          <div class="text-caption text-medium-emphasis" style="font-size: 10px; line-height: 1;">
+          <div
+            class="text-caption text-medium-emphasis"
+            style="font-size: 10px; line-height: 1;"
+          >
             评分
           </div>
         </div>
