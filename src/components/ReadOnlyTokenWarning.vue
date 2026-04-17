@@ -9,7 +9,7 @@
     @click:close="dismissed = true"
   >
     <template #prepend>
-      <v-icon icon="mdi-lock-alert"/>
+      <v-icon icon="mdi-lock-alert" />
     </template>
     <v-alert-title>当前使用只读 Token</v-alert-title>
     <div class="text-body-2">

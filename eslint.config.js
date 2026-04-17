@@ -62,6 +62,8 @@ export default [
         // Web Workers
         Worker: 'readonly',
         SharedWorker: 'readonly',
+        // Fetch API
+        AbortController: 'readonly',
       },
     },
   }
