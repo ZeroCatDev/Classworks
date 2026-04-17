@@ -26,6 +26,15 @@ const serverPreference = {
 };
 
 /**
+ * Update the preference cache to mark the given server URL as preferred.
+ * @param {string} url
+ */
+function setCachedPreference(url) {
+  serverPreference.preferred = url;
+  serverPreference.cachedAt = Date.now();
+}
+
+/**
  * Determine whether an error should trigger rotation to the next server.
  * Network errors and 5xx server errors warrant rotation.
  * HTTP 4xx responses mean the server is reachable and should NOT trigger rotation
@@ -81,8 +90,7 @@ async function updateServerPreference() {
       .filter((r) => r.latency < Infinity)
       .sort((a, b) => a.latency - b.latency);
     if (reachable.length > 0) {
-      serverPreference.preferred = reachable[0].url;
-      serverPreference.cachedAt = Date.now();
+      setCachedPreference(reachable[0].url);
     }
   } catch {
     // Probe failure is non-fatal; keep existing preference
@@ -169,8 +177,7 @@ export async function tryWithRotation(operation, options = {}) {
 
       // Remember this server as the preferred one for future requests
       if (provider === "classworkscloud") {
-        serverPreference.preferred = serverUrl;
-        serverPreference.cachedAt = Date.now();
+        setCachedPreference(serverUrl);
       }
 
       return result;
