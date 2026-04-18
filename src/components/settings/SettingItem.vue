@@ -11,9 +11,9 @@
       {{ displayTitle }}
     </v-list-item-title>
 
-    <v-list-item-subtitle class="d-flex align-center text-wrap">
+    <!--<v-list-item-subtitle class="d-flex align-center text-wrap">
       <span class="text-caption text-grey-darken-1">{{ settingKey }}</span>
-    </v-list-item-subtitle>
+    </v-list-item-subtitle>-->
 
     <template #append>
       <div class="d-flex flex-column flex-sm-row align-center">
