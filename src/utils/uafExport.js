@@ -266,7 +266,7 @@ export async function downloadUafAssignments(assignments, dateValue) {
   if (issues.length) throw new UafExportValidationError(issues);
   const { createUafPdf } = await loadBrowserUaf();
   const base = import.meta.env.BASE_URL || "/";
-  const fontUrl = new URL(`${base}uaf/NotoSansSC-Regular.otf`, window.location.origin);
+  const fontUrl = new URL(`${base}uaf/HarmonyOS_Sans_SC_Regular.ttf`, window.location.origin);
   const wasmUrl = new URL(`${base}uaf/hb-subset.wasm`, window.location.origin);
   const pdfBytes = await createUafPdf(assignments, {
     fontUrl,
