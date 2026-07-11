@@ -203,6 +203,12 @@ const settingsDefinitions = {
     icon: "mdi-calendar-check",
     // 控制是否在主页显示考试看板按钮，指向考试安排页面
   },
+  "display.showUafTransfer": {
+    type: "boolean",
+    default: true,
+    description: "是否显示UAF作业导入导出",
+    icon: "mdi-swap-vertical-bold",
+  },
   "display.showQuickTools": {
     type: "boolean",
     default: true,

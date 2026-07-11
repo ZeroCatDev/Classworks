@@ -179,4 +179,4 @@ typed-router.d.ts
 
 # Package lock files (using pnpm)
 package-lock.json
-
+/.trae

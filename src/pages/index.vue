@@ -200,12 +200,28 @@
         :is-fullscreen="state.isFullscreen"
         :show-anti-screen-burn-card="showAntiScreenBurnCard"
         :show-test-card-button="showTestCardButton"
+        :show-uaf-transfer-button="showUafTransferButton"
+        :uaf-transfer-loading="loading.exportUaf"
         @upload="manualUpload"
         @show-sync-message="showSyncMessage"
         @open-random-picker="openRandomPicker"
         @toggle-fullscreen="toggleFullscreen"
         @add-test-card="addTestCard"
         @add-exam-card="showAddExamDialog = true"
+        @open-uaf-export="openUafTransfer('export')"
+        @open-uaf-import="openUafTransfer('import')"
+      />
+
+      <uaf-transfer-dialog
+        v-model="uafTransfer.show"
+        :mode="uafTransfer.mode"
+        :current-date="state.dateString"
+        :current-items="sortedItems"
+        :current-board-data="state.boardData"
+        :subjects="state.availableSubjects"
+        @success="handleUafSuccess"
+        @error="handleUafError"
+        @imported="handleUafImported"
       />
 
       <pwa-install-card />
@@ -471,9 +487,10 @@
   >
     <v-card>
       <v-card-title class="text-h6">
-        预览考试看板
+        考试看板
       </v-card-title>
       <v-card-text>
+        <v-list><v-list-item active color="green" @click="$router.push('/examschedule')" append-icon="mdi-arrow-right">打开考试看板</v-list-item></v-list>
         <v-list v-if="examStore.examList.length > 0">
           <v-list-item
             v-for="exam in examStore.examList"
@@ -584,6 +601,10 @@ const HomeworkEditDialog = defineAsyncComponent({
   loader: () => import("@/components/HomeworkEditDialog.vue"),
   delay: 0,
 });
+const UafTransferDialog = defineAsyncComponent({
+  loader: () => import("@/components/home/UafTransferDialog.vue"),
+  delay: 0,
+});
 const InitServiceChooser = defineAsyncComponent({
   loader: () => import("@/components/InitServiceChooser.vue"),
   loadingComponent: AsyncLoadingPlaceholder,
@@ -661,6 +682,7 @@ export default {
     ExamScheduleCard,
     ExamConfigEditor,
     HomeSkeleton,
+    UafTransferDialog,
   },
   setup() {
     const { mobile } = useDisplay();
@@ -732,6 +754,11 @@ export default {
         upload: false,
         students: false,
         copyToToday: false,
+        exportUaf: false,
+      },
+      uafTransfer: {
+        show: false,
+        mode: "export",
       },
       dataReady: false,
       debouncedUpload: null,
@@ -888,6 +915,7 @@ export default {
             name: subjectKey,
             type: 'homework',
             content: subjectData.content,
+            tags: Array.isArray(subjectData.tags) ? subjectData.tags : [],
             order: subject.order,
             rowSpan: estimatedHeight, // Used for sorting only
           });
@@ -928,6 +956,7 @@ export default {
             name: card.name,
             type: 'custom',
             content: card.content,
+            tags: Array.isArray(card.tags) ? card.tags : [],
             order: 9999, // Put at the end
             rowSpan: estimatedHeight, // Used for sorting only
           });
@@ -1040,6 +1069,9 @@ export default {
     },
     showTestCardButton() {
       return getSetting("developer.enabled");
+    },
+    showUafTransferButton() {
+      return getSetting("display.showUafTransfer");
     },
     shouldShowInit() {
       const provider = getSetting("server.provider");
@@ -1652,6 +1684,7 @@ export default {
           this.state.boardData.homework[this.currentEditSubject].content = content;
         } else {
           this.state.boardData.homework[this.currentEditSubject] = {
+            ...this.state.boardData.homework[this.currentEditSubject],
             content: content,
           };
         }
@@ -1785,6 +1818,7 @@ export default {
         this.state.boardData.homework[this.currentEditSubject].content = content;
       } else {
         this.state.boardData.homework[this.currentEditSubject] = {
+          ...this.state.boardData.homework[this.currentEditSubject],
           content: content,
         };
       }
@@ -2050,6 +2084,25 @@ export default {
         type: "custom",
       };
       this.state.synced = false;
+    },
+
+    openUafTransfer(mode) {
+      this.uafTransfer.mode = mode;
+      this.uafTransfer.show = true;
+    },
+
+    handleUafSuccess(title, content) {
+      this.$message.success(title, content);
+    },
+
+    handleUafError(title, content) {
+      this.$message.error(title, content);
+    },
+
+    async handleUafImported(result) {
+      if (result.savedDates.includes(this.state.dateString)) {
+        await this.downloadData(true);
+      }
     },
 
     showConfirmDialog() {
@@ -2369,6 +2422,7 @@ export default {
         cardHoverEffect: "卡片悬浮效果",
         enhancedTouchMode: "增强触摸模式",
         showAntiScreenBurnCard: "防烧屏卡片",
+        showUafTransfer: "UAF导入导出",
 
         mode: "主题模式",
 
@@ -2454,7 +2508,10 @@ export default {
             } else {
               // 普通作业，只复制内容
               newHomework[key] = {
-                content: sourceHomework[key].content
+                content: sourceHomework[key].content,
+                tags: Array.isArray(sourceHomework[key].tags)
+                  ? [...sourceHomework[key].tags]
+                  : [],
               };
             }
           }

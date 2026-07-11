@@ -69,6 +69,9 @@
       <setting-item :setting-key="'display.showExamScheduleButton'" />
 
       <v-divider class="my-2" />
+      <setting-item :setting-key="'display.showUafTransfer'" />
+
+      <v-divider class="my-2" />
       <setting-item :setting-key="'display.forceDesktopMode'" />
 
       <v-divider class="my-2" />

@@ -1,0 +1,7 @@
+{
+  "uafVersion": "1.0",
+  "source": "../UnifiedAssignmentFormat/implementations/typescript/packages/pdf",
+  "bundleSha256": "1e059777c77c22569ed628bbf3f4b20f59abab46337ff6a6d814c2497d17e4e1",
+  "fontSha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da",
+  "wasmSha256": "1bf32603c1dfe17e1b9d54acaec6adfd0fc5c517e088648ba7e44a24213ae93e"
+}

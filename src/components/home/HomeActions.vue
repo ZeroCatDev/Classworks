@@ -19,6 +19,46 @@
       @click="$emit('show-sync-message')"
     >
       同步完成
+    </v-btn><v-menu
+      v-if="showUafTransferButton"
+      location="bottom end"
+    >
+      <template #activator="{ props: menuProps }">
+        <v-btn
+          v-bind="menuProps"
+          :disabled="uafTransferLoading"
+          :loading="uafTransferLoading"
+          class="ml-2"
+          color="indigo"
+
+          size="large"
+          rounded="xl"
+        ><v-icon  icon="mdi-swap-vertical-bold"></v-icon></v-btn>
+      </template>
+      <v-list density="comfortable">
+        <v-list-item
+          prepend-icon="mdi-file-export-outline"
+          title="导出 UAF"
+          @click="$emit('open-uaf-export')"
+        />
+        <v-list-item
+          prepend-icon="mdi-file-import-outline"
+          title="导入 UAF"
+          @click="$emit('open-uaf-import')"
+        />
+      </v-list>
+    </v-menu>    <v-btn
+      v-if="showFullscreenButton"
+      :color="isFullscreen ? 'blue-grey' : 'blue'"
+      :prepend-icon="
+        isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'
+      "
+       rounded="xl"
+      class="ml-2"
+      size="large"
+      @click="$emit('toggle-fullscreen')"
+    >
+      {{ isFullscreen ? "退出全屏" : "全屏" }}
     </v-btn>
     <v-btn
       v-if="showRandomPickerButton"
@@ -31,26 +71,19 @@
     >
       随机点名
     </v-btn>
-    <v-btn-group
-      v-if="showExamScheduleButton"
-      class="ml-2"
-      color="green"
-      variant="elevated"
-      divided
-    >
+
       <v-btn
+      v-if="showExamScheduleButton"
         prepend-icon="mdi-calendar-check"
         size="large"
-        @click="$router.push('/examschedule')"
+        @click="$emit('add-exam-card')"
+   class="ml-2"
+   color="green"
       >
         考试看板
       </v-btn>
-      <v-btn
-        icon="mdi-plus"
-        size="large"
-        @click="$emit('add-exam-card')"
-      />
-    </v-btn-group>
+
+
     <v-btn
       v-if="showListCardButton"
       class="ml-2"
@@ -61,18 +94,7 @@
     >
       列表
     </v-btn>
-    <v-btn
-      v-if="showFullscreenButton"
-      :color="isFullscreen ? 'blue-grey' : 'blue'"
-      :prepend-icon="
-        isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'
-      "
-      class="ml-2"
-      size="large"
-      @click="$emit('toggle-fullscreen')"
-    >
-      {{ isFullscreen ? "退出全屏" : "全屏显示" }}
-    </v-btn>
+
     <v-btn
       v-if="showTestCardButton"
       class="ml-2"
@@ -83,6 +105,7 @@
     >
       添加测试卡片
     </v-btn>
+
   </div>
 
   <v-card
@@ -127,6 +150,8 @@ export default {
     isFullscreen: Boolean,
     showAntiScreenBurnCard: Boolean,
     showTestCardButton: Boolean,
+    showUafTransferButton: Boolean,
+    uafTransferLoading: Boolean,
   },
   emits: [
     "upload",
@@ -134,6 +159,9 @@ export default {
     "open-random-picker",
     "toggle-fullscreen",
     "add-test-card",
+    "add-exam-card",
+    "open-uaf-export",
+    "open-uaf-import",
   ],
 };
 </script>
