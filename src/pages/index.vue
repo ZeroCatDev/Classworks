@@ -490,7 +490,16 @@
         考试看板
       </v-card-title>
       <v-card-text>
-        <v-list><v-list-item active color="green" @click="$router.push('/examschedule')" append-icon="mdi-arrow-right">打开考试看板</v-list-item></v-list>
+        <v-list>
+          <v-list-item
+            active
+            color="green"
+            append-icon="mdi-arrow-right"
+            @click="$router.push('/examschedule')"
+          >
+            打开考试看板
+          </v-list-item>
+        </v-list>
         <v-list v-if="examStore.examList.length > 0">
           <v-list-item
             v-for="exam in examStore.examList"

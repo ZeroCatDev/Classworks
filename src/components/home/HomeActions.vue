@@ -33,7 +33,9 @@
 
           size="large"
           rounded="xl"
-        ><v-icon  icon="mdi-swap-vertical-bold"></v-icon></v-btn>
+        >
+          <v-icon icon="mdi-swap-vertical-bold" />
+        </v-btn>
       </template>
       <v-list density="comfortable">
         <v-list-item
@@ -53,7 +55,7 @@
       :prepend-icon="
         isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'
       "
-       rounded="xl"
+      rounded="xl"
       class="ml-2"
       size="large"
       @click="$emit('toggle-fullscreen')"
@@ -72,16 +74,16 @@
       随机点名
     </v-btn>
 
-      <v-btn
+    <v-btn
       v-if="showExamScheduleButton"
-        prepend-icon="mdi-calendar-check"
-        size="large"
-        @click="$emit('add-exam-card')"
-   class="ml-2"
-   color="green"
-      >
-        考试看板
-      </v-btn>
+      prepend-icon="mdi-calendar-check"
+      size="large"
+      class="ml-2"
+      color="green"
+      @click="$emit('add-exam-card')"
+    >
+      考试看板
+    </v-btn>
 
 
     <v-btn
@@ -105,7 +107,6 @@
     >
       添加测试卡片
     </v-btn>
-
   </div>
 
   <v-card
