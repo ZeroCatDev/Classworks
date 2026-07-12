@@ -753,7 +753,13 @@ function displayDate(date) {
 }
 
 .export-layout.mobile.show-preview .preview-section {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+.export-layout.mobile.show-preview .preview-placeholder {
+  max-height: none;
 }
 
 .export-layout.mobile:not(.show-preview) .editor-section {
