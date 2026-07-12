@@ -24,99 +24,210 @@
 
       <v-card-text class="transfer-content">
         <template v-if="mode === 'export'">
-          <v-text-field
-            v-model="exportDate"
+          <v-tabs
+            v-if="mobile"
+            v-model="mobileTab"
+            fixed-tabs
             class="mb-3"
-            label="导出日期"
-            prepend-inner-icon="mdi-calendar"
-            type="date"
-            hide-details
-            :disabled="busy"
-            @update:model-value="loadExportPreview"
-          />
-
-          <v-progress-linear
-            v-if="loadingPreview"
-            class="mb-3"
-            indeterminate
-          />
-
-          <v-alert
-            v-if="exportError"
-            class="mb-3"
-            type="warning"
-            variant="tonal"
           >
-            {{ exportError }}
-          </v-alert>
+            <v-tab value="edit">
+              编辑
+            </v-tab>
+            <v-tab value="preview">
+              预览
+            </v-tab>
+          </v-tabs>
 
           <div
-            v-if="previewRows.length"
-            class="d-flex align-center mb-2"
+            class="export-layout"
+            :class="{ mobile: mobile, 'show-preview': mobile && mobileTab === 'preview' }"
           >
-            <v-checkbox-btn
-              :model-value="allValidSelected"
-              :indeterminate="someValidSelected && !allValidSelected"
-              @click="toggleAll"
-            />
-            <span class="text-body-2">选择全部有效作业</span>
-            <v-spacer />
-            <span class="text-caption text-medium-emphasis">
-              已选择 {{ selectedAssignments.length }} / {{ previewRows.length }} 项
-            </span>
-          </div>
+            <div class="editor-section">
+              <v-text-field
+                v-model="exportDate"
+                class="mb-3"
+                label="导出日期"
+                prepend-inner-icon="mdi-calendar"
+                type="date"
+                hide-details
+                :disabled="busy"
+                @update:model-value="loadExportPreview"
+              />
 
-          <v-list
-            v-if="previewRows.length"
-            border
-            lines="three"
-          >
-            <v-list-item
-              v-for="row in previewRows"
-              :key="row.id"
-            >
-              <template #prepend>
+              <v-progress-linear
+                v-if="loadingPreview"
+                class="mb-3"
+                indeterminate
+              />
+
+              <v-alert
+                v-if="exportError"
+                class="mb-3"
+                type="warning"
+                variant="tonal"
+              >
+                {{ exportError }}
+              </v-alert>
+
+              <div
+                v-if="previewRows.length"
+                class="d-flex align-center mb-2"
+              >
                 <v-checkbox-btn
-                  v-model="row.selected"
-                  :disabled="row.issues.length > 0"
+                  :model-value="allValidSelected"
+                  :indeterminate="someValidSelected && !allValidSelected"
+                  @click="toggleAll"
                 />
-              </template>
-              <v-list-item-title>{{ row.assignment.subject }}</v-list-item-title>
-              <v-list-item-subtitle class="content-preview">
-                {{ row.assignment.content }}
-              </v-list-item-subtitle>
-              <div class="d-flex flex-wrap align-center mt-1 ga-1">
-                <v-chip
-                  size="x-small"
-                  variant="tonal"
-                >
-                  {{ row.assignment.date }}
-                </v-chip>
-                <v-chip
-                  v-for="tag in row.assignment.tags"
-                  :key="tag"
-                  size="x-small"
-                  color="primary"
-                  variant="tonal"
-                >
-                  {{ tag }}
-                </v-chip>
-                <span
-                  v-if="row.issues.length"
-                  class="text-caption text-error"
-                >
-                  {{ row.issues.join("；") }}
+                <span class="text-body-2">选择全部有效作业</span>
+                <v-spacer />
+                <span class="text-caption text-medium-emphasis">
+                  已选择 {{ selectedAssignments.length }} / {{ previewRows.length }} 项
                 </span>
               </div>
-            </v-list-item>
-          </v-list>
 
-          <v-empty-state
-            v-else-if="!loadingPreview && !exportError"
-            icon="mdi-book-open-blank-variant-outline"
-            text="该日期没有可导出的作业"
-            title="暂无作业"
-          />
+              <v-list
+                v-if="previewRows.length"
+                border
+                lines="three"
+              >
+                <v-list-item
+                  v-for="row in previewRows"
+                  :key="row.id"
+                  class="edit-list-item"
+                >
+                  <template #prepend>
+                    <v-checkbox-btn
+                      v-model="row.selected"
+                      :disabled="row.issues.length > 0"
+                    />
+                  </template>
+                  <div class="d-flex flex-column w-100">
+                    <v-list-item-title>{{ row.assignment.subject }}</v-list-item-title>
+                    <v-list-item-subtitle class="content-preview">
+                      {{ row.assignment.content }}
+                    </v-list-item-subtitle>
+                    <div class="d-flex flex-wrap align-center mt-1 ga-1">
+                      <v-chip
+                        size="x-small"
+                        variant="tonal"
+                      >
+                        {{ row.assignment.date }}
+                      </v-chip>
+                      <v-chip
+                        v-for="tag in row.assignment.tags"
+                        :key="tag"
+                        size="x-small"
+                        color="primary"
+                        variant="tonal"
+                      >
+                        {{ tag }}
+                      </v-chip>
+                      <span
+                        v-if="row.issues.length"
+                        class="text-caption text-error"
+                      >
+                        {{ row.issues.join("；") }}
+                      </span>
+                    </div>
+                  </div>
+                </v-list-item>
+              </v-list>
+
+              <v-empty-state
+                v-else-if="!loadingPreview && !exportError"
+                icon="mdi-book-open-blank-variant-outline"
+                text="该日期没有可导出的作业"
+                title="暂无作业"
+              />
+            </div>
+
+            <div class="preview-section">
+              <div class="preview-placeholder">
+                <div class="preview-scroll-container">
+                  <v-progress-linear
+                    v-if="previewLoading"
+                    indeterminate
+                  />
+                  <v-alert
+                    v-else-if="previewError"
+                    type="error"
+                    variant="tonal"
+                  >
+                    {{ previewError }}
+                  </v-alert>
+                  <v-alert
+                    v-else-if="!previewUrl"
+                    type="info"
+                    variant="tonal"
+                  >
+                    请选择有效作业以预览
+                  </v-alert>
+                  <iframe
+                    v-else
+                    :src="previewUrl"
+                    class="pdf-preview-frame"
+                    title="UAF 导出预览"
+                  />
+                </div>
+              </div>
+
+              <v-expansion-panels
+                v-model="fontSettingsPanels"
+                variant="accordion"
+                class="mt-3 font-settings-panels"
+              >
+                <v-expansion-panel value="settings">
+                  <v-expansion-panel-title>
+                    导出字体设置
+                  </v-expansion-panel-title>
+                  <v-expansion-panel-text>
+                    <div
+                      v-for="field in styleFields"
+                      :key="field.key"
+                      class="mb-3"
+                    >
+                      <div class="d-flex align-center ga-3">
+                        <span class="text-caption label-min-width">{{ field.label }}</span>
+                        <v-slider
+                          v-model="globalStyle[field.key].fontSize"
+                          :min="field.min"
+                          :max="field.max"
+                          :step="0.5"
+                          hide-details
+                          class="flex-grow-1"
+                        />
+                        <v-text-field
+                          :model-value="globalStyle[field.key].fontSize"
+                          type="number"
+                          :min="field.min"
+                          :max="field.max"
+                          step="0.5"
+                          density="compact"
+                          hide-details
+                          variant="outlined"
+                          class="style-number-field"
+                          @update:model-value="setGlobalFontSize(field.key, $event)"
+                        />
+                      </div>
+                      <div class="d-flex align-center ga-3 mt-2">
+                        <span class="text-caption label-min-width">字重</span>
+                        <v-select
+                          v-model="globalStyle[field.key].fontWeight"
+                          :items="fontWeightOptions"
+                          item-title="title"
+                          item-value="value"
+                          density="compact"
+                          hide-details
+                          variant="outlined"
+                          class="style-weight-select"
+                        />
+                      </div>
+                    </div>
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+              </v-expansion-panels>
+            </div>
+          </div>
         </template>
 
         <template v-else>
@@ -247,10 +358,12 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, onUnmounted, ref, watch } from "vue";
 import { useDisplay } from "vuetify";
 import dataProvider from "@/utils/dataProvider";
+import { debounce } from "@/utils/debounce";
 import {
+  buildUafPdfBytes,
   createExportPreview,
   createImportPlan,
   downloadUafAssignments,
@@ -287,6 +400,22 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue", "success", "error", "imported"]);
 const { mobile } = useDisplay();
+const fontWeightOptions = [
+  { title: "Light", value: "light" },
+  { title: "Regular", value: "regular" },
+  { title: "Bold", value: "bold" },
+];
+const styleFields = [
+  { key: "subject", label: "标题", min: 10, max: 32 },
+  { key: "content", label: "正文", min: 8, max: 24 },
+  { key: "tags", label: "标签", min: 6, max: 16 },
+];
+const globalStyle = ref({
+  subject: { fontSize: 17, fontWeight: "regular" },
+  content: { fontSize: 13.5, fontWeight: "regular" },
+  tags: { fontSize: 9.5, fontWeight: "regular" },
+});
+const fontSettingsPanels = ref([]);
 const dialog = computed({
   get: () => props.modelValue,
   set: (value) => emit("update:modelValue", value),
@@ -301,10 +430,20 @@ const importPlan = ref(null);
 const importError = ref("");
 const loadingImport = ref(false);
 const importing = ref(false);
+const mobileTab = ref("edit");
+const previewUrl = ref("");
+const previewLoading = ref(false);
+const previewError = ref("");
 const busy = computed(() => exporting.value || importing.value || loadingImport.value);
 
 const selectedAssignments = computed(() =>
   previewRows.value.filter((row) => row.selected).map((row) => row.assignment),
+);
+const styledSelectedAssignments = computed(() =>
+  selectedAssignments.value.map((assignment) => ({
+    ...assignment,
+    style: JSON.parse(JSON.stringify(globalStyle.value)),
+  })),
 );
 const validRows = computed(() => previewRows.value.filter((row) => row.issues.length === 0));
 const allValidSelected = computed(
@@ -335,7 +474,11 @@ const footerText = computed(() => {
 
 watch(
   () => props.modelValue,
-  (open) => {
+  (open, oldOpen) => {
+    if (!open && oldOpen) {
+      releasePreviewUrl();
+      mobileTab.value = "edit";
+    }
     if (!open) return;
     if (props.mode === "export") {
       exportDate.value = displayDate(props.currentDate);
@@ -347,6 +490,20 @@ watch(
     }
   },
 );
+
+watch(
+  selectedAssignments,
+  () => {
+    generatePreview();
+  },
+  { deep: true },
+);
+
+watch(globalStyle, () => generatePreview(), { deep: true });
+
+onUnmounted(() => {
+  releasePreviewUrl();
+});
 
 function cloneBoard(board) {
   return JSON.parse(JSON.stringify(board || { homework: {}, attendance: {} }));
@@ -387,10 +544,47 @@ function toggleAll() {
   for (const row of validRows.value) row.selected = selected;
 }
 
+function setGlobalFontSize(fieldKey, value) {
+  const field = styleFields.find((f) => f.key === fieldKey);
+  const parsed = Number(value);
+  const size = Number.isFinite(parsed) ? parsed : field.min;
+  globalStyle.value[fieldKey].fontSize =
+    Math.round(Math.min(field.max, Math.max(field.min, size)) * 2) / 2;
+}
+
+function releasePreviewUrl() {
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value);
+    previewUrl.value = "";
+  }
+}
+
+const generatePreview = debounce(async () => {
+  if (!styledSelectedAssignments.value.length) {
+    releasePreviewUrl();
+    previewError.value = "";
+    previewLoading.value = false;
+    return;
+  }
+  previewLoading.value = true;
+  previewError.value = "";
+  try {
+    const pdfBytes = await buildUafPdfBytes(styledSelectedAssignments.value);
+    const blob = new window.Blob([pdfBytes], { type: "application/pdf" });
+    releasePreviewUrl();
+    previewUrl.value = URL.createObjectURL(blob);
+  } catch (error) {
+    releasePreviewUrl();
+    previewError.value = formatError(error);
+  } finally {
+    previewLoading.value = false;
+  }
+}, 800);
+
 async function exportSelected() {
   exporting.value = true;
   try {
-    const filename = await downloadUafAssignments(selectedAssignments.value, exportDate.value);
+    const filename = await downloadUafAssignments(styledSelectedAssignments.value, exportDate.value);
     emit("success", "导出成功", filename);
     dialog.value = false;
   } catch (error) {
@@ -479,6 +673,97 @@ function displayDate(date) {
   white-space: normal;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.export-layout {
+  display: flex;
+  gap: 16px;
+  height: 100%;
+  min-height: 360px;
+}
+
+.editor-section {
+  flex: 7;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.preview-section {
+  flex: 5;
+  min-width: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-placeholder {
+  flex: 1 1 auto;
+  min-height: 360px;
+  max-height: 480px;
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-scroll-container {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+.pdf-preview-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.edit-list-item {
+  align-items: flex-start;
+}
+
+.style-weight-select {
+  max-width: 110px;
+}
+
+.label-min-width {
+  min-width: 40px;
+  text-align: right;
+}
+
+.style-number-field {
+  max-width: 90px;
+}
+
+.style-select-field {
+  max-width: 110px;
+}
+
+.export-layout.mobile {
+  flex-direction: column;
+  max-height: none;
+}
+
+.export-layout.mobile .editor-section,
+.export-layout.mobile .preview-section {
+  display: none;
+  overflow-y: visible;
+  min-height: 60vh;
+}
+
+.export-layout.mobile.show-preview .preview-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+.export-layout.mobile.show-preview .preview-placeholder {
+  max-height: none;
+}
+
+.export-layout.mobile:not(.show-preview) .editor-section {
+  display: block;
 }
 
 .action-select {

@@ -8323,13 +8323,22 @@ function isValidIso8601(value) {
   const parsed = Date.parse(value);
   return !Number.isNaN(parsed);
 }
+var stylePartSchema = external_exports.object({
+  fontSize: external_exports.number().optional(),
+  fontWeight: external_exports.string().optional()
+});
 var uafAssignmentSchema = external_exports.object({
   subject: external_exports.string().min(1, "subject must not be empty").max(LIMITS.subjectMax, `subject must be at most ${LIMITS.subjectMax} characters`),
   date: external_exports.string().min(1, "date must not be empty").refine(isValidIso8601, "date must be valid ISO 8601"),
   content: external_exports.string().min(1, "content must not be empty").max(LIMITS.contentMax, `content must be at most ${LIMITS.contentMax} characters`),
   tags: external_exports.array(
     external_exports.string().min(1, "tag must not be empty").max(LIMITS.tagMax, `each tag must be at most ${LIMITS.tagMax} characters`).refine((t) => !t.includes(";"), 'tag must not contain ";"')
-  ).max(LIMITS.tagCountMax, `at most ${LIMITS.tagCountMax} tags allowed`)
+  ).max(LIMITS.tagCountMax, `at most ${LIMITS.tagCountMax} tags allowed`),
+  style: external_exports.object({
+    subject: stylePartSchema.optional(),
+    content: stylePartSchema.optional(),
+    tags: stylePartSchema.optional()
+  }).optional()
 });
 var uafDocumentSchema = external_exports.array(uafAssignmentSchema).min(1, "document must contain at least one assignment");
 function escapeField(value) {
@@ -25488,7 +25497,7 @@ var INTRINSICS = {
   "%Error%": Error,
   "%ErrorPrototype%": Error.prototype,
   "%eval%": eval,
-  // eslint-disable-line no-eval
+   
   "%EvalError%": EvalError,
   "%EvalErrorPrototype%": EvalError.prototype,
   "%Float32Array%": typeof Float32Array === "undefined" ? undefined$1 : Float32Array,
@@ -48402,7 +48411,7 @@ var decodePDFRawStream = function(_a) {
     for (var idx = 0, len2 = Filter.size(); idx < len2; idx++) {
       stream2 = decodeStream(stream2, Filter.lookup(idx, PDFName_default), DecodeParms && DecodeParms.lookupMaybe(idx, PDFDict_default));
     }
-  } else if (!!Filter) {
+  } else if (Filter) {
     throw new UnexpectedObjectTypeError([PDFName_default, PDFArray_default], Filter);
   }
   return stream2;
@@ -50830,7 +50839,7 @@ var PDFParser = (
               this.context.header = this.parseHeader();
               _a.label = 1;
             case 1:
-              if (!!this.bytes.done()) return [3, 3];
+              if (this.bytes.done()) return [3, 3];
               return [4, this.parseDocumentSection()];
             case 2:
               _a.sent();
@@ -53019,7 +53028,7 @@ var PDFEmbeddedPage = (
         return __generator(this, function(_a) {
           switch (_a.label) {
             case 0:
-              if (!!this.alreadyEmbedded) return [3, 2];
+              if (this.alreadyEmbedded) return [3, 2];
               return [4, this.embedder.embedIntoContext(this.doc.context, this.ref)];
             case 1:
               _a.sent();
@@ -54745,7 +54754,7 @@ var PDFEmbeddedFile = (
         return __generator(this, function(_a) {
           switch (_a.label) {
             case 0:
-              if (!!this.alreadyEmbedded) return [3, 2];
+              if (this.alreadyEmbedded) return [3, 2];
               return [4, this.embedder.embedIntoContext(this.doc.context, this.ref)];
             case 1:
               ref = _a.sent();
@@ -54803,7 +54812,7 @@ var PDFJavaScript = (
         return __generator(this, function(_b) {
           switch (_b.label) {
             case 0:
-              if (!!this.alreadyEmbedded) return [3, 2];
+              if (this.alreadyEmbedded) return [3, 2];
               _a = this.doc, catalog = _a.catalog, context2 = _a.context;
               return [4, this.embedder.embedIntoContext(this.doc.context, this.ref)];
             case 1:
@@ -56455,21 +56464,28 @@ function createFragments(document, font) {
   const maxWidth = CARD_WIDTH - CARD_PAD * 2;
   const fragments = [];
   for (const assignment of document) {
-    const lines = wrapText(assignment.content, font, CONTENT_FONT, maxWidth);
+    const contentStyle = assignment.style?.content || {};
+    const contentFontSize = typeof contentStyle.fontSize === "number" ? contentStyle.fontSize : CONTENT_FONT;
+    const contentLineHeight = contentFontSize * (CONTENT_LINE_HEIGHT / CONTENT_FONT);
+    const tagStyle = assignment.style?.tags || {};
+    const tagFontSize = typeof tagStyle.fontSize === "number" ? tagStyle.fontSize : TAG_FONT;
+    const tagAreaHeight = Math.max(TAG_AREA_HEIGHT, tagFontSize * 3 + 12);
+    const lines = wrapText(assignment.content, font, contentFontSize, maxWidth);
     for (let index = 0; index < lines.length; index += MAX_LINES_PER_FRAGMENT) {
       const fragmentLines = lines.slice(index, index + MAX_LINES_PER_FRAGMENT);
       const showTags = index + MAX_LINES_PER_FRAGMENT >= lines.length;
-      const contentHeight = fragmentLines.length * CONTENT_LINE_HEIGHT;
+      const contentHeight = fragmentLines.length * contentLineHeight;
       const height = Math.max(
         MIN_CARD_HEIGHT,
-        CARD_PAD + HEADER_HEIGHT + 12 + contentHeight + (showTags ? TAG_AREA_HEIGHT : 12) + CARD_PAD
+        CARD_PAD + HEADER_HEIGHT + 12 + contentHeight + (showTags ? tagAreaHeight : 12) + CARD_PAD
       );
       fragments.push({
         assignment,
         continuation: index > 0,
         lines: fragmentLines,
         showTags,
-        height
+        height,
+        contentLineHeight
       });
     }
   }
@@ -56493,40 +56509,67 @@ function drawPageBackground(page, font, canRenderCjk, colors) {
     color: colors.watermark
   });
 }
-function drawTags(page, tags, x, y, font, colors) {
+function resolveFont(fontWeight, fontNormal, fontLight, fontBold) {
+  const weight = String(fontWeight || "regular").toLowerCase();
+  if (weight === "light") return fontLight;
+  if (weight === "bold") return fontBold;
+  return fontNormal;
+}
+function drawTextWithWeight(page, text, options) {
+  const { font, fontLight, fontBold, fontWeight, opacity, ...rest } = options;
+  const fontToUse = resolveFont(fontWeight, font, fontLight, fontBold);
+  page.drawText(text, { ...rest, font: fontToUse, opacity: opacity ?? 1 });
+}
+function drawTags(page, tags, x, y, font, fontLight, fontBold, fontSize, fontWeight, colors) {
   if (tags.length === 0) {
-    page.drawText("", { x, y, font, size: TAG_FONT });
+    page.drawText("", { x, y, font, size: fontSize });
     return;
   }
   let cursor = x;
   const maxX = x + CARD_WIDTH - CARD_PAD * 2;
+  const pillHeight = Math.max(19, fontSize + 8);
   for (const tag2 of tags) {
-    const label = ellipsize(tag2, font, TAG_FONT, CARD_WIDTH - CARD_PAD * 2 - 16);
-    const width = Math.min(widthOf(font, label, TAG_FONT) + 16, CARD_WIDTH - CARD_PAD * 2);
+    const label = ellipsize(tag2, font, fontSize, CARD_WIDTH - CARD_PAD * 2 - 16);
+    const width = Math.min(widthOf(font, label, fontSize) + 16, CARD_WIDTH - CARD_PAD * 2);
     if (cursor + width > maxX) break;
-    drawPill(page, cursor, y, width, 19, colors.chip);
-    page.drawText(label, { x: cursor + 8, y: y + 5.2, size: TAG_FONT, font, color: colors.chipText });
+    drawPill(page, cursor, y, width, pillHeight, colors.chip);
+    drawTextWithWeight(page, label, {
+      x: cursor + 8,
+      y: y + (pillHeight - fontSize) / 2 - 1,
+      size: fontSize,
+      font,
+      fontLight,
+      fontBold,
+      fontWeight,
+      color: colors.chipText
+    });
     cursor += width + 6;
   }
 }
-function drawFragment(page, fragment, x, top, font, fontBold, dateDisplay, canRenderCjk, colors) {
+function drawFragment(page, fragment, x, top, font, fontLight, fontBold, dateDisplay, canRenderCjk, colors) {
   const y = top - fragment.height;
   drawRoundedRect(page, x, y, CARD_WIDTH, fragment.height, CARD_RADIUS, colors.card, {
     color: colors.border,
     width: 1
   });
+  const subjectStyle = fragment.assignment.style?.subject || {};
+  const subjectFontSize = typeof subjectStyle.fontSize === "number" ? subjectStyle.fontSize : SUBJECT_FONT;
+  const subjectFontWeight = subjectStyle.fontWeight || "regular";
   const continuation = fragment.continuation ? canRenderCjk ? "\uFF08\u7EED\uFF09" : " (cont.)" : "";
   const subject = ellipsize(
     `${fragment.assignment.subject}${continuation}`,
-    fontBold,
-    SUBJECT_FONT,
+    font,
+    subjectFontSize,
     CARD_WIDTH - CARD_PAD * 2
   );
-  page.drawText(subject, {
+  drawTextWithWeight(page, subject, {
     x: x + CARD_PAD,
     y: top - CARD_PAD - 20,
-    size: SUBJECT_FONT,
-    font: fontBold,
+    size: subjectFontSize,
+    font,
+    fontLight,
+    fontBold,
+    fontWeight: subjectFontWeight,
     color: colors.headerText
   });
   page.drawText(formatDate(fragment.assignment.date, dateDisplay), {
@@ -56536,31 +56579,44 @@ function drawFragment(page, fragment, x, top, font, fontBold, dateDisplay, canRe
     font,
     color: colors.dateText
   });
+  const contentStyle = fragment.assignment.style?.content || {};
+  const contentFontSize = typeof contentStyle.fontSize === "number" ? contentStyle.fontSize : CONTENT_FONT;
+  const contentFontWeight = contentStyle.fontWeight || "regular";
+  const contentLineHeight = fragment.contentLineHeight || contentFontSize * (CONTENT_LINE_HEIGHT / CONTENT_FONT);
   let lineY = top - CARD_PAD - HEADER_HEIGHT - 12;
   for (const line of fragment.lines) {
-    page.drawText(line || " ", {
+    drawTextWithWeight(page, line || " ", {
       x: x + CARD_PAD,
       y: lineY,
-      size: CONTENT_FONT,
+      size: contentFontSize,
       font,
+      fontLight,
+      fontBold,
+      fontWeight: contentFontWeight,
       color: colors.content
     });
-    lineY -= CONTENT_LINE_HEIGHT;
+    lineY -= contentLineHeight;
   }
   if (fragment.showTags) {
-    drawTags(page, fragment.assignment.tags, x + CARD_PAD, y + CARD_PAD + 5, font, colors);
+    const tagStyle = fragment.assignment.style?.tags || {};
+    const tagFontSize = typeof tagStyle.fontSize === "number" ? tagStyle.fontSize : TAG_FONT;
+    const tagFontWeight = tagStyle.fontWeight || "regular";
+    drawTags(page, fragment.assignment.tags, x + CARD_PAD, y + CARD_PAD + 5, font, fontLight, fontBold, tagFontSize, tagFontWeight, colors);
   } else {
     const continued = canRenderCjk ? "\u6B63\u6587\u4E0B\u9875\u7EE7\u7EED" : "Continued on next card";
-    page.drawText(continued, {
+    drawTextWithWeight(page, continued, {
       x: x + CARD_PAD,
       y: y + CARD_PAD + 8,
       size: TAG_FONT,
       font,
+      fontLight,
+      fontBold,
+      fontWeight: "regular",
       color: colors.muted
     });
   }
 }
-function renderAssignmentDocument(pdfDoc, document, font, fontBold, options = {}) {
+function renderAssignmentDocument(pdfDoc, document, font, fontLight, fontBold, options = {}) {
   const fragments = createFragments(document, font);
   const pages = [];
   const dateDisplay = options.dateDisplay ?? "zh";
@@ -56584,6 +56640,7 @@ function renderAssignmentDocument(pdfDoc, document, font, fontBold, options = {}
         PAGE_MARGIN + column * (CARD_WIDTH + COLUMN_GAP),
         cursorTop,
         font,
+        fontLight,
         fontBold,
         dateDisplay,
         options.canRenderCjk !== false,
@@ -56600,15 +56657,21 @@ async function createUafPdfWithFont(document, options = {}) {
   const validated = validatePayload(document);
   const csvBytes = new TextEncoder().encode(serializePayload(validated));
   const pdfDoc = await PDFDocument_default.create();
-  let font;
+  let fontNormal, fontLight, fontBold;
   if (options.useStandardFont) {
-    font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    fontNormal = fontLight = fontBold = await pdfDoc.embedFont(StandardFonts.Helvetica);
   } else {
     if (!options.fontBytes) throw new Error("fontBytes are required for CJK PDF rendering");
     pdfDoc.registerFontkit(fontkit_es_default);
-    font = await pdfDoc.embedFont(options.fontBytes, { subset: options.subsetFont ?? true });
+    fontNormal = await pdfDoc.embedFont(options.fontBytes, { subset: options.subsetFont ?? true });
+    fontLight = options.fontLightBytes
+      ? await pdfDoc.embedFont(options.fontLightBytes, { subset: options.subsetFont ?? true })
+      : fontNormal;
+    fontBold = options.fontBoldBytes
+      ? await pdfDoc.embedFont(options.fontBoldBytes, { subset: options.subsetFont ?? true })
+      : fontNormal;
   }
-  renderAssignmentDocument(pdfDoc, validated, font, font, {
+  renderAssignmentDocument(pdfDoc, validated, fontNormal, fontLight, fontBold, {
     dateDisplay: options.useStandardFont ? "iso" : "zh",
     canRenderCjk: !options.useStandardFont,
     theme: options.theme
@@ -56632,6 +56695,9 @@ function collectDocumentText(document) {
   return [...new Set(parts.join(""))].join("");
 }
 async function subsetFontInBrowser(fontBytes, text, wasmUrl) {
+  if (fontBytes instanceof ArrayBuffer) {
+    fontBytes = new Uint8Array(fontBytes);
+  }
   const response = await fetch(wasmUrl);
   if (!response.ok) throw new Error(`Failed to load HarfBuzz subset engine: ${response.status}`);
   const result = await WebAssembly.instantiate(await response.arrayBuffer());
@@ -56844,13 +56910,24 @@ async function loadBrowserFont(options) {
   return cachedFontBytes;
 }
 async function createUafPdf(document, options = {}) {
-  const fontBytes = await loadBrowserFont(options);
   const wasmUrl = options.wasmUrl ?? new URL("../assets/hb-subset.wasm", import.meta.url);
-  const subset = await subsetFontInBrowser(fontBytes, collectDocumentText(document), wasmUrl);
+  const text = collectDocumentText(document);
+  const [fontBytes, fontLightBytes, fontBoldBytes] = await Promise.all([
+    loadBrowserFont(options),
+    options.fontLightBytes ? Promise.resolve(options.fontLightBytes) : Promise.resolve(null),
+    options.fontBoldBytes ? Promise.resolve(options.fontBoldBytes) : Promise.resolve(null),
+  ]);
+  const [subsetNormal, subsetLight, subsetBold] = await Promise.all([
+    subsetFontInBrowser(fontBytes, text, wasmUrl),
+    fontLightBytes ? subsetFontInBrowser(fontLightBytes, text, wasmUrl) : Promise.resolve(null),
+    fontBoldBytes ? subsetFontInBrowser(fontBoldBytes, text, wasmUrl) : Promise.resolve(null),
+  ]);
   return createUafPdfWithFont(document, {
-    fontBytes: subset,
+    fontBytes: subsetNormal,
+    fontLightBytes: subsetLight,
+    fontBoldBytes: subsetBold,
     subsetFont: false,
-    theme: options.theme
+    theme: options.theme,
   });
 }
 async function createUafPdfFromCsv(csv, options = {}) {

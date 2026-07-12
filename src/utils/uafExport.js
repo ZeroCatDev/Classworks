@@ -71,6 +71,7 @@ export function createUafDocument(items, dateValue) {
       date,
       content: item.content,
       tags: normalizeTags(item.tags),
+      style: item.style ? JSON.parse(JSON.stringify(item.style)) : JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENT_STYLE)),
     }));
 
   if (assignments.length === 0) {
@@ -84,6 +85,12 @@ export function createUafDocument(items, dateValue) {
   return assignments;
 }
 
+export const DEFAULT_ASSIGNMENT_STYLE = {
+  subject: { fontSize: 17, fontWeight: "regular" },
+  content: { fontSize: 13.5, fontWeight: "regular" },
+  tags: { fontSize: 9.5, fontWeight: "regular" },
+};
+
 export function createExportPreview(items, dateValue) {
   const date = normalizeUafDate(dateValue);
   return items
@@ -95,9 +102,10 @@ export function createExportPreview(items, dateValue) {
         date,
         content: item.content,
         tags: normalizeTags(item.tags),
+        style: JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENT_STYLE)),
       };
       const issues = validateUafAssignment(assignment, assignment.subject || `第 ${index + 1} 张卡片`);
-      return { id: `${item.key || index}-${index}`, assignment, selected: issues.length === 0, issues };
+      return { id: `${item.key || index}-${index}`, assignment, selected: issues.length === 0, issues, expanded: false };
     });
 }
 
@@ -260,19 +268,35 @@ export async function executeImportPlan(plan, saveBoardData) {
   return { imported, skipped, savedDates, failedDates };
 }
 
-export async function downloadUafAssignments(assignments, dateValue) {
+async function fetchFont(base, filename) {
+  const response = await fetch(new URL(`${base}uaf/${filename}`, window.location.origin));
+  if (!response.ok) throw new Error(`加载字体 ${filename} 失败：${response.status}`);
+  return response.arrayBuffer();
+}
+
+export async function buildUafPdfBytes(assignments) {
   if (!assignments.length) throw new UafExportValidationError(["请至少选择一项作业"]);
   const issues = assignments.flatMap((assignment) => validateUafAssignment(assignment));
   if (issues.length) throw new UafExportValidationError(issues);
   const { createUafPdf } = await loadBrowserUaf();
   const base = import.meta.env.BASE_URL || "/";
-  const fontUrl = new URL(`${base}uaf/NotoSansSC-Regular.otf`, window.location.origin);
+  const [fontBytes, fontLightBytes, fontBoldBytes] = await Promise.all([
+    fetchFont(base, "HarmonyOS_Sans_SC_Regular.ttf"),
+    fetchFont(base, "HarmonyOS_Sans_SC_Light.ttf"),
+    fetchFont(base, "HarmonyOS_Sans_SC_Bold.ttf"),
+  ]);
   const wasmUrl = new URL(`${base}uaf/hb-subset.wasm`, window.location.origin);
-  const pdfBytes = await createUafPdf(assignments, {
-    fontUrl,
+  return createUafPdf(assignments, {
+    fontBytes,
+    fontLightBytes,
+    fontBoldBytes,
     wasmUrl,
     theme: "classworks-dark",
   });
+}
+
+export async function downloadUafAssignments(assignments, dateValue) {
+  const pdfBytes = await buildUafPdfBytes(assignments);
   const blob = new window.Blob([pdfBytes], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
