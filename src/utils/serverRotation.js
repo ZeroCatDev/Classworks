@@ -8,7 +8,6 @@ import { getSetting } from "./settings";
 
 // Server list for classworkscloud provider (in default priority order)
 const CLASSWORKS_CLOUD_SERVERS = [
-  "https://kv-service.houlang.cloud",
   "https://kv-service.wuyuan.dev",
 ];
 

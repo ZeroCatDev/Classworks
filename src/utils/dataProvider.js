@@ -257,7 +257,7 @@ export default {
         if (autoConfigureCloud) {
           // 使用classworksCloudDefaults配置
           const classworksCloudDefaults = {
-            "server.domain": import.meta.env.VITE_DEFAULT_KV_SERVER || "https://kv-service.houlang.cloud",
+            "server.domain": import.meta.env.VITE_DEFAULT_KV_SERVER || "https://kv-service.wuyuan.dev",
             "server.siteKey": "",
           };
 
