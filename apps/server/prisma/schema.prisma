@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  relationMode = "prisma"
+}
+
+model Account {
+  id                 String    @id @db.VarChar(191) @default(cuid())
+  provider           String    @db.VarChar(191)
+  providerId         String    @db.VarChar(191)
+  email              String?   @db.VarChar(191)
+  name               String?   @db.VarChar(191)
+  avatarUrl          String?   @db.VarChar(191)
+  providerData       Json?     @db.Json
+  accessToken        String?
+  createdAt          DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  refreshToken       String?
+  refreshTokenExpiry DateTime? @db.Timestamptz(6)
+  tokenVersion       Int       @default(1)
+
+  devices          Device[]
+
+  @@unique([provider, providerId])
+}
+
+model AppInstall {
+  id          String   @id @default(cuid()) @db.VarChar(191)
+  deviceId    Int
+  appId       String   @db.VarChar(191)
+  token       String   @unique @db.VarChar(191)
+  note        String?  @db.VarChar(191)
+  installedAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  deviceType  String?  @db.VarChar(191)
+  isReadOnly  Boolean  @default(false)
+
+  device      Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId])
+}
+
+model AutoAuth {
+  id         String   @id @default(cuid()) @db.VarChar(191)
+  deviceId   Int
+  password   String?  @db.VarChar(191)
+  deviceType String?  @db.VarChar(191)
+  isReadOnly Boolean  @default(false)
+  createdAt  DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  device      Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceId, password])
+}
+
+model Device {
+  id           Int          @id @default(autoincrement())
+  uuid         String       @unique @db.VarChar(191)
+  name         String?      @db.VarChar(191)
+  accountId    String?      @db.VarChar(191)
+  createdAt    DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime     @default(now()) @updatedAt @db.Timestamptz(6)
+  password     String?      @db.VarChar(191)
+  passwordHint String?      @db.VarChar(191)
+  namespace    String?      @unique @db.VarChar(191)
+
+  // 关联关系
+  account      Account?   @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  appInstalls  AppInstall[]
+  kvStore      KVStore[]  // 设备相关的KV存储
+  autoAuths    AutoAuth[] // 自动授权配置
+  @@index([accountId])
+}
+
+model KVStore {
+  deviceId  Int
+  key       String   @db.VarChar(191)
+  value     Json     @db.Json
+  creatorIp String?  @default("") @db.VarChar(191)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt   @db.Timestamptz(6)
+
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@id([deviceId, key])
+}

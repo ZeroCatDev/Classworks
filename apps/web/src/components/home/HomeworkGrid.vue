@@ -352,11 +352,11 @@ export default {
     }
   },
   async mounted() {
-    /* eslint-disable no-undef */
+     
     this.resizeObserver = new ResizeObserver(() => {
       this.resizeAllGridItems();
     });
-    /* eslint-enable no-undef */
+     
 
     // Observe the grid container for width changes
     if (this.$refs.gridContainer) {

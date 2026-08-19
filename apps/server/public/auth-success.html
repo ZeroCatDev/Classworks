@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>登录成功</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.5s ease;
+        }
+
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: white;
+            stroke-width: 3;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        h1 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .provider {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .token-container {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            word-break: break-all;
+        }
+
+        .token-label {
+            color: #6b7280;
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .token {
+            color: #1f2937;
+            font-family: monospace;
+            font-size: 0.875rem;
+            user-select: all;
+        }
+
+        .copy-btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .copy-btn:hover {
+            background: #4338ca;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.98);
+        }
+
+        .copy-btn.copied {
+            background: #10b981;
+        }
+
+        .auto-close {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .countdown {
+            color: #4f46e5;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="success-icon">
+        <svg fill="none" viewBox="0 0 24 24">
+            <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+
+    <h1>登录成功</h1>
+    <p class="provider" id="provider">OAuth Provider</p>
+
+    <div class="token-container">
+        <div class="token-label">访问令牌</div>
+        <div class="token" id="token">加载中...</div>
+    </div>
+
+    <button class="copy-btn" id="copyBtn" onclick="copyToken()">复制令牌</button>
+
+    <div class="auto-close">
+        窗口将在 <span class="countdown" id="countdown">10</span> 秒后自动关闭
+    </div>
+</div>
+
+<script>
+    // 从URL获取参数
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const provider = params.get('provider');
+
+    // 显示信息
+    if (token) {
+        document.getElementById('token').textContent = token;
+
+        // 保存到localStorage（前端应用可以读取）
+        localStorage.setItem('auth_token', token);
+        localStorage.setItem('auth_provider', provider);
+
+        // 触发storage事件，通知其他窗口
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: 'auth_token',
+            newValue: token,
+            url: window.location.href
+        }));
+    } else {
+        document.getElementById('token').textContent = '未获取到令牌';
+    }
+
+    if (provider) {
+        const providerNames = {
+            'github': 'GitHub',
+            'zerocat': 'ZeroCat'
+        };
+        document.getElementById('provider').textContent = `通过 ${providerNames[provider] || provider} 登录`;
+    }
+
+    // 复制令牌
+    function copyToken() {
+        if (!token) return;
+
+        navigator.clipboard.writeText(token).then(() => {
+            const btn = document.getElementById('copyBtn');
+            btn.textContent = '已复制';
+            btn.classList.add('copied');
+
+            setTimeout(() => {
+                btn.textContent = '复制令牌';
+                btn.classList.remove('copied');
+            }, 2000);
+        }).catch(() => {
+            // 降级方案
+            const textArea = document.createElement('textarea');
+            textArea.value = token;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            const btn = document.getElementById('copyBtn');
+            btn.textContent = '已复制';
+            btn.classList.add('copied');
+
+            setTimeout(() => {
+                btn.textContent = '复制令牌';
+                btn.classList.remove('copied');
+            }, 2000);
+        });
+    }
+
+    // 倒计时关闭
+    let countdown = 10;
+    const countdownEl = document.getElementById('countdown');
+
+    const timer = setInterval(() => {
+        countdown--;
+        countdownEl.textContent = countdown;
+
+        if (countdown <= 0) {
+            clearInterval(timer);
+
+            // 尝试关闭窗口
+            window.close();
+
+            // 如果无法关闭（比如不是通过脚本打开的），显示提示
+            setTimeout(() => {
+                if (!window.closed) {
+                    countdownEl.parentElement.innerHTML = '您可以关闭此窗口了';
+                }
+            }, 100);
+        }
+    }, 1000);
+
+    // 如果用户有任何交互，停止自动关闭
+    document.addEventListener('click', () => {
+        clearInterval(timer);
+        document.querySelector('.auto-close').style.display = 'none';
+    });
+</script>
+</body>
+</html>

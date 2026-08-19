@@ -1,0 +1,14 @@
+**/dist/**
+**/dev-dist/**
+**/node_modules/**
+**/coverage/**
+**/generated/**
+**/pnpm-lock.yaml
+**/package-lock.json
+**/*.min.js
+**/*.min.css
+apps/server/public/**
+apps/web/public/sounds/**
+apps/web/public/uaf/**
+apps/web/public/pwa/**
+pnpm-workspace.yaml

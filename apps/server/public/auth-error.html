@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>登录失败</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: shake 0.5s ease;
+        }
+
+        .error-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: white;
+            stroke-width: 3;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-5px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(5px);
+            }
+        }
+
+        h1 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .error-message {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #fee2e2;
+            border-radius: 8px;
+            color: #991b1b;
+        }
+
+        .error-code {
+            font-family: monospace;
+            font-size: 0.875rem;
+            word-break: break-all;
+        }
+
+        .retry-btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .retry-btn:hover {
+            background: #4338ca;
+        }
+
+        .close-btn {
+            background: transparent;
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .help-text {
+            color: #6b7280;
+            font-size: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="error-icon">
+        <svg fill="none" viewBox="0 0 24 24">
+            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+
+    <h1>登录失败</h1>
+
+    <div class="error-message">
+        <div id="errorMsg">认证过程中出现错误</div>
+        <div class="error-code" id="errorCode"></div>
+    </div>
+
+    <a class="retry-btn" href="javascript:history.back()">返回重试</a>
+    <button class="close-btn" onclick="window.close()">关闭窗口</button>
+
+    <div class="help-text">
+        如果问题持续存在，请检查：<br>
+        • OAuth应用配置是否正确<br>
+        • 回调URL是否已添加到OAuth应用中<br>
+        • 环境变量是否配置正确
+    </div>
+</div>
+
+<script>
+    // 从URL获取错误信息
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+
+    if (error) {
+        const errorMessages = {
+            'invalid_state': 'State验证失败，可能存在CSRF攻击',
+            'access_denied': '用户拒绝了授权请求',
+            'temporarily_unavailable': '服务暂时不可用，请稍后重试'
+        };
+
+        const errorMsg = errorMessages[error] || '未知错误';
+        document.getElementById('errorMsg').textContent = errorMsg;
+        document.getElementById('errorCode').textContent = `错误代码: ${error}`;
+    }
+</script>
+</body>
+</html>
