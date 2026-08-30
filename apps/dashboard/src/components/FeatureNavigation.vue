@@ -1,16 +1,8 @@
 <script setup>
-import {useRouter} from 'vue-router'
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
-import {Button} from '@/components/ui/button'
-import {
-  Shield,
-  TestTube2,
-  Settings,
-  Layers,
-  Database,
-  Key,
-  ArrowRight,
-} from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Shield, TestTube2, Settings, Layers, Database, Key, ArrowRight } from 'lucide-vue-next'
 
 const router = useRouter()
 
@@ -32,7 +24,8 @@ const features = [
     color: 'from-purple-500 to-pink-500',
     iconBg: 'bg-purple-500/10',
     iconColor: 'text-purple-600 dark:text-purple-400',
-  }, {
+  },
+  {
     title: 'KV 管理器',
     description: '浏览和管理键值存储数据，支持批量操作',
     icon: Database,
@@ -68,18 +61,19 @@ const navigateTo = (path) => {
 
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <Card
-          v-for="feature in features"
-          :key="feature.path"
-          class="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-          @click="navigateTo(feature.path)"
+        v-for="feature in features"
+        :key="feature.path"
+        class="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+        @click="navigateTo(feature.path)"
       >
         <CardHeader class="pb-3">
           <div class="flex items-start justify-between mb-3">
             <div :class="[feature.iconBg, 'p-3 rounded-lg']">
-              <component :is="feature.icon" :class="[feature.iconColor, 'h-6 w-6']"/>
+              <component :is="feature.icon" :class="[feature.iconColor, 'h-6 w-6']" />
             </div>
             <ArrowRight
-                class="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all"/>
+              class="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all"
+            />
           </div>
           <CardTitle class="text-lg">{{ feature.title }}</CardTitle>
           <CardDescription class="text-xs line-clamp-2">
@@ -89,7 +83,7 @@ const navigateTo = (path) => {
         <CardContent>
           <Button class="w-full group-hover:bg-primary/10" size="sm" variant="ghost">
             前往
-            <ArrowRight class="ml-2 h-3 w-3"/>
+            <ArrowRight class="ml-2 h-3 w-3" />
           </Button>
         </CardContent>
       </Card>

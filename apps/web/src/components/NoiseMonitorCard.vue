@@ -8,29 +8,13 @@
     style="cursor: pointer"
     @click="showDetail = true"
   >
-    <v-card-text
-      class="pa-5 d-flex flex-column"
-      style="height: 100%"
-    >
+    <v-card-text class="pa-5 d-flex flex-column" style="height: 100%">
       <!-- 顶部标题行 -->
       <div class="d-flex align-center mb-3">
-        <v-icon
-          :color="statusColor"
-          class="mr-2"
-          size="20"
-        >
-          mdi-microphone
-        </v-icon>
-        <span class="text-subtitle-2 font-weight-medium text-medium-emphasis">
-          环境噪音监测
-        </span>
+        <v-icon :color="statusColor" class="mr-2" size="20"> mdi-microphone </v-icon>
+        <span class="text-subtitle-2 font-weight-medium text-medium-emphasis"> 环境噪音监测 </span>
         <v-spacer />
-        <v-chip
-          :color="statusColor"
-          size="x-small"
-          variant="tonal"
-          label
-        >
+        <v-chip :color="statusColor" size="x-small" variant="tonal" label>
           {{ statusLabel }}
         </v-chip>
       </div>
@@ -47,10 +31,7 @@
             </span>
             <span class="text-caption text-medium-emphasis ml-1 mb-1">dB</span>
           </div>
-          <div
-            class="noise-level-label text-caption mt-1"
-            :class="`text-${dbColor}`"
-          >
+          <div class="noise-level-label text-caption mt-1" :class="`text-${dbColor}`">
             {{ noiseLevel }}
           </div>
         </div>
@@ -59,10 +40,7 @@
       <!-- 底部迷你波形 + 分数 -->
       <div class="d-flex align-center mt-2">
         <!-- 迷你波形条 -->
-        <div
-          class="noise-mini-bars d-flex align-end"
-          style="height: 20px; gap: 2px; flex: 1;"
-        >
+        <div class="noise-mini-bars d-flex align-end" style="height: 20px; gap: 2px; flex: 1">
           <div
             v-for="(val, i) in miniBarValues"
             :key="i"
@@ -80,20 +58,11 @@
         </div>
 
         <!-- 当前评分 -->
-        <div
-          v-if="currentScore !== null"
-          class="ml-3 text-center"
-        >
-          <div
-            class="font-weight-bold text-subtitle-1"
-            :class="`text-${scoreColor}`"
-          >
+        <div v-if="currentScore !== null" class="ml-3 text-center">
+          <div class="font-weight-bold text-subtitle-1" :class="`text-${scoreColor}`">
             {{ currentScore }}
           </div>
-          <div
-            class="text-caption text-medium-emphasis"
-            style="font-size: 10px; line-height: 1;"
-          >
+          <div class="text-caption text-medium-emphasis" style="font-size: 10px; line-height: 1">
             评分
           </div>
         </div>
@@ -126,9 +95,7 @@
 import { defineAsyncComponent } from 'vue'
 import { noiseService } from '@wydev/noise-core'
 
-const NoiseMonitorDetail = defineAsyncComponent(() =>
-  import('@/components/NoiseMonitorDetail.vue')
-)
+const NoiseMonitorDetail = defineAsyncComponent(() => import('@/components/NoiseMonitorDetail.vue'))
 
 // 最近 N 个采样用于迷你波形
 const MINI_BAR_COUNT = 16
@@ -171,7 +138,7 @@ export default {
         'permission-denied': '无权限',
         error: '错误',
       }
-      return this.isMonitoring ? (map[this.status] || '未知') : '未启动'
+      return this.isMonitoring ? map[this.status] || '未知' : '未启动'
     },
     dbColor() {
       const db = typeof this.currentDb === 'number' ? this.currentDb : 0
@@ -203,7 +170,7 @@ export default {
       return 'error'
     },
     miniBarValues() {
-      return this.recentDbValues.map(db => {
+      return this.recentDbValues.map((db) => {
         // 将 dB 值 (0-100) 映射到 5%-100% 高度
         return Math.max(5, Math.min(100, db))
       })

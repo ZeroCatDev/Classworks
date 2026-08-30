@@ -26,11 +26,7 @@
 ```vue
 <template>
   <v-dialog v-model="dialog">
-    <DeviceAuthDialog
-      :show-cancel="true"
-      @success="handleSuccess"
-      @cancel="dialog = false"
-    />
+    <DeviceAuthDialog :show-cancel="true" @success="handleSuccess" @cancel="dialog = false" />
   </v-dialog>
 </template>
 
@@ -63,11 +59,7 @@ Token 输入对话框,用于手动输入 KV 授权 Token。
 ```vue
 <template>
   <v-dialog v-model="dialog">
-    <TokenInputDialog
-      :show-cancel="true"
-      @success="handleSuccess"
-      @cancel="dialog = false"
-    />
+    <TokenInputDialog :show-cancel="true" @success="handleSuccess" @cancel="dialog = false" />
   </v-dialog>
 </template>
 
@@ -100,11 +92,7 @@ import TokenInputDialog from '@/components/auth/TokenInputDialog.vue'
 ```vue
 <template>
   <v-dialog v-model="dialog">
-    <AlternativeCodeDialog
-      :show-cancel="true"
-      @submit="handleSubmit"
-      @cancel="dialog = false"
-    />
+    <AlternativeCodeDialog :show-cancel="true" @submit="handleSubmit" @cancel="dialog = false" />
   </v-dialog>
 </template>
 

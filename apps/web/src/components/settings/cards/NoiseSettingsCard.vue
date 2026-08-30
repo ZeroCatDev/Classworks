@@ -1,9 +1,5 @@
 <template>
-  <settings-card
-    border
-    icon="mdi-microphone"
-    title="噪音监测"
-  >
+  <settings-card border icon="mdi-microphone" title="噪音监测">
     <v-list>
       <setting-item :setting-key="'noiseMonitor.enabled'" />
 
@@ -19,12 +15,7 @@
     <!-- 晚自习时间段配置 -->
     <div class="px-4 pb-4">
       <div class="d-flex align-center mb-4">
-        <v-icon
-          class="mr-2"
-          color="teal"
-        >
-          mdi-clock-edit-outline
-        </v-icon>
+        <v-icon class="mr-2" color="teal"> mdi-clock-edit-outline </v-icon>
         <span class="text-subtitle-1 font-weight-bold">晚自习时间段</span>
         <v-spacer />
         <v-btn
@@ -42,21 +33,10 @@
         配置晚自习时间段后，系统会在对应时段内自动开启噪音监测并记录统计报告。时间段外不会长期记录。
       </div>
 
-      <v-skeleton-loader
-        v-if="sessionLoading"
-        type="card"
-        class="mb-4"
-      />
+      <v-skeleton-loader v-if="sessionLoading" type="card" class="mb-4" />
       <template v-else>
-        <div
-          v-for="(session, idx) in editSessions"
-          :key="idx"
-          class="mb-3"
-        >
-          <v-card
-            variant="outlined"
-            rounded="xl"
-          >
+        <div v-for="(session, idx) in editSessions" :key="idx" class="mb-3">
+          <v-card variant="outlined" rounded="xl">
             <v-card-text class="pa-4">
               <div class="d-flex align-center ga-3 flex-wrap">
                 <v-text-field
@@ -65,7 +45,7 @@
                   variant="outlined"
                   label="名称"
                   hide-details
-                  style="max-width: 160px;"
+                  style="max-width: 160px"
                 />
                 <v-menu
                   v-model="timePickerMenus[idx]"
@@ -82,7 +62,7 @@
                       readonly
                       hide-details
                       prepend-inner-icon="mdi-clock-outline"
-                      style="max-width: 170px;"
+                      style="max-width: 170px"
                     />
                   </template>
                   <v-time-picker
@@ -101,7 +81,7 @@
                   label="时长"
                   suffix="分钟"
                   hide-details
-                  style="max-width: 130px;"
+                  style="max-width: 130px"
                   :min="10"
                   :max="300"
                 />
@@ -127,16 +107,9 @@
           </v-card>
         </div>
 
-        <div
-          v-if="editSessions.length === 0"
-          class="text-center text-medium-emphasis py-4"
-        >
-          <v-icon class="mb-1">
-            mdi-clock-outline
-          </v-icon>
-          <div class="text-caption">
-            暂无时间段，点击上方「添加时段」创建
-          </div>
+        <div v-if="editSessions.length === 0" class="text-center text-medium-emphasis py-4">
+          <v-icon class="mb-1"> mdi-clock-outline </v-icon>
+          <div class="text-caption">暂无时间段，点击上方「添加时段」创建</div>
         </div>
       </template>
 
@@ -144,12 +117,7 @@
 
       <!-- 监测参数 -->
       <div class="d-flex align-center mb-4">
-        <v-icon
-          class="mr-2"
-          color="orange"
-        >
-          mdi-alert-decagram
-        </v-icon>
+        <v-icon class="mr-2" color="orange"> mdi-alert-decagram </v-icon>
         <span class="text-subtitle-1 font-weight-bold">监测参数</span>
       </div>
 
@@ -162,20 +130,14 @@
           label="噪音报警阈值"
           suffix="dB"
           hide-details
-          style="max-width: 200px;"
+          style="max-width: 200px"
           :min="30"
           :max="90"
         />
       </div>
 
       <div class="d-flex justify-end ga-3 mb-2">
-        <v-btn
-          variant="text"
-          prepend-icon="mdi-restore"
-          @click="resetSessionConfig"
-        >
-          重置
-        </v-btn>
+        <v-btn variant="text" prepend-icon="mdi-restore" @click="resetSessionConfig"> 重置 </v-btn>
         <v-btn
           color="primary"
           variant="elevated"
@@ -191,9 +153,9 @@
 </template>
 
 <script>
-import SettingsCard from '@/components/SettingsCard.vue';
-import SettingItem from '@/components/settings/SettingItem.vue';
-import dataProvider from '@/utils/dataProvider';
+import SettingsCard from '@/components/SettingsCard.vue'
+import SettingItem from '@/components/settings/SettingItem.vue'
+import dataProvider from '@/utils/dataProvider'
 
 const DEFAULT_SESSION_CONFIG = {
   sessions: [
@@ -201,7 +163,7 @@ const DEFAULT_SESSION_CONFIG = {
     { name: '第2节晚自习', start: '20:20', duration: 110, enabled: true },
   ],
   alertThresholdDb: 55,
-};
+}
 
 export default {
   name: 'NoiseSettingsCard',
@@ -215,51 +177,51 @@ export default {
       editSessions: [],
       editAlertThreshold: 55,
       timePickerMenus: {},
-    };
+    }
   },
 
   mounted() {
-    this.loadSessionConfig();
+    this.loadSessionConfig()
   },
 
   methods: {
     // ===== 自习配置 =====
     async loadSessionConfig() {
-      this.sessionLoading = true;
+      this.sessionLoading = true
       try {
-        const res = await dataProvider.loadData('noise-session-config');
-        const data = res?.data || res;
+        const res = await dataProvider.loadData('noise-session-config')
+        const data = res?.data || res
         if (data && data.sessions) {
-          this.editSessions = JSON.parse(JSON.stringify(data.sessions));
-          this.editAlertThreshold = data.alertThresholdDb || 55;
+          this.editSessions = JSON.parse(JSON.stringify(data.sessions))
+          this.editAlertThreshold = data.alertThresholdDb || 55
         } else {
-          this.resetSessionConfig();
+          this.resetSessionConfig()
         }
       } catch {
-        this.resetSessionConfig();
+        this.resetSessionConfig()
       } finally {
-        this.sessionLoading = false;
+        this.sessionLoading = false
       }
     },
 
     async saveSessionConfig() {
-      this.sessionSaving = true;
+      this.sessionSaving = true
       try {
         const config = {
           sessions: this.editSessions,
           alertThresholdDb: this.editAlertThreshold,
-        };
-        await dataProvider.saveData('noise-session-config', config);
+        }
+        await dataProvider.saveData('noise-session-config', config)
       } catch (e) {
-        console.error('保存自习配置失败:', e);
+        console.error('保存自习配置失败:', e)
       } finally {
-        this.sessionSaving = false;
+        this.sessionSaving = false
       }
     },
 
     resetSessionConfig() {
-      this.editSessions = JSON.parse(JSON.stringify(DEFAULT_SESSION_CONFIG.sessions));
-      this.editAlertThreshold = DEFAULT_SESSION_CONFIG.alertThresholdDb;
+      this.editSessions = JSON.parse(JSON.stringify(DEFAULT_SESSION_CONFIG.sessions))
+      this.editAlertThreshold = DEFAULT_SESSION_CONFIG.alertThresholdDb
     },
 
     addSession() {
@@ -268,17 +230,17 @@ export default {
         start: '19:00',
         duration: 70,
         enabled: true,
-      });
+      })
     },
 
     sessionEndTime(session) {
-      if (!session?.start || !session?.duration) return '--:--';
-      const [h, m] = session.start.split(':').map(Number);
-      const totalMin = h * 60 + m + (session.duration || 0);
-      const eh = Math.floor(totalMin / 60) % 24;
-      const em = totalMin % 60;
-      return `${String(eh).padStart(2, '0')}:${String(em).padStart(2, '0')}`;
+      if (!session?.start || !session?.duration) return '--:--'
+      const [h, m] = session.start.split(':').map(Number)
+      const totalMin = h * 60 + m + (session.duration || 0)
+      const eh = Math.floor(totalMin / 60) % 24
+      const em = totalMin % 60
+      return `${String(eh).padStart(2, '0')}:${String(em).padStart(2, '0')}`
     },
   },
-};
+}
 </script>

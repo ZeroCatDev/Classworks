@@ -1,17 +1,7 @@
 <template>
-  <v-card
-    :border="border"
-    class="setting-group"
-  >
-    <v-card-title
-      v-if="title"
-      class="d-flex align-center"
-    >
-      <v-icon
-        v-if="icon"
-        :icon="icon"
-        class="mr-2"
-      />
+  <v-card :border="border" class="setting-group">
+    <v-card-title v-if="title" class="d-flex align-center">
+      <v-icon v-if="icon" :icon="icon" class="mr-2" />
       {{ title }}
     </v-card-title>
 
@@ -43,7 +33,7 @@ export default {
      */
     title: {
       type: String,
-      default: null
+      default: null,
     },
 
     /**
@@ -51,7 +41,7 @@ export default {
      */
     description: {
       type: String,
-      default: null
+      default: null,
     },
 
     /**
@@ -59,7 +49,7 @@ export default {
      */
     icon: {
       type: String,
-      default: null
+      default: null,
     },
 
     /**
@@ -67,20 +57,20 @@ export default {
      */
     border: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
 
   methods: {
     onSettingUpdate(key, value) {
-      this.$emit('update', key, value);
+      this.$emit('update', key, value)
     },
 
     onSettingError(key) {
-      this.$emit('error', key);
-    }
-  }
-};
+      this.$emit('error', key)
+    },
+  },
+}
 </script>
 
 <style scoped>

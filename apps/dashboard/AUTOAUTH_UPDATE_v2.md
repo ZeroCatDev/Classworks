@@ -11,10 +11,12 @@
 ### 1. ✅ API 客户端更新 (`src/lib/api.js`)
 
 **变更内容：**
+
 - 所有 AutoAuth API 方法的第二个参数从 `password` 改为 `token`
 - 使用 `authenticatedFetch()` 方法自动添加 `Authorization: Bearer {token}` header
 
 **修改的方法：**
+
 ```javascript
 // 旧方式
 async getAutoAuthConfigs(deviceUuid, password)
@@ -36,16 +38,19 @@ async deleteAutoAuthConfig(deviceUuid, token, configId)
 **主要变更：**
 
 #### A. 认证方式改变
+
 - ❌ 旧：使用 `DeviceAuthDialog` 进行设备 UUID + 密码认证
 - ✅ 新：使用 `LoginDialog` 进行 OAuth 账户登录
 
 #### B. 新增功能
+
 - ✅ 检查用户是否已登录
 - ✅ 验证设备是否绑定到当前账户
 - ✅ 未登录状态显示友好提示
 - ✅ 使用 `accountStore` 管理账户状态
 
 #### C. 状态管理更新
+
 ```javascript
 // 移除
 const devicePassword = ref('')
@@ -57,6 +62,7 @@ const isAuthenticated = computed(() => accountStore.isAuthenticated)
 ```
 
 #### D. 方法更新
+
 ```javascript
 // 旧：设备认证成功
 const handleLoginSuccess = async (uuid, password, device) => {
@@ -83,6 +89,7 @@ const checkDeviceAndLoad = async () => {
 ```
 
 #### E. 模板更新
+
 - ✅ 添加未登录状态卡片
 - ✅ 显示账户绑定信息
 - ✅ 移除设备密码相关 UI
@@ -92,6 +99,7 @@ const checkDeviceAndLoad = async () => {
 ### 3. ✅ 配置对话框更新 (`src/components/AutoAuthConfigDialog.vue`)
 
 **Props 变更：**
+
 ```javascript
 // 旧
 props: {
@@ -109,12 +117,13 @@ props: {
 ```
 
 **API 调用更新：**
+
 ```javascript
 // 所有 API 调用都使用 props.accountToken 而不是 props.devicePassword
 await apiClient.createAutoAuthConfig(
   props.deviceUuid,
-  props.accountToken,  // 改为 token
-  config
+  props.accountToken, // 改为 token
+  config,
 )
 ```
 
@@ -123,6 +132,7 @@ await apiClient.createAutoAuthConfig(
 ### 4. ✅ Account Store 扩展 (`src/stores/account.js`)
 
 **新增计算属性：**
+
 ```javascript
 const userId = computed(() => profile.value?.id || null)
 ```
@@ -134,6 +144,7 @@ const userId = computed(() => profile.value?.id || null)
 ### 5. ✅ 文档更新
 
 **快速使用指南 (`QUICKSTART.md`) 更新：**
+
 - 添加"重要前提"章节
 - 强调必须先登录并绑定设备
 - 更新使用流程
@@ -143,6 +154,7 @@ const userId = computed(() => profile.value?.id || null)
 ## 🎯 用户使用流程变化
 
 ### 旧流程（已废弃）
+
 ```
 1. 访问自动授权配置页面
 2. 输入设备 UUID 和密码
@@ -150,6 +162,7 @@ const userId = computed(() => profile.value?.id || null)
 ```
 
 ### 新流程（当前）
+
 ```
 1. 主页登录账户（OAuth）
 2. 绑定设备到账户
@@ -161,12 +174,12 @@ const userId = computed(() => profile.value?.id || null)
 
 ## 🔒 安全性提升
 
-| 特性 | 旧方式 | 新方式 |
-|------|--------|--------|
-| **认证级别** | 设备密码 | 账户 Token (JWT) |
-| **权限控制** | 知道密码即可 | 必须是设备所有者 |
-| **安全性** | 中等 | 高 |
-| **可追溯性** | 低 | 高（关联账户） |
+| 特性         | 旧方式             | 新方式             |
+| ------------ | ------------------ | ------------------ |
+| **认证级别** | 设备密码           | 账户 Token (JWT)   |
+| **权限控制** | 知道密码即可       | 必须是设备所有者   |
+| **安全性**   | 中等               | 高                 |
+| **可追溯性** | 低                 | 高（关联账户）     |
 | **适用范围** | 任何设置密码的设备 | 只有绑定账户的设备 |
 
 ---
@@ -174,6 +187,7 @@ const userId = computed(() => profile.value?.id || null)
 ## 📱 UI/UX 改进
 
 ### 新增功能
+
 1. **未登录提示卡片**
    - 显示登录按钮
    - 说明需要账户登录的原因
@@ -191,10 +205,12 @@ const userId = computed(() => profile.value?.id || null)
 ## ⚠️ 破坏性变更
 
 ### 影响范围
+
 - ❌ 旧的设备密码认证方式不再有效
 - ❌ 未绑定账户的设备无法管理 AutoAuth 配置
 
 ### 迁移建议
+
 1. 提示用户登录账户
 2. 引导用户绑定设备
 3. 更新使用文档和帮助信息

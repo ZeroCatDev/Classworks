@@ -1,6 +1,6 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv'
 
-dotenv.config();
+dotenv.config()
 
-export const siteKey = process.env.SITE_KEY || "";
-export const isDevelopment = process.env.NODE_ENV === "development";
+export const siteKey = process.env.SITE_KEY || ''
+export const isDevelopment = process.env.NODE_ENV === 'development'

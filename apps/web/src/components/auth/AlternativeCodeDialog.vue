@@ -11,42 +11,24 @@
         rows="5"
         variant="outlined"
       />
-      <v-alert
-        class="mt-3"
-        type="info"
-        variant="tonal"
-      >
-        替代代码功能暂未实现，敬请期待
-      </v-alert>
+      <v-alert class="mt-3" type="info" variant="tonal"> 替代代码功能暂未实现，敬请期待 </v-alert>
     </v-card-text>
     <v-card-actions>
       <v-spacer />
-      <v-btn
-        v-if="showCancel"
-        variant="text"
-        @click="$emit('cancel')"
-      >
-        取消
-      </v-btn>
-      <v-btn
-        :disabled="!code"
-        color="primary"
-        @click="submit"
-      >
-        提交
-      </v-btn>
+      <v-btn v-if="showCancel" variant="text" @click="$emit('cancel')"> 取消 </v-btn>
+      <v-btn :disabled="!code" color="primary" @click="submit"> 提交 </v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup>
-import {ref} from 'vue'
+import { ref } from 'vue'
 
 defineProps({
   showCancel: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const emit = defineEmits(['submit', 'cancel'])
@@ -63,6 +45,6 @@ const submit = () => {
 defineExpose({
   reset: () => {
     code.value = ''
-  }
+  },
 })
 </script>

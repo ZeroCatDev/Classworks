@@ -3,7 +3,9 @@
 .touch-card {
   border-radius: 16px;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 
   .v-card-title {
     font-size: 1.25rem;
@@ -35,9 +37,11 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%),
-            rgba(255, 255, 255, 0.2) 0%,
-            rgba(255, 255, 255, 0) 60%);
+    background: radial-gradient(
+      circle at var(--x, 50%) var(--y, 50%),
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0) 60%
+    );
     opacity: 0;
     transition: opacity 0.5s;
     pointer-events: none;
@@ -62,4 +66,4 @@
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   grid-gap: 16px;
   margin-top: 16px;
-} 
+}

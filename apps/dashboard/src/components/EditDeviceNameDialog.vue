@@ -1,29 +1,34 @@
 <script setup>
-import {ref, computed} from 'vue'
-import {useAccountStore} from '@/stores/account'
-import {apiClient} from '@/lib/api'
-import {Button} from '@/components/ui/button'
-import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog'
-import {Input} from '@/components/ui/input'
-import {Label} from '@/components/ui/label'
-import {Edit} from 'lucide-vue-next'
-import {toast} from 'vue-sonner'
-
+import { ref, computed } from 'vue'
+import { useAccountStore } from '@/stores/account'
+import { apiClient } from '@/lib/api'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Edit } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 
 const props = defineProps({
   modelValue: {
     type: Boolean,
-    default: false
+    default: false,
   },
   deviceUuid: {
     type: String,
-    required: true
+    required: true,
   },
   currentName: {
     type: String,
-    default: ''
+    default: '',
   },
-
 })
 
 const emit = defineEmits(['update:modelValue', 'success'])
@@ -40,9 +45,8 @@ const isOpen = computed({
       deviceName.value = props.currentName || ''
     }
     emit('update:modelValue', val)
-  }
+  },
 })
-
 
 const updateDeviceName = async () => {
   if (!deviceName.value.trim()) {
@@ -53,9 +57,9 @@ const updateDeviceName = async () => {
   isSubmitting.value = true
   try {
     await apiClient.setDeviceName(
-        props.deviceUuid,
-        deviceName.value.trim(),
-        accountStore.isAuthenticated ? accountStore.token : null
+      props.deviceUuid,
+      deviceName.value.trim(),
+      accountStore.isAuthenticated ? accountStore.token : null,
     )
 
     toast.success('设备名称已更新')
@@ -75,33 +79,27 @@ const updateDeviceName = async () => {
       <DialogHeader>
         <DialogTitle>
           <div class="flex items-center gap-2">
-            <Edit class="h-5 w-5"/>
+            <Edit class="h-5 w-5" />
             编辑设备名称
           </div>
         </DialogTitle>
-        <DialogDescription>
-          为设备设置一个易于识别的名称
-        </DialogDescription>
+        <DialogDescription> 为设备设置一个易于识别的名称 </DialogDescription>
       </DialogHeader>
 
       <div class="space-y-4 py-4">
         <div class="space-y-2">
           <Label for="deviceName">设备名称</Label>
           <Input
-              id="deviceName"
-              v-model="deviceName"
-              placeholder="输入设备名称"
-              @keyup.enter="updateDeviceName"
+            id="deviceName"
+            v-model="deviceName"
+            placeholder="输入设备名称"
+            @keyup.enter="updateDeviceName"
           />
         </div>
-
-
       </div>
 
       <DialogFooter>
-        <Button :disabled="isSubmitting" variant="outline" @click="isOpen = false">
-          取消
-        </Button>
+        <Button :disabled="isSubmitting" variant="outline" @click="isOpen = false"> 取消 </Button>
         <Button :disabled="isSubmitting || !deviceName.trim()" @click="updateDeviceName">
           {{ isSubmitting ? '更新中...' : '确认' }}
         </Button>

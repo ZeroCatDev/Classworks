@@ -2,33 +2,14 @@
   <v-card class="auth-card">
     <v-card-text class="pa-8">
       <div class="text-center mb-6">
-        <v-icon
-          class="mb-4"
-          color="success"
-          size="80"
-        >
-          mdi-account-key
-        </v-icon>
-        <h2 class="text-h4 mb-3">
-          设备认证
-        </h2>
-        <p class="text-body-1 text-medium-emphasis">
-          输入你在 Classworks KV 获取的认证信息
-        </p>
+        <v-icon class="mb-4" color="success" size="80"> mdi-account-key </v-icon>
+        <h2 class="text-h4 mb-3">设备认证</h2>
+        <p class="text-body-1 text-medium-emphasis">输入你在 Classworks KV 获取的认证信息</p>
       </div>
 
-      <v-card
-        class="pa-4 mb-6"
-        color="info"
-        variant="tonal"
-      >
+      <v-card class="pa-4 mb-6" color="info" variant="tonal">
         <div class="text-body-2">
-          <v-icon
-            class="mr-2"
-            size="20"
-          >
-            mdi-information
-          </v-icon>
+          <v-icon class="mr-2" size="20"> mdi-information </v-icon>
           对于已有UUID的用户，您应当使用UUID与您的密码登录。
         </div>
       </v-card>
@@ -65,14 +46,7 @@
     </v-card-text>
 
     <v-card-actions class="pa-6 pt-0">
-      <v-btn
-        v-if="showCancel"
-        size="large"
-        variant="text"
-        @click="$emit('cancel')"
-      >
-        取消
-      </v-btn>
+      <v-btn v-if="showCancel" size="large" variant="text" @click="$emit('cancel')"> 取消 </v-btn>
       <v-spacer />
       <v-btn
         :disabled="!form.namespace || authenticating"
@@ -83,12 +57,7 @@
         variant="elevated"
         @click="authenticate"
       >
-        <v-icon
-          size="24"
-          start
-        >
-          mdi-login
-        </v-icon>
+        <v-icon size="24" start> mdi-login </v-icon>
         <span class="text-h6">认证并登录</span>
       </v-btn>
     </v-card-actions>
@@ -96,26 +65,26 @@
 </template>
 
 <script setup>
-import {ref, watch} from 'vue'
-import {getSetting, setSetting} from '@/utils/settings'
+import { ref, watch } from 'vue'
+import { getSetting, setSetting } from '@/utils/settings'
 import axios from '@/axios/axios'
 
 const props = defineProps({
   showCancel: {
     type: Boolean,
-    default: false
+    default: false,
   },
   preconfig: {
     type: Object,
-    default: null
-  }
+    default: null,
+  },
 })
 
 const emit = defineEmits(['success', 'cancel'])
 
 const form = ref({
   namespace: '',
-  password: ''
+  password: '',
 })
 const authenticating = ref(false)
 const error = ref('')
@@ -141,7 +110,7 @@ watch(
       }
     }
   },
-  {immediate: true, deep: true}
+  { immediate: true, deep: true },
 )
 
 const authenticate = async () => {
@@ -157,7 +126,7 @@ const authenticate = async () => {
     const response = await axios.post(`${serverUrl}/apps/auth/token`, {
       namespace: form.value.namespace,
       password: form.value.password || undefined,
-      appId: "d158067f53627d2b98babe8bffd2fd7d"
+      appId: 'd158067f53627d2b98babe8bffd2fd7d',
     })
 
     if (!response.data.success) {
@@ -175,7 +144,6 @@ const authenticate = async () => {
     }
 
     emit('success', tokenData)
-
   } catch (err) {
     const status = err?.response?.status
     if (status === 401 || status === 403) {
@@ -193,9 +161,9 @@ const authenticate = async () => {
 // 暴露清空表单的方法
 defineExpose({
   reset: () => {
-    form.value = {namespace: '', password: ''}
+    form.value = { namespace: '', password: '' }
     error.value = ''
-  }
+  },
 })
 </script>
 

@@ -22,7 +22,7 @@ export default defineConfig({
     vueDevTools(),
     Layouts(),
     Vue({
-      template: { transformAssetUrls }
+      template: { transformAssetUrls },
     }),
     VitePWA({
       registerType: 'autoUpdate',
@@ -36,92 +36,90 @@ export default defineConfig({
       injectRegister: 'auto',
       strategies: 'generateSW',
 
-
       workbox: {
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
-        globPatterns: [
-          '**/*.{js,css,html,ico,png,svg,webmanifest,txt,json,woff2,ttf,mp3}',
-        ],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,txt,json,woff2,ttf,mp3}'],
         navigateFallback: 'index.html',
-        navigateFallbackDenylist: [
-          /^\/api\//,
-          /^\/socket\.io\//,
-        ],
+        navigateFallbackDenylist: [/^\/api\//, /^\/socket\.io\//],
         runtimeCaching: [
           {
             urlPattern: ({ url, sameOrigin }) => {
-              return sameOrigin && url.pathname.startsWith('/assets/');
+              return sameOrigin && url.pathname.startsWith('/assets/')
             },
             handler: 'CacheFirst',
             options: {
               cacheName: 'assets-cache',
               expiration: {
                 maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 60 // 60 天
+                maxAgeSeconds: 60 * 60 * 24 * 60, // 60 天
               },
               cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
+                statuses: [0, 200],
+              },
+            },
           },
           {
             urlPattern: ({ url, sameOrigin }) => {
-              return sameOrigin && url.pathname.startsWith('/sounds/');
+              return sameOrigin && url.pathname.startsWith('/sounds/')
             },
             handler: 'CacheFirst',
             options: {
               cacheName: 'sound-cache',
               expiration: {
                 maxEntries: 80,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 天
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 天
               },
               cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
+                statuses: [0, 200],
+              },
+            },
           },
           {
             urlPattern: ({ url, sameOrigin }) => {
-              return sameOrigin && url.pathname.startsWith('/pwa/');
+              return sameOrigin && url.pathname.startsWith('/pwa/')
             },
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'pwa-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 天
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 天
               },
               cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
+                statuses: [0, 200],
+              },
+            },
           },
           {
             // 匹配当前域名下除了上述规则外的所有请求
             urlPattern: ({ url, sameOrigin }) => {
-              if (!sameOrigin) return false;
-              const path = url.pathname;
+              if (!sameOrigin) return false
+              const path = url.pathname
               // 排除已经由其他规则处理的路径
-              return !(path.includes('/assets/') || path.includes('/pwa/') || path.includes('/sounds/'));
+              return !(
+                path.includes('/assets/') ||
+                path.includes('/pwa/') ||
+                path.includes('/sounds/')
+              )
             },
             handler: 'NetworkFirst',
             options: {
               cacheName: 'other-resources',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 // 1 天
+                maxAgeSeconds: 60 * 60 * 24, // 1 天
               },
               networkTimeoutSeconds: 10,
               cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
+                statuses: [0, 200],
+              },
+            },
           },
         ],
         additionalManifestEntries: [],
         clientsClaim: true,
         skipWaiting: true,
-        importScripts: ['sw-cache-manager.js']
+        importScripts: ['sw-cache-manager.js'],
       },
       manifest: {
         id: '7C24F2B3.ClassworksPWA',
@@ -178,24 +176,24 @@ export default defineConfig({
           {
             src: './pwa/image/pwa-64x64.png',
             sizes: '64x64',
-            type: 'image/png'
+            type: 'image/png',
           },
           {
             src: './pwa/image/pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
           },
           {
             src: './pwa/image/pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
           },
           {
             src: './pwa/image/maskable-icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'maskable'
-          }
+            purpose: 'maskable',
+          },
         ],
         shortcuts: [
           {
@@ -206,12 +204,12 @@ export default defineConfig({
               {
                 src: './pwa/image/pwa-64x64.png',
                 sizes: '64x64',
-                type: 'image/png'
-              }
-            ]
+                type: 'image/png',
+              },
+            ],
           },
         ],
-      }
+      },
     }),
     // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
     Vuetify({
@@ -229,17 +227,16 @@ export default defineConfig({
     }),
     Fonts({
       google: {
-        families: [{
-          name: 'Roboto',
-          styles: 'wght@100;300;400;500;700;900',
-        }],
+        families: [
+          {
+            name: 'Roboto',
+            styles: 'wght@100;300;400;500;700;900',
+          },
+        ],
       },
     }),
     AutoImport({
-      imports: [
-        'vue',
-        'vue-router',
-      ],
+      imports: ['vue', 'vue-router'],
       eslintrc: {
         enabled: true,
       },
@@ -249,17 +246,9 @@ export default defineConfig({
   define: { 'process.env': {} },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
-    extensions: [
-      '.js',
-      '.json',
-      '.jsx',
-      '.mjs',
-      '.ts',
-      '.tsx',
-      '.vue',
-    ],
+    extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue'],
   },
   build: {
     // ===== Chunk 分割优化 =====

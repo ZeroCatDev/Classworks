@@ -2,10 +2,13 @@
 
 // 卡片悬浮效果
 .hover-card {
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.3s ease;
   will-change: transform, box-shadow;
 
-  &:hover, &:focus {
+  &:hover,
+  &:focus {
     transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
   }
@@ -41,9 +44,11 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%),
-            rgba(255, 255, 255, 0.2) 0%,
-            rgba(255, 255, 255, 0) 60%);
+    background: radial-gradient(
+      circle at var(--x, 50%) var(--y, 50%),
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0) 60%
+    );
     opacity: 0;
     transition: opacity 0.5s;
     pointer-events: none;

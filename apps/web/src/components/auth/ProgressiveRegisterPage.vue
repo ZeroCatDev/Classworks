@@ -1,24 +1,15 @@
 <template>
   <v-card>
     <v-card-title class="d-flex align-center">
-      <v-icon
-        class="mr-2"
-        icon="mdi-account-plus"
-      />
+      <v-icon class="mr-2" icon="mdi-account-plus" />
       渐进式注册
     </v-card-title>
 
     <v-card-text>
       <div v-if="!isRegistered && !isRegistering">
-        <p class="text-body-1 mb-4">
-          快速创建设备并开始使用 Classworks 云端功能
-        </p>
+        <p class="text-body-1 mb-4">快速创建设备并开始使用 Classworks 云端功能</p>
 
-        <v-alert
-          class="mb-4"
-          type="info"
-          variant="tonal"
-        >
+        <v-alert class="mb-4" type="info" variant="tonal">
           <template #prepend>
             <v-icon icon="mdi-information" />
           </template>
@@ -29,15 +20,8 @@
       <!-- 注册进行中 -->
       <div v-else-if="isRegistering">
         <div class="text-center py-4">
-          <v-progress-circular
-            class="mb-4"
-            color="primary"
-            indeterminate
-            size="48"
-          />
-          <p class="text-h6 mb-2">
-            正在注册设备...
-          </p>
+          <v-progress-circular class="mb-4" color="primary" indeterminate size="48" />
+          <p class="text-h6 mb-2">正在注册设备...</p>
           <p class="text-body-2 text-medium-emphasis">
             {{ registrationStep }}
           </p>
@@ -46,11 +30,7 @@
 
       <!-- 注册成功 -->
       <div v-else-if="isRegistered && deviceInfo">
-        <v-alert
-          class="mb-4"
-          type="success"
-          variant="tonal"
-        >
+        <v-alert class="mb-4" type="success" variant="tonal">
           <template #prepend>
             <v-icon icon="mdi-check-circle" />
           </template>
@@ -77,11 +57,7 @@
           </v-list-item>
         </v-list>
 
-        <v-alert
-          class="mt-4"
-          type="info"
-          variant="tonal"
-        >
+        <v-alert class="mt-4" type="info" variant="tonal">
           <template #prepend>
             <v-icon icon="mdi-information" />
           </template>
@@ -91,11 +67,7 @@
 
       <!-- 错误状态 -->
       <div v-else-if="errorMessage">
-        <v-alert
-          class="mb-4"
-          type="error"
-          variant="tonal"
-        >
+        <v-alert class="mb-4" type="error" variant="tonal">
           <template #prepend>
             <v-icon icon="mdi-alert-circle" />
           </template>
@@ -129,28 +101,18 @@
       </v-btn>
 
       <!-- 重试按钮 -->
-      <v-btn
-        v-if="errorMessage"
-        color="primary"
-        prepend-icon="mdi-refresh"
-        @click="resetAndRetry"
-      >
+      <v-btn v-if="errorMessage" color="primary" prepend-icon="mdi-refresh" @click="resetAndRetry">
         重试
       </v-btn>
 
-      <v-btn
-        variant="text"
-        @click="$emit('close')"
-      >
-        关闭
-      </v-btn>
+      <v-btn variant="text" @click="$emit('close')"> 关闭 </v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup>
-import {ref} from 'vue'
-import {getSetting, setSetting} from '@/utils/settings'
+import { ref } from 'vue'
+import { getSetting, setSetting } from '@/utils/settings'
 import axios from '@/axios/axios'
 
 // 事件定义
@@ -169,8 +131,8 @@ const registrationStep = ref('')
 // 生成 UUID
 const generateUUID = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = Math.random() * 16 | 0
-    const v = c === 'x' ? r : (r & 0x3 | 0x8)
+    const r = (Math.random() * 16) | 0
+    const v = c === 'x' ? r : (r & 0x3) | 0x8
     return v.toString(16)
   })
 }
@@ -211,12 +173,12 @@ const registerDevice = async () => {
     const serverUrl = getSetting('server.domain')
 
     registrationStep.value = '正在注册设备到服务器...'
-    console.log('开始注册设备:', {uuid, deviceName, serverUrl})
+    console.log('开始注册设备:', { uuid, deviceName, serverUrl })
 
     // 调用设备注册接口
     const response = await axios.post(`${serverUrl}/devices`, {
       uuid,
-      deviceName
+      deviceName,
     })
 
     console.log('设备注册响应:', response.data)
@@ -226,7 +188,7 @@ const registerDevice = async () => {
       uuid,
       deviceName,
       createdAt: new Date().toISOString(),
-      registered: true
+      registered: true,
     }
 
     saveDeviceInfo(newDeviceInfo)
@@ -237,7 +199,6 @@ const registerDevice = async () => {
     await autoLogin(uuid)
 
     isRegistered.value = true
-
   } catch (error) {
     console.error('设备注册失败:', error)
     errorMessage.value = error.response?.data?.message || error.message || '网络连接失败'
@@ -255,7 +216,7 @@ const autoLogin = async (uuid) => {
     // 使用设备认证接口获取 token
     const response = await axios.post(`${serverUrl}/apps/auth/token`, {
       namespace: uuid,
-      password: '' // 空密码
+      password: '', // 空密码
     })
 
     if (response.data && response.data.token) {

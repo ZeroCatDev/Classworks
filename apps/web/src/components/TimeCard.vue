@@ -8,34 +8,19 @@
     style="cursor: pointer"
     @click="showFullscreen = true"
   >
-    <v-card-text
-      class="pa-6 d-flex flex-column"
-      style="height: 100%"
-    >
-      <div
-        class="d-flex align-center"
-        style="gap: 16px;"
-      >
+    <v-card-text class="pa-6 d-flex flex-column" style="height: 100%">
+      <div class="d-flex align-center" style="gap: 16px">
         <!-- 左侧：时间显示 -->
         <div class="flex-grow-1">
-          <div
-            class="time-display"
-            :style="timeStyle"
-          >
-            {{ timeString }}<span
-              class="seconds-text"
-              :style="secondsStyle"
-            >{{ secondsString }}</span><span
-              v-if="use12hClock"
-              class="ampm-text"
-              :style="secondsStyle"
-            > {{ amPmString }}</span>
+          <div class="time-display" :style="timeStyle">
+            {{ timeString
+            }}<span class="seconds-text" :style="secondsStyle">{{ secondsString }}</span
+            ><span v-if="use12hClock" class="ampm-text" :style="secondsStyle">
+              {{ amPmString }}</span
+            >
           </div>
-          <div
-            class="date-line mt-3"
-            :style="dateStyle"
-          >
-            {{ dateString }}  {{ weekdayString }}  {{ periodOfDay }}
+          <div class="date-line mt-3" :style="dateStyle">
+            {{ dateString }} {{ weekdayString }} {{ periodOfDay }}
           </div>
         </div>
 
@@ -43,34 +28,21 @@
         <div
           v-if="noiseEnabled"
           class="d-flex flex-column align-center justify-center"
-          style="min-width: 80px;"
+          style="min-width: 80px"
           @click.stop="onNoiseClick"
         >
           <!-- 无麦克风权限提示 -->
           <template v-if="micPermissionState === 'denied'">
-            <v-icon
-              color="error"
-              size="24"
-            >
-              mdi-microphone-off
-            </v-icon>
-            <div
-              class="text-caption text-error mt-1"
-              style="white-space: nowrap; font-size: 10px;"
-            >
+            <v-icon color="error" size="24"> mdi-microphone-off </v-icon>
+            <div class="text-caption text-error mt-1" style="white-space: nowrap; font-size: 10px">
               权限被拒绝
             </div>
           </template>
           <template v-else-if="micPermissionState === 'unavailable'">
-            <v-icon
-              color="warning"
-              size="24"
-            >
-              mdi-microphone-question
-            </v-icon>
+            <v-icon color="warning" size="24"> mdi-microphone-question </v-icon>
             <div
               class="text-caption text-warning mt-1"
-              style="white-space: nowrap; font-size: 10px;"
+              style="white-space: nowrap; font-size: 10px"
             >
               无麦克风
             </div>
@@ -79,21 +51,25 @@
             <div
               class="noise-side-db font-weight-bold"
               :class="`text-${noiseDbColor}`"
-              :style="{ fontSize: `${fontSize * 0.9}px`, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }"
+              :style="{
+                fontSize: `${fontSize * 0.9}px`,
+                lineHeight: 1,
+                fontVariantNumeric: 'tabular-nums',
+              }"
             >
               {{ noiseDisplayDb }}
             </div>
             <div
               class="text-caption mt-1"
               :class="`text-${noiseDbColor}`"
-              style="white-space: nowrap; font-size: 11px;"
+              style="white-space: nowrap; font-size: 11px"
             >
               {{ noiseStatusText }}
             </div>
             <div
               v-if="!noiseMonitoring"
               class="text-caption text-medium-emphasis mt-1"
-              style="font-size: 10px; cursor: pointer;"
+              style="font-size: 10px; cursor: pointer"
             >
               点击开启
             </div>
@@ -132,32 +108,18 @@
     />
 
     <!-- 麦克风权限引导弹框 -->
-    <v-dialog
-      v-model="showMicPermissionDialog"
-      max-width="480"
-      persistent
-    >
+    <v-dialog v-model="showMicPermissionDialog" max-width="480" persistent>
       <v-card rounded="xl">
         <div class="text-center pt-8 pb-2">
-          <v-avatar
-            color="primary"
-            size="72"
-          >
-            <v-icon
-              icon="mdi-microphone-outline"
-              size="36"
-            />
+          <v-avatar color="primary" size="72">
+            <v-icon icon="mdi-microphone-outline" size="36" />
           </v-avatar>
         </div>
 
-        <v-card-title class="text-center text-h6 pt-4">
-          开启环境噪音监测
-        </v-card-title>
+        <v-card-title class="text-center text-h6 pt-4"> 开启环境噪音监测 </v-card-title>
 
         <v-card-text class="text-body-2 text-medium-emphasis px-6">
-          <p class="mb-3">
-            该功能可以实时监测教室环境噪音，帮助营造安静的学习氛围：
-          </p>
+          <p class="mb-3">该功能可以实时监测教室环境噪音，帮助营造安静的学习氛围：</p>
           <div class="d-flex align-start mb-2">
             <v-icon
               icon="mdi-chart-line"
@@ -186,12 +148,7 @@
             <span>音频数据仅在本地处理，不会上传或存储录音</span>
           </div>
 
-          <v-alert
-            type="info"
-            variant="tonal"
-            density="compact"
-            class="mb-2"
-          >
+          <v-alert type="info" variant="tonal" density="compact" class="mb-2">
             需要授予麦克风权限才能使用此功能。浏览器将弹出权限请求，请点击「允许」。
           </v-alert>
         </v-card-text>
@@ -199,21 +156,13 @@
         <v-divider />
 
         <v-card-text class="px-6 py-3">
-          <v-list
-            density="compact"
-            class="pa-0"
-          >
+          <v-list density="compact" class="pa-0">
             <v-list-item class="px-0">
               <template #prepend>
-                <v-icon
-                  icon="mdi-microphone"
-                  class="mr-3"
-                />
+                <v-icon icon="mdi-microphone" class="mr-3" />
               </template>
               <v-list-item-title>启用噪音监测</v-list-item-title>
-              <v-list-item-subtitle class="text-caption">
-                关闭后将不再提醒
-              </v-list-item-subtitle>
+              <v-list-item-subtitle class="text-caption"> 关闭后将不再提醒 </v-list-item-subtitle>
               <template #append>
                 <v-switch
                   :model-value="noiseEnabled"
@@ -227,12 +176,7 @@
         </v-card-text>
 
         <v-card-actions class="px-6 pb-5">
-          <v-btn
-            variant="text"
-            @click="dismissMicPermission"
-          >
-            暂不开启
-          </v-btn>
+          <v-btn variant="text" @click="dismissMicPermission"> 暂不开启 </v-btn>
           <v-spacer />
           <v-btn
             color="primary"
@@ -263,10 +207,7 @@
     >
       <!-- 顶部分页导航 (自动隐藏) -->
       <Transition name="toolbar-fade">
-        <div
-          v-show="toolbarVisible"
-          class="fullscreen-toolbar"
-        >
+        <div v-show="toolbarVisible" class="fullscreen-toolbar">
           <v-tabs
             v-model="fullscreenMode"
             density="comfortable"
@@ -275,24 +216,15 @@
             class="fullscreen-tabs"
           >
             <v-tab value="clock">
-              <v-icon
-                start
-                icon="mdi-clock-outline"
-              />
+              <v-icon start icon="mdi-clock-outline" />
               时钟
             </v-tab>
             <v-tab value="countdown">
-              <v-icon
-                start
-                icon="mdi-timer-sand"
-              />
+              <v-icon start icon="mdi-timer-sand" />
               倒计时
             </v-tab>
             <v-tab value="stopwatch">
-              <v-icon
-                start
-                icon="mdi-timer-outline"
-              />
+              <v-icon start icon="mdi-timer-outline" />
               秒表
             </v-tab>
           </v-tabs>
@@ -301,21 +233,16 @@
 
       <!-- 主体内容区 -->
       <div class="fullscreen-time-body flex-grow-1 d-flex flex-column align-center justify-center">
-        <v-tabs-window
-          v-model="fullscreenMode"
-          class="fullscreen-tabs-window"
-        >
+        <v-tabs-window v-model="fullscreenMode" class="fullscreen-tabs-window">
           <!-- ========= 时钟模式 ========= -->
           <v-tabs-window-item value="clock">
             <div class="d-flex flex-column align-center justify-center">
               <div class="fullscreen-time-display">
-                {{ timeString }}<span class="fullscreen-seconds">{{ secondsString }}</span><span
-                  v-if="use12hClock"
-                  class="fullscreen-seconds"
-                > {{ amPmString }}</span>
+                {{ timeString }}<span class="fullscreen-seconds">{{ secondsString }}</span
+                ><span v-if="use12hClock" class="fullscreen-seconds"> {{ amPmString }}</span>
               </div>
               <div class="fullscreen-date-line mt-6">
-                {{ dateString }}  {{ weekdayString }}  {{ periodOfDay }}
+                {{ dateString }} {{ weekdayString }} {{ periodOfDay }}
               </div>
               <div class="fullscreen-progress mt-10">
                 <div class="text-caption text-medium-emphasis mb-1">
@@ -380,13 +307,9 @@
                       size="small"
                       @click="countdownHours = Math.max(countdownHours - 1, 0)"
                     />
-                    <div class="text-caption text-medium-emphasis">
-                      时
-                    </div>
+                    <div class="text-caption text-medium-emphasis">时</div>
                   </div>
-                  <div class="countdown-sep">
-                    :
-                  </div>
+                  <div class="countdown-sep">:</div>
                   <div class="text-center">
                     <v-btn
                       icon="mdi-chevron-up"
@@ -403,13 +326,9 @@
                       size="small"
                       @click="countdownMinutes = Math.max(countdownMinutes - 1, 0)"
                     />
-                    <div class="text-caption text-medium-emphasis">
-                      分
-                    </div>
+                    <div class="text-caption text-medium-emphasis">分</div>
                   </div>
-                  <div class="countdown-sep">
-                    :
-                  </div>
+                  <div class="countdown-sep">:</div>
                   <div class="text-center">
                     <v-btn
                       icon="mdi-chevron-up"
@@ -426,9 +345,7 @@
                       size="small"
                       @click="countdownSeconds = Math.max(countdownSeconds - 1, 0)"
                     />
-                    <div class="text-caption text-medium-emphasis">
-                      秒
-                    </div>
+                    <div class="text-caption text-medium-emphasis">秒</div>
                   </div>
                 </div>
                 <!-- 快捷按钮 -->
@@ -466,7 +383,13 @@
                   {{ countdownDisplay }}
                 </div>
                 <div class="fullscreen-date-line mt-4 text-medium-emphasis">
-                  {{ countdownRunning ? '倒计时进行中' : (countdownRemaining <= 0 ? '时间到！' : '已暂停') }}
+                  {{
+                    countdownRunning
+                      ? '倒计时进行中'
+                      : countdownRemaining <= 0
+                        ? '时间到！'
+                        : '已暂停'
+                  }}
                 </div>
                 <!-- 进度 -->
                 <v-progress-linear
@@ -505,7 +428,7 @@
                 {{ stopwatchDisplay }}
               </div>
               <div class="fullscreen-date-line mt-4 text-medium-emphasis">
-                {{ stopwatchRunning ? '计时中' : (stopwatchElapsed > 0 ? '已暂停' : '秒表') }}
+                {{ stopwatchRunning ? '计时中' : stopwatchElapsed > 0 ? '已暂停' : '秒表' }}
               </div>
               <div class="mt-8 d-flex ga-3">
                 <v-btn
@@ -534,32 +457,17 @@
               </div>
               <!-- 计次记录 -->
               <v-slide-y-transition>
-                <div
-                  v-if="laps.length > 0"
-                  class="stopwatch-laps mt-6"
-                >
-                  <v-table
-                    density="compact"
-                    class="stopwatch-laps-table"
-                  >
+                <div v-if="laps.length > 0" class="stopwatch-laps mt-6">
+                  <v-table density="compact" class="stopwatch-laps-table">
                     <thead>
                       <tr>
-                        <th>
-                          #
-                        </th>
-                        <th>
-                          计次
-                        </th>
-                        <th>
-                          总计
-                        </th>
+                        <th>#</th>
+                        <th>计次</th>
+                        <th>总计</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr
-                        v-for="(lap, idx) in laps"
-                        :key="idx"
-                      >
+                      <tr v-for="(lap, idx) in laps" :key="idx">
                         <td>
                           {{ laps.length - idx }}
                         </td>
@@ -581,12 +489,7 @@
 
       <!-- 右下角按钮组 -->
       <div class="fullscreen-actions">
-        <v-btn
-          icon="mdi-cog"
-          variant="text"
-          size="large"
-          @click.stop="showSettings = true"
-        />
+        <v-btn icon="mdi-cog" variant="text" size="large" @click.stop="showSettings = true" />
         <v-btn
           icon="mdi-close"
           variant="text"
@@ -599,41 +502,19 @@
   </v-dialog>
 
   <!-- 倒计时结束弹框 -->
-  <v-dialog
-    v-model="countdownEndedDialog"
-    max-width="480"
-    persistent
-  >
+  <v-dialog v-model="countdownEndedDialog" max-width="480" persistent>
     <v-card rounded="xl">
       <v-card-title class="d-flex align-center justify-center pt-6">
-        <v-icon
-          color="error"
-          size="32"
-          class="mr-2"
-          icon="mdi-alarm"
-        />
+        <v-icon color="error" size="32" class="mr-2" icon="mdi-alarm" />
         时间到！
       </v-card-title>
       <v-card-text class="text-center pb-2">
-        <div
-          class="text-h4 font-weight-bold my-4"
-          style="font-variant-numeric: tabular-nums;"
-        >
+        <div class="text-h4 font-weight-bold my-4" style="font-variant-numeric: tabular-nums">
           {{ formatCountdownTotal(countdownTotal) }}
         </div>
-        <div class="text-body-1 text-medium-emphasis">
-          设定的倒计时已结束
-        </div>
-        <div
-          v-if="overtimeElapsed > 0"
-          class="mt-4"
-        >
-          <v-chip
-            color="error"
-            variant="tonal"
-            size="large"
-            prepend-icon="mdi-clock-alert-outline"
-          >
+        <div class="text-body-1 text-medium-emphasis">设定的倒计时已结束</div>
+        <div v-if="overtimeElapsed > 0" class="mt-4">
+          <v-chip color="error" variant="tonal" size="large" prepend-icon="mdi-clock-alert-outline">
             已超时 {{ overtimeDisplay }}
           </v-chip>
         </div>
@@ -654,27 +535,17 @@
   </v-dialog>
 
   <!-- 设置弹框 -->
-  <v-dialog
-    v-model="showSettings"
-    max-width="420"
-    :scrim="true"
-  >
+  <v-dialog v-model="showSettings" max-width="420" :scrim="true">
     <v-card rounded="xl">
       <v-card-title class="d-flex align-center">
-        <v-icon
-          class="mr-2"
-          icon="mdi-cog"
-        />
+        <v-icon class="mr-2" icon="mdi-cog" />
         时间卡片设置
       </v-card-title>
       <v-card-text>
         <v-list>
           <v-list-item>
             <template #prepend>
-              <v-icon
-                class="mr-3"
-                icon="mdi-clock-outline"
-              />
+              <v-icon class="mr-3" icon="mdi-clock-outline" />
             </template>
             <v-list-item-title>显示时间卡片</v-list-item-title>
             <v-list-item-subtitle>在首页显示时间卡片，刷新后生效。</v-list-item-subtitle>
@@ -689,10 +560,7 @@
           </v-list-item>
           <v-list-item>
             <template #prepend>
-              <v-icon
-                class="mr-3"
-                icon="mdi-clock-time-six-outline"
-              />
+              <v-icon class="mr-3" icon="mdi-clock-time-six-outline" />
             </template>
             <v-list-item-title>12 小时制</v-list-item-title>
             <v-list-item-subtitle>以 12 小时制（AM/PM）显示时间。</v-list-item-subtitle>
@@ -709,12 +577,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          variant="text"
-          @click="showSettings = false"
-        >
-          完成
-        </v-btn>
+        <v-btn variant="text" @click="showSettings = false"> 完成 </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -727,9 +590,7 @@ import { noiseService } from '@wydev/noise-core'
 import { defineAsyncComponent } from 'vue'
 import dataProvider from '@/utils/dataProvider'
 
-const NoiseMonitorDetail = defineAsyncComponent(() =>
-  import('@/components/NoiseMonitorDetail.vue')
-)
+const NoiseMonitorDetail = defineAsyncComponent(() => import('@/components/NoiseMonitorDetail.vue'))
 
 // 时间字体大小比例（卡片场景）
 const TIME_FONT_RATIO = 2.0
@@ -760,7 +621,7 @@ export default {
       countdownSeconds: 0,
       countdownRunning: false,
       countdownRemaining: 0, // 剩余毫秒
-      countdownTotal: 0,     // 总毫秒
+      countdownTotal: 0, // 总毫秒
       countdownTimer: null,
       countdownLastTick: null,
       countdownPresets: [
@@ -779,7 +640,7 @@ export default {
       overtimeLastTick: null,
       // 秒表
       stopwatchRunning: false,
-      stopwatchElapsed: 0,  // 已走毫秒
+      stopwatchElapsed: 0, // 已走毫秒
       stopwatchTimer: null,
       stopwatchLastTick: null,
       laps: [],
@@ -872,7 +733,7 @@ export default {
         'font-variant-numeric': 'tabular-nums',
         'vertical-align': 'baseline',
         'margin-left': '4px',
-        'opacity': '0.6',
+        opacity: '0.6',
       }
     },
     dateStyle() {
@@ -1201,7 +1062,7 @@ export default {
         // 先检查是否有麦克风硬件
         if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
           const devices = await navigator.mediaDevices.enumerateDevices()
-          const hasMic = devices.some(d => d.kind === 'audioinput')
+          const hasMic = devices.some((d) => d.kind === 'audioinput')
           if (!hasMic) return 'unavailable'
         }
         if (!navigator.permissions || !navigator.permissions.query) return 'granted'
@@ -1247,9 +1108,8 @@ export default {
           // 防抖平滑: 指数移动平均
           const alpha = 0.25
           const rawDb = snapshot.currentDisplayDb
-          this.noiseSmoothedDb = this.noiseSmoothedDb === 0
-            ? rawDb
-            : this.noiseSmoothedDb * (1 - alpha) + rawDb * alpha
+          this.noiseSmoothedDb =
+            this.noiseSmoothedDb === 0 ? rawDb : this.noiseSmoothedDb * (1 - alpha) + rawDb * alpha
           this.noiseRingBuffer = snapshot.ringBuffer || []
           this.noiseLastSlice = snapshot.lastSlice || null
           this.noiseScore = snapshot.currentScore ?? null
@@ -1383,16 +1243,18 @@ export default {
         const res = await dataProvider.loadData(`noise-reports-${dateStr}`)
         const data = res?.data || res
         if (Array.isArray(data)) existing = data
-      } catch { /* empty */ }
+      } catch {
+        /* empty */
+      }
       existing.push(report)
       await dataProvider.saveData(`noise-reports-${dateStr}`, existing)
       // 更新元数据
       if (!this.noiseReportMeta.dates) this.noiseReportMeta.dates = {}
-      const scores = existing.map(r => r.score)
+      const scores = existing.map((r) => r.score)
       this.noiseReportMeta.dates[dateStr] = {
         count: existing.length,
         avgScore: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
-        sessions: existing.map(r => r.sessionName),
+        sessions: existing.map((r) => r.sessionName),
         lastUpdated: Date.now(),
       }
       await this.saveReportMeta()
@@ -1424,7 +1286,7 @@ export default {
       if (!this.noiseSessionConfig?.sessions) return
       const now = new Date()
       const nowMinutes = now.getHours() * 60 + now.getMinutes()
-      const activeSession = this.noiseSessionConfig.sessions.find(s => {
+      const activeSession = this.noiseSessionConfig.sessions.find((s) => {
         if (!s.enabled) return false
         const [h, m] = s.start.split(':').map(Number)
         const startMin = h * 60 + m
@@ -1481,7 +1343,7 @@ export default {
     },
     generateSessionReport(data) {
       const samples = data.samples
-      const dbs = samples.map(s => s.db)
+      const dbs = samples.map((s) => s.db)
       const threshold = data.alertThresholdDb
       const duration = data.endTime - data.startTime
 
@@ -1491,33 +1353,42 @@ export default {
           startTime: data.startTime,
           endTime: data.endTime,
           duration,
-          avgDb: 0, maxDb: 0, score: 100,
-          overThresholdDuration: 0, overThresholdRatio: 0,
-          segmentCount: 0, samples: [],
+          avgDb: 0,
+          maxDb: 0,
+          score: 100,
+          overThresholdDuration: 0,
+          overThresholdRatio: 0,
+          segmentCount: 0,
+          samples: [],
           scorePenalties: { sustained: 0, time: 0, segment: 0 },
         }
       }
 
       // 统计
-      const avgDb = Math.round(dbs.reduce((a, b) => a + b, 0) / dbs.length * 10) / 10
+      const avgDb = Math.round((dbs.reduce((a, b) => a + b, 0) / dbs.length) * 10) / 10
       const maxDb = Math.round(Math.max(...dbs) * 10) / 10
 
       // 超阈时长
       let overCount = 0
-      dbs.forEach(d => { if (d > threshold) overCount++ })
+      dbs.forEach((d) => {
+        if (d > threshold) overCount++
+      })
       const overThresholdRatio = overCount / dbs.length
-      const overThresholdDuration = Math.round(overThresholdRatio * duration / 1000)
+      const overThresholdDuration = Math.round((overThresholdRatio * duration) / 1000)
 
       // 打断次数（超阈片段）
       let segmentCount = 0
       let inSegment = false
-      dbs.forEach(d => {
-        if (d > threshold && !inSegment) { segmentCount++; inSegment = true }
+      dbs.forEach((d) => {
+        if (d > threshold && !inSegment) {
+          segmentCount++
+          inSegment = true
+        }
         if (d <= threshold) inSegment = false
       })
 
       // 评分
-      const sustainedPenalty = Math.min(40, Math.max(0, (avgDb - threshold) / 30 * 40))
+      const sustainedPenalty = Math.min(40, Math.max(0, ((avgDb - threshold) / 30) * 40))
       const timePenalty = Math.min(30, overThresholdRatio * 30)
       const segmentPenalty = Math.min(30, (segmentCount / Math.max(1, duration / 60000) / 6) * 30)
       const score = Math.max(0, Math.round(100 - sustainedPenalty - timePenalty - segmentPenalty))
@@ -1527,7 +1398,9 @@ export default {
         startTime: data.startTime,
         endTime: data.endTime,
         duration,
-        avgDb, maxDb, score,
+        avgDb,
+        maxDb,
+        score,
         overThresholdDuration,
         overThresholdRatio: Math.round(overThresholdRatio * 1000) / 10,
         segmentCount,
@@ -1554,7 +1427,9 @@ export default {
     async onClearDateReports(dateStr) {
       try {
         await dataProvider.saveData(`noise-reports-${dateStr}`, [])
-      } catch { /* empty */ }
+      } catch {
+        /* empty */
+      }
       // 更新元数据
       if (this.noiseReportMeta.dates) {
         delete this.noiseReportMeta.dates[dateStr]
@@ -1570,7 +1445,9 @@ export default {
         for (const dateStr of Object.keys(this.noiseReportMeta.dates)) {
           try {
             await dataProvider.saveData(`noise-reports-${dateStr}`, [])
-          } catch { /* empty */ }
+          } catch {
+            /* empty */
+          }
         }
       }
       this.noiseReportMeta = { dates: {} }
@@ -1648,7 +1525,9 @@ export default {
 
 .toolbar-fade-enter-active,
 .toolbar-fade-leave-active {
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
 }
 
 .toolbar-fade-enter-from,
@@ -1743,7 +1622,8 @@ export default {
 }
 
 @keyframes pulse-red {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

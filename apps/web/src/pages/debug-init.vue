@@ -1,10 +1,7 @@
 <template>
   <v-container>
     <v-row>
-      <v-col
-        cols="12"
-        md="6"
-      >
+      <v-col cols="12" md="6">
         <v-card>
           <v-card-title>KvInitialize 调试面板</v-card-title>
           <v-card-text>
@@ -13,41 +10,15 @@
                 v-model="provider"
                 label="server.provider (kv-server/classworkscloud/other)"
               />
-              <v-text-field
-                v-model="kvToken"
-                label="server.kvToken (空表示未授权)"
-              />
-              <v-text-field
-                v-model="uuid"
-                label="device.uuid"
-              />
-              <v-text-field
-                v-model="authDomain"
-                label="server.authDomain"
-              />
+              <v-text-field v-model="kvToken" label="server.kvToken (空表示未授权)" />
+              <v-text-field v-model="uuid" label="device.uuid" />
+              <v-text-field v-model="authDomain" label="server.authDomain" />
             </v-form>
             <v-divider class="my-4" />
 
-            <v-btn
-              class="me-2"
-              color="primary"
-              @click="applySettings"
-            >
-              应用设置
-            </v-btn>
-            <v-btn
-              class="me-2"
-              color="secondary"
-              @click="clearGuard"
-            >
-              清除重定向守卫
-            </v-btn>
-            <v-btn
-              color="error"
-              @click="simulateLoadError"
-            >
-              模拟命名空间加载错误
-            </v-btn>
+            <v-btn class="me-2" color="primary" @click="applySettings"> 应用设置 </v-btn>
+            <v-btn class="me-2" color="secondary" @click="clearGuard"> 清除重定向守卫 </v-btn>
+            <v-btn color="error" @click="simulateLoadError"> 模拟命名空间加载错误 </v-btn>
 
             <v-list two-line>
               <v-list-item>
@@ -67,15 +38,10 @@
         </v-card>
       </v-col>
 
-      <v-col
-        cols="12"
-        md="6"
-      >
+      <v-col cols="12" md="6">
         <v-card>
           <v-card-title>初始化组件已替换</v-card-title>
-          <v-card-text>
-            已迁移为首页内联的 InitServiceChooser 组件。
-          </v-card-text>
+          <v-card-text> 已迁移为首页内联的 InitServiceChooser 组件。 </v-card-text>
         </v-card>
       </v-col>
     </v-row>
@@ -83,9 +49,9 @@
 </template>
 
 <script setup>
-import {ref, computed} from 'vue'
-import {getSetting, setSetting} from '@/utils/settings'
-import {kvServerProvider} from '@/utils/providers/kvServerProvider'
+import { ref, computed } from 'vue'
+import { getSetting, setSetting } from '@/utils/settings'
+import { kvServerProvider } from '@/utils/providers/kvServerProvider'
 
 const REDIRECT_GUARD_KEY = 'kvinit.redirecting'
 
@@ -129,11 +95,15 @@ const guardRaw = computed(() => {
 })
 
 const settingsDump = computed(() => {
-  return JSON.stringify({
-    provider: getSetting('server.provider'),
-    kvToken: getSetting('server.kvToken'),
-    uuid: getSetting('device.uuid'),
-    authDomain: getSetting('server.authDomain')
-  }, null, 2)
+  return JSON.stringify(
+    {
+      provider: getSetting('server.provider'),
+      kvToken: getSetting('server.kvToken'),
+      uuid: getSetting('device.uuid'),
+      authDomain: getSetting('server.authDomain'),
+    },
+    null,
+    2,
+  )
 })
 </script>

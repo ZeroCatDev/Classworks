@@ -8,8 +8,8 @@ export default {
   props: {
     time: {
       type: [String, Date, Number],
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     displayTime() {
@@ -50,7 +50,7 @@ export default {
       const month = date.getMonth() + 1
       const day = date.getDate()
       return `${month}月${day}日`
-    }
-  }
+    },
+  },
 }
 </script>

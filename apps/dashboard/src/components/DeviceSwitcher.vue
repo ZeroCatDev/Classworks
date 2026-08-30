@@ -1,13 +1,19 @@
 <script setup>
-import {ref, computed, onMounted, watch} from 'vue'
-import {useAccountStore} from '@/stores/account'
-import {deviceStore} from '@/lib/deviceStore'
-import {apiClient} from '@/lib/api'
-import {Button} from '@/components/ui/button'
-import {Input} from '@/components/ui/input'
-import {Badge} from '@/components/ui/badge'
-import {Separator} from '@/components/ui/separator'
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useAccountStore } from '@/stores/account'
+import { deviceStore } from '@/lib/deviceStore'
+import { apiClient } from '@/lib/api'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import DropdownMenu from '@/components/ui/dropdown-menu/DropdownMenu.vue'
 import DropdownItem from '@/components/ui/dropdown-menu/DropdownItem.vue'
 import LoginDialog from '@/components/LoginDialog.vue'
@@ -21,19 +27,19 @@ import {
   User,
   Check,
   Settings,
-  Layers
+  Layers,
 } from 'lucide-vue-next'
-import {toast} from 'vue-sonner'
+import { toast } from 'vue-sonner'
 
 const props = defineProps({
   deviceInfo: {
     type: Object,
-    default: null
+    default: null,
   },
   deviceUuid: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 const emit = defineEmits(['device-changed'])
@@ -60,14 +66,14 @@ const currentDevice = computed(() => {
       name: props.deviceInfo.name || props.deviceInfo.deviceName || '未命名设备',
       namespace: props.deviceInfo.namespace,
       uuid: props.deviceUuid,
-      isOwned: !!props.deviceInfo.account
+      isOwned: !!props.deviceInfo.account,
     }
   }
   return {
     name: '未选择设备',
     namespace: props.deviceUuid,
     uuid: props.deviceUuid,
-    isOwned: false
+    isOwned: false,
   }
 })
 
@@ -75,10 +81,11 @@ const currentDevice = computed(() => {
 const filteredAccountDevices = computed(() => {
   if (!searchQuery.value) return accountDevices.value
   const query = searchQuery.value.toLowerCase()
-  return accountDevices.value.filter(device =>
+  return accountDevices.value.filter(
+    (device) =>
       (device.name || '').toLowerCase().includes(query) ||
       device.uuid.toLowerCase().includes(query) ||
-      (device.namespace || '').toLowerCase().includes(query)
+      (device.namespace || '').toLowerCase().includes(query),
   )
 })
 
@@ -86,9 +93,10 @@ const filteredAccountDevices = computed(() => {
 const filteredHistoryDevices = computed(() => {
   if (!searchQuery.value) return historyDevices.value
   const query = searchQuery.value.toLowerCase()
-  return historyDevices.value.filter(device =>
+  return historyDevices.value.filter(
+    (device) =>
       (device.name || '').toLowerCase().includes(query) ||
-      device.uuid.toLowerCase().includes(query)
+      device.uuid.toLowerCase().includes(query),
   )
 })
 
@@ -119,7 +127,7 @@ const switchToDevice = async (device) => {
     deviceStore.setDeviceUuid(device.uuid)
     deviceStore.addDeviceToHistory({
       uuid: device.uuid,
-      name: device.name || device.deviceName
+      name: device.name || device.deviceName,
     })
 
     showDropdown.value = false
@@ -145,7 +153,7 @@ const handleManualInput = () => {
     return
   }
 
-  switchToDevice({uuid, name: ''})
+  switchToDevice({ uuid, name: '' })
   showManualInputDialog.value = false
   manualUuid.value = ''
 }
@@ -189,25 +197,24 @@ onMounted(() => {
     <DropdownMenu v-model:open="showDropdown">
       <template #trigger="{ toggle, open }">
         <Button
-            class="h-8 px-3  max-w-[300px] justify-start font-normal hover:bg-accent/50 border border-border"
-            variant="ghost"
-            @click="toggle"
+          class="h-8 px-3 max-w-[300px] justify-start font-normal hover:bg-accent/50 border border-border"
+          variant="ghost"
+          @click="toggle"
         >
           <div class="flex items-center gap-2 min-w-0 flex-1">
-            <Monitor class="h-4 w-4 text-muted-foreground flex-shrink-0"/>
+            <Monitor class="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <div class="flex flex-col items-start min-w-0 flex-1">
               <div class="truncate text-sm font-medium max-w-[180px]">
                 {{ currentDevice.name }}
               </div>
-
             </div>
             <div class="flex items-center gap-1 ml-auto">
               <Badge v-if="!currentDevice.isOwned" class="h-4 px-1 text-[10px]" variant="secondary">
                 未绑定
               </Badge>
               <ChevronDown
-                  :class="{ 'rotate-180': open }"
-                  class="h-3 w-3 text-muted-foreground flex-shrink-0 transition-transform duration-200"
+                :class="{ 'rotate-180': open }"
+                class="h-3 w-3 text-muted-foreground flex-shrink-0 transition-transform duration-200"
               />
             </div>
           </div>
@@ -219,12 +226,10 @@ onMounted(() => {
         <!-- 搜索框 -->
         <div class="p-3 border-b">
           <div class="relative">
-            <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-            <Input
-                v-model="searchQuery"
-                class="pl-9 h-8"
-                placeholder="搜索设备..."
+            <Search
+              class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
             />
+            <Input v-model="searchQuery" class="pl-9 h-8" placeholder="搜索设备..." />
           </div>
         </div>
 
@@ -232,22 +237,24 @@ onMounted(() => {
         <div class="p-3 border-b bg-muted/20">
           <div class="text-xs font-medium text-muted-foreground mb-1">当前设备</div>
           <div class="flex items-center gap-2">
-            <Monitor class="h-4 w-4 text-primary"/>
+            <Monitor class="h-4 w-4 text-primary" />
             <div class="flex-1 min-w-0">
               <div class="font-medium text-sm truncate">{{ currentDevice.name }}</div>
               <code class="text-xs text-muted-foreground truncate block">
                 {{ currentDevice.namespace }}
               </code>
             </div>
-            <Check class="h-4 w-4 text-green-500"/>
+            <Check class="h-4 w-4 text-green-500" />
           </div>
         </div>
 
         <div class="max-h-80 overflow-y-auto">
           <!-- 账户设备 -->
           <div v-if="accountStore.isAuthenticated">
-            <div class="px-3 py-2 text-xs font-medium text-muted-foreground flex items-center gap-2">
-              <User class="h-3 w-3"/>
+            <div
+              class="px-3 py-2 text-xs font-medium text-muted-foreground flex items-center gap-2"
+            >
+              <User class="h-3 w-3" />
               账户设备
             </div>
 
@@ -263,44 +270,45 @@ onMounted(() => {
 
             <div v-else>
               <DropdownItem
-                  v-for="device in filteredAccountDevices"
-                  :key="device.uuid"
-                  class="cursor-pointer"
-                  @click="switchToDevice(device)"
+                v-for="device in filteredAccountDevices"
+                :key="device.uuid"
+                class="cursor-pointer"
+                @click="switchToDevice(device)"
               >
                 <div class="flex items-center gap-2 w-full">
-                  <Monitor class="h-4 w-4 text-muted-foreground"/>
+                  <Monitor class="h-4 w-4 text-muted-foreground" />
                   <div class="flex-1 min-w-0">
                     <div class="font-medium text-sm truncate">
                       {{ device.name || '未命名设备' }}
                     </div>
                     <div class="text-xs text-muted-foreground truncate">
-                      {{ device.namespace}}
+                      {{ device.namespace }}
                     </div>
                   </div>
-
                 </div>
               </DropdownItem>
             </div>
 
-            <Separator class="my-1"/>
+            <Separator class="my-1" />
           </div>
 
           <!-- 历史设备 -->
           <div v-if="filteredHistoryDevices.length > 0">
-            <div class="px-3 py-2 text-xs font-medium text-muted-foreground flex items-center gap-2">
-              <Clock class="h-3 w-3"/>
+            <div
+              class="px-3 py-2 text-xs font-medium text-muted-foreground flex items-center gap-2"
+            >
+              <Clock class="h-3 w-3" />
               最近使用
             </div>
 
             <DropdownItem
-                v-for="device in filteredHistoryDevices.slice(0, 5)"
-                :key="device.uuid"
-                class="cursor-pointer"
-                @click="switchToDevice(device)"
+              v-for="device in filteredHistoryDevices.slice(0, 5)"
+              :key="device.uuid"
+              class="cursor-pointer"
+              @click="switchToDevice(device)"
             >
               <div class="flex items-center gap-2 w-full">
-                <Monitor class="h-4 w-4 text-muted-foreground"/>
+                <Monitor class="h-4 w-4 text-muted-foreground" />
                 <div class="flex-1 min-w-0">
                   <div class="font-medium text-sm truncate">
                     {{ device.name || '未命名设备' }}
@@ -312,41 +320,32 @@ onMounted(() => {
               </div>
             </DropdownItem>
 
-            <Separator class="my-1"/>
+            <Separator class="my-1" />
           </div>
         </div>
 
         <!-- 操作按钮 -->
         <div class="p-2 border-t bg-muted/20 space-y-1">
           <DropdownItem
-              v-if="!accountStore.isAuthenticated"
-              class="cursor-pointer text-primary"
-              @click="showLoginDialog = true"
+            v-if="!accountStore.isAuthenticated"
+            class="cursor-pointer text-primary"
+            @click="showLoginDialog = true"
           >
-            <User class="h-4 w-4"/>
+            <User class="h-4 w-4" />
             登录账户
           </DropdownItem>
 
-          <DropdownItem
-              class="cursor-pointer"
-              @click="showManualInputDialog = true"
-          >
-            <Settings class="h-4 w-4"/>
+          <DropdownItem class="cursor-pointer" @click="showManualInputDialog = true">
+            <Settings class="h-4 w-4" />
             手动输入UUID
           </DropdownItem>
 
-          <DropdownItem
-              class="cursor-pointer text-primary"
-              @click="showRegisterDialog = true"
-          >
-            <Plus class="h-4 w-4"/>
+          <DropdownItem class="cursor-pointer text-primary" @click="showRegisterDialog = true">
+            <Plus class="h-4 w-4" />
             注册新设备
           </DropdownItem>
-          <DropdownItem
-              class="cursor-pointer text-primary"
-              @click="showRegisterDialog = true"
-          >
-            <Plus class="h-4 w-4"/>
+          <DropdownItem class="cursor-pointer text-primary" @click="showRegisterDialog = true">
+            <Plus class="h-4 w-4" />
             高级选项
           </DropdownItem>
         </div>
@@ -358,40 +357,24 @@ onMounted(() => {
       <DialogContent class="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>手动输入设备UUID</DialogTitle>
-          <DialogDescription>
-            输入已存在的设备UUID来快速切换
-          </DialogDescription>
+          <DialogDescription> 输入已存在的设备UUID来快速切换 </DialogDescription>
         </DialogHeader>
 
         <div class="space-y-4 py-4">
-          <Input
-              v-model="manualUuid"
-              placeholder="输入设备UUID"
-              @keyup.enter="handleManualInput"
-          />
+          <Input v-model="manualUuid" placeholder="输入设备UUID" @keyup.enter="handleManualInput" />
         </div>
 
         <div class="flex justify-end gap-2">
-          <Button variant="outline" @click="showManualInputDialog = false">
-            取消
-          </Button>
-          <Button :disabled="!manualUuid.trim()" @click="handleManualInput">
-            确定
-          </Button>
+          <Button variant="outline" @click="showManualInputDialog = false"> 取消 </Button>
+          <Button :disabled="!manualUuid.trim()" @click="handleManualInput"> 确定 </Button>
         </div>
       </DialogContent>
     </Dialog>
 
     <!-- 登录对话框 -->
-    <LoginDialog
-        v-model="showLoginDialog"
-        :on-success="handleLoginSuccess"
-    />
+    <LoginDialog v-model="showLoginDialog" :on-success="handleLoginSuccess" />
 
     <!-- 设备注册对话框 -->
-    <DeviceRegisterDialog
-        v-model="showRegisterDialog"
-        @confirm="handleDeviceRegistered"
-    />
+    <DeviceRegisterDialog v-model="showRegisterDialog" @confirm="handleDeviceRegistered" />
   </div>
 </template>

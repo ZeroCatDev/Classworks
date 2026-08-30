@@ -26,13 +26,13 @@ yarn add socket.io-client
 ### 基础连接
 
 ```typescript
-import { io, Socket } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client'
 
-const SERVER_URL = 'http://localhost:3000'; // 替换为实际服务器地址
+const SERVER_URL = 'http://localhost:3000' // 替换为实际服务器地址
 
 const socket: Socket = io(SERVER_URL, {
   transports: ['websocket'],
-});
+})
 ```
 
 ### 连接时自动加入频道（推荐）
@@ -45,19 +45,19 @@ const socket = io(SERVER_URL, {
   query: {
     token: '<your-kv-app-token>', // 或使用 apptoken 参数
   },
-});
+})
 
 // 监听加入成功
 socket.on('joined', (info) => {
-  console.log('已加入频道:', info);
+  console.log('已加入频道:', info)
   // { by: 'token', uuid: 'device-uuid-xxx' }
-});
+})
 
 // 监听加入失败
 socket.on('join-error', (error) => {
-  console.error('加入频道失败:', error);
+  console.error('加入频道失败:', error)
   // { by: 'token', reason: 'invalid_token' }
-});
+})
 ```
 
 ## 事件接口
@@ -69,6 +69,7 @@ socket.on('join-error', (error) => {
 连接后按需加入频道。
 
 **载荷格式：**
+
 ```typescript
 {
   token?: string;   // KV token（二选一）
@@ -77,8 +78,9 @@ socket.on('join-error', (error) => {
 ```
 
 **示例：**
+
 ```typescript
-socket.emit('join-token', { token: '<your-kv-app-token>' });
+socket.emit('join-token', { token: '<your-kv-app-token>' })
 ```
 
 ---
@@ -88,6 +90,7 @@ socket.emit('join-token', { token: '<your-kv-app-token>' });
 离开指定 token 对应的设备频道。
 
 **载荷格式：**
+
 ```typescript
 {
   token?: string;
@@ -96,8 +99,9 @@ socket.emit('join-token', { token: '<your-kv-app-token>' });
 ```
 
 **示例：**
+
 ```typescript
-socket.emit('leave-token', { token: '<your-kv-app-token>' });
+socket.emit('leave-token', { token: '<your-kv-app-token>' })
 ```
 
 ---
@@ -109,8 +113,9 @@ socket.emit('leave-token', { token: '<your-kv-app-token>' });
 **载荷：** 无
 
 **示例：**
+
 ```typescript
-socket.emit('leave-all');
+socket.emit('leave-all')
 ```
 
 ---
@@ -122,18 +127,20 @@ socket.emit('leave-all');
 当成功加入频道后，服务端会发送此事件。
 
 **载荷格式：**
+
 ```typescript
 {
-  by: 'token';
-  uuid: string; // 设备 uuid（用于调试/日志）
+  by: 'token'
+  uuid: string // 设备 uuid（用于调试/日志）
 }
 ```
 
 **示例：**
+
 ```typescript
 socket.on('joined', (info) => {
-  console.log(`成功加入设备 ${info.uuid} 的频道`);
-});
+  console.log(`成功加入设备 ${info.uuid} 的频道`)
+})
 ```
 
 ---
@@ -143,18 +150,20 @@ socket.on('joined', (info) => {
 token 无效或查询失败时触发。
 
 **载荷格式：**
+
 ```typescript
 {
-  by: 'token';
-  reason: 'invalid_token'; // 失败原因
+  by: 'token'
+  reason: 'invalid_token' // 失败原因
 }
 ```
 
 **示例：**
+
 ```typescript
 socket.on('join-error', (error) => {
-  console.error('Token 无效，无法加入频道');
-});
+  console.error('Token 无效，无法加入频道')
+})
 ```
 
 ---
@@ -164,6 +173,7 @@ socket.on('join-error', (error) => {
 当设备下的 KV 键被创建/更新/删除时，向该设备频道内所有连接广播此事件。
 
 **载荷格式：**
+
 ```typescript
 {
   uuid: string;           // 设备 uuid
@@ -181,21 +191,23 @@ socket.on('join-error', (error) => {
 ```
 
 **示例：**
+
 ```typescript
 socket.on('kv-key-changed', (msg) => {
   if (msg.action === 'upsert') {
-    console.log(`键 ${msg.key} 已${msg.created ? '创建' : '更新'}`);
+    console.log(`键 ${msg.key} 已${msg.created ? '创建' : '更新'}`)
     // 刷新本地缓存或重新获取数据
   } else if (msg.action === 'delete') {
-    console.log(`键 ${msg.key} 已删除`);
+    console.log(`键 ${msg.key} 已删除`)
     // 从本地缓存移除
   }
-});
+})
 ```
 
 **载荷示例：**
 
 - 新建/更新键：
+
   ```json
   {
     "uuid": "device-001",
@@ -207,6 +219,7 @@ socket.on('kv-key-changed', (msg) => {
   ```
 
 - 删除键：
+
   ```json
   {
     "uuid": "device-001",
@@ -235,18 +248,20 @@ socket.on('kv-key-changed', (msg) => {
 当有新连接加入某设备频道时广播，用于显示在线人数。
 
 **载荷格式：**
+
 ```typescript
 {
-  uuid: string;       // 设备 uuid
-  connections: number; // 当前连接数
+  uuid: string // 设备 uuid
+  connections: number // 当前连接数
 }
 ```
 
 **示例：**
+
 ```typescript
 socket.on('device-joined', (info) => {
-  console.log(`设备 ${info.uuid} 当前有 ${info.connections} 个连接`);
-});
+  console.log(`设备 ${info.uuid} 当前有 ${info.connections} 个连接`)
+})
 ```
 
 ---
@@ -256,141 +271,142 @@ socket.on('device-joined', (info) => {
 ### React Hook 封装
 
 ```typescript
-import { useEffect, useRef } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { useEffect, useRef } from 'react'
+import { io, Socket } from 'socket.io-client'
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000'
 
 interface KvKeyChange {
-  uuid: string;
-  key: string;
-  action: 'upsert' | 'delete';
-  created?: boolean;
-  updatedAt?: string;
-  deletedAt?: string;
-  batch?: boolean;
+  uuid: string
+  key: string
+  action: 'upsert' | 'delete'
+  created?: boolean
+  updatedAt?: string
+  deletedAt?: string
+  batch?: boolean
 }
 
-export function useKvChannel(
-  token: string | null,
-  onKeyChanged?: (event: KvKeyChange) => void
-) {
-  const socketRef = useRef<Socket | null>(null);
+export function useKvChannel(token: string | null, onKeyChanged?: (event: KvKeyChange) => void) {
+  const socketRef = useRef<Socket | null>(null)
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) return
 
     // 创建连接并加入频道
     const socket = io(SERVER_URL, {
       transports: ['websocket'],
       query: { token },
-    });
+    })
 
     socket.on('joined', (info) => {
-      console.log('已加入设备频道:', info.uuid);
-    });
+      console.log('已加入设备频道:', info.uuid)
+    })
 
     socket.on('join-error', (err) => {
-      console.error('加入频道失败:', err.reason);
-    });
+      console.error('加入频道失败:', err.reason)
+    })
 
     socket.on('kv-key-changed', (msg: KvKeyChange) => {
-      onKeyChanged?.(msg);
-    });
+      onKeyChanged?.(msg)
+    })
 
-    socketRef.current = socket;
+    socketRef.current = socket
 
     return () => {
-      socket.emit('leave-all');
-      socket.close();
-    };
-  }, [token]);
+      socket.emit('leave-all')
+      socket.close()
+    }
+  }, [token])
 
-  return socketRef.current;
+  return socketRef.current
 }
 ```
 
 ### Vue Composable 封装
 
 ```typescript
-import { ref, watch, onUnmounted } from 'vue';
-import { io, Socket } from 'socket.io-client';
+import { ref, watch, onUnmounted } from 'vue'
+import { io, Socket } from 'socket.io-client'
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000'
 
 export function useKvChannel(token: Ref<string | null>) {
-  const socket = ref<Socket | null>(null);
-  const isConnected = ref(false);
-  const deviceUuid = ref<string | null>(null);
+  const socket = ref<Socket | null>(null)
+  const isConnected = ref(false)
+  const deviceUuid = ref<string | null>(null)
 
-  watch(token, (newToken) => {
-    // 清理旧连接
-    if (socket.value) {
-      socket.value.emit('leave-all');
-      socket.value.close();
-      socket.value = null;
-    }
+  watch(
+    token,
+    (newToken) => {
+      // 清理旧连接
+      if (socket.value) {
+        socket.value.emit('leave-all')
+        socket.value.close()
+        socket.value = null
+      }
 
-    if (!newToken) return;
+      if (!newToken) return
 
-    // 创建新连接
-    const s = io(SERVER_URL, {
-      transports: ['websocket'],
-      query: { token: newToken },
-    });
+      // 创建新连接
+      const s = io(SERVER_URL, {
+        transports: ['websocket'],
+        query: { token: newToken },
+      })
 
-    s.on('connect', () => {
-      isConnected.value = true;
-    });
+      s.on('connect', () => {
+        isConnected.value = true
+      })
 
-    s.on('disconnect', () => {
-      isConnected.value = false;
-    });
+      s.on('disconnect', () => {
+        isConnected.value = false
+      })
 
-    s.on('joined', (info) => {
-      deviceUuid.value = info.uuid;
-      console.log('已加入设备频道:', info.uuid);
-    });
+      s.on('joined', (info) => {
+        deviceUuid.value = info.uuid
+        console.log('已加入设备频道:', info.uuid)
+      })
 
-    s.on('join-error', (err) => {
-      console.error('加入失败:', err.reason);
-    });
+      s.on('join-error', (err) => {
+        console.error('加入失败:', err.reason)
+      })
 
-    socket.value = s;
-  }, { immediate: true });
+      socket.value = s
+    },
+    { immediate: true },
+  )
 
   onUnmounted(() => {
     if (socket.value) {
-      socket.value.emit('leave-all');
-      socket.value.close();
+      socket.value.emit('leave-all')
+      socket.value.close()
     }
-  });
+  })
 
-  return { socket, isConnected, deviceUuid };
+  return { socket, isConnected, deviceUuid }
 }
 ```
 
 ### 使用示例（React）
 
 ```tsx
-import { useKvChannel } from './hooks/useKvChannel';
+import { useKvChannel } from './hooks/useKvChannel'
 
 function MyComponent() {
-  const token = localStorage.getItem('kv-token');
+  const token = localStorage.getItem('kv-token')
 
   useKvChannel(token, (event) => {
-    console.log('KV 变更:', event);
+    console.log('KV 变更:', event)
 
     if (event.action === 'upsert') {
       // 更新本地状态或重新获取数据
-      fetchKeyValue(event.key);
+      fetchKeyValue(event.key)
     } else if (event.action === 'delete') {
       // 从本地移除
-      removeFromCache(event.key);
+      removeFromCache(event.key)
     }
-  });
+  })
 
-  return <div>实时监听中...</div>;
+  return <div>实时监听中...</div>
 }
 ```
 
@@ -403,23 +419,25 @@ function MyComponent() {
 ### `GET /devices/online`
 
 **响应格式：**
+
 ```typescript
 {
-  success: true;
+  success: true
   devices: Array<{
-    uuid: string;        // 设备 uuid
-    connections: number; // 当前连接数
-    name: string | null; // 设备名称（若已设置）
-  }>;
+    uuid: string // 设备 uuid
+    connections: number // 当前连接数
+    name: string | null // 设备名称（若已设置）
+  }>
 }
 ```
 
 **示例：**
-```typescript
-const response = await fetch(`${SERVER_URL}/devices/online`);
-const data = await response.json();
 
-console.log('在线设备:', data.devices);
+```typescript
+const response = await fetch(`${SERVER_URL}/devices/online`)
+const data = await response.json()
+
+console.log('在线设备:', data.devices)
 // [{ uuid: 'device-001', connections: 3, name: 'My Device' }, ...]
 ```
 
@@ -436,14 +454,15 @@ console.log('在线设备:', data.devices);
 **认证：** 需要设备 UUID 认证（密码或账户 JWT）
 
 **响应包含：**
+
 ```typescript
 {
-  id: string;
-  appId: string;
-  token: string;      // 用于 KV 操作和加入频道
-  note: string | null;
-  name: string | null; // 等同于 note，便于展示
-  installedAt: string;
+  id: string
+  appId: string
+  token: string // 用于 KV 操作和加入频道
+  note: string | null
+  name: string | null // 等同于 note，便于展示
+  installedAt: string
 }
 ```
 
@@ -452,18 +471,19 @@ console.log('在线设备:', data.devices);
 **接口：** `GET /apps/tokens?uuid=<device-uuid>`
 
 **响应：**
+
 ```typescript
 {
-  success: true;
+  success: true
   tokens: Array<{
-    id: string;
-    token: string;
-    appId: string;
-    installedAt: string;
-    note: string | null;
-    name: string | null; // 等同于 note
-  }>;
-  deviceUuid: string;
+    id: string
+    token: string
+    appId: string
+    installedAt: string
+    note: string | null
+    name: string | null // 等同于 note
+  }>
+  deviceUuid: string
 }
 ```
 
@@ -519,8 +539,8 @@ PORT=3000
 A: 对每个设备的 token 分别调用 `join-token`，或在连接时传入一个 token，后续通过事件加入其他设备。
 
 ```typescript
-socket.emit('join-token', { token: token1 });
-socket.emit('join-token', { token: token2 });
+socket.emit('join-token', { token: token1 })
+socket.emit('join-token', { token: token2 })
 ```
 
 ### Q: 广播延迟有多大？
@@ -542,14 +562,17 @@ A: 可以，使用相同的 socket.io-client 包，接口完全一致。
 ### v1.1.0 (2025-10-25)
 
 **破坏性变更：**
+
 - 移除直接使用 uuid 加入频道的接口（`join-device` / `leave-device`）
 - 现在必须使用 KV token 通过 `join-token` 或握手 query 加入
 
 **新增：**
+
 - `leave-all` 事件：离开所有已加入的频道
 - 握手时支持 `token` 和 `apptoken` 两种参数名
 
 **改进：**
+
 - 同一设备的不同 token 自动归入同一房间
 - 优化在线设备计数准确性
 
@@ -558,6 +581,7 @@ A: 可以，使用相同的 socket.io-client 包，接口完全一致。
 ## 技术支持
 
 如有问题，请查阅：
+
 - 服务端源码：`utils/socket.js`
 - KV 路由：`routes/kv-token.js`
 - 设备管理：`routes/device.js`

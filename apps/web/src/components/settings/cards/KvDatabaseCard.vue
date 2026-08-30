@@ -1,29 +1,15 @@
 <template>
-  <settings-card
-    :loading="loading"
-    icon="mdi-database-edit"
-    title="KV数据库管理"
-  >
+  <settings-card :loading="loading" icon="mdi-database-edit" title="KV数据库管理">
     <v-list>
       <!-- 数据库连接状态 -->
       <v-list-item>
         <template #prepend>
-          <v-icon
-            :color="connectionColor"
-            :icon="connectionIcon"
-            class="mr-3"
-          />
+          <v-icon :color="connectionColor" :icon="connectionIcon" class="mr-3" />
         </template>
         <v-list-item-title>数据库状态</v-list-item-title>
         <v-list-item-subtitle>{{ connectionStatus }}</v-list-item-subtitle>
         <template #append>
-          <v-btn
-            :loading="loading"
-            variant="tonal"
-            @click="refreshConnection"
-          >
-            刷新
-          </v-btn>
+          <v-btn :loading="loading" variant="tonal" @click="refreshConnection"> 刷新 </v-btn>
         </template>
       </v-list-item>
 
@@ -32,36 +18,19 @@
       <!-- 数据列表 -->
       <v-list-item>
         <template #prepend>
-          <v-icon
-            class="mr-3"
-            icon="mdi-format-list-bulleted"
-          />
+          <v-icon class="mr-3" icon="mdi-format-list-bulleted" />
         </template>
         <v-list-item-title>数据条目</v-list-item-title>
         <v-list-item-subtitle>共 {{ kvData.length }} 条记录</v-list-item-subtitle>
         <template #append>
           <v-btn-group variant="tonal">
-            <v-btn
-              :loading="loadingData"
-              @click="loadKvData"
-            >
-              加载数据
-            </v-btn>
-            <v-btn
-              :disabled="!isKvProvider"
-              @click="createNewItem"
-            >
-              <v-icon
-                class="mr-1"
-                icon="mdi-plus"
-              />
+            <v-btn :loading="loadingData" @click="loadKvData"> 加载数据 </v-btn>
+            <v-btn :disabled="!isKvProvider" @click="createNewItem">
+              <v-icon class="mr-1" icon="mdi-plus" />
               新建
             </v-btn>
             <v-btn @click="showMigrationDialog = true">
-              <v-icon
-                class="mr-1"
-                icon="mdi-cloud-upload"
-              />
+              <v-icon class="mr-1" icon="mdi-cloud-upload" />
               从本地迁移
             </v-btn>
           </v-btn-group>
@@ -70,16 +39,9 @@
     </v-list>
 
     <!-- 数据表格 -->
-    <v-card
-      v-if="kvData.length > 0"
-      class="mt-4"
-      variant="outlined"
-    >
+    <v-card v-if="kvData.length > 0" class="mt-4" variant="outlined">
       <v-card-title class="d-flex align-center">
-        <v-icon
-          class="mr-2"
-          icon="mdi-table"
-        />
+        <v-icon class="mr-2" icon="mdi-table" />
         KV数据列表
         <v-spacer />
         <v-text-field
@@ -89,7 +51,7 @@
           hide-details
           label="搜索键名"
           prepend-inner-icon="mdi-magnify"
-          style="max-width: 300px;"
+          style="max-width: 300px"
           variant="outlined"
         />
       </v-card-title>
@@ -107,22 +69,9 @@
         </template>
 
         <template #[`item.actions`]="{ item }">
-          <v-btn-group
-            density="compact"
-            variant="text"
-          >
-            <v-btn
-              icon="mdi-eye"
-              size="small"
-              title="查看"
-              @click="viewItem(item)"
-            />
-            <v-btn
-              icon="mdi-pencil"
-              size="small"
-              title="编辑"
-              @click="editItem(item)"
-            />
+          <v-btn-group density="compact" variant="text">
+            <v-btn icon="mdi-eye" size="small" title="查看" @click="viewItem(item)" />
+            <v-btn icon="mdi-pencil" size="small" title="编辑" @click="editItem(item)" />
             <v-btn
               color="primary"
               icon="mdi-cloud-download"
@@ -143,23 +92,13 @@
     </v-card>
 
     <!-- 查看数据对话框 -->
-    <v-dialog
-      v-model="viewDialog"
-      max-width="800px"
-    >
+    <v-dialog v-model="viewDialog" max-width="800px">
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon
-            class="mr-2"
-            icon="mdi-eye"
-          />
+          <v-icon class="mr-2" icon="mdi-eye" />
           查看数据
           <v-spacer />
-          <v-btn
-            icon="mdi-close"
-            variant="text"
-            @click="viewDialog = false"
-          />
+          <v-btn icon="mdi-close" variant="text" @click="viewDialog = false" />
         </v-card-title>
 
         <v-card-subtitle v-if="selectedItem">
@@ -180,44 +119,23 @@
 
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            variant="tonal"
-            @click="copyToClipboard(selectedItem?.value)"
-          >
-            <v-icon
-              class="mr-1"
-              icon="mdi-content-copy"
-            />
+          <v-btn variant="tonal" @click="copyToClipboard(selectedItem?.value)">
+            <v-icon class="mr-1" icon="mdi-content-copy" />
             复制数据
           </v-btn>
-          <v-btn
-            variant="text"
-            @click="viewDialog = false"
-          >
-            关闭
-          </v-btn>
+          <v-btn variant="text" @click="viewDialog = false"> 关闭 </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <!-- 编辑数据对话框 -->
-    <v-dialog
-      v-model="editDialog"
-      max-width="800px"
-    >
+    <v-dialog v-model="editDialog" max-width="800px">
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon
-            class="mr-2"
-            icon="mdi-pencil"
-          />
+          <v-icon class="mr-2" icon="mdi-pencil" />
           编辑数据
           <v-spacer />
-          <v-btn
-            icon="mdi-close"
-            variant="text"
-            @click="closeEditDialog"
-          />
+          <v-btn icon="mdi-close" variant="text" @click="closeEditDialog" />
         </v-card-title>
 
         <v-card-subtitle v-if="editingItem">
@@ -238,12 +156,7 @@
 
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            variant="text"
-            @click="closeEditDialog"
-          >
-            取消
-          </v-btn>
+          <v-btn variant="text" @click="closeEditDialog"> 取消 </v-btn>
           <v-btn
             :disabled="!isValidJson"
             :loading="savingData"
@@ -258,23 +171,13 @@
     </v-dialog>
 
     <!-- 新建数据对话框 -->
-    <v-dialog
-      v-model="createDialog"
-      max-width="800px"
-    >
+    <v-dialog v-model="createDialog" max-width="800px">
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon
-            class="mr-2"
-            icon="mdi-plus"
-          />
+          <v-icon class="mr-2" icon="mdi-plus" />
           新建数据
           <v-spacer />
-          <v-btn
-            icon="mdi-close"
-            variant="text"
-            @click="closeCreateDialog"
-          />
+          <v-btn icon="mdi-close" variant="text" @click="closeCreateDialog" />
         </v-card-title>
 
         <v-card-text>
@@ -294,7 +197,7 @@
             :error-messages="isValidNewJson ? [] : ['请输入有效的JSON格式']"
             class="font-monospace"
             label="数据内容 (JSON格式)"
-            placeholder="请输入JSON数据，如：{&quot;name&quot;: &quot;value&quot;}"
+            placeholder='请输入JSON数据，如：{"name": "value"}'
             rows="15"
             variant="outlined"
           />
@@ -302,12 +205,7 @@
 
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            variant="text"
-            @click="closeCreateDialog"
-          >
-            取消
-          </v-btn>
+          <v-btn variant="text" @click="closeCreateDialog"> 取消 </v-btn>
           <v-btn
             :disabled="!isValidKey || !isValidNewJson"
             :loading="savingData"
@@ -322,23 +220,13 @@
     </v-dialog>
 
     <!-- 云端地址对话框 -->
-    <v-dialog
-      v-model="cloudUrlDialog"
-      max-width="800px"
-    >
+    <v-dialog v-model="cloudUrlDialog" max-width="800px">
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon
-            class="mr-2"
-            icon="mdi-cloud-download"
-          />
+          <v-icon class="mr-2" icon="mdi-cloud-download" />
           获取云端访问地址
           <v-spacer />
-          <v-btn
-            icon="mdi-close"
-            variant="text"
-            @click="cloudUrlDialog = false"
-          />
+          <v-btn icon="mdi-close" variant="text" @click="cloudUrlDialog = false" />
         </v-card-title>
 
         <v-card-subtitle v-if="selectedCloudItem">
@@ -346,12 +234,7 @@
         </v-card-subtitle>
 
         <v-card-text>
-          <v-alert
-            v-if="cloudUrlError"
-            class="mb-4"
-            type="error"
-            variant="tonal"
-          >
+          <v-alert v-if="cloudUrlError" class="mb-4" type="error" variant="tonal">
             {{ cloudUrlError }}
           </v-alert>
 
@@ -363,26 +246,12 @@
           >
             <v-alert-title>云端地址获取成功</v-alert-title>
             <div class="mt-2">
-              <div
-                v-if="cloudUrlResult.migrated"
-                class="mb-2"
-              >
-                <v-icon
-                  class="mr-1"
-                  color="success"
-                  icon="mdi-database-arrow-up"
-                />
+              <div v-if="cloudUrlResult.migrated" class="mb-2">
+                <v-icon class="mr-1" color="success" icon="mdi-database-arrow-up" />
                 数据已从本地迁移到云端
               </div>
-              <div
-                v-if="cloudUrlResult.configured"
-                class="mb-2"
-              >
-                <v-icon
-                  class="mr-1"
-                  color="info"
-                  icon="mdi-cog"
-                />
+              <div v-if="cloudUrlResult.configured" class="mb-2">
+                <v-icon class="mr-1" color="info" icon="mdi-cog" />
                 云端配置已自动设置
               </div>
             </div>
@@ -399,16 +268,10 @@
             @click:append-inner="copyCloudUrl"
           />
 
-          <v-expansion-panels
-            v-if="cloudUrlResult && cloudUrlResult.url"
-            class="mt-4"
-          >
+          <v-expansion-panels v-if="cloudUrlResult && cloudUrlResult.url" class="mt-4">
             <v-expansion-panel>
               <v-expansion-panel-title>
-                <v-icon
-                  class="mr-2"
-                  icon="mdi-cog"
-                />
+                <v-icon class="mr-2" icon="mdi-cog" />
                 高级选项
               </v-expansion-panel-title>
               <v-expansion-panel-text>
@@ -429,10 +292,7 @@
                   variant="tonal"
                   @click="refreshCloudUrl"
                 >
-                  <v-icon
-                    class="mr-1"
-                    icon="mdi-refresh"
-                  />
+                  <v-icon class="mr-1" icon="mdi-refresh" />
                   重新获取
                 </v-btn>
               </v-expansion-panel-text>
@@ -442,22 +302,14 @@
 
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            variant="text"
-            @click="cloudUrlDialog = false"
-          >
-            关闭
-          </v-btn>
+          <v-btn variant="text" @click="cloudUrlDialog = false"> 关闭 </v-btn>
           <v-btn
             v-if="cloudUrlResult && cloudUrlResult.url"
             color="primary"
             variant="tonal"
             @click="openCloudUrl"
           >
-            <v-icon
-              class="mr-1"
-              icon="mdi-open-in-new"
-            />
+            <v-icon class="mr-1" icon="mdi-open-in-new" />
             在新窗口打开
           </v-btn>
         </v-card-actions>
@@ -465,45 +317,24 @@
     </v-dialog>
 
     <!-- 删除确认对话框 -->
-    <v-dialog
-      v-model="deleteDialog"
-      max-width="400px"
-    >
+    <v-dialog v-model="deleteDialog" max-width="400px">
       <v-card>
         <v-card-title class="d-flex align-center text-error">
-          <v-icon
-            class="mr-2"
-            icon="mdi-alert"
-          />
+          <v-icon class="mr-2" icon="mdi-alert" />
           确认删除
         </v-card-title>
 
         <v-card-text>
-          确定要删除键名为 <code>{{ itemToDelete?.key }}</code> 的数据吗？
-          <br><br>
-          <v-alert
-            class="mt-2"
-            type="warning"
-            variant="tonal"
-          >
+          确定要删除键名为 <code>{{ itemToDelete?.key }}</code> 的数据吗？ <br /><br />
+          <v-alert class="mt-2" type="warning" variant="tonal">
             此操作不可撤销，请谨慎操作！
           </v-alert>
         </v-card-text>
 
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            variant="text"
-            @click="deleteDialog = false"
-          >
-            取消
-          </v-btn>
-          <v-btn
-            :loading="deletingData"
-            color="error"
-            variant="tonal"
-            @click="deleteItem"
-          >
+          <v-btn variant="text" @click="deleteDialog = false"> 取消 </v-btn>
+          <v-btn :loading="deletingData" color="error" variant="tonal" @click="deleteItem">
             删除
           </v-btn>
         </v-card-actions>
@@ -515,17 +346,17 @@
 </template>
 
 <script>
-import SettingsCard from '@/components/SettingsCard.vue';
-import CloudMigrationDialog from '../CloudMigrationDialog.vue';
-import dataProvider from '@/utils/dataProvider';
-import {getSetting} from '@/utils/settings';
-import {openDB} from 'idb';
+import SettingsCard from '@/components/SettingsCard.vue'
+import CloudMigrationDialog from '../CloudMigrationDialog.vue'
+import dataProvider from '@/utils/dataProvider'
+import { getSetting } from '@/utils/settings'
+import { openDB } from 'idb'
 
 export default {
   name: 'KvDatabaseCard',
   components: {
     SettingsCard,
-    CloudMigrationDialog
+    CloudMigrationDialog,
   },
 
   data() {
@@ -557,7 +388,7 @@ export default {
       cloudUrlError: null,
       cloudUrlOptions: {
         migrateFromLocal: true,
-        autoConfigureCloud: true
+        autoConfigureCloud: true,
       },
 
       // 编辑数据
@@ -567,360 +398,366 @@ export default {
 
       // 表格头部
       tableHeaders: [
-        {title: '键名', key: 'key', sortable: true},
-        {title: '操作', key: 'actions', sortable: false, width: '120px'}
-      ]
-    };
+        { title: '键名', key: 'key', sortable: true },
+        { title: '操作', key: 'actions', sortable: false, width: '120px' },
+      ],
+    }
   },
 
   computed: {
     currentProvider() {
-      return getSetting('server.provider');
+      return getSetting('server.provider')
     },
 
     isKvProvider() {
-      return this.currentProvider === 'kv-local' || this.currentProvider === 'kv-server' || this.currentProvider === 'classworkscloud'
+      return (
+        this.currentProvider === 'kv-local' ||
+        this.currentProvider === 'kv-server' ||
+        this.currentProvider === 'classworkscloud'
+      )
     },
 
     connectionStatus() {
       if (!this.isKvProvider) {
-        return '当前数据提供者不支持KV数据库管理';
+        return '当前数据提供者不支持KV数据库管理'
       }
-      return this.currentProvider === 'kv-local' ? '本地数据库' : '服务器数据库';
+      return this.currentProvider === 'kv-local' ? '本地数据库' : '服务器数据库'
     },
 
     connectionIcon() {
-      if (!this.isKvProvider) return 'mdi-database-off';
-      return this.currentProvider === 'kv-local' ? 'mdi-database' : 'mdi-database-sync';
+      if (!this.isKvProvider) return 'mdi-database-off'
+      return this.currentProvider === 'kv-local' ? 'mdi-database' : 'mdi-database-sync'
     },
 
     connectionColor() {
-      if (!this.isKvProvider) return 'error';
-      return 'success';
+      if (!this.isKvProvider) return 'error'
+      return 'success'
     },
 
     filteredKvData() {
-      if (!this.searchQuery) return this.kvData;
-      return this.kvData.filter(item =>
-        item.key.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
+      if (!this.searchQuery) return this.kvData
+      return this.kvData.filter((item) =>
+        item.key.toLowerCase().includes(this.searchQuery.toLowerCase()),
+      )
     },
 
     isValidJson() {
-      if (!this.editingData) return true;
+      if (!this.editingData) return true
       try {
-        JSON.parse(this.editingData);
-        return true;
+        JSON.parse(this.editingData)
+        return true
       } catch {
-        return false;
+        return false
       }
     },
 
     isValidNewJson() {
-      if (!this.newData) return true;
+      if (!this.newData) return true
       try {
-        JSON.parse(this.newData);
-        return true;
+        JSON.parse(this.newData)
+        return true
       } catch {
-        return false;
+        return false
       }
     },
 
     isValidKey() {
-      if (!this.newKey || this.newKey.trim() === '') return false;
+      if (!this.newKey || this.newKey.trim() === '') return false
       // 检查是否与现有键重复
-      return !this.kvData.some(item => item.key === this.newKey.trim());
-    }
+      return !this.kvData.some((item) => item.key === this.newKey.trim())
+    },
   },
 
   async mounted() {
     if (this.isKvProvider) {
-      await this.loadKvData();
+      await this.loadKvData()
     }
   },
 
   methods: {
     async refreshConnection() {
-      this.loading = true;
+      this.loading = true
       try {
         // 重新检查连接状态
-        await new Promise(resolve => setTimeout(resolve, 500));
-        this.$message.success('连接状态已刷新');
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        this.$message.success('连接状态已刷新')
       } catch (error) {
-        this.$message.error('刷新失败', error.message);
+        this.$message.error('刷新失败', error.message)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
 
     async loadKvData() {
       if (!this.isKvProvider) {
-        this.$message.warning('当前数据提供者不支持KV数据库管理');
-        return;
+        this.$message.warning('当前数据提供者不支持KV数据库管理')
+        return
       }
 
-      this.loadingData = true;
+      this.loadingData = true
       try {
-        this.kvData = [];
+        this.kvData = []
 
         // 使用新的loadKeys API获取键名列表
         const result = await dataProvider.loadKeys({
           sortBy: 'key',
           sortDir: 'asc',
-          limit: 1000 // 获取更多数据，可根据需要调整
-        });
+          limit: 1000, // 获取更多数据，可根据需要调整
+        })
 
         if (result.success === false) {
-          throw new Error(result.error?.message || '获取键名列表失败');
+          throw new Error(result.error?.message || '获取键名列表失败')
         }
 
         // 只保存键名，不读取内容
-        this.kvData = result.keys.map(key => ({
+        this.kvData = result.keys.map((key) => ({
           key,
           value: null, // 不预加载内容
-          loaded: false // 标记是否已加载内容
-        }));
+          loaded: false, // 标记是否已加载内容
+        }))
 
-        this.$message.success('键名加载完成', `共找到 ${this.kvData.length} 个键，总计 ${result.total_rows} 个键`);
+        this.$message.success(
+          '键名加载完成',
+          `共找到 ${this.kvData.length} 个键，总计 ${result.total_rows} 个键`,
+        )
       } catch (error) {
-        this.$message.error('加载数据失败', error.message);
+        this.$message.error('加载数据失败', error.message)
       } finally {
-        this.loadingData = false;
+        this.loadingData = false
       }
     },
 
-
     async viewItem(item) {
-      this.selectedItem = item;
-      this.viewDialog = true;
+      this.selectedItem = item
+      this.viewDialog = true
 
       // 如果数据未加载，则加载数据
       if (!item.loaded || item.value === null) {
-        await this.loadItemData(item);
+        await this.loadItemData(item)
       }
     },
 
     async editItem(item) {
-      this.editingItem = item;
+      this.editingItem = item
 
       // 如果数据未加载，则加载数据
       if (!item.loaded || item.value === null) {
-        await this.loadItemData(item);
+        await this.loadItemData(item)
       }
 
-      this.editingData = this.formatJsonData(item.value);
-      this.editDialog = true;
+      this.editingData = this.formatJsonData(item.value)
+      this.editDialog = true
     },
 
     async loadItemData(item) {
       try {
-        const data = await dataProvider.loadData(item.key);
+        const data = await dataProvider.loadData(item.key)
         if (data && data.success !== false) {
-          item.value = data;
-          item.loaded = true;
+          item.value = data
+          item.loaded = true
         } else {
-          throw new Error('数据加载失败');
+          throw new Error('数据加载失败')
         }
       } catch (error) {
-        this.$message.error('加载数据失败', error.message);
-        item.value = null;
-        item.loaded = false;
+        this.$message.error('加载数据失败', error.message)
+        item.value = null
+        item.loaded = false
       }
     },
 
     closeEditDialog() {
-      this.editDialog = false;
-      this.editingItem = null;
-      this.editingData = '';
+      this.editDialog = false
+      this.editingItem = null
+      this.editingData = ''
     },
 
     createNewItem() {
-      this.newKey = '';
-      this.newData = '{\n  "example": "value"\n}';
-      this.createDialog = true;
+      this.newKey = ''
+      this.newData = '{\n  "example": "value"\n}'
+      this.createDialog = true
     },
 
     closeCreateDialog() {
-      this.createDialog = false;
-      this.newKey = '';
-      this.newData = '';
+      this.createDialog = false
+      this.newKey = ''
+      this.newData = ''
     },
 
     async saveNewData() {
-      if (!this.isValidKey || !this.isValidNewJson) return;
+      if (!this.isValidKey || !this.isValidNewJson) return
 
-      this.savingData = true;
+      this.savingData = true
       try {
-        const parsedData = JSON.parse(this.newData);
-        const key = this.newKey.trim();
-        const result = await dataProvider.saveData(key, parsedData);
+        const parsedData = JSON.parse(this.newData)
+        const key = this.newKey.trim()
+        const result = await dataProvider.saveData(key, parsedData)
 
         if (result && !result.error) {
           // 添加到本地数据列表
           this.kvData.push({
             key,
             value: parsedData,
-            loaded: true
-          });
+            loaded: true,
+          })
 
-          this.$message.success('数据创建成功');
-          this.closeCreateDialog();
+          this.$message.success('数据创建成功')
+          this.closeCreateDialog()
         } else {
-          throw new Error(result.error?.message || '创建失败');
+          throw new Error(result.error?.message || '创建失败')
         }
       } catch (error) {
-        this.$message.error('创建失败', error.message);
+        this.$message.error('创建失败', error.message)
       } finally {
-        this.savingData = false;
+        this.savingData = false
       }
     },
 
     async saveEditedData() {
-      if (!this.isValidJson || !this.editingItem) return;
+      if (!this.isValidJson || !this.editingItem) return
 
-      this.savingData = true;
+      this.savingData = true
       try {
-        const parsedData = JSON.parse(this.editingData);
-        const result = await dataProvider.saveData(this.editingItem.key, parsedData);
+        const parsedData = JSON.parse(this.editingData)
+        const result = await dataProvider.saveData(this.editingItem.key, parsedData)
 
         if (result && !result.error) {
           // 更新本地数据
-          const index = this.kvData.findIndex(item => item.key === this.editingItem.key);
+          const index = this.kvData.findIndex((item) => item.key === this.editingItem.key)
           if (index !== -1) {
-            this.kvData[index].value = parsedData;
-            this.kvData[index].loaded = true;
+            this.kvData[index].value = parsedData
+            this.kvData[index].loaded = true
           }
 
-          this.$message.success('数据保存成功');
-          this.closeEditDialog();
+          this.$message.success('数据保存成功')
+          this.closeEditDialog()
         } else {
-          throw new Error(result.error?.message || '保存失败');
+          throw new Error(result.error?.message || '保存失败')
         }
       } catch (error) {
-        this.$message.error('保存失败', error.message);
+        this.$message.error('保存失败', error.message)
       } finally {
-        this.savingData = false;
+        this.savingData = false
       }
     },
 
     confirmDelete(item) {
-      this.itemToDelete = item;
-      this.deleteDialog = true;
+      this.itemToDelete = item
+      this.deleteDialog = true
     },
 
     async deleteItem() {
-      if (!this.itemToDelete) return;
+      if (!this.itemToDelete) return
 
-      this.deletingData = true;
+      this.deletingData = true
       try {
         // 对于本地存储，直接删除
         if (this.currentProvider === 'kv-local') {
-          const db = await openDB('ClassworksDB', 2);
-          const tx = db.transaction('kv', 'readwrite');
-          const store = tx.objectStore('kv');
-          await store.delete(this.itemToDelete.key);
+          const db = await openDB('ClassworksDB', 2)
+          const tx = db.transaction('kv', 'readwrite')
+          const store = tx.objectStore('kv')
+          await store.delete(this.itemToDelete.key)
         } else {
           // 对于服务器存储，这里需要实现删除API
           // 注意：大多数KV服务器不提供删除功能，可能需要设置为null
-          await dataProvider.saveData(this.itemToDelete.key, null);
+          await dataProvider.saveData(this.itemToDelete.key, null)
         }
 
         // 从本地列表中移除
-        const index = this.kvData.findIndex(item => item.key === this.itemToDelete.key);
+        const index = this.kvData.findIndex((item) => item.key === this.itemToDelete.key)
         if (index !== -1) {
-          this.kvData.splice(index, 1);
+          this.kvData.splice(index, 1)
         }
 
-        this.$message.success('数据删除成功');
-        this.deleteDialog = false;
-        this.itemToDelete = null;
+        this.$message.success('数据删除成功')
+        this.deleteDialog = false
+        this.itemToDelete = null
       } catch (error) {
-        this.$message.error('删除失败', error.message);
+        this.$message.error('删除失败', error.message)
       } finally {
-        this.deletingData = false;
+        this.deletingData = false
       }
     },
 
     formatJsonData(data) {
       try {
-        return JSON.stringify(data, null, 2);
+        return JSON.stringify(data, null, 2)
       } catch {
-        return String(data);
+        return String(data)
       }
     },
 
     async copyToClipboard(data) {
       try {
-        const text = this.formatJsonData(data);
-        await navigator.clipboard.writeText(text);
-        this.$message.success('数据已复制到剪贴板');
+        const text = this.formatJsonData(data)
+        await navigator.clipboard.writeText(text)
+        this.$message.success('数据已复制到剪贴板')
       } catch (error) {
-        this.$message.error('复制失败', error.message);
+        this.$message.error('复制失败', error.message)
       }
     },
 
     async getCloudUrl(item) {
-      this.selectedCloudItem = item;
-      this.cloudUrlResult = null;
-      this.cloudUrlError = null;
-      this.cloudUrlDialog = true;
+      this.selectedCloudItem = item
+      this.cloudUrlResult = null
+      this.cloudUrlError = null
+      this.cloudUrlDialog = true
 
-      await this.fetchCloudUrl();
+      await this.fetchCloudUrl()
     },
 
     async fetchCloudUrl() {
-      if (!this.selectedCloudItem) return;
+      if (!this.selectedCloudItem) return
 
-      this.gettingCloudUrl = true;
-      this.cloudUrlError = null;
+      this.gettingCloudUrl = true
+      this.cloudUrlError = null
 
       try {
         const result = await dataProvider.getKeyCloudUrl(
           this.selectedCloudItem.key,
-          this.cloudUrlOptions
-        );
+          this.cloudUrlOptions,
+        )
 
         if (result.success) {
-          this.cloudUrlResult = result;
-          this.$message.success('云端地址获取成功');
+          this.cloudUrlResult = result
+          this.$message.success('云端地址获取成功')
         } else {
-          this.cloudUrlError = result.error?.message || '获取云端地址失败';
-          this.$message.error('获取失败', this.cloudUrlError);
+          this.cloudUrlError = result.error?.message || '获取云端地址失败'
+          this.$message.error('获取失败', this.cloudUrlError)
         }
       } catch (error) {
-        this.cloudUrlError = error.message || '获取云端地址时发生错误';
-        this.$message.error('获取失败', this.cloudUrlError);
+        this.cloudUrlError = error.message || '获取云端地址时发生错误'
+        this.$message.error('获取失败', this.cloudUrlError)
       } finally {
-        this.gettingCloudUrl = false;
+        this.gettingCloudUrl = false
       }
     },
 
     async refreshCloudUrl() {
-      await this.fetchCloudUrl();
+      await this.fetchCloudUrl()
     },
 
     async copyCloudUrl() {
-      if (!this.cloudUrlResult?.url) return;
+      if (!this.cloudUrlResult?.url) return
 
       try {
-        await navigator.clipboard.writeText(this.cloudUrlResult.url);
-        this.$message.success('云端地址已复制到剪贴板');
+        await navigator.clipboard.writeText(this.cloudUrlResult.url)
+        this.$message.success('云端地址已复制到剪贴板')
       } catch (error) {
-        this.$message.error('复制失败', error.message);
+        this.$message.error('复制失败', error.message)
       }
     },
 
     openCloudUrl() {
-      if (!this.cloudUrlResult?.url) return;
+      if (!this.cloudUrlResult?.url) return
 
       try {
-        window.open(this.cloudUrlResult.url, '_blank');
+        window.open(this.cloudUrlResult.url, '_blank')
       } catch (error) {
-        this.$message.error('打开链接失败', error.message);
+        this.$message.error('打开链接失败', error.message)
       }
-    }
-  }
-};
+    },
+  },
+}
 </script>
 
 <style scoped>

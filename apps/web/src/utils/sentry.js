@@ -26,7 +26,7 @@ export function initSentry(app, router) {
         maskAllText: false,
         blockAllMedia: false,
       }),
-      feedbackIntegration = Sentry.feedbackIntegration({
+      (feedbackIntegration = Sentry.feedbackIntegration({
         autoInject: false,
         colorScheme: 'system',
         showBranding: false,
@@ -46,13 +46,10 @@ export function initSentry(app, router) {
           submitBackground: '#6200EA',
           submitBackgroundHover: '#7C4DFF',
         },
-      }),
+      })),
     ],
     tracesSampleRate: 1.0,
-    tracePropagationTargets: [
-      'localhost',
-      /^https?:\/\/cs\.(houlang\.cloud|houlangs\.com)/,
-    ],
+    tracePropagationTargets: ['localhost', /^https?:\/\/cs\.(houlang\.cloud|houlangs\.com)/],
     replaysSessionSampleRate: 0,
     replaysOnErrorSampleRate: 0,
     enableLogs: true,
@@ -111,7 +108,7 @@ export function initSentry(app, router) {
       }
       const integrations = client.getOptions().integrations || []
       const replayIntegration = integrations.find(
-        (integration) => integration && integration.name === 'Replay'
+        (integration) => integration && integration.name === 'Replay',
       )
       if (replayIntegration && typeof replayIntegration.start === 'function') {
         replayIntegration.start()

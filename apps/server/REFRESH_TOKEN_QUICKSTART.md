@@ -20,6 +20,7 @@ npx prisma migrate dev --name add_refresh_token_system
 ### 3. 新的OAuth回调参数
 
 登录成功后，回调URL现在包含：
+
 ```
 ?access_token=eyJ...&refresh_token=eyJ...&expires_in=15m&success=true
 ```
@@ -27,6 +28,7 @@ npx prisma migrate dev --name add_refresh_token_system
 ## 📝 核心API
 
 ### 刷新Token
+
 ```http
 POST /api/accounts/refresh
 Content-Type: application/json
@@ -37,12 +39,14 @@ Content-Type: application/json
 ```
 
 ### 登出当前设备
+
 ```http
 POST /api/accounts/logout
 Authorization: Bearer <access_token>
 ```
 
 ### 登出所有设备
+
 ```http
 POST /api/accounts/logout-all
 Authorization: Bearer <access_token>
@@ -51,42 +55,44 @@ Authorization: Bearer <access_token>
 ## 💻 前端集成
 
 ### 基础Token管理
+
 ```javascript
 class TokenManager {
   setTokens(accessToken, refreshToken) {
-    localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('refresh_token', refreshToken);
+    localStorage.setItem('access_token', accessToken)
+    localStorage.setItem('refresh_token', refreshToken)
   }
 
   async refreshToken() {
-    const refreshToken = localStorage.getItem('refresh_token');
+    const refreshToken = localStorage.getItem('refresh_token')
     const response = await fetch('/api/accounts/refresh', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: refreshToken })
-    });
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    })
 
-    const data = await response.json();
+    const data = await response.json()
     if (data.success) {
-      localStorage.setItem('access_token', data.data.access_token);
-      return data.data.access_token;
+      localStorage.setItem('access_token', data.data.access_token)
+      return data.data.access_token
     }
-    throw new Error(data.message);
+    throw new Error(data.message)
   }
 }
 ```
 
 ### 自动刷新拦截器
+
 ```javascript
 // 检查响应头中的新token
-const newToken = response.headers.get('X-New-Access-Token');
+const newToken = response.headers.get('X-New-Access-Token')
 if (newToken) {
-  localStorage.setItem('access_token', newToken);
+  localStorage.setItem('access_token', newToken)
 }
 
 // 401错误时自动刷新
 if (response.status === 401) {
-  await tokenManager.refreshToken();
+  await tokenManager.refreshToken()
   // 重试请求
 }
 ```

@@ -1,20 +1,12 @@
 <template>
   <!-- 统一姓名设置对话框（学生 / 教师） -->
-  <v-dialog
-    v-model="showDialog"
-    max-width="720"
-    persistent
-  >
+  <v-dialog v-model="showDialog" max-width="720" persistent>
     <v-card>
       <v-card-title>{{ dialogTitle }}</v-card-title>
       <v-card-text>
         <!-- 学生模式 -->
         <template v-if="isStudentToken">
-          <div
-            class="mb-2"
-          >
-            请从列表中选择您的姓名：
-          </div>
+          <div class="mb-2">请从列表中选择您的姓名：</div>
           <v-autocomplete
             v-model="selectedName"
             :items="studentList"
@@ -25,10 +17,7 @@
             label="学生姓名"
             placeholder="选择您的姓名"
           />
-          <div
-            v-if="studentList.length > 0"
-            class="mt-2 text-caption text-medium-emphasis"
-          >
+          <div v-if="studentList.length > 0" class="mt-2 text-caption text-medium-emphasis">
             共 {{ studentList.length }} 位学生
           </div>
         </template>
@@ -43,10 +32,7 @@
             clearable
           />
           <!-- 建议列表 -->
-          <div
-
-            class="mt-2 mb-4"
-          >
+          <div class="mt-2 mb-4">
             <div class="d-flex flex-wrap gap-2">
               <v-chip
                 v-for="teacher in filteredTeacherSuggestions"
@@ -55,12 +41,7 @@
                 @click="selectTeacherFromSuggestion(teacher)"
               >
                 {{ teacher.name }}
-                <span
-                  v-if="teacher.isHeadTeacher"
-                  class="ms-1 text-error"
-                >
-                  👨‍🏫
-                </span>
+                <span v-if="teacher.isHeadTeacher" class="ms-1 text-error"> 👨‍🏫 </span>
               </v-chip>
             </div>
           </div>
@@ -85,22 +66,12 @@
           />
         </template>
 
-        <v-alert
-          v-if="error"
-          class="mt-3"
-          type="error"
-          variant="tonal"
-        >
+        <v-alert v-if="error" class="mt-3" type="error" variant="tonal">
           {{ error }}
         </v-alert>
       </v-card-text>
       <v-card-actions>
-        <v-btn
-          variant="text"
-          @click="skipSetting"
-        >
-          稍后设置
-        </v-btn>
+        <v-btn variant="text" @click="skipSetting"> 稍后设置 </v-btn>
         <v-spacer />
         <v-btn
           v-if="isStudentToken"
@@ -135,8 +106,8 @@
 </template>
 
 <script setup>
-import {ref, computed, watch, onMounted} from 'vue'
-import {getSetting, watchSettings} from '@/utils/settings'
+import { ref, computed, watch, onMounted } from 'vue'
+import { getSetting, watchSettings } from '@/utils/settings'
 import axios from '@/axios/axios'
 import dataProvider from '@/utils/dataProvider'
 
@@ -163,8 +134,12 @@ const displayName = computed(() => tokenInfo.value?.note || '设置名称')
 const hasToken = computed(() => !!kvToken.value)
 const kvToken = computed(() => getSetting('server.kvToken'))
 const provider = computed(() => getSetting('server.provider'))
-const isKvProvider = computed(() => provider.value === 'kv-server' || provider.value === 'classworkscloud')
-const dialogTitle = computed(() => (isStudentToken.value ? '设置学生姓名' : isTeacherToken.value ? '设置教师姓名' : '设置姓名'))
+const isKvProvider = computed(
+  () => provider.value === 'kv-server' || provider.value === 'classworkscloud',
+)
+const dialogTitle = computed(() =>
+  isStudentToken.value ? '设置学生姓名' : isTeacherToken.value ? '设置教师姓名' : '设置姓名',
+)
 // 教师建议列表（显示所有教师）
 const filteredTeacherSuggestions = computed(() => teacherList.value)
 
@@ -181,8 +156,8 @@ const checkStudentNameStatus = async () => {
     // 获取 Token 信息
     const tokenResponse = await axios.get(`${serverUrl}/kv/_token`, {
       headers: {
-        Authorization: `Bearer ${kvToken.value}`
-      }
+        Authorization: `Bearer ${kvToken.value}`,
+      },
     })
 
     tokenInfo.value = tokenResponse.data
@@ -192,14 +167,14 @@ const checkStudentNameStatus = async () => {
       currentStudentName.value = tokenInfo.value.note || ''
 
       const listResponse = await axios.get(`${serverUrl}/kv/classworks-list-main`, {
-        headers: { Authorization: `Bearer ${kvToken.value}` }
+        headers: { Authorization: `Bearer ${kvToken.value}` },
       })
       const list = listResponse.data.value || []
       studentList.value = Array.isArray(list) ? list : []
 
       if (studentList.value.length > 0) {
         const currentNote = tokenInfo.value.note || ''
-        const nameExists = studentList.value.some(s => s.name === currentNote)
+        const nameExists = studentList.value.some((s) => s.name === currentNote)
         if (!currentNote || !nameExists) {
           showDialog.value = true
           selectedName.value = ''
@@ -214,7 +189,7 @@ const checkStudentNameStatus = async () => {
 
       try {
         const listResponse = await axios.get(`${serverUrl}/kv/classworks-list-teacher`, {
-          headers: { Authorization: `Bearer ${kvToken.value}` }
+          headers: { Authorization: `Bearer ${kvToken.value}` },
         })
         const list = listResponse.data.value || []
         teacherList.value = Array.isArray(list) ? list : []
@@ -231,7 +206,7 @@ const checkStudentNameStatus = async () => {
 
       if (teacherList.value.length > 0) {
         const currentNote = tokenInfo.value.note || ''
-        const nameExists = teacherList.value.some(t => t.name === currentNote)
+        const nameExists = teacherList.value.some((t) => t.name === currentNote)
         if (!currentNote || !nameExists) {
           showDialog.value = true
           selectedTeacherName.value = ''
@@ -239,7 +214,6 @@ const checkStudentNameStatus = async () => {
       }
       return
     }
-
   } catch (err) {
     console.error('检查学生姓名状态失败:', err)
   }
@@ -255,12 +229,9 @@ const saveStudentName = async () => {
     const serverUrl = getSetting('server.domain')
     const token = kvToken.value
 
-    const response = await axios.post(
-      `${serverUrl}/apps/tokens/${token}/set-student-name`,
-      {
-        name: selectedName.value
-      }
-    )
+    const response = await axios.post(`${serverUrl}/apps/tokens/${token}/set-student-name`, {
+      name: selectedName.value,
+    })
 
     if (response.data.success) {
       currentStudentName.value = selectedName.value
@@ -301,12 +272,14 @@ const saveTeacherName = async () => {
       name: teacherForm.value.name.trim(),
       isHeadTeacher: !!teacherForm.value.isHeadTeacher,
       subjects: Array.isArray(teacherForm.value.subjects)
-        ? teacherForm.value.subjects.filter(s => s && String(s).trim()).map(s => String(s).trim())
-        : []
+        ? teacherForm.value.subjects
+            .filter((s) => s && String(s).trim())
+            .map((s) => String(s).trim())
+        : [],
     }
 
     // 先更新本地列表
-    const idx = teacherList.value.findIndex(t => t.name === entry.name)
+    const idx = teacherList.value.findIndex((t) => t.name === entry.name)
     if (idx >= 0) {
       teacherList.value[idx] = entry
     } else {
@@ -320,10 +293,9 @@ const saveTeacherName = async () => {
     }
 
     // 设置教师名称
-    const response = await axios.post(
-      `${serverUrl}/apps/tokens/${token}/set-teacher-name`,
-      { name: entry.name }
-    )
+    const response = await axios.post(`${serverUrl}/apps/tokens/${token}/set-teacher-name`, {
+      name: entry.name,
+    })
 
     if (response.data.success) {
       currentTeacherName.value = entry.name
@@ -368,7 +340,7 @@ const openDialog = async () => {
 
   if (isStudentToken.value) {
     const resp = await dataProvider.loadData('classworks-list-main')
-    studentList.value = Array.isArray(resp?.value) ? resp.value : (Array.isArray(resp) ? resp : [])
+    studentList.value = Array.isArray(resp?.value) ? resp.value : Array.isArray(resp) ? resp : []
     if (studentList.value.length === 0) {
       console.log('Student list is empty, trying to load...')
       await checkStudentNameStatus()
@@ -384,7 +356,7 @@ const openDialog = async () => {
   if (isTeacherToken.value) {
     try {
       const resp = await dataProvider.loadData('classworks-list-teacher')
-      teacherList.value = Array.isArray(resp?.value) ? resp.value : (Array.isArray(resp) ? resp : [])
+      teacherList.value = Array.isArray(resp?.value) ? resp.value : Array.isArray(resp) ? resp : []
     } catch {
       // 如果列表不存在，初始化为空
       console.log('教师列表不存在或加载失败，允许手动创建')
@@ -394,7 +366,7 @@ const openDialog = async () => {
     teacherForm.value = { name: currentTeacherName.value, isHeadTeacher: false, subjects: [] }
     // 如果当前有教师名称，尝试从列表中读取班主任和科目信息
     if (currentTeacherName.value) {
-      const found = teacherList.value.find(t => t.name === currentTeacherName.value)
+      const found = teacherList.value.find((t) => t.name === currentTeacherName.value)
       if (found) {
         teacherForm.value.isHeadTeacher = found.isHeadTeacher || false
         teacherForm.value.subjects = Array.isArray(found.subjects) ? [...found.subjects] : []
@@ -419,9 +391,13 @@ watchSettings(() => {
 })
 
 // 监听 tokenInfo 变化，通知父组件
-watch(tokenInfo, () => {
-  emit('token-info-updated')
-}, {deep: true})
+watch(
+  tokenInfo,
+  () => {
+    emit('token-info-updated')
+  },
+  { deep: true },
+)
 
 // 初始化
 onMounted(() => {
@@ -439,7 +415,7 @@ defineExpose({
   isReadOnly,
   displayName,
   hasToken,
-  tokenInfo
+  tokenInfo,
 })
 </script>
 

@@ -12,18 +12,18 @@ export const DeviceEventTypes = {
   CHAT: 'chat',
   KV_KEY_CHANGED: 'kv-key-changed',
   URGENT_NOTICE: 'urgent-notice',
-  NOTIFICATION: 'notification'
+  NOTIFICATION: 'notification',
 }
 
 /**
  * 实时同步发送者信息
  */
 export const RealtimeSenderInfo = {
-  appId: "5c2a54d553951a37b47066ead68c8642",
-  deviceType: "server",
-  deviceName: "realtime",
+  appId: '5c2a54d553951a37b47066ead68c8642',
+  deviceType: 'server',
+  deviceName: 'realtime',
   isReadOnly: false,
-  note: "Database realtime sync"
+  note: 'Database realtime sync',
 }
 
 /**
@@ -36,7 +36,7 @@ export function sendChatMessage(text) {
   }
 
   sendEvent(DeviceEventTypes.CHAT, {
-    text: text.trim()
+    text: text.trim(),
   })
 }
 
@@ -65,7 +65,7 @@ export function sendUrgentNotice(urgency, message, targetDevices, senderInfo) {
     urgency,
     message: message.trim(),
     targetDevices,
-    senderInfo
+    senderInfo,
   })
 }
 
@@ -86,7 +86,7 @@ export function createChatEventHandler(handler) {
           senderId: eventData.senderId,
           at: eventData.timestamp,
           uuid: eventData.senderId,
-          senderInfo: eventData.senderInfo
+          senderInfo: eventData.senderInfo,
         }
         handler(chatMsg, eventData)
       }
@@ -132,7 +132,7 @@ export function convertChatEventToLegacy(eventData) {
     senderId: eventData.senderId,
     at: eventData.timestamp,
     uuid: eventData.uuid,
-    senderInfo: eventData.senderInfo
+    senderInfo: eventData.senderInfo,
   }
 }
 
@@ -153,7 +153,7 @@ export function convertKvEventToLegacy(eventData) {
     created: eventData.content?.created,
     updatedAt: eventData.content?.updatedAt,
     deletedAt: eventData.content?.deletedAt,
-    batch: eventData.content?.batch
+    batch: eventData.content?.batch,
   }
 }
 
@@ -173,7 +173,7 @@ export function convertUrgentNoticeEventToLegacy(eventData) {
     targetDevices: eventData.content?.targetDevices || [],
     senderId: eventData.senderId,
     senderInfo: eventData.content?.senderInfo || eventData.senderInfo,
-    timestamp: eventData.timestamp
+    timestamp: eventData.timestamp,
   }
 }
 
@@ -194,7 +194,7 @@ export function convertNotificationEventToLegacy(eventData) {
     senderId: eventData.senderId,
     senderInfo: eventData.content?.senderInfo || eventData.senderInfo,
     timestamp: eventData.timestamp,
-    eventId: eventData.eventId
+    eventId: eventData.eventId,
   }
 }
 
@@ -204,8 +204,10 @@ export function convertNotificationEventToLegacy(eventData) {
  * @returns {boolean} 是否为实时同步事件
  */
 export function isRealtimeEvent(eventData) {
-  return eventData?.senderInfo?.appId === RealtimeSenderInfo.appId &&
-         eventData?.senderInfo?.deviceName === RealtimeSenderInfo.deviceName
+  return (
+    eventData?.senderInfo?.appId === RealtimeSenderInfo.appId &&
+    eventData?.senderInfo?.deviceName === RealtimeSenderInfo.deviceName
+  )
 }
 
 /**
@@ -235,47 +237,47 @@ export function createDeviceEventHandler(options = {}) {
     onUrgentNotice,
     onNotification,
     onOtherEvent,
-    enableLegacySupport = true
+    enableLegacySupport = true,
   } = options
 
   return (eventData) => {
     handleDeviceEvent(eventData, {
       [DeviceEventTypes.CHAT]: (data) => {
         if (onChat) {
-          const chatMsg = enableLegacySupport ?
-            convertChatEventToLegacy(data) : data
+          const chatMsg = enableLegacySupport ? convertChatEventToLegacy(data) : data
           onChat(chatMsg, data)
         }
       },
       [DeviceEventTypes.KV_KEY_CHANGED]: (data) => {
         if (onKvChanged) {
-          const kvMsg = enableLegacySupport ?
-            convertKvEventToLegacy(data) : data
+          const kvMsg = enableLegacySupport ? convertKvEventToLegacy(data) : data
           onKvChanged(kvMsg, data)
         }
       },
       [DeviceEventTypes.URGENT_NOTICE]: (data) => {
         if (onUrgentNotice) {
-          const urgentMsg = enableLegacySupport ?
-            convertUrgentNoticeEventToLegacy(data) : data
+          const urgentMsg = enableLegacySupport ? convertUrgentNoticeEventToLegacy(data) : data
           onUrgentNotice(urgentMsg, data)
         }
       },
       [DeviceEventTypes.NOTIFICATION]: (data) => {
         if (onNotification) {
-          const notificationMsg = enableLegacySupport ?
-            convertNotificationEventToLegacy(data) : data
+          const notificationMsg = enableLegacySupport
+            ? convertNotificationEventToLegacy(data)
+            : data
           onNotification(notificationMsg, data)
         }
-      }
+      },
     })
 
     // 处理其他类型的事件
-    if (onOtherEvent &&
-        eventData.type !== DeviceEventTypes.CHAT &&
-        eventData.type !== DeviceEventTypes.KV_KEY_CHANGED &&
-        eventData.type !== DeviceEventTypes.URGENT_NOTICE &&
-        eventData.type !== DeviceEventTypes.NOTIFICATION) {
+    if (
+      onOtherEvent &&
+      eventData.type !== DeviceEventTypes.CHAT &&
+      eventData.type !== DeviceEventTypes.KV_KEY_CHANGED &&
+      eventData.type !== DeviceEventTypes.URGENT_NOTICE &&
+      eventData.type !== DeviceEventTypes.NOTIFICATION
+    ) {
       onOtherEvent(eventData)
     }
   }
@@ -301,7 +303,7 @@ export function createKvEventHandler(handler) {
           created: eventData.content.created,
           updatedAt: eventData.content.updatedAt || eventData.timestamp,
           deletedAt: eventData.content.deletedAt,
-          batch: eventData.content.batch
+          batch: eventData.content.batch,
         }
         handler(legacyData)
       } else {
@@ -323,5 +325,5 @@ export default {
   convertKvEventToLegacy,
   isRealtimeEvent,
   formatDeviceInfo,
-  createDeviceEventHandler
+  createDeviceEventHandler,
 }

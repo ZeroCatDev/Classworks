@@ -1,8 +1,5 @@
 <template>
-  <settings-card
-    icon="mdi-cog"
-    title="编辑设置"
-  >
+  <settings-card icon="mdi-cog" title="编辑设置">
     <v-list>
       <setting-item setting-key="randomPicker.enabled" />
       <v-divider class="my-2" />
@@ -15,7 +12,6 @@
       <v-divider class="my-2" />
       <setting-item setting-key="randomPicker.defaultCount" />
 
-
       <v-divider class="my-2" />
       <setting-item setting-key="randomPicker.animation" />
     </v-list>
@@ -23,7 +19,6 @@
 </template>
 
 <script>
-import SettingsCard from '@/components/SettingsCard.vue';
-import SettingItem from '../SettingItem.vue';
-
+import SettingsCard from '@/components/SettingsCard.vue'
+import SettingItem from '../SettingItem.vue'
 </script>

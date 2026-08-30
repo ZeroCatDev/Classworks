@@ -1,27 +1,37 @@
 <route lang="json">
 {
-"meta": {
-"requiresAuth": false
-}
+  "meta": {
+    "requiresAuth": false
+  }
 }
 </route>
 
 <script setup>
-import {ref, computed, onMounted} from 'vue'
-import {useRoute, useRouter} from 'vue-router'
-import {apiClient} from '@/lib/api'
-import {deviceStore} from '@/lib/deviceStore'
-import {useAccountStore} from '@/stores/account'
-import {Button} from '@/components/ui/button'
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
-import {Input} from '@/components/ui/input'
-import {Label} from '@/components/ui/label'
-import {Badge} from '@/components/ui/badge'
-import {CheckCircle2, XCircle, Loader2, Shield, Key, AlertCircle, User, Plus, Check} from 'lucide-vue-next'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { apiClient } from '@/lib/api'
+import { deviceStore } from '@/lib/deviceStore'
+import { useAccountStore } from '@/stores/account'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import {
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Shield,
+  Key,
+  AlertCircle,
+  User,
+  Plus,
+  Check,
+} from 'lucide-vue-next'
 import AppCard from '@/components/AppCard.vue'
 import LoginDialog from '@/components/LoginDialog.vue'
 import DeviceRegisterDialog from '@/components/DeviceRegisterDialog.vue'
-import {toast} from 'vue-sonner'
+import { toast } from 'vue-sonner'
 
 const route = useRoute()
 const router = useRouter()
@@ -108,11 +118,11 @@ const bindCurrentDevice = async () => {
     await accountStore.bindDevice(deviceUuid.value)
     await loadDeviceAccount()
     toast.success('绑定成功', {
-      description: '设备已绑定到您的账户'
+      description: '设备已绑定到您的账户',
     })
   } catch (error) {
     toast.error('绑定失败', {
-      description: error.message || '无法绑定设备'
+      description: error.message || '无法绑定设备',
     })
   }
 }
@@ -208,7 +218,6 @@ const goHome = () => {
 const retry = () => {
   step.value = 'input'
   errorMessage.value = ''
-
 }
 
 // 加载设备信息
@@ -269,53 +278,45 @@ onMounted(async () => {
       <CardHeader class="space-y-4">
         <div class="flex items-center justify-center">
           <div class="rounded-full bg-primary/10 p-3">
-            <Key class="h-8 w-8 text-primary"/>
+            <Key class="h-8 w-8 text-primary" />
           </div>
         </div>
         <div class="space-y-2 text-center">
           <CardTitle class="text-2xl">应用授权</CardTitle>
-          <CardDescription>
-
-            授权应用访问您的 KV 存储
-          </CardDescription>
+          <CardDescription> 授权应用访问您的 KV 存储 </CardDescription>
         </div>
       </CardHeader>
 
       <CardContent class="space-y-6">
         <!-- 应用信息 -->
         <div>
-          <AppCard :app-id="appId" class="mb-4"/>
+          <AppCard :app-id="appId" class="mb-4" />
         </div>
 
         <!-- 设备信息 -->
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <Label class="text-sm text-muted-foreground">设备 UUID</Label>
-
           </div>
-
 
           <!-- 当前设备UUID显示 -->
           <div class="flex items-center gap-2">
             <code class="text-xs font-mono bg-muted px-3 py-2 rounded flex-1 truncate">
               {{ deviceUuid }}
             </code>
-
           </div>
 
           <!-- 设备绑定状态 -->
           <div v-if="deviceAccount" class="text-xs text-muted-foreground flex items-center gap-2">
-            <User class="h-3 w-3"/>
+            <User class="h-3 w-3" />
             已绑定至: {{ deviceAccount.name }}
           </div>
-          <div v-else-if="accountStore.isAuthenticated && !showDeviceList" class="flex items-center gap-2">
-            <Button
-                class="text-xs"
-                size="sm"
-                variant="outline"
-                @click="bindCurrentDevice"
-            >
-              <Plus class="h-3 w-3 mr-1"/>
+          <div
+            v-else-if="accountStore.isAuthenticated && !showDeviceList"
+            class="flex items-center gap-2"
+          >
+            <Button class="text-xs" size="sm" variant="outline" @click="bindCurrentDevice">
+              <Plus class="h-3 w-3 mr-1" />
               绑定到我的账户
             </Button>
           </div>
@@ -334,10 +335,10 @@ onMounted(async () => {
           <div v-if="isDeviceCodeMode && !deviceCode" class="space-y-2">
             <Label for="device-code">设备代码</Label>
             <Input
-                id="device-code"
-                v-model="inputDeviceCode"
-                class="font-mono"
-                placeholder="例如：1234-ABCD"
+              id="device-code"
+              v-model="inputDeviceCode"
+              class="font-mono"
+              placeholder="例如：1234-ABCD"
             />
           </div>
 
@@ -354,39 +355,32 @@ onMounted(async () => {
           <!-- 备注 -->
           <div class="space-y-2">
             <Label for="note">备注（可选）</Label>
-            <Input
-                id="note"
-                v-model="authNote"
-                placeholder="例如：CLI 工具访问"
-            />
+            <Input id="note" v-model="authNote" placeholder="例如：CLI 工具访问" />
           </div>
 
           <!-- 密码输入（使用统一组件） -->
 
-
           <!-- 授权按钮 -->
           <div class="space-y-3 pt-2">
             <Button
-                :disabled="(isDeviceCodeMode && !currentDeviceCode)"
-                class="w-full"
-                size="lg"
-                @click="handleSubmit"
+              :disabled="isDeviceCodeMode && !currentDeviceCode"
+              class="w-full"
+              size="lg"
+              @click="handleSubmit"
             >
-              <Key class="mr-2 h-4 w-4"/>
+              <Key class="mr-2 h-4 w-4" />
               确认授权
             </Button>
 
             <!-- 返回首页 -->
-            <Button class="w-full" variant="ghost" @click="goHome">
-              返回管理页面
-            </Button>
+            <Button class="w-full" variant="ghost" @click="goHome"> 返回管理页面 </Button>
           </div>
         </div>
 
         <!-- 加载状态 -->
         <div v-else-if="step === 'loading'" class="py-8">
           <div class="flex flex-col items-center justify-center space-y-4">
-            <Loader2 class="h-12 w-12 animate-spin text-primary"/>
+            <Loader2 class="h-12 w-12 animate-spin text-primary" />
             <div class="text-center space-y-1">
               <div class="font-medium">正在授权...</div>
               <div class="text-sm text-muted-foreground">请稍候</div>
@@ -398,7 +392,7 @@ onMounted(async () => {
         <div v-else-if="step === 'success'" class="space-y-4">
           <div class="flex flex-col items-center justify-center py-8 space-y-4">
             <div class="rounded-full bg-green-100 dark:bg-green-900/20 p-4">
-              <CheckCircle2 class="h-12 w-12 text-green-600 dark:text-green-500"/>
+              <CheckCircle2 class="h-12 w-12 text-green-600 dark:text-green-500" />
             </div>
             <div class="text-center space-y-2">
               <div class="text-lg font-semibold">授权成功！</div>
@@ -406,23 +400,19 @@ onMounted(async () => {
                 <template v-if="isDeviceCodeMode">
                   设备代码已绑定，您可以继续使用 CLI 工具
                 </template>
-                <template v-else>
-                  应用已成功授权
-                </template>
+                <template v-else> 应用已成功授权 </template>
               </div>
             </div>
           </div>
 
-          <Button class="w-full" size="lg" @click="goHome">
-            返回管理页面
-          </Button>
+          <Button class="w-full" size="lg" @click="goHome"> 返回管理页面 </Button>
         </div>
 
         <!-- 错误状态 -->
         <div v-else-if="step === 'error'" class="space-y-4">
           <div class="flex flex-col items-center justify-center py-8 space-y-4">
             <div class="rounded-full bg-red-100 dark:bg-red-900/20 p-4">
-              <XCircle class="h-12 w-12 text-red-600 dark:text-red-500"/>
+              <XCircle class="h-12 w-12 text-red-600 dark:text-red-500" />
             </div>
             <div class="text-center space-y-2">
               <div class="text-lg font-semibold">授权失败</div>
@@ -431,30 +421,25 @@ onMounted(async () => {
           </div>
 
           <div class="space-y-2">
-            <Button class="w-full" size="lg" @click="retry">
-              重试
-            </Button>
-            <Button class="w-full" variant="ghost" @click="goHome">
-              返回管理页面
-            </Button>
+            <Button class="w-full" size="lg" @click="retry"> 重试 </Button>
+            <Button class="w-full" variant="ghost" @click="goHome"> 返回管理页面 </Button>
           </div>
         </div>
 
         <!-- 提示信息 -->
         <div
-v-if="step === 'input'"
-             class="rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 p-4">
+          v-if="step === 'input'"
+          class="rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 p-4"
+        >
           <div class="flex gap-3">
-            <AlertCircle class="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5"/>
+            <AlertCircle class="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
             <div class="space-y-1.5 text-sm">
               <div class="font-medium text-blue-900 dark:text-blue-100">授权说明</div>
               <div class="text-blue-700 dark:text-blue-300 leading-relaxed">
                 <template v-if="isDeviceCodeMode">
                   点击"确认授权"后，应用将获得访问您 KV 存储的权限。CLI 工具将自动完成授权流程。
                 </template>
-                <template v-else>
-                  点击"确认授权"后，应用将获得访问您 KV 存储的权限。
-                </template>
+                <template v-else> 点击"确认授权"后，应用将获得访问您 KV 存储的权限。 </template>
               </div>
             </div>
           </div>
@@ -463,13 +448,13 @@ v-if="step === 'input'"
     </Card>
 
     <!-- 登录弹框 -->
-    <LoginDialog v-model="showLoginDialog" :on-success="handleLoginSuccess"/>
+    <LoginDialog v-model="showLoginDialog" :on-success="handleLoginSuccess" />
 
     <!-- 设备注册弹框 -->
     <DeviceRegisterDialog
-        v-model="showRegisterDialog"
-        :required="deviceRequired"
-        @confirm="updateUuid"
+      v-model="showRegisterDialog"
+      :required="deviceRequired"
+      @confirm="updateUuid"
     />
   </div>
 </template>

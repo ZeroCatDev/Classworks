@@ -8,27 +8,11 @@
     <v-card class="rounded-xl noise-detail-card">
       <!-- 顶部标题栏 -->
       <v-card-title class="d-flex align-center pa-4">
-        <v-icon
-          class="mr-2"
-          color="primary"
-        >
-          mdi-waveform
-        </v-icon>
+        <v-icon class="mr-2" color="primary"> mdi-waveform </v-icon>
         <span class="text-h6 font-weight-bold">环境噪音监测</span>
         <v-spacer />
-        <v-chip
-          v-if="sessionActive"
-          color="teal"
-          size="small"
-          variant="tonal"
-          class="mr-2"
-        >
-          <v-icon
-            start
-            size="12"
-          >
-            mdi-record-circle
-          </v-icon>
+        <v-chip v-if="sessionActive" color="teal" size="small" variant="tonal" class="mr-2">
+          <v-icon start size="12"> mdi-record-circle </v-icon>
           {{ sessionData?.sessionName || '自习中' }}
         </v-chip>
         <v-chip
@@ -48,38 +32,20 @@
       </v-card-title>
 
       <!-- 分页标签 -->
-      <v-tabs
-        v-model="activeTab"
-        color="primary"
-        density="compact"
-        grow
-      >
+      <v-tabs v-model="activeTab" color="primary" density="compact" grow>
         <v-tab value="realtime">
-          <v-icon
-            start
-            size="18"
-          >
-            mdi-pulse
-          </v-icon>
+          <v-icon start size="18"> mdi-pulse </v-icon>
           实时监测
         </v-tab>
         <v-tab value="reports">
-          <v-icon
-            start
-            size="18"
-          >
-            mdi-chart-bar
-          </v-icon>
+          <v-icon start size="18"> mdi-chart-bar </v-icon>
           统计报告
         </v-tab>
       </v-tabs>
 
       <v-divider />
 
-      <v-card-text
-        class="pa-0"
-        style="max-height: 70vh;"
-      >
+      <v-card-text class="pa-0" style="max-height: 70vh">
         <v-tabs-window v-model="activeTab">
           <!-- ==================== 实时监测 ==================== -->
           <v-tabs-window-item value="realtime">
@@ -92,14 +58,9 @@
               prominent
             >
               <template #prepend>
-                <v-icon
-                  icon="mdi-microphone-off"
-                  size="28"
-                />
+                <v-icon icon="mdi-microphone-off" size="28" />
               </template>
-              <div class="text-subtitle-2 font-weight-bold mb-1">
-                麦克风权限被拒绝
-              </div>
+              <div class="text-subtitle-2 font-weight-bold mb-1">麦克风权限被拒绝</div>
               <div class="text-body-2">
                 浏览器已拒绝麦克风访问，无法进行噪音监测。请在浏览器地址栏左侧的锁图标中重新授予麦克风权限，然后刷新页面。
               </div>
@@ -112,14 +73,9 @@
               prominent
             >
               <template #prepend>
-                <v-icon
-                  icon="mdi-microphone-question"
-                  size="28"
-                />
+                <v-icon icon="mdi-microphone-question" size="28" />
               </template>
-              <div class="text-subtitle-2 font-weight-bold mb-1">
-                未检测到麦克风
-              </div>
+              <div class="text-subtitle-2 font-weight-bold mb-1">未检测到麦克风</div>
               <div class="text-body-2">
                 当前设备未检测到麦克风硬件，无法进行噪音监测。请连接麦克风后刷新页面重试。
               </div>
@@ -129,34 +85,22 @@
             <div class="noise-dashboard pa-5">
               <div class="d-flex align-center justify-center">
                 <div class="text-center">
-                  <div
-                    class="noise-gauge-ring"
-                    :class="`ring-${dbColor}`"
-                  >
+                  <div class="noise-gauge-ring" :class="`ring-${dbColor}`">
                     <div class="noise-gauge-inner d-flex flex-column align-center justify-center">
-                      <span
-                        class="noise-gauge-value font-weight-bold"
-                        :class="`text-${dbColor}`"
-                      >
+                      <span class="noise-gauge-value font-weight-bold" :class="`text-${dbColor}`">
                         {{ currentDb }}
                       </span>
                       <span class="text-caption text-medium-emphasis">dB</span>
                     </div>
                   </div>
-                  <div
-                    class="text-subtitle-1 font-weight-medium mt-3"
-                    :class="`text-${dbColor}`"
-                  >
+                  <div class="text-subtitle-1 font-weight-medium mt-3" :class="`text-${dbColor}`">
                     {{ noiseLevel }}
                   </div>
                 </div>
               </div>
 
               <!-- 分贝条 -->
-              <div
-                class="noise-level-bar mt-5 mx-auto"
-                style="max-width: 500px;"
-              >
+              <div class="noise-level-bar mt-5 mx-auto" style="max-width: 500px">
                 <div class="d-flex justify-space-between text-caption text-medium-emphasis mb-1">
                   <span>0 dB</span>
                   <span>50</span>
@@ -177,23 +121,14 @@
             <!-- 实时波形 -->
             <div class="pa-5">
               <div class="d-flex align-center mb-3">
-                <v-icon
-                  class="mr-2"
-                  size="18"
-                  color="primary"
-                >
-                  mdi-chart-line
-                </v-icon>
+                <v-icon class="mr-2" size="18" color="primary"> mdi-chart-line </v-icon>
                 <span class="text-subtitle-2 font-weight-medium">噪音走势</span>
                 <v-spacer />
                 <span class="text-caption text-medium-emphasis">
                   最近 {{ ringBuffer.length }} 个采样
                 </span>
               </div>
-              <div
-                ref="waveformContainer"
-                class="noise-waveform"
-              >
+              <div ref="waveformContainer" class="noise-waveform">
                 <svg
                   width="100%"
                   height="120"
@@ -242,13 +177,7 @@
                     stroke-linecap="round"
                   />
                   <defs>
-                    <linearGradient
-                      id="waveGradient-rt"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
+                    <linearGradient id="waveGradient-rt" x1="0" y1="0" x2="0" y2="1">
                       <stop
                         offset="0%"
                         stop-color="rgb(var(--v-theme-primary))"
@@ -270,19 +199,10 @@
             <!-- 当前评分 -->
             <div class="pa-5">
               <div class="d-flex align-center mb-3">
-                <v-icon
-                  class="mr-2"
-                  size="18"
-                  color="amber"
-                >
-                  mdi-star-circle
-                </v-icon>
+                <v-icon class="mr-2" size="18" color="amber"> mdi-star-circle </v-icon>
                 <span class="text-subtitle-2 font-weight-medium">实时评分</span>
               </div>
-              <div
-                v-if="currentScore !== null"
-                class="d-flex flex-wrap ga-4"
-              >
+              <div v-if="currentScore !== null" class="d-flex flex-wrap ga-4">
                 <v-card
                   variant="tonal"
                   :color="scoreColor"
@@ -304,9 +224,7 @@
                       <div class="text-subtitle-1 font-weight-bold">
                         {{ scoreLabel }}
                       </div>
-                      <div class="text-caption text-medium-emphasis">
-                        综合评分 (0-100)
-                      </div>
+                      <div class="text-caption text-medium-emphasis">综合评分 (0-100)</div>
                     </div>
                   </v-card-text>
                 </v-card>
@@ -319,28 +237,19 @@
                   min-width="200"
                 >
                   <v-card-text class="pa-4">
-                    <div class="text-subtitle-2 font-weight-medium mb-2">
-                      扣分扣因
-                    </div>
+                    <div class="text-subtitle-2 font-weight-medium mb-2">扣分扣因</div>
                     <div
                       v-for="item in scorePenaltyItems"
                       :key="item.label"
                       class="d-flex align-center justify-space-between mb-1"
                     >
                       <div class="d-flex align-center">
-                        <v-icon
-                          :color="item.color"
-                          size="14"
-                          class="mr-2"
-                        >
+                        <v-icon :color="item.color" size="14" class="mr-2">
                           {{ item.icon }}
                         </v-icon>
                         <span class="text-body-2">{{ item.label }}</span>
                       </div>
-                      <div
-                        class="d-flex align-center"
-                        style="min-width: 140px;"
-                      >
+                      <div class="d-flex align-center" style="min-width: 140px">
                         <v-progress-linear
                           :model-value="item.percent"
                           :color="item.color"
@@ -350,7 +259,7 @@
                         />
                         <span
                           class="text-caption font-weight-medium"
-                          style="min-width: 36px; text-align: right;"
+                          style="min-width: 36px; text-align: right"
                         >
                           {{ item.percent }}%
                         </span>
@@ -359,19 +268,9 @@
                   </v-card-text>
                 </v-card>
               </div>
-              <div
-                v-else
-                class="text-center text-medium-emphasis py-4"
-              >
-                <v-icon
-                  size="32"
-                  class="mb-2"
-                >
-                  mdi-chart-arc
-                </v-icon>
-                <div class="text-body-2">
-                  开始监测后将显示评分
-                </div>
+              <div v-else class="text-center text-medium-emphasis py-4">
+                <v-icon size="32" class="mb-2"> mdi-chart-arc </v-icon>
+                <div class="text-body-2">开始监测后将显示评分</div>
               </div>
             </div>
 
@@ -416,35 +315,17 @@
 
           <!-- ==================== 统计报告 ==================== -->
           <v-tabs-window-item value="reports">
-            <div
-              v-if="sortedDateKeys.length === 0"
-              class="text-center text-medium-emphasis py-12"
-            >
-              <v-icon
-                size="48"
-                class="mb-3"
-              >
-                mdi-chart-box-outline
-              </v-icon>
-              <div class="text-body-1">
-                暂无统计报告
-              </div>
-              <div class="text-caption mt-1">
-                在配置的晚自习时间段内，系统会自动记录并生成报告
-              </div>
+            <div v-if="sortedDateKeys.length === 0" class="text-center text-medium-emphasis py-12">
+              <v-icon size="48" class="mb-3"> mdi-chart-box-outline </v-icon>
+              <div class="text-body-1">暂无统计报告</div>
+              <div class="text-caption mt-1">在配置的晚自习时间段内，系统会自动记录并生成报告</div>
             </div>
 
             <template v-else>
               <!-- 日期选择器 + 操作 -->
               <div class="pa-4">
                 <div class="d-flex align-center flex-wrap ga-2 mb-3">
-                  <v-icon
-                    size="18"
-                    color="teal"
-                    class="mr-1"
-                  >
-                    mdi-calendar
-                  </v-icon>
+                  <v-icon size="18" color="teal" class="mr-1"> mdi-calendar </v-icon>
                   <span class="text-subtitle-2 font-weight-medium">选择日期</span>
                   <v-spacer />
                   <v-btn
@@ -466,12 +347,7 @@
                     size="small"
                     @click="$emit('select-date', dateKey)"
                   >
-                    <v-icon
-                      start
-                      size="14"
-                    >
-                      mdi-calendar-blank
-                    </v-icon>
+                    <v-icon start size="14"> mdi-calendar-blank </v-icon>
                     {{ formatDateLabel(dateKey) }}
                     <v-badge
                       :content="reportMeta.dates[dateKey].count"
@@ -486,10 +362,7 @@
               <v-divider />
 
               <!-- 当日元数据摘要 -->
-              <div
-                v-if="selectedDate && reportMeta.dates[selectedDate]"
-                class="pa-4 pb-0"
-              >
+              <div v-if="selectedDate && reportMeta.dates[selectedDate]" class="pa-4 pb-0">
                 <div class="d-flex align-center ga-3 flex-wrap">
                   <div class="text-h6 font-weight-bold">
                     {{ formatDateLabel(selectedDate) }}
@@ -501,10 +374,7 @@
                   >
                     均分 {{ reportMeta.dates[selectedDate].avgScore }}
                   </v-chip>
-                  <v-chip
-                    size="small"
-                    variant="tonal"
-                  >
+                  <v-chip size="small" variant="tonal">
                     {{ reportMeta.dates[selectedDate].count }} 条记录
                   </v-chip>
                   <v-spacer />
@@ -525,19 +395,12 @@
                 v-if="dateReports.length === 0 && selectedDate"
                 class="text-center text-medium-emphasis py-8"
               >
-                <v-icon size="32">
-                  mdi-file-document-outline
-                </v-icon>
-                <div class="text-body-2 mt-1">
-                  该日期暂无报告数据
-                </div>
+                <v-icon size="32"> mdi-file-document-outline </v-icon>
+                <div class="text-body-2 mt-1">该日期暂无报告数据</div>
               </div>
 
               <!-- 报告选择条 -->
-              <div
-                v-if="dateReports.length > 0"
-                class="pa-4 pt-3 d-flex flex-wrap ga-2"
-              >
+              <div v-if="dateReports.length > 0" class="pa-4 pt-3 d-flex flex-wrap ga-2">
                 <v-chip
                   v-for="(report, idx) in dateReports"
                   :key="report.startTime"
@@ -554,10 +417,7 @@
               <v-divider v-if="selectedReport" />
 
               <!-- 选中的报告 -->
-              <div
-                v-if="selectedReport"
-                class="report-content"
-              >
+              <div v-if="selectedReport" class="report-content">
                 <!-- 报告标题 -->
                 <div class="pa-5 pb-0">
                   <div class="text-h6 font-weight-bold d-flex align-center">
@@ -573,50 +433,36 @@
                   </div>
                   <div class="report-grid">
                     <div class="report-stat-card">
-                      <div class="text-caption text-medium-emphasis">
-                        时长
-                      </div>
+                      <div class="text-caption text-medium-emphasis">时长</div>
                       <div class="text-h6 font-weight-bold">
                         {{ formatDuration(selectedReport.duration) }}
                       </div>
                     </div>
                     <div class="report-stat-card">
-                      <div class="text-caption text-medium-emphasis">
-                        表现
-                      </div>
+                      <div class="text-caption text-medium-emphasis">表现</div>
                       <div class="text-h6 font-weight-bold">
                         {{ selectedReport.score }} 分
-                        <span class="text-caption">（{{ reportScoreLabel(selectedReport.score) }}）</span>
+                        <span class="text-caption"
+                          >（{{ reportScoreLabel(selectedReport.score) }}）</span
+                        >
                       </div>
                     </div>
                     <div class="report-stat-card">
-                      <div class="text-caption text-medium-emphasis">
-                        峰值
-                      </div>
-                      <div class="text-h6 font-weight-bold">
-                        {{ selectedReport.maxDb }} dB
-                      </div>
+                      <div class="text-caption text-medium-emphasis">峰值</div>
+                      <div class="text-h6 font-weight-bold">{{ selectedReport.maxDb }} dB</div>
                     </div>
                     <div class="report-stat-card">
-                      <div class="text-caption text-medium-emphasis">
-                        平均
-                      </div>
-                      <div class="text-h6 font-weight-bold">
-                        {{ selectedReport.avgDb }} dB
-                      </div>
+                      <div class="text-caption text-medium-emphasis">平均</div>
+                      <div class="text-h6 font-weight-bold">{{ selectedReport.avgDb }} dB</div>
                     </div>
                     <div class="report-stat-card">
-                      <div class="text-caption text-medium-emphasis">
-                        超阈时长
-                      </div>
+                      <div class="text-caption text-medium-emphasis">超阈时长</div>
                       <div class="text-h6 font-weight-bold">
                         {{ formatSeconds(selectedReport.overThresholdDuration) }}
                       </div>
                     </div>
                     <div class="report-stat-card">
-                      <div class="text-caption text-medium-emphasis">
-                        打断次数
-                      </div>
+                      <div class="text-caption text-medium-emphasis">打断次数</div>
                       <div class="text-h6 font-weight-bold">
                         {{ selectedReport.segmentCount }}
                       </div>
@@ -630,10 +476,7 @@
                     <span class="report-section-line bg-teal" />
                     <span class="text-subtitle-2 font-weight-bold ml-2">噪音走势</span>
                   </div>
-                  <div
-                    ref="reportChartContainer"
-                    class="noise-waveform"
-                  >
+                  <div ref="reportChartContainer" class="noise-waveform">
                     <svg
                       width="100%"
                       height="140"
@@ -680,13 +523,7 @@
                         stroke-linejoin="round"
                       />
                       <defs>
-                        <linearGradient
-                          id="reportGrad"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
+                        <linearGradient id="reportGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop
                             offset="0%"
                             stop-color="rgb(var(--v-theme-primary))"
@@ -702,9 +539,9 @@
                     </svg>
                   </div>
                   <div class="text-caption text-medium-emphasis mt-2">
-                    统计范围：{{ formatFullTime(selectedReport.startTime) }} - {{ formatFullTime(selectedReport.endTime) }}；
-                    噪音报警阈值: {{ selectedReport.alertThresholdDb || 55 }} dB；
-                    覆盖率: {{ reportCoverage }}%
+                    统计范围：{{ formatFullTime(selectedReport.startTime) }} -
+                    {{ formatFullTime(selectedReport.endTime) }}； 噪音报警阈值:
+                    {{ selectedReport.alertThresholdDb || 55 }} dB； 覆盖率: {{ reportCoverage }}%
                   </div>
                 </div>
 
@@ -716,20 +553,13 @@
                   </div>
                   <div class="d-flex flex-wrap ga-4">
                     <!-- 噪音等级分布 -->
-                    <v-card
-                      variant="outlined"
-                      rounded="xl"
-                      class="flex-grow-1"
-                      min-width="280"
-                    >
+                    <v-card variant="outlined" rounded="xl" class="flex-grow-1" min-width="280">
                       <v-card-text class="pa-4">
-                        <div class="text-subtitle-2 font-weight-medium mb-3">
-                          噪音等级分布
-                        </div>
+                        <div class="text-subtitle-2 font-weight-medium mb-3">噪音等级分布</div>
                         <div class="noise-level-distribution">
                           <div
                             class="d-flex"
-                            style="height: 16px; border-radius: 8px; overflow: hidden;"
+                            style="height: 16px; border-radius: 8px; overflow: hidden"
                           >
                             <div
                               v-for="seg in levelDistribution"
@@ -766,12 +596,7 @@
                     </v-card>
 
                     <!-- 扣分扣因 -->
-                    <v-card
-                      variant="outlined"
-                      rounded="xl"
-                      class="flex-grow-1"
-                      min-width="280"
-                    >
+                    <v-card variant="outlined" rounded="xl" class="flex-grow-1" min-width="280">
                       <v-card-text class="pa-4">
                         <div class="text-subtitle-2 font-weight-medium mb-3">
                           扣分扣因 (越长扣分越多)
@@ -781,10 +606,9 @@
                           :key="item.label"
                           class="d-flex align-center mb-2"
                         >
-                          <span
-                            class="text-body-2 mr-3"
-                            style="min-width: 32px;"
-                          >{{ item.label }}</span>
+                          <span class="text-body-2 mr-3" style="min-width: 32px">{{
+                            item.label
+                          }}</span>
                           <v-progress-linear
                             :model-value="item.percent"
                             :color="item.color"
@@ -794,8 +618,9 @@
                           />
                           <span
                             class="text-body-2 font-weight-bold"
-                            style="min-width: 40px; text-align: right;"
-                          >{{ item.percent }}%</span>
+                            style="min-width: 40px; text-align: right"
+                            >{{ item.percent }}%</span
+                          >
                         </div>
                       </v-card-text>
                     </v-card>
@@ -809,19 +634,10 @@
     </v-card>
 
     <!-- 校准对话框 -->
-    <v-dialog
-      v-model="showCalibrateDialog"
-      max-width="560"
-      scrollable
-    >
+    <v-dialog v-model="showCalibrateDialog" max-width="560" scrollable>
       <v-card class="rounded-xl">
         <v-card-title class="d-flex align-center pa-4">
-          <v-icon
-            class="mr-2"
-            color="deep-purple"
-          >
-            mdi-crosshairs-gps
-          </v-icon>
+          <v-icon class="mr-2" color="deep-purple"> mdi-crosshairs-gps </v-icon>
           <span class="text-h6 font-weight-bold">分贝校准</span>
           <v-spacer />
           <v-btn
@@ -836,14 +652,9 @@
 
         <v-card-text class="pa-5">
           <!-- 当前校准状态 -->
-          <v-card
-            variant="outlined"
-            class="mb-5"
-          >
+          <v-card variant="outlined" class="mb-5">
             <v-card-text class="py-3">
-              <div class="text-caption text-medium-emphasis mb-1">
-                当前校准值
-              </div>
+              <div class="text-caption text-medium-emphasis mb-1">当前校准值</div>
               <div class="d-flex align-center ga-6 flex-wrap">
                 <div>
                   <span class="text-body-2 text-medium-emphasis">基准分贝：</span>
@@ -854,7 +665,11 @@
                 <div>
                   <span class="text-body-2 text-medium-emphasis">基准 RMS：</span>
                   <span class="text-body-1 font-weight-bold font-monospace">
-                    {{ calibrationSettings.baselineRms != null ? calibrationSettings.baselineRms.toFixed(6) : '未校准' }}
+                    {{
+                      calibrationSettings.baselineRms != null
+                        ? calibrationSettings.baselineRms.toFixed(6)
+                        : '未校准'
+                    }}
                   </span>
                 </div>
                 <div>
@@ -869,13 +684,7 @@
 
           <!-- 自动校准 -->
           <div class="d-flex align-center mb-2">
-            <v-icon
-              size="18"
-              class="mr-2"
-              color="primary"
-            >
-              mdi-auto-fix
-            </v-icon>
+            <v-icon size="18" class="mr-2" color="primary"> mdi-auto-fix </v-icon>
             <span class="text-subtitle-2 font-weight-medium">自动校准</span>
           </div>
           <div class="text-caption text-medium-emphasis mb-3">
@@ -890,7 +699,7 @@
               label="目标分贝"
               suffix="dB"
               hide-details
-              style="max-width: 160px;"
+              style="max-width: 160px"
               :min="20"
               :max="80"
             />
@@ -904,12 +713,7 @@
             >
               开始校准
             </v-btn>
-            <span
-              v-if="!isMonitoring"
-              class="text-caption text-warning"
-            >
-              需先开启监测
-            </span>
+            <span v-if="!isMonitoring" class="text-caption text-warning"> 需先开启监测 </span>
             <span
               v-if="calibrateMessage"
               class="text-caption"
@@ -923,13 +727,7 @@
 
           <!-- 手动校准 -->
           <div class="d-flex align-center mb-2">
-            <v-icon
-              size="18"
-              class="mr-2"
-              color="orange"
-            >
-              mdi-pencil-ruler
-            </v-icon>
+            <v-icon size="18" class="mr-2" color="orange"> mdi-pencil-ruler </v-icon>
             <span class="text-subtitle-2 font-weight-medium">手动校准 / 参数调整</span>
           </div>
           <div class="text-caption text-medium-emphasis mb-3">
@@ -944,7 +742,7 @@
               label="基准分贝"
               suffix="dB"
               hide-details
-              style="max-width: 160px;"
+              style="max-width: 160px"
               :min="20"
               :max="80"
             />
@@ -954,7 +752,7 @@
               variant="outlined"
               label="基准 RMS"
               hide-details
-              style="max-width: 200px;"
+              style="max-width: 200px"
               placeholder="如 0.003200"
             />
             <v-text-field
@@ -965,7 +763,7 @@
               label="最大显示分贝"
               suffix="dB"
               hide-details
-              style="max-width: 180px;"
+              style="max-width: 180px"
               :min="40"
               :max="120"
             />
@@ -973,11 +771,7 @@
         </v-card-text>
 
         <v-card-actions class="px-4 pb-4">
-          <v-btn
-            variant="text"
-            prepend-icon="mdi-restore"
-            @click="resetCalibration"
-          >
+          <v-btn variant="text" prepend-icon="mdi-restore" @click="resetCalibration">
             恢复默认
           </v-btn>
           <v-spacer />
@@ -994,32 +788,20 @@
     </v-dialog>
 
     <!-- 清空报告确认 -->
-    <v-dialog
-      v-model="showConfirmClear"
-      max-width="360"
-    >
+    <v-dialog v-model="showConfirmClear" max-width="360">
       <v-card>
         <v-card-title>确认清空</v-card-title>
         <v-card-text>
-          {{ confirmClearMode === 'all'
-            ? '确定要清空所有日期的统计报告吗？此操作不可撤销。'
-            : `确定要清空 ${formatDateLabel(selectedDate)} 的统计报告吗？此操作不可撤销。`
+          {{
+            confirmClearMode === 'all'
+              ? '确定要清空所有日期的统计报告吗？此操作不可撤销。'
+              : `确定要清空 ${formatDateLabel(selectedDate)} 的统计报告吗？此操作不可撤销。`
           }}
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            variant="text"
-            @click="confirmClearMode = ''"
-          >
-            取消
-          </v-btn>
-          <v-btn
-            color="error"
-            @click="doClearReports"
-          >
-            确认清空
-          </v-btn>
+          <v-btn variant="text" @click="confirmClearMode = ''"> 取消 </v-btn>
+          <v-btn color="error" @click="doClearReports"> 确认清空 </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -1032,7 +814,7 @@ import {
   getNoiseControlSettings,
   saveNoiseControlSettings,
   resetNoiseControlSettings,
-} from '@wydev/noise-core';
+} from '@wydev/noise-core'
 
 export default {
   name: 'NoiseMonitorDetail',
@@ -1056,7 +838,15 @@ export default {
     selectedDate: { type: String, default: '' },
     dateReports: { type: Array, default: () => [] },
   },
-  emits: ['update:modelValue', 'start', 'stop', 'clear-history', 'select-date', 'clear-date-reports', 'clear-all-reports'],
+  emits: [
+    'update:modelValue',
+    'start',
+    'stop',
+    'clear-history',
+    'select-date',
+    'clear-date-reports',
+    'clear-all-reports',
+  ],
   data() {
     return {
       activeTab: 'realtime',
@@ -1074,7 +864,6 @@ export default {
       editBaselineDb: 40,
       editBaselineRms: '',
       editMaxLevelDb: 100,
-
     }
   },
   computed: {
@@ -1120,21 +909,23 @@ export default {
       ]
     },
     gridLines() {
-      return [20, 40, 60, 80].map(val => ({ val, y: this.dbToY(val) }))
+      return [20, 40, 60, 80].map((val) => ({ val, y: this.dbToY(val) }))
     },
     reportGridLines() {
-      return [20, 40, 60, 80].map(val => ({ val, y: this.reportDbToY(val) }))
+      return [20, 40, 60, 80].map((val) => ({ val, y: this.reportDbToY(val) }))
     },
     waveformPath() {
       if (!this.ringBuffer || this.ringBuffer.length < 2) return null
       const w = this.waveformWidth
       const points = this.ringBuffer.slice(-120)
       const step = w / (points.length - 1)
-      return points.map((pt, i) => {
-        const x = i * step
-        const y = this.dbToY(pt.displayDb ?? 0)
-        return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
-      }).join(' ')
+      return points
+        .map((pt, i) => {
+          const x = i * step
+          const y = this.dbToY(pt.displayDb ?? 0)
+          return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
+        })
+        .join(' ')
     },
     waveformFillPath() {
       if (!this.waveformPath) return null
@@ -1152,7 +943,10 @@ export default {
     },
     reportCoverage() {
       if (!this.selectedReport?.samples?.length || !this.selectedReport?.duration) return 0
-      return ((this.selectedReport.samples.length * 2 / (this.selectedReport.duration / 1000)) * 100).toFixed(1)
+      return (
+        ((this.selectedReport.samples.length * 2) / (this.selectedReport.duration / 1000)) *
+        100
+      ).toFixed(1)
     },
     reportWaveformPath() {
       if (!this.selectedReport?.samples?.length) return null
@@ -1160,11 +954,13 @@ export default {
       if (samples.length < 2) return null
       const w = this.reportChartWidth
       const step = w / (samples.length - 1)
-      return samples.map((s, i) => {
-        const x = i * step
-        const y = this.reportDbToY(s.db)
-        return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
-      }).join(' ')
+      return samples
+        .map((s, i) => {
+          const x = i * step
+          const y = this.reportDbToY(s.db)
+          return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
+        })
+        .join(' ')
     },
     reportWaveformFillPath() {
       if (!this.reportWaveformPath) return null
@@ -1179,29 +975,40 @@ export default {
           { label: '极吵', percent: 0, color: '#f44336' },
         ]
       }
-      const dbs = this.selectedReport.samples.map(s => s.db)
+      const dbs = this.selectedReport.samples.map((s) => s.db)
       const total = dbs.length
-      let quiet = 0, normal = 0, loud = 0, extreme = 0
-      dbs.forEach(d => {
+      let quiet = 0,
+        normal = 0,
+        loud = 0,
+        extreme = 0
+      dbs.forEach((d) => {
         if (d < 45) quiet++
         else if (d < 60) normal++
         else if (d < 75) loud++
         else extreme++
       })
       return [
-        { label: '安静', percent: Math.round(quiet / total * 100), color: '#4caf50' },
-        { label: '正常', percent: Math.round(normal / total * 100), color: '#8bc34a' },
-        { label: '吵闹', percent: Math.round(loud / total * 100), color: '#ff9800' },
-        { label: '极吵', percent: Math.round(extreme / total * 100), color: '#f44336' },
+        { label: '安静', percent: Math.round((quiet / total) * 100), color: '#4caf50' },
+        { label: '正常', percent: Math.round((normal / total) * 100), color: '#8bc34a' },
+        { label: '吵闹', percent: Math.round((loud / total) * 100), color: '#ff9800' },
+        { label: '极吵', percent: Math.round((extreme / total) * 100), color: '#f44336' },
       ]
     },
     reportPenaltyItems() {
       if (!this.selectedReport?.scorePenalties) return []
       const p = this.selectedReport.scorePenalties
       return [
-        { label: '持续', color: 'amber', percent: Math.min(100, Math.round(p.sustained / 40 * 100)) },
-        { label: '时长', color: 'orange', percent: Math.min(100, Math.round(p.time / 30 * 100)) },
-        { label: '打断', color: 'pink', percent: Math.min(100, Math.round(p.segment / 30 * 100)) },
+        {
+          label: '持续',
+          color: 'amber',
+          percent: Math.min(100, Math.round((p.sustained / 40) * 100)),
+        },
+        { label: '时长', color: 'orange', percent: Math.min(100, Math.round((p.time / 30) * 100)) },
+        {
+          label: '打断',
+          color: 'pink',
+          percent: Math.min(100, Math.round((p.segment / 30) * 100)),
+        },
       ]
     },
   },
@@ -1250,10 +1057,10 @@ export default {
       }
     },
     dbToY(db) {
-      return 120 - Math.max(0, Math.min(100, db)) / 100 * 120
+      return 120 - (Math.max(0, Math.min(100, db)) / 100) * 120
     },
     reportDbToY(db) {
-      return 140 - Math.max(0, Math.min(100, db)) / 100 * 140
+      return 140 - (Math.max(0, Math.min(100, db)) / 100) * 140
     },
     doClearReports() {
       if (this.confirmClearMode === 'all') {
@@ -1335,7 +1142,9 @@ export default {
         if (success) {
           this.refreshCalibrationSettings()
         }
-        setTimeout(() => { this.calibrateMessage = '' }, 5000)
+        setTimeout(() => {
+          this.calibrateMessage = ''
+        }, 5000)
       })
     },
     saveManualCalibration() {
@@ -1378,12 +1187,24 @@ export default {
     border: 4px solid;
     transition: border-color 0.3s ease;
 
-    &.ring-success { border-color: rgb(var(--v-theme-success)); }
-    &.ring-light-green { border-color: rgb(var(--v-theme-light-green)); }
-    &.ring-warning { border-color: rgb(var(--v-theme-warning)); }
-    &.ring-orange { border-color: rgb(var(--v-theme-orange)); }
-    &.ring-error { border-color: rgb(var(--v-theme-error)); }
-    &.ring-grey { border-color: rgb(var(--v-theme-grey)); }
+    &.ring-success {
+      border-color: rgb(var(--v-theme-success));
+    }
+    &.ring-light-green {
+      border-color: rgb(var(--v-theme-light-green));
+    }
+    &.ring-warning {
+      border-color: rgb(var(--v-theme-warning));
+    }
+    &.ring-orange {
+      border-color: rgb(var(--v-theme-orange));
+    }
+    &.ring-error {
+      border-color: rgb(var(--v-theme-error));
+    }
+    &.ring-grey {
+      border-color: rgb(var(--v-theme-grey));
+    }
   }
 
   .noise-gauge-inner {

@@ -1,10 +1,9 @@
-import {Router} from "express";
-import deviceCodeStore from "../utils/deviceCodeStore.js";
-import errors from "../utils/errors.js";
-import { prisma } from "../utils/prisma.js";
+import { Router } from 'express'
+import deviceCodeStore from '../utils/deviceCodeStore.js'
+import errors from '../utils/errors.js'
+import { prisma } from '../utils/prisma.js'
 
-const router = Router();
-
+const router = Router()
 
 /**
  * POST /device/code
@@ -19,17 +18,17 @@ const router = Router();
  * }
  */
 router.post(
-    "/device/code",
-    errors.catchAsync(async (req, res) => {
-        const deviceCode = deviceCodeStore.create();
+  '/device/code',
+  errors.catchAsync(async (req, res) => {
+    const deviceCode = deviceCodeStore.create()
 
-        return res.json({
-            device_code: deviceCode,
-            expires_in: 900, // 15分钟
-            message: "请在前端输入此代码进行授权",
-        });
+    return res.json({
+      device_code: deviceCode,
+      expires_in: 900, // 15分钟
+      message: '请在前端输入此代码进行授权',
     })
-);
+  }),
+)
 
 /**
  * POST /device/bind
@@ -51,40 +50,36 @@ router.post(
  * }
  */
 router.post(
-    "/device/bind",
-    errors.catchAsync(async (req, res, next) => {
-        const {device_code, token} = req.body;
+  '/device/bind',
+  errors.catchAsync(async (req, res, next) => {
+    const { device_code, token } = req.body
 
-        if (!device_code || !token) {
-            return next(
-                errors.createError(400, "请提供 device_code 和 token")
-            );
-        }
+    if (!device_code || !token) {
+      return next(errors.createError(400, '请提供 device_code 和 token'))
+    }
 
-        // 验证token是否有效（检查数据库）
-        const appInstall = await prisma.appInstall.findUnique({
-            where: {token},
-        });
-
-        if (!appInstall) {
-            return next(errors.createError(400, "无效的令牌"));
-        }
-
-        // 绑定令牌到设备代码
-        const success = deviceCodeStore.bindToken(device_code, token);
-
-        if (!success) {
-            return next(
-                errors.createError(400, "设备代码不存在或已过期")
-            );
-        }
-
-        return res.json({
-            success: true,
-            message: "令牌已成功绑定到设备代码",
-        });
+    // 验证token是否有效（检查数据库）
+    const appInstall = await prisma.appInstall.findUnique({
+      where: { token },
     })
-);
+
+    if (!appInstall) {
+      return next(errors.createError(400, '无效的令牌'))
+    }
+
+    // 绑定令牌到设备代码
+    const success = deviceCodeStore.bindToken(device_code, token)
+
+    if (!success) {
+      return next(errors.createError(400, '设备代码不存在或已过期'))
+    }
+
+    return res.json({
+      success: true,
+      message: '令牌已成功绑定到设备代码',
+    })
+  }),
+)
 
 /**
  * GET /device/token
@@ -115,44 +110,44 @@ router.post(
  * }
  */
 router.get(
-    "/device/token",
-    errors.catchAsync(async (req, res, next) => {
-        const {device_code} = req.query;
+  '/device/token',
+  errors.catchAsync(async (req, res, next) => {
+    const { device_code } = req.query
 
-        if (!device_code) {
-            return next(errors.createError(400, "请提供 device_code"));
-        }
+    if (!device_code) {
+      return next(errors.createError(400, '请提供 device_code'))
+    }
 
-        // 尝试获取并移除令牌
-        const token = deviceCodeStore.getAndRemove(device_code);
+    // 尝试获取并移除令牌
+    const token = deviceCodeStore.getAndRemove(device_code)
 
-        if (token) {
-            // 令牌已绑定，返回并删除
-            return res.json({
-                status: "success",
-                token,
-            });
-        }
+    if (token) {
+      // 令牌已绑定，返回并删除
+      return res.json({
+        status: 'success',
+        token,
+      })
+    }
 
-        // 检查设备代码是否存在
-        const status = deviceCodeStore.getStatus(device_code);
+    // 检查设备代码是否存在
+    const status = deviceCodeStore.getStatus(device_code)
 
-        if (!status) {
-            // 设备代码不存在或已过期
-            return res.json({
-                status: "expired",
-                message: "设备代码不存在或已过期",
-            });
-        }
+    if (!status) {
+      // 设备代码不存在或已过期
+      return res.json({
+        status: 'expired',
+        message: '设备代码不存在或已过期',
+      })
+    }
 
-        // 设备代码存在但令牌未绑定
-        return res.json({
-            status: "pending",
-            message: "等待用户授权",
-            expires_in: Math.floor((status.expiresAt - Date.now()) / 1000),
-        });
+    // 设备代码存在但令牌未绑定
+    return res.json({
+      status: 'pending',
+      message: '等待用户授权',
+      expires_in: Math.floor((status.expiresAt - Date.now()) / 1000),
     })
-);
+  }),
+)
 
 /**
  * GET /device/status
@@ -170,32 +165,32 @@ router.get(
  * }
  */
 router.get(
-    "/device/status",
-    errors.catchAsync(async (req, res, next) => {
-        const {device_code} = req.query;
+  '/device/status',
+  errors.catchAsync(async (req, res, next) => {
+    const { device_code } = req.query
 
-        if (!device_code) {
-            return next(errors.createError(400, "请提供 device_code"));
-        }
+    if (!device_code) {
+      return next(errors.createError(400, '请提供 device_code'))
+    }
 
-        const status = deviceCodeStore.getStatus(device_code);
+    const status = deviceCodeStore.getStatus(device_code)
 
-        if (!status) {
-            return res.json({
-                device_code,
-                exists: false,
-                message: "设备代码不存在或已过期",
-            });
-        }
+    if (!status) {
+      return res.json({
+        device_code,
+        exists: false,
+        message: '设备代码不存在或已过期',
+      })
+    }
 
-        return res.json({
-            device_code,
-            exists: true,
-            has_token: status.hasToken,
-            expires_in: Math.floor((status.expiresAt - Date.now()) / 1000),
-            created_at: status.createdAt,
-        });
+    return res.json({
+      device_code,
+      exists: true,
+      has_token: status.hasToken,
+      expires_in: Math.floor((status.expiresAt - Date.now()) / 1000),
+      created_at: status.createdAt,
     })
-);
+  }),
+)
 
-export default router;
+export default router

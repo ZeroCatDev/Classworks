@@ -5,11 +5,11 @@
 </template>
 
 <script>
-import { sendEvent } from "@/utils/socketClient";
+import { sendEvent } from '@/utils/socketClient'
 
 export default {
-  name: "EventSender",
-  emits: ["sent", "error"],
+  name: 'EventSender',
+  emits: ['sent', 'error'],
   methods: {
     /**
      * 发送事件
@@ -19,33 +19,33 @@ export default {
      */
     async sendEvent(eventName, content = {}) {
       try {
-        sendEvent(eventName, content);
+        sendEvent(eventName, content)
 
-        this.$emit("sent", {
+        this.$emit('sent', {
           eventName,
           content,
           timestamp: new Date().toISOString(),
           success: true,
-        });
+        })
 
         // 返回可能的 eventId 和 notificationId，方便调用者关联回执
         return {
           success: true,
           eventId: content?.eventId || null,
-          notificationId: content?.notificationId || null
-        };
+          notificationId: content?.notificationId || null,
+        }
       } catch (error) {
-        console.error("发送事件失败:", error);
+        console.error('发送事件失败:', error)
 
-        this.$emit("error", {
+        this.$emit('error', {
           eventName,
           content,
           error: error.message,
           timestamp: new Date().toISOString(),
           success: false,
-        });
+        })
 
-        return { success: false, error: error.message };
+        return { success: false, error: error.message }
       }
     },
 
@@ -62,20 +62,18 @@ export default {
       isUrgent = false,
       targetDevices = [],
       senderInfo = {},
-      notificationId = null
+      notificationId = null,
     ) {
       // 生成一个客户端事件 ID，便于在接收回执时进行映射
-      const eventId = `evt-${Date.now()}-${Math.random()
-        .toString(36)
-        .slice(2, 8)}`;
-      return this.sendEvent("notification", {
+      const eventId = `evt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      return this.sendEvent('notification', {
         eventId,
         notificationId,
         message,
         isUrgent,
         targetDevices,
         senderInfo,
-      });
+      })
     },
 
     /**
@@ -86,16 +84,14 @@ export default {
      * @param {string} notificationId - 原通知ID（可选）
      */
     async sendReceipt(originalEventId, status, deviceInfo = {}, notificationId = null) {
-      const eventId = `rcpt-${Date.now()}-${Math.random()
-        .toString(36)
-        .slice(2, 6)}`;
-      return this.sendEvent("notification-receipt", {
+      const eventId = `rcpt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+      return this.sendEvent('notification-receipt', {
         eventId,
         originalEventId,
         notificationId,
         status,
         deviceInfo,
-      });
+      })
     },
 
     /**
@@ -104,14 +100,12 @@ export default {
      * @param {string} notificationId 原通知ID
      */
     async sendDisplayedReceipt(deviceInfo = {}, notificationId = null) {
-      const eventId = `disp-${Date.now()}-${Math.random()
-        .toString(36)
-        .slice(2, 6)}`;
-      return this.sendEvent("notification-displayed", {
+      const eventId = `disp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+      return this.sendEvent('notification-displayed', {
         eventId,
         notificationId,
         deviceInfo,
-      });
+      })
     },
     /**
      * 单独发送"已读"回执事件
@@ -119,15 +113,13 @@ export default {
      * @param {string} notificationId 原通知ID
      */
     async sendReadReceipt(deviceInfo = {}, notificationId = null) {
-      const eventId = `read-${Date.now()}-${Math.random()
-        .toString(36)
-        .slice(2, 6)}`;
-      return this.sendEvent("notification-read", {
+      const eventId = `read-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+      return this.sendEvent('notification-read', {
         eventId,
         notificationId,
         deviceInfo,
-      });
+      })
     },
   },
-};
+}
 </script>

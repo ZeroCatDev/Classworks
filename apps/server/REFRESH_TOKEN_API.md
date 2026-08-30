@@ -37,11 +37,13 @@ REFRESH_TOKEN_PUBLIC_KEY="-----BEGIN RSA PUBLIC KEY-----\n..."
 OAuth登录成功后，系统会返回令牌对。
 
 **回调URL参数（新版）：**
+
 ```
 https://your-frontend.com/?access_token=eyJ...&refresh_token=eyJ...&expires_in=15m&success=true&provider=github
 ```
 
 **旧版兼容参数：**
+
 ```
 https://your-frontend.com/?token=eyJ...&success=true&provider=github
 ```
@@ -53,6 +55,7 @@ https://your-frontend.com/?token=eyJ...&success=true&provider=github
 **端点：** `POST /api/accounts/refresh`
 
 **请求体：**
+
 ```json
 {
   "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -60,6 +63,7 @@ https://your-frontend.com/?token=eyJ...&success=true&provider=github
 ```
 
 **响应（成功）：**
+
 ```json
 {
   "success": true,
@@ -79,6 +83,7 @@ https://your-frontend.com/?token=eyJ...&success=true&provider=github
 ```
 
 **错误响应：**
+
 ```json
 {
   "success": false,
@@ -87,6 +92,7 @@ https://your-frontend.com/?token=eyJ...&success=true&provider=github
 ```
 
 **错误状态码：**
+
 - `400`: 缺少刷新令牌
 - `401`: 无效的刷新令牌、令牌已过期、账户不存在、令牌版本不匹配
 
@@ -97,11 +103,13 @@ https://your-frontend.com/?token=eyJ...&success=true&provider=github
 **端点：** `POST /api/accounts/logout`
 
 **请求头：**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -116,11 +124,13 @@ Authorization: Bearer <access_token>
 **端点：** `POST /api/accounts/logout-all`
 
 **请求头：**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -135,11 +145,13 @@ Authorization: Bearer <access_token>
 **端点：** `GET /api/accounts/token-info`
 
 **请求头：**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -165,6 +177,7 @@ Authorization: Bearer <access_token>
 当Access Token剩余有效期少于5分钟时，系统会在响应头中提供新的Access Token：
 
 **响应头：**
+
 ```
 X-New-Access-Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 X-Token-Refreshed: true
@@ -179,30 +192,30 @@ X-Token-Refreshed: true
 ```javascript
 class TokenManager {
   constructor() {
-    this.accessToken = localStorage.getItem('access_token');
-    this.refreshToken = localStorage.getItem('refresh_token');
+    this.accessToken = localStorage.getItem('access_token')
+    this.refreshToken = localStorage.getItem('refresh_token')
   }
 
   // 设置令牌对
   setTokens(accessToken, refreshToken) {
-    this.accessToken = accessToken;
-    this.refreshToken = refreshToken;
-    localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('refresh_token', refreshToken);
+    this.accessToken = accessToken
+    this.refreshToken = refreshToken
+    localStorage.setItem('access_token', accessToken)
+    localStorage.setItem('refresh_token', refreshToken)
   }
 
   // 清除令牌
   clearTokens() {
-    this.accessToken = null;
-    this.refreshToken = null;
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    this.accessToken = null
+    this.refreshToken = null
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
   }
 
   // 刷新访问令牌
   async refreshAccessToken() {
     if (!this.refreshToken) {
-      throw new Error('No refresh token available');
+      throw new Error('No refresh token available')
     }
 
     try {
@@ -212,59 +225,59 @@ class TokenManager {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          refresh_token: this.refreshToken
+          refresh_token: this.refreshToken,
         }),
-      });
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (data.success) {
-        this.accessToken = data.data.access_token;
-        localStorage.setItem('access_token', this.accessToken);
-        return this.accessToken;
+        this.accessToken = data.data.access_token
+        localStorage.setItem('access_token', this.accessToken)
+        return this.accessToken
       } else {
-        throw new Error(data.message);
+        throw new Error(data.message)
       }
     } catch (error) {
-      this.clearTokens();
-      throw error;
+      this.clearTokens()
+      throw error
     }
   }
 
   // API请求拦截器
   async request(url, options = {}) {
     const headers = {
-      'Authorization': `Bearer ${this.accessToken}`,
+      Authorization: `Bearer ${this.accessToken}`,
       'Content-Type': 'application/json',
       ...options.headers,
-    };
+    }
 
     const response = await fetch(url, {
       ...options,
       headers,
-    });
+    })
 
     // 检查是否有新的访问令牌
-    const newAccessToken = response.headers.get('X-New-Access-Token');
+    const newAccessToken = response.headers.get('X-New-Access-Token')
     if (newAccessToken) {
-      this.accessToken = newAccessToken;
-      localStorage.setItem('access_token', newAccessToken);
+      this.accessToken = newAccessToken
+      localStorage.setItem('access_token', newAccessToken)
     }
 
     // 如果token过期，尝试刷新
     if (response.status === 401) {
       try {
-        await this.refreshAccessToken();
+        await this.refreshAccessToken()
         // 重试请求
-        return this.request(url, options);
+        return this.request(url, options)
       } catch (refreshError) {
         // 刷新失败，重定向到登录页
-        window.location.href = '/login';
-        throw refreshError;
+        window.location.href = '/login'
+        throw refreshError
       }
     }
 
-    return response;
+    return response
   }
 
   // 登出
@@ -272,12 +285,12 @@ class TokenManager {
     try {
       await this.request('/api/accounts/logout', {
         method: 'POST',
-      });
+      })
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Logout error:', error)
     } finally {
-      this.clearTokens();
-      window.location.href = '/login';
+      this.clearTokens()
+      window.location.href = '/login'
     }
   }
 
@@ -286,35 +299,35 @@ class TokenManager {
     try {
       await this.request('/api/accounts/logout-all', {
         method: 'POST',
-      });
+      })
     } catch (error) {
-      console.error('Logout all error:', error);
+      console.error('Logout all error:', error)
     } finally {
-      this.clearTokens();
-      window.location.href = '/login';
+      this.clearTokens()
+      window.location.href = '/login'
     }
   }
 }
 
 // 使用示例
-const tokenManager = new TokenManager();
+const tokenManager = new TokenManager()
 
 // OAuth回调处理
 function handleOAuthCallback() {
-  const params = new URLSearchParams(window.location.search);
-  const accessToken = params.get('access_token');
-  const refreshToken = params.get('refresh_token');
+  const params = new URLSearchParams(window.location.search)
+  const accessToken = params.get('access_token')
+  const refreshToken = params.get('refresh_token')
 
   if (accessToken && refreshToken) {
-    tokenManager.setTokens(accessToken, refreshToken);
+    tokenManager.setTokens(accessToken, refreshToken)
     // 重定向到应用主页
-    window.location.href = '/dashboard';
+    window.location.href = '/dashboard'
   } else {
     // 处理旧版回调
-    const legacyToken = params.get('token');
+    const legacyToken = params.get('token')
     if (legacyToken) {
-      tokenManager.setTokens(legacyToken, null);
-      window.location.href = '/dashboard';
+      tokenManager.setTokens(legacyToken, null)
+      window.location.href = '/dashboard'
     }
   }
 }
@@ -322,12 +335,12 @@ function handleOAuthCallback() {
 // API调用示例
 async function getUserProfile() {
   try {
-    const response = await tokenManager.request('/api/accounts/profile');
-    const data = await response.json();
-    return data;
+    const response = await tokenManager.request('/api/accounts/profile')
+    const data = await response.json()
+    return data
   } catch (error) {
-    console.error('Failed to get user profile:', error);
-    throw error;
+    console.error('Failed to get user profile:', error)
+    throw error
   }
 }
 ```
@@ -335,54 +348,57 @@ async function getUserProfile() {
 ### React Hook
 
 ```jsx
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react'
 
 export function useAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  const tokenManager = new TokenManager();
+  const tokenManager = new TokenManager()
 
   const checkAuth = useCallback(async () => {
     if (!tokenManager.accessToken) {
-      setIsAuthenticated(false);
-      setLoading(false);
-      return;
+      setIsAuthenticated(false)
+      setLoading(false)
+      return
     }
 
     try {
-      const response = await tokenManager.request('/api/accounts/profile');
-      const data = await response.json();
+      const response = await tokenManager.request('/api/accounts/profile')
+      const data = await response.json()
 
       if (data.success) {
-        setUser(data.data);
-        setIsAuthenticated(true);
+        setUser(data.data)
+        setIsAuthenticated(true)
       } else {
-        setIsAuthenticated(false);
+        setIsAuthenticated(false)
       }
     } catch (error) {
-      setIsAuthenticated(false);
+      setIsAuthenticated(false)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    checkAuth()
+  }, [checkAuth])
 
-  const login = useCallback((accessToken, refreshToken) => {
-    tokenManager.setTokens(accessToken, refreshToken);
-    setIsAuthenticated(true);
-    checkAuth();
-  }, [checkAuth]);
+  const login = useCallback(
+    (accessToken, refreshToken) => {
+      tokenManager.setTokens(accessToken, refreshToken)
+      setIsAuthenticated(true)
+      checkAuth()
+    },
+    [checkAuth],
+  )
 
   const logout = useCallback(async () => {
-    await tokenManager.logout();
-    setIsAuthenticated(false);
-    setUser(null);
-  }, []);
+    await tokenManager.logout()
+    setIsAuthenticated(false)
+    setUser(null)
+  }, [])
 
   return {
     isAuthenticated,
@@ -391,23 +407,27 @@ export function useAuth() {
     login,
     logout,
     tokenManager,
-  };
+  }
 }
 ```
 
 ## 安全考虑
 
 ### 1. Token存储
+
 - **Access Token**: 可以存储在内存或localStorage中
 - **Refresh Token**: 建议存储在httpOnly cookie中（需要后端支持），或者安全的本地存储
 
 ### 2. HTTPS
+
 - 生产环境必须使用HTTPS传输令牌
 
 ### 3. Token轮换
+
 - 系统支持令牌版本控制，可以快速失效所有令牌
 
 ### 4. 过期时间
+
 - Access Token短期有效（15分钟）
 - Refresh Token长期有效（7天）
 - 可根据安全需求调整
@@ -436,12 +456,12 @@ export function useAuth() {
 
 ### 常见错误
 
-| 错误代码 | 错误信息 | 处理方式 |
-|---------|---------|---------|
-| 401 | JWT token已过期 | 使用refresh token刷新 |
-| 401 | 无效的刷新令牌 | 重新登录 |
-| 401 | 令牌版本不匹配 | 重新登录 |
-| 401 | 账户不存在 | 重新登录 |
+| 错误代码 | 错误信息        | 处理方式              |
+| -------- | --------------- | --------------------- |
+| 401      | JWT token已过期 | 使用refresh token刷新 |
+| 401      | 无效的刷新令牌  | 重新登录              |
+| 401      | 令牌版本不匹配  | 重新登录              |
+| 401      | 账户不存在      | 重新登录              |
 
 ### 错误处理流程
 
@@ -470,6 +490,7 @@ graph TD
 ### 日志记录
 
 系统会记录以下事件：
+
 - Token生成
 - Token刷新
 - Token撤销
@@ -478,12 +499,15 @@ graph TD
 ## 性能优化
 
 ### 1. Token缓存
+
 - 在内存中缓存已验证的token（适用于高并发场景）
 
 ### 2. 数据库优化
+
 - 为`refreshToken`字段添加索引
 - 定期清理过期的refresh token
 
 ### 3. 前端优化
+
 - 实现Token预刷新机制
 - 使用Web Workers处理Token逻辑

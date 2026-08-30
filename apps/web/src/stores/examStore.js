@@ -63,7 +63,7 @@ export const useExamStore = defineStore('exam', {
 
         if (exam && exam.examInfos && Array.isArray(exam.examInfos)) {
           // Check if any subject in this exam starts within the next 2 days
-          const hasUpcoming = exam.examInfos.some(info => {
+          const hasUpcoming = exam.examInfos.some((info) => {
             const start = new Date(info.start)
             return start >= now && start <= twoDaysLater
           })
@@ -75,6 +75,6 @@ export const useExamStore = defineStore('exam', {
       }
 
       return upcoming
-    }
-  }
+    },
+  },
 })

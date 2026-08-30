@@ -13,9 +13,11 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%),
-            rgba(255, 255, 255, 0.15) 0%,
-            rgba(255, 255, 255, 0) 70%);
+    background: radial-gradient(
+      circle at var(--x, 50%) var(--y, 50%),
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0) 70%
+    );
     opacity: 0;
     transition: opacity 0.3s;
     pointer-events: none;
@@ -30,27 +32,33 @@
 // 数据更新高亮效果
 .glow-highlight {
   animation: glow-pulse 3s ease-in-out;
-  box-shadow: 0 0 20px rgba(33, 150, 243, 0.6),
-  0 0 40px rgba(33, 150, 243, 0.4),
-  0 0 60px rgba(33, 150, 243, 0.2) !important;
+  box-shadow:
+    0 0 20px rgba(33, 150, 243, 0.6),
+    0 0 40px rgba(33, 150, 243, 0.4),
+    0 0 60px rgba(33, 150, 243, 0.2) !important;
 }
 
 @keyframes glow-pulse {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(33, 150, 243, 0.6),
-    0 0 40px rgba(33, 150, 243, 0.4),
-    0 0 60px rgba(33, 150, 243, 0.2);
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(33, 150, 243, 0.6),
+      0 0 40px rgba(33, 150, 243, 0.4),
+      0 0 60px rgba(33, 150, 243, 0.2);
   }
   50% {
-    box-shadow: 0 0 30px rgba(33, 150, 243, 0.8),
-    0 0 60px rgba(33, 150, 243, 0.6),
-    0 0 90px rgba(33, 150, 243, 0.4);
+    box-shadow:
+      0 0 30px rgba(33, 150, 243, 0.8),
+      0 0 60px rgba(33, 150, 243, 0.6),
+      0 0 90px rgba(33, 150, 243, 0.4);
   }
 }
 
 // 添加卡片悬浮效果
 .grid-item .v-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 
   &:hover {
     transform: translateY(-4px);
@@ -98,7 +106,6 @@
 .attendance-stat {
   height: 100%;
 }
-
 
 // 搜索建议按钮
 .suggestion-btn {
@@ -226,19 +233,16 @@
   width: 8px;
 }
 
-.attendance-drawer
-:deep(.v-navigation-drawer__content::-webkit-scrollbar-track) {
+.attendance-drawer :deep(.v-navigation-drawer__content::-webkit-scrollbar-track) {
   background: transparent;
 }
 
-.attendance-drawer
-:deep(.v-navigation-drawer__content::-webkit-scrollbar-thumb) {
+.attendance-drawer :deep(.v-navigation-drawer__content::-webkit-scrollbar-thumb) {
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
 }
 
-.attendance-drawer
-:deep(.v-navigation-drawer__content::-webkit-scrollbar-thumb:hover) {
+.attendance-drawer :deep(.v-navigation-drawer__content::-webkit-scrollbar-thumb:hover) {
   background-color: rgba(0, 0, 0, 0.3);
 }
 
@@ -316,7 +320,6 @@
 .attendance-stat {
   height: 100%;
 }
-
 
 // 搜索建议按钮
 .suggestion-btn {

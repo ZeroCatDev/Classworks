@@ -1,15 +1,8 @@
 <template>
   <!-- 纯 CSS 骨架屏，避免使用 VSkeletonLoader 引起的渲染冲突 -->
-  <v-container
-    class="main-window"
-    fluid
-  >
+  <v-container class="main-window" fluid>
     <div class="skeleton-grid">
-      <div
-        v-for="n in cardCount"
-        :key="n"
-        class="skeleton-card"
-      >
+      <div v-for="n in cardCount" :key="n" class="skeleton-card">
         <div class="skeleton-heading skeleton-pulse" />
         <div class="skeleton-line skeleton-pulse" />
         <div class="skeleton-line skeleton-line--short skeleton-pulse" />
@@ -27,7 +20,7 @@ import { computed } from 'vue'
 import { useDisplay } from 'vuetify'
 
 const { mobile } = useDisplay()
-const cardCount = computed(() => mobile.value ? 3 : 6)
+const cardCount = computed(() => (mobile.value ? 3 : 6))
 </script>
 
 <style scoped>
@@ -68,7 +61,12 @@ const cardCount = computed(() => mobile.value ? 3 : 6)
   animation: skeleton-pulse 1.5s ease-in-out infinite;
 }
 @keyframes skeleton-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 </style>

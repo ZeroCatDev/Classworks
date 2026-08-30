@@ -1,13 +1,13 @@
 <script setup>
-import {ref, computed} from 'vue'
-import {useRouter} from 'vue-router'
-import {apiClient} from '@/lib/api'
-import {Button} from '@/components/ui/button'
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
-import {Input} from '@/components/ui/input'
-import {Label} from '@/components/ui/label'
-import {Badge} from '@/components/ui/badge'
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { apiClient } from '@/lib/api'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   TestTube2,
   ArrowLeft,
@@ -21,7 +21,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-vue-next'
-import {toast} from 'vue-sonner'
+import { toast } from 'vue-sonner'
 
 const router = useRouter()
 
@@ -65,9 +65,9 @@ const testGetToken = async () => {
 
   try {
     const response = await apiClient.getTokenByNamespace(
-        tab1Form.value.namespace,
-        tab1Form.value.password || undefined,
-        tab1Form.value.appId
+      tab1Form.value.namespace,
+      tab1Form.value.password || undefined,
+      tab1Form.value.appId,
     )
 
     tab1Result.value = {
@@ -107,10 +107,7 @@ const testSetStudentName = async () => {
   tab2Result.value = null
 
   try {
-    const response = await apiClient.setStudentName(
-        tab2Form.value.token,
-        tab2Form.value.name
-    )
+    const response = await apiClient.setStudentName(tab2Form.value.token, tab2Form.value.name)
 
     tab2Result.value = {
       success: true,
@@ -135,7 +132,7 @@ const testKVOperation = async () => {
     return
   }
 
-  const {operation, key, value} = tab3Form.value
+  const { operation, key, value } = tab3Form.value
 
   if (operation !== 'list' && !key) {
     toast.error('请输入 key')
@@ -208,20 +205,18 @@ const goBack = () => {
 <template>
   <div class="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
     <!-- Header -->
-    <div class="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
+    <div
+      class="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10"
+    >
       <div class="container mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <Button
-                size="icon"
-                variant="ghost"
-                @click="goBack"
-            >
-              <ArrowLeft class="h-5 w-5"/>
+            <Button size="icon" variant="ghost" @click="goBack">
+              <ArrowLeft class="h-5 w-5" />
             </Button>
             <div>
               <h1 class="text-2xl font-bold flex items-center gap-2">
-                <TestTube2 class="h-6 w-6"/>
+                <TestTube2 class="h-6 w-6" />
                 AutoAuth API 测试
               </h1>
               <p class="text-sm text-muted-foreground">测试自动授权和相关 API 功能</p>
@@ -236,15 +231,15 @@ const goBack = () => {
       <Tabs class="w-full" default-value="token">
         <TabsList class="grid w-full grid-cols-3">
           <TabsTrigger value="token">
-            <Key class="h-4 w-4 mr-2"/>
+            <Key class="h-4 w-4 mr-2" />
             获取 Token
           </TabsTrigger>
           <TabsTrigger value="student">
-            <User class="h-4 w-4 mr-2"/>
+            <User class="h-4 w-4 mr-2" />
             学生名称
           </TabsTrigger>
           <TabsTrigger value="kv">
-            <Database class="h-4 w-4 mr-2"/>
+            <Database class="h-4 w-4 mr-2" />
             KV 操作
           </TabsTrigger>
         </TabsList>
@@ -262,9 +257,9 @@ const goBack = () => {
               <div class="space-y-2">
                 <Label for="namespace">Namespace *</Label>
                 <Input
-                    id="namespace"
-                    v-model="tab1Form.namespace"
-                    placeholder="例如: class-2024-1"
+                  id="namespace"
+                  v-model="tab1Form.namespace"
+                  placeholder="例如: class-2024-1"
                 />
               </div>
 
@@ -272,41 +267,33 @@ const goBack = () => {
                 <Label for="password">Password</Label>
                 <div class="relative">
                   <Input
-                      id="password"
-                      v-model="tab1Form.password"
-                      :type="tab1ShowPassword ? 'text' : 'password'"
-                      placeholder="留空表示无密码授权"
+                    id="password"
+                    v-model="tab1Form.password"
+                    :type="tab1ShowPassword ? 'text' : 'password'"
+                    placeholder="留空表示无密码授权"
                   />
                   <Button
-                      class="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                      size="icon"
-                      tabindex="-1"
-                      type="button"
-                      variant="ghost"
-                      @click="tab1ShowPassword = !tab1ShowPassword"
+                    class="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    size="icon"
+                    tabindex="-1"
+                    type="button"
+                    variant="ghost"
+                    @click="tab1ShowPassword = !tab1ShowPassword"
                   >
-                    <Eye v-if="!tab1ShowPassword" class="h-4 w-4 text-muted-foreground"/>
-                    <EyeOff v-else class="h-4 w-4 text-muted-foreground"/>
+                    <Eye v-if="!tab1ShowPassword" class="h-4 w-4 text-muted-foreground" />
+                    <EyeOff v-else class="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </div>
               </div>
 
               <div class="space-y-2">
                 <Label for="appId">App ID</Label>
-                <Input
-                    id="appId"
-                    v-model="tab1Form.appId"
-                    placeholder="应用标识符"
-                />
+                <Input id="appId" v-model="tab1Form.appId" placeholder="应用标识符" />
               </div>
 
-              <Button
-                  :disabled="tab1Loading"
-                  class="w-full"
-                  @click="testGetToken"
-              >
-                <Loader2 v-if="tab1Loading" class="mr-2 h-4 w-4 animate-spin"/>
-                <Play v-else class="mr-2 h-4 w-4"/>
+              <Button :disabled="tab1Loading" class="w-full" @click="testGetToken">
+                <Loader2 v-if="tab1Loading" class="mr-2 h-4 w-4 animate-spin" />
+                <Play v-else class="mr-2 h-4 w-4" />
                 执行测试
               </Button>
 
@@ -315,14 +302,16 @@ const goBack = () => {
                 <div class="flex items-center gap-2 mb-2">
                   <Badge :variant="tab1Result.success ? 'default' : 'destructive'">
                     <component
-                        :is="tab1Result.success ? CheckCircle2 : XCircle"
-                        class="h-3 w-3 mr-1"
+                      :is="tab1Result.success ? CheckCircle2 : XCircle"
+                      class="h-3 w-3 mr-1"
                     />
                     {{ tab1Result.success ? '成功' : '失败' }}
                   </Badge>
                 </div>
                 <div class="rounded-lg bg-muted p-4">
-                  <pre class="text-xs overflow-auto">{{ formatJson(tab1Result.success ? tab1Result.data : tab1Result.error) }}</pre>
+                  <pre class="text-xs overflow-auto">{{
+                    formatJson(tab1Result.success ? tab1Result.data : tab1Result.error)
+                  }}</pre>
                 </div>
               </div>
             </CardContent>
@@ -341,32 +330,20 @@ const goBack = () => {
             <CardContent class="space-y-4">
               <div class="space-y-2">
                 <Label for="token2">Token *</Label>
-                <Input
-                    id="token2"
-                    v-model="tab2Form.token"
-                    placeholder="从上一步获取的 token"
-                />
+                <Input id="token2" v-model="tab2Form.token" placeholder="从上一步获取的 token" />
               </div>
 
               <div class="space-y-2">
                 <Label for="studentName">学生姓名 *</Label>
-                <Input
-                    id="studentName"
-                    v-model="tab2Form.name"
-                    placeholder="例如: 张三"
-                />
+                <Input id="studentName" v-model="tab2Form.name" placeholder="例如: 张三" />
                 <p class="text-xs text-muted-foreground">
                   名称必须在设备的学生列表中（存储在 classworks-list-main 键中）
                 </p>
               </div>
 
-              <Button
-                  :disabled="tab2Loading"
-                  class="w-full"
-                  @click="testSetStudentName"
-              >
-                <Loader2 v-if="tab2Loading" class="mr-2 h-4 w-4 animate-spin"/>
-                <Play v-else class="mr-2 h-4 w-4"/>
+              <Button :disabled="tab2Loading" class="w-full" @click="testSetStudentName">
+                <Loader2 v-if="tab2Loading" class="mr-2 h-4 w-4 animate-spin" />
+                <Play v-else class="mr-2 h-4 w-4" />
                 执行测试
               </Button>
 
@@ -375,14 +352,16 @@ const goBack = () => {
                 <div class="flex items-center gap-2 mb-2">
                   <Badge :variant="tab2Result.success ? 'default' : 'destructive'">
                     <component
-                        :is="tab2Result.success ? CheckCircle2 : XCircle"
-                        class="h-3 w-3 mr-1"
+                      :is="tab2Result.success ? CheckCircle2 : XCircle"
+                      class="h-3 w-3 mr-1"
                     />
                     {{ tab2Result.success ? '成功' : '失败' }}
                   </Badge>
                 </div>
                 <div class="rounded-lg bg-muted p-4">
-                  <pre class="text-xs overflow-auto">{{ formatJson(tab2Result.success ? tab2Result.data : tab2Result.error) }}</pre>
+                  <pre class="text-xs overflow-auto">{{
+                    formatJson(tab2Result.success ? tab2Result.data : tab2Result.error)
+                  }}</pre>
                 </div>
               </div>
             </CardContent>
@@ -394,26 +373,20 @@ const goBack = () => {
           <Card>
             <CardHeader>
               <CardTitle>KV 存储操作测试</CardTitle>
-              <CardDescription>
-                测试 KV API 的读写权限控制
-              </CardDescription>
+              <CardDescription> 测试 KV API 的读写权限控制 </CardDescription>
             </CardHeader>
             <CardContent class="space-y-4">
               <div class="space-y-2">
                 <Label for="token3">Token *</Label>
-                <Input
-                    id="token3"
-                    v-model="tab3Form.token"
-                    placeholder="从第一步获取的 token"
-                />
+                <Input id="token3" v-model="tab3Form.token" placeholder="从第一步获取的 token" />
               </div>
 
               <div class="space-y-2">
                 <Label for="operation">操作类型</Label>
                 <select
-                    id="operation"
-                    v-model="tab3Form.operation"
-                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  id="operation"
+                  v-model="tab3Form.operation"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <option value="list">列出所有键值 (LIST)</option>
                   <option value="get">读取值 (GET)</option>
@@ -424,30 +397,22 @@ const goBack = () => {
 
               <div v-if="tab3Form.operation !== 'list'" class="space-y-2">
                 <Label for="key">Key *</Label>
-                <Input
-                    id="key"
-                    v-model="tab3Form.key"
-                    placeholder="例如: test-key"
-                />
+                <Input id="key" v-model="tab3Form.key" placeholder="例如: test-key" />
               </div>
 
               <div v-if="tab3Form.operation === 'set'" class="space-y-2">
                 <Label for="value">Value (JSON) *</Label>
                 <textarea
-                    id="value"
-                    v-model="tab3Form.value"
-                    class="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    placeholder='例如: {"message": "Hello World"}'
+                  id="value"
+                  v-model="tab3Form.value"
+                  class="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  placeholder='例如: {"message": "Hello World"}'
                 />
               </div>
 
-              <Button
-                  :disabled="tab3Loading"
-                  class="w-full"
-                  @click="testKVOperation"
-              >
-                <Loader2 v-if="tab3Loading" class="mr-2 h-4 w-4 animate-spin"/>
-                <Play v-else class="mr-2 h-4 w-4"/>
+              <Button :disabled="tab3Loading" class="w-full" @click="testKVOperation">
+                <Loader2 v-if="tab3Loading" class="mr-2 h-4 w-4 animate-spin" />
+                <Play v-else class="mr-2 h-4 w-4" />
                 执行测试
               </Button>
 
@@ -456,14 +421,16 @@ const goBack = () => {
                 <div class="flex items-center gap-2 mb-2">
                   <Badge :variant="tab3Result.success ? 'default' : 'destructive'">
                     <component
-                        :is="tab3Result.success ? CheckCircle2 : XCircle"
-                        class="h-3 w-3 mr-1"
+                      :is="tab3Result.success ? CheckCircle2 : XCircle"
+                      class="h-3 w-3 mr-1"
                     />
                     {{ tab3Result.success ? '成功' : '失败' }}
                   </Badge>
                 </div>
                 <div class="rounded-lg bg-muted p-4">
-                  <pre class="text-xs overflow-auto">{{ formatJson(tab3Result.success ? tab3Result.data : tab3Result.error) }}</pre>
+                  <pre class="text-xs overflow-auto">{{
+                    formatJson(tab3Result.success ? tab3Result.data : tab3Result.error)
+                  }}</pre>
                 </div>
               </div>
             </CardContent>

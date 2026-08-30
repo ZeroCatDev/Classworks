@@ -1,7 +1,7 @@
 <script setup>
-import {ref, watch} from 'vue'
-import {apiClient} from '@/lib/api'
-import {deviceStore} from '@/lib/deviceStore'
+import { ref, watch } from 'vue'
+import { apiClient } from '@/lib/api'
+import { deviceStore } from '@/lib/deviceStore'
 import {
   Dialog,
   DialogContent,
@@ -10,26 +10,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {Button} from '@/components/ui/button'
-import {Input} from '@/components/ui/input'
-import {Label} from '@/components/ui/label'
-import {Loader2, Eye, EyeOff} from 'lucide-vue-next'
-import {toast} from 'vue-sonner'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Loader2, Eye, EyeOff } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 
 const props = defineProps({
   modelValue: Boolean,
   title: {
     type: String,
-    default: '设备认证'
+    default: '设备认证',
   },
   description: {
     type: String,
-    default: '请输入设备 UUID'
+    default: '请输入设备 UUID',
   },
   closable: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'success'])
@@ -38,16 +38,18 @@ const isLoading = ref(false)
 
 const deviceUuid = ref('')
 
-
 // 监听对话框打开，自动填充 UUID
-watch(() => props.modelValue, (isOpen) => {
-  if (isOpen) {
-    const uuid = deviceStore.getDeviceUuid()
-    if (uuid) {
-      deviceUuid.value = uuid
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen) {
+      const uuid = deviceStore.getDeviceUuid()
+      if (uuid) {
+        deviceUuid.value = uuid
+      }
     }
-  }
-})
+  },
+)
 
 // 关闭对话框
 const closeDialog = () => {
@@ -79,8 +81,6 @@ const handleAuth = async () => {
     isLoading.value = false
   }
 }
-
-
 </script>
 
 <template>
@@ -96,32 +96,26 @@ const handleAuth = async () => {
         <div class="space-y-2">
           <Label for="device-uuid">设备 UUID *</Label>
           <Input
-              id="device-uuid"
-              v-model="deviceUuid"
-              placeholder="输入设备 UUID"
-              @keyup.enter="handleAuth"
+            id="device-uuid"
+            v-model="deviceUuid"
+            placeholder="输入设备 UUID"
+            @keyup.enter="handleAuth"
           />
         </div>
-
-
       </div>
 
       <DialogFooter>
         <Button
-            v-if="closable"
-            :disabled="isLoading"
-            type="button"
-            variant="outline"
-            @click="closeDialog"
+          v-if="closable"
+          :disabled="isLoading"
+          type="button"
+          variant="outline"
+          @click="closeDialog"
         >
           取消
         </Button>
-        <Button
-            :disabled="isLoading"
-            type="button"
-            @click="handleAuth"
-        >
-          <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin"/>
+        <Button :disabled="isLoading" type="button" @click="handleAuth">
+          <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
           确认
         </Button>
       </DialogFooter>

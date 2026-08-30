@@ -4,8 +4,8 @@ import { ref, onMounted, onUnmounted, defineProps, defineEmits } from 'vue'
 const props = defineProps({
   open: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:open'])

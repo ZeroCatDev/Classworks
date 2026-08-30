@@ -17,12 +17,8 @@
     </div>
     <template v-if="tokenInfo">
       <div class="mt-2 text-caption">
-        <div>
-          <strong>设备类型：</strong>{{ deviceTypeLabel }}
-        </div>
-        <div v-if="tokenInfo.note">
-          <strong>备注：</strong>{{ tokenInfo.note }}
-        </div>
+        <div><strong>设备类型：</strong>{{ deviceTypeLabel }}</div>
+        <div v-if="tokenInfo.note"><strong>备注：</strong>{{ tokenInfo.note }}</div>
         <div v-if="tokenInfo.device">
           <strong>设备：</strong>{{ tokenInfo.device.name }} ({{ tokenInfo.device.namespace }})
         </div>
@@ -32,15 +28,15 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted, watch} from 'vue'
-import {getSetting} from '@/utils/settings'
+import { ref, computed, onMounted, watch } from 'vue'
+import { getSetting } from '@/utils/settings'
 import axios from '@/axios/axios'
 
 const props = defineProps({
   autoCheck: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 })
 
 const tokenInfo = ref(null)
@@ -81,8 +77,8 @@ const checkTokenPermission = async () => {
 
     const response = await axios.get(`${serverUrl}/kv/_token`, {
       headers: {
-        Authorization: `Bearer ${kvToken}`
-      }
+        Authorization: `Bearer ${kvToken}`,
+      },
     })
 
     if (response.data) {
@@ -113,7 +109,7 @@ onMounted(() => {
 defineExpose({
   checkTokenPermission,
   tokenInfo,
-  isReadOnly
+  isReadOnly,
 })
 </script>
 

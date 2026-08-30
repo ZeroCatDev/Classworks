@@ -26,7 +26,7 @@ export function createEmptyMeta(deviceId) {
     lastSyncedData: null,
     lastSyncedTs: 0,
     lastSyncedVc: { [deviceId]: 0 },
-  };
+  }
 }
 
 /**
@@ -36,14 +36,14 @@ export function createEmptyMeta(deviceId) {
  * @returns {Object} 递增后的新 metadata
  */
 export function bumpClock(meta, deviceId) {
-  const newVc = { ...meta.vc };
-  newVc[deviceId] = (newVc[deviceId] || 0) + 1;
+  const newVc = { ...meta.vc }
+  newVc[deviceId] = (newVc[deviceId] || 0) + 1
   return {
     ...meta,
     vc: newVc,
     ts: Date.now(),
     deviceId,
-  };
+  }
 }
 
 /**
@@ -53,11 +53,11 @@ export function bumpClock(meta, deviceId) {
  * @returns {Object} 合并后的向量时钟
  */
 export function mergeClocks(vcA, vcB) {
-  const result = { ...vcA };
+  const result = { ...vcA }
   for (const [node, count] of Object.entries(vcB)) {
-    result[node] = Math.max(result[node] || 0, count);
+    result[node] = Math.max(result[node] || 0, count)
   }
-  return result;
+  return result
 }
 
 /**
@@ -67,26 +67,26 @@ export function mergeClocks(vcA, vcB) {
  * @returns {"A_NEWER"|"B_NEWER"|"CONCURRENT"|"EQUAL"}
  */
 export function compareVersions(metaA, metaB) {
-  const vcA = metaA.vc || {};
-  const vcB = metaB.vc || {};
+  const vcA = metaA.vc || {}
+  const vcB = metaB.vc || {}
 
   // 收集所有节点
-  const allNodes = new Set([...Object.keys(vcA), ...Object.keys(vcB)]);
+  const allNodes = new Set([...Object.keys(vcA), ...Object.keys(vcB)])
 
-  let aGreater = false;
-  let bGreater = false;
+  let aGreater = false
+  let bGreater = false
 
   for (const node of allNodes) {
-    const a = vcA[node] || 0;
-    const b = vcB[node] || 0;
-    if (a > b) aGreater = true;
-    if (b > a) bGreater = true;
-    if (aGreater && bGreater) return "CONCURRENT";
+    const a = vcA[node] || 0
+    const b = vcB[node] || 0
+    if (a > b) aGreater = true
+    if (b > a) bGreater = true
+    if (aGreater && bGreater) return 'CONCURRENT'
   }
 
-  if (!aGreater && !bGreater) return "EQUAL";
-  if (aGreater) return "A_NEWER";
-  return "B_NEWER";
+  if (!aGreater && !bGreater) return 'EQUAL'
+  if (aGreater) return 'A_NEWER'
+  return 'B_NEWER'
 }
 
 // --- 数据合并 ---
@@ -95,7 +95,7 @@ export function compareVersions(metaA, metaB) {
  * 判断是否为纯对象 (非数组、非 null)
  */
 function isPlainObject(val) {
-  return val !== null && typeof val === "object" && !Array.isArray(val);
+  return val !== null && typeof val === 'object' && !Array.isArray(val)
 }
 
 /**
@@ -104,12 +104,12 @@ function isPlainObject(val) {
  * @returns {string} 十六进制哈希字符串
  */
 export function computeDataHash(data) {
-  const str = typeof data === "string" ? data : JSON.stringify(data);
-  let hash = 5381;
+  const str = typeof data === 'string' ? data : JSON.stringify(data)
+  let hash = 5381
   for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) + hash + str.charCodeAt(i)) | 0;
+    hash = ((hash << 5) + hash + str.charCodeAt(i)) | 0
   }
-  return (hash >>> 0).toString(16);
+  return (hash >>> 0).toString(16)
 }
 
 /**
@@ -119,18 +119,22 @@ export function computeDataHash(data) {
  * @returns {Object}
  */
 function mergeFieldTimestamps(fieldTsA, fieldTsB) {
-  if (!fieldTsA && !fieldTsB) return {};
-  if (!fieldTsA) return { ...fieldTsB };
-  if (!fieldTsB) return { ...fieldTsA };
+  if (!fieldTsA && !fieldTsB) return {}
+  if (!fieldTsA) return { ...fieldTsB }
+  if (!fieldTsB) return { ...fieldTsA }
 
-  const result = { ...fieldTsA };
+  const result = { ...fieldTsA }
   for (const [path, infoB] of Object.entries(fieldTsB)) {
-    const infoA = result[path];
-    if (!infoA || infoB.ts > infoA.ts || (infoB.ts === infoA.ts && infoB.deviceId < infoA.deviceId)) {
-      result[path] = infoB;
+    const infoA = result[path]
+    if (
+      !infoA ||
+      infoB.ts > infoA.ts ||
+      (infoB.ts === infoA.ts && infoB.deviceId < infoA.deviceId)
+    ) {
+      result[path] = infoB
     }
   }
-  return result;
+  return result
 }
 
 /**
@@ -138,14 +142,14 @@ function mergeFieldTimestamps(fieldTsA, fieldTsB) {
  * 优先级: id > name > key > JSON.stringify
  */
 function detectIdentityFn(arr) {
-  if (!arr || arr.length === 0) return null;
-  const first = arr[0];
+  if (!arr || arr.length === 0) return null
+  const first = arr[0]
   if (isPlainObject(first)) {
-    if ("id" in first) return (item) => (isPlainObject(item) ? item.id : JSON.stringify(item));
-    if ("name" in first) return (item) => (isPlainObject(item) ? item.name : JSON.stringify(item));
-    if ("key" in first) return (item) => (isPlainObject(item) ? item.key : JSON.stringify(item));
+    if ('id' in first) return (item) => (isPlainObject(item) ? item.id : JSON.stringify(item))
+    if ('name' in first) return (item) => (isPlainObject(item) ? item.name : JSON.stringify(item))
+    if ('key' in first) return (item) => (isPlainObject(item) ? item.key : JSON.stringify(item))
   }
-  return null;
+  return null
 }
 
 /**
@@ -157,41 +161,39 @@ function detectIdentityFn(arr) {
  */
 function mergeArrays(local, localMeta, remote) {
   const identityFn =
-    detectIdentityFn(local) ||
-    detectIdentityFn(remote) ||
-    ((item) => JSON.stringify(item));
+    detectIdentityFn(local) || detectIdentityFn(remote) || ((item) => JSON.stringify(item))
 
-  const localMap = new Map();
-  const remoteMap = new Map();
+  const localMap = new Map()
+  const remoteMap = new Map()
 
   local.forEach((item) => {
-    const id = identityFn(item);
-    if (!localMap.has(id)) localMap.set(id, item);
-  });
+    const id = identityFn(item)
+    if (!localMap.has(id)) localMap.set(id, item)
+  })
   remote.forEach((item) => {
-    const id = identityFn(item);
-    if (!remoteMap.has(id)) remoteMap.set(id, item);
-  });
+    const id = identityFn(item)
+    if (!remoteMap.has(id)) remoteMap.set(id, item)
+  })
 
-  const result = [];
-  const seen = new Set();
+  const result = []
+  const seen = new Set()
 
   // 保持本地顺序，本地有的以本地为准
   for (const [id, item] of localMap) {
-    if (seen.has(id)) continue;
-    seen.add(id);
-    result.push(item);
+    if (seen.has(id)) continue
+    seen.add(id)
+    result.push(item)
   }
 
   // 追加远程独有的
   for (const [id, item] of remoteMap) {
     if (!seen.has(id)) {
-      seen.add(id);
-      result.push(item);
+      seen.add(id)
+      result.push(item)
     }
   }
 
-  return result;
+  return result
 }
 
 /**
@@ -203,43 +205,40 @@ function mergeArrays(local, localMeta, remote) {
  * @returns {Object}
  */
 function mergeObjects(local, localMeta, remote, remoteMeta) {
-  const result = {};
-  const allKeys = new Set([...Object.keys(local), ...Object.keys(remote)]);
+  const result = {}
+  const allKeys = new Set([...Object.keys(local), ...Object.keys(remote)])
 
   for (const key of allKeys) {
-    const localHas = key in local;
-    const remoteHas = key in remote;
+    const localHas = key in local
+    const remoteHas = key in remote
 
     if (localHas && !remoteHas) {
-      result[key] = local[key];
+      result[key] = local[key]
     } else if (!localHas && remoteHas) {
-      result[key] = remote[key];
+      result[key] = remote[key]
     } else {
       // 两边都有 — 用字段级时间戳决定
       const localFieldInfo = localMeta._fieldTs?.[key] || {
         ts: localMeta.ts,
         deviceId: localMeta.deviceId,
-      };
+      }
       const remoteFieldInfo = remoteMeta._fieldTs?.[key] || {
         ts: remoteMeta.ts,
         deviceId: remoteMeta.deviceId,
-      };
+      }
 
       if (localFieldInfo.ts > remoteFieldInfo.ts) {
-        result[key] = local[key];
+        result[key] = local[key]
       } else if (remoteFieldInfo.ts > localFieldInfo.ts) {
-        result[key] = remote[key];
+        result[key] = remote[key]
       } else {
         // 时间戳相同 — deviceId 字典序决定
-        result[key] =
-          localFieldInfo.deviceId <= remoteFieldInfo.deviceId
-            ? local[key]
-            : remote[key];
+        result[key] = localFieldInfo.deviceId <= remoteFieldInfo.deviceId ? local[key] : remote[key]
       }
     }
   }
 
-  return result;
+  return result
 }
 
 /**
@@ -252,42 +251,29 @@ function mergeObjects(local, localMeta, remote, remoteMeta) {
  * @returns {{ data: *, meta: Object }} 合并后的数据和 metadata
  */
 export function mergeValues(localData, localMeta, remoteData, remoteMeta) {
-  const mergedVc = mergeClocks(localMeta.vc || {}, remoteMeta.vc || {});
-  const mergedTs = Math.max(localMeta.ts || 0, remoteMeta.ts || 0);
-  const mergedFieldTs = mergeFieldTimestamps(
-    localMeta._fieldTs,
-    remoteMeta._fieldTs,
-  );
+  const mergedVc = mergeClocks(localMeta.vc || {}, remoteMeta.vc || {})
+  const mergedTs = Math.max(localMeta.ts || 0, remoteMeta.ts || 0)
+  const mergedFieldTs = mergeFieldTimestamps(localMeta._fieldTs, remoteMeta._fieldTs)
 
-  let mergedData;
+  let mergedData
 
   if (isPlainObject(localData) && isPlainObject(remoteData)) {
-    mergedData = mergeObjects(
-      localData,
-      localMeta,
-      remoteData,
-      remoteMeta,
-    );
+    mergedData = mergeObjects(localData, localMeta, remoteData, remoteMeta)
   } else if (Array.isArray(localData) && Array.isArray(remoteData)) {
-    mergedData = mergeArrays(localData, localMeta, remoteData);
-  } else if (
-    typeof localData === typeof remoteData &&
-    typeof localData !== "object"
-  ) {
+    mergedData = mergeArrays(localData, localMeta, remoteData)
+  } else if (typeof localData === typeof remoteData && typeof localData !== 'object') {
     // 原始类型: LWW
     if ((localMeta.ts || 0) > (remoteMeta.ts || 0)) {
-      mergedData = localData;
+      mergedData = localData
     } else if ((remoteMeta.ts || 0) > (localMeta.ts || 0)) {
-      mergedData = remoteData;
+      mergedData = remoteData
     } else {
       mergedData =
-        (localMeta.deviceId || "") <= (remoteMeta.deviceId || "")
-          ? localData
-          : remoteData;
+        (localMeta.deviceId || '') <= (remoteMeta.deviceId || '') ? localData : remoteData
     }
   } else {
     // 类型不同 — LWW
-    mergedData = (localMeta.ts || 0) >= (remoteMeta.ts || 0) ? localData : remoteData;
+    mergedData = (localMeta.ts || 0) >= (remoteMeta.ts || 0) ? localData : remoteData
   }
 
   return {
@@ -301,5 +287,5 @@ export function mergeValues(localData, localMeta, remoteData, remoteMeta) {
       lastSyncedTs: Math.max(localMeta.lastSyncedTs || 0, remoteMeta.lastSyncedTs || 0),
       lastSyncedVc: mergedVc,
     },
-  };
+  }
 }

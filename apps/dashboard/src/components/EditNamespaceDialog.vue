@@ -1,6 +1,6 @@
 <script setup>
-import {ref, watch} from 'vue'
-import {apiClient} from '@/lib/api'
+import { ref, watch } from 'vue'
+import { apiClient } from '@/lib/api'
 import {
   Dialog,
   DialogContent,
@@ -9,11 +9,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {Button} from '@/components/ui/button'
-import {Input} from '@/components/ui/input'
-import {Label} from '@/components/ui/label'
-import {Loader2} from 'lucide-vue-next'
-import {toast} from 'vue-sonner'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Loader2 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -28,11 +28,14 @@ const isLoading = ref(false)
 const namespace = ref('')
 
 // 监听对话框打开状态
-watch(() => props.modelValue, (isOpen) => {
-  if (isOpen) {
-    namespace.value = props.currentNamespace || ''
-  }
-})
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen) {
+      namespace.value = props.currentNamespace || ''
+    }
+  },
+)
 
 // 关闭对话框
 const closeDialog = () => {
@@ -57,11 +60,7 @@ const saveNamespace = async () => {
 
   isLoading.value = true
   try {
-    await apiClient.updateDeviceNamespace(
-        props.deviceUuid,
-        props.accountToken,
-        trimmedNamespace
-    )
+    await apiClient.updateDeviceNamespace(props.deviceUuid, props.accountToken, trimmedNamespace)
     toast.success('命名空间更新成功')
     emit('success', trimmedNamespace)
     closeDialog()
@@ -82,29 +81,23 @@ const saveNamespace = async () => {
     <DialogContent class="sm:max-w-[500px]">
       <DialogHeader>
         <DialogTitle>编辑命名空间</DialogTitle>
-        <DialogDescription>
-          修改设备的命名空间，用于自动授权登录时识别设备
-        </DialogDescription>
+        <DialogDescription> 修改设备的命名空间，用于自动授权登录时识别设备 </DialogDescription>
       </DialogHeader>
 
       <div class="space-y-4 py-4">
         <div class="space-y-2">
           <Label for="namespace">
             命名空间
-            <span class="text-xs text-muted-foreground ml-2">
-              (必填)
-            </span>
+            <span class="text-xs text-muted-foreground ml-2"> (必填) </span>
           </Label>
           <Input
-              id="namespace"
-              v-model="namespace"
-              autocomplete="off"
-              placeholder="例如: class-2024-grade1"
-              type="text"
+            id="namespace"
+            v-model="namespace"
+            autocomplete="off"
+            placeholder="例如: class-2024-grade1"
+            type="text"
           />
-          <p class="text-xs text-muted-foreground">
-            命名空间用于自动授权接口，必须全局唯一
-          </p>
+          <p class="text-xs text-muted-foreground">命名空间用于自动授权接口，必须全局唯一</p>
         </div>
 
         <!-- 提示信息 -->
@@ -119,20 +112,11 @@ const saveNamespace = async () => {
       </div>
 
       <DialogFooter>
-        <Button
-            :disabled="isLoading"
-            type="button"
-            variant="outline"
-            @click="closeDialog"
-        >
+        <Button :disabled="isLoading" type="button" variant="outline" @click="closeDialog">
           取消
         </Button>
-        <Button
-            :disabled="isLoading"
-            type="button"
-            @click="saveNamespace"
-        >
-          <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin"/>
+        <Button :disabled="isLoading" type="button" @click="saveNamespace">
+          <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
           保存
         </Button>
       </DialogFooter>

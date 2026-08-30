@@ -12,7 +12,7 @@ export function createSafeEventMixin() {
     data() {
       return {
         _isDestroying: false,
-        _eventCleanupFunctions: []
+        _eventCleanupFunctions: [],
       }
     },
 
@@ -79,7 +79,7 @@ export function createSafeEventMixin() {
       $cleanupEvents() {
         this._isDestroying = true
 
-        this._eventCleanupFunctions.forEach(cleanup => {
+        this._eventCleanupFunctions.forEach((cleanup) => {
           try {
             if (typeof cleanup === 'function') {
               cleanup()
@@ -90,12 +90,12 @@ export function createSafeEventMixin() {
         })
 
         this._eventCleanupFunctions = []
-      }
+      },
     },
 
     beforeUnmount() {
       this.$cleanupEvents()
-    }
+    },
   }
 }
 
@@ -117,8 +117,8 @@ export const socketEventMixin = {
         const { on } = require('@/utils/socketClient')
         return on(event, this.$safeHandler(handler))
       })
-    }
-  }
+    },
+  },
 }
 
 /**
@@ -148,7 +148,7 @@ export function withSafeEvents(component) {
       if (this.$cleanupEvents) {
         this.$cleanupEvents()
       }
-    }
+    },
   }
 }
 
@@ -206,7 +206,7 @@ export function useSafeEvents() {
   const cleanup = () => {
     isDestroying.value = true
 
-    cleanupFunctions.value.forEach(fn => {
+    cleanupFunctions.value.forEach((fn) => {
       try {
         if (typeof fn === 'function') {
           fn()
@@ -228,7 +228,7 @@ export function useSafeEvents() {
     safeOn,
     safeHandler,
     safeDom,
-    cleanup
+    cleanup,
   }
 }
 
@@ -236,5 +236,5 @@ export default {
   createSafeEventMixin,
   socketEventMixin,
   withSafeEvents,
-  useSafeEvents
+  useSafeEvents,
 }

@@ -8,24 +8,12 @@
     height="100%"
     @click="fetchSentence"
   >
-    <v-card-text
-      class="pa-6 d-flex flex-column justify-center"
-      style="height: 100%"
-    >
-      <div
-        class="font-weight-medium mb-4 serif-font"
-        :style="contentStyle"
-      >
+    <v-card-text class="pa-6 d-flex flex-column justify-center" style="height: 100%">
+      <div class="font-weight-medium mb-4 serif-font" :style="contentStyle">
         {{ sentence }}
       </div>
-      <div
-        class="text-medium-emphasis serif-font"
-        :style="authorStyle"
-      >
-        <span
-          v-if="author"
-          class="mr-2"
-        >{{ author }}</span>
+      <div class="text-medium-emphasis serif-font" :style="authorStyle">
+        <span v-if="author" class="mr-2">{{ author }}</span>
         <span v-if="origin">《{{ origin }}》</span>
       </div>
     </v-card-text>
@@ -39,16 +27,10 @@ import axios from 'axios'
 import { Base64 } from 'js-base64'
 
 // 全局敏感词列表，强制生效。
-const GLOBAL_SENSITIVE_WORDS_ENCODED = [
-  '6IO4',
-  '5Lmz',
-  '6JCd6I6J',
-  '5rer',
-  '5aW4',
-]
+const GLOBAL_SENSITIVE_WORDS_ENCODED = ['6IO4', '5Lmz', '6JCd6I6J', '5rer', '5aW4']
 
 // 解码敏感词列表
-const GLOBAL_SENSITIVE_WORDS = GLOBAL_SENSITIVE_WORDS_ENCODED.map(word => Base64.decode(word))
+const GLOBAL_SENSITIVE_WORDS = GLOBAL_SENSITIVE_WORDS_ENCODED.map((word) => Base64.decode(word))
 
 // 一言字体大小比例（75%的全局字体大小）
 const HITOKOTO_FONT_RATIO = 0.75
@@ -62,7 +44,7 @@ export default {
       kvConfig: {
         sources: ['zhaoyu'],
         sensitiveWords: [],
-        hitokotoCategories: []
+        hitokotoCategories: [],
       },
       sentence: '',
       author: '',
@@ -70,7 +52,7 @@ export default {
       loading: false,
       timer: null,
       unwatch: null,
-      fontSize: 28 // Will be updated in mounted()
+      fontSize: 28, // Will be updated in mounted()
     }
   },
   computed: {
@@ -79,16 +61,16 @@ export default {
         'font-size': `${this.fontSize * HITOKOTO_FONT_RATIO}px`,
         'white-space': 'pre-wrap',
         'line-height': '1.6',
-        'text-align': 'left'
+        'text-align': 'left',
       }
     },
     authorStyle() {
       const AUTHOR_FONT_RATIO = 0.6 // Author font size is 60% of the main font size
       return {
         'font-size': `${this.fontSize * HITOKOTO_FONT_RATIO * AUTHOR_FONT_RATIO}px`,
-        'text-align': 'left'
+        'text-align': 'left',
       }
-    }
+    },
   },
   async mounted() {
     this.loadLocalSettings()
@@ -124,10 +106,18 @@ export default {
 
         if (data) {
           this.kvConfig = {
-            sources: Array.isArray(data.sources) && data.sources.length > 0 ? data.sources : ['zhaoyu'],
-            sensitiveWords: data.sensitiveWords ? data.sensitiveWords.split(/[,，]/).map(w => w.trim()).filter(w => w) : [],
+            sources:
+              Array.isArray(data.sources) && data.sources.length > 0 ? data.sources : ['zhaoyu'],
+            sensitiveWords: data.sensitiveWords
+              ? data.sensitiveWords
+                  .split(/[,，]/)
+                  .map((w) => w.trim())
+                  .filter((w) => w)
+              : [],
             jinrishiciToken: data.jinrishiciToken,
-            hitokotoCategories: Array.isArray(data.hitokotoCategories) ? data.hitokotoCategories : []
+            hitokotoCategories: Array.isArray(data.hitokotoCategories)
+              ? data.hitokotoCategories
+              : [],
           }
         }
       } catch (e) {
@@ -160,7 +150,7 @@ export default {
           const params = new URLSearchParams()
           const categories = this.kvConfig.hitokotoCategories
           if (Array.isArray(categories) && categories.length > 0) {
-            categories.forEach(cat => params.append('c', cat))
+            categories.forEach((cat) => params.append('c', cat))
           }
           const url = 'https://v1.hitokoto.cn/' + (params.toString() ? '?' + params.toString() : '')
           const res = await axios.get(url)
@@ -178,8 +168,11 @@ export default {
           }
         } else if (source === 'jinrishici') {
           if (this.kvConfig.jinrishiciToken) {
-            const res = await axios.get('https://v2.jinrishici.com/one.json?client=npm-sdk/1.0&X-User-Token='+encodeURIComponent(this.kvConfig.jinrishiciToken), {
-            })
+            const res = await axios.get(
+              'https://v2.jinrishici.com/one.json?client=npm-sdk/1.0&X-User-Token=' +
+                encodeURIComponent(this.kvConfig.jinrishiciToken),
+              {},
+            )
             if (res.data.status === 'success') {
               data = res.data.data
               content = data.content
@@ -189,7 +182,9 @@ export default {
           } else {
             // Token missing, maybe retry with another source or just fail silently
             // For now, let's just log it. The settings page should handle token generation.
-            console.warn('Jinrishici token missing. Please enable it in settings to generate a token.')
+            console.warn(
+              'Jinrishici token missing. Please enable it in settings to generate a token.',
+            )
             // Retry to pick another source to avoid empty card
             this.loading = false
             return this.fetchSentence()
@@ -199,7 +194,7 @@ export default {
         if (content) {
           // Sensitive word check (global + KV)
           const combinedWords = [...GLOBAL_SENSITIVE_WORDS, ...this.kvConfig.sensitiveWords]
-          const hasSensitiveWord = combinedWords.some(word => word && content.includes(word))
+          const hasSensitiveWord = combinedWords.some((word) => word && content.includes(word))
           if (hasSensitiveWord) {
             // Retry
             this.loading = false
@@ -218,8 +213,8 @@ export default {
       } finally {
         this.loading = false
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -232,6 +227,8 @@ export default {
   transform: translateY(-2px);
 }
 .serif-font {
-  font-family: "Noto Serif SC", "Source Han Serif SC", "Source Han Serif", source-han-serif-sc, "Songti SC", "SimSun", "Hiragino Sans GB", system-ui, serif;
+  font-family:
+    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif', source-han-serif-sc, 'Songti SC',
+    'SimSun', 'Hiragino Sans GB', system-ui, serif;
 }
 </style>

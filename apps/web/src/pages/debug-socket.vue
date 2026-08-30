@@ -1,14 +1,8 @@
 <template>
   <v-container>
     <v-row>
-      <v-col
-        cols="12"
-        md="6"
-      >
-        <v-card
-          border
-          class="mb-4"
-        >
+      <v-col cols="12" md="6">
+        <v-card border class="mb-4">
           <v-card-title>连接信息</v-card-title>
           <v-card-text>
             <v-list density="compact">
@@ -23,11 +17,7 @@
               <v-list-item>
                 <v-list-item-title>连接状态</v-list-item-title>
                 <v-list-item-subtitle>
-                  <v-chip
-                    :color="connected ? 'success' : 'error'"
-                    class="mr-2"
-                    size="small"
-                  >
+                  <v-chip :color="connected ? 'success' : 'error'" class="mr-2" size="small">
                     {{ connected ? 'connected' : 'disconnected' }}
                   </v-chip>
                   <span v-if="socketId">id: {{ socketId }}</span>
@@ -44,21 +34,14 @@
             </v-list>
             <v-divider class="my-4" />
             <v-row>
-              <v-col
-                cols="12"
-                md="8"
-              >
+              <v-col cols="12" md="8">
                 <v-text-field
                   v-model="manualToken"
                   clearable
                   label="手动加入 Token (留空使用配置的 Token)"
                 />
               </v-col>
-              <v-col
-                class="d-flex align-center"
-                cols="12"
-                md="4"
-              >
+              <v-col class="d-flex align-center" cols="12" md="4">
                 <v-btn
                   class="mr-2"
                   color="primary"
@@ -74,26 +57,14 @@
                 >
                   离开当前
                 </v-btn>
-                <v-btn
-                  color="error"
-                  variant="tonal"
-                  @click="handleLeaveAll"
-                >
-                  离开全部
-                </v-btn>
+                <v-btn color="error" variant="tonal" @click="handleLeaveAll"> 离开全部 </v-btn>
               </v-col>
             </v-row>
             <v-divider class="my-4" />
             <v-row>
               <v-col cols="12">
-                <v-card
-                  border
-                  color="primary"
-                  variant="tonal"
-                >
-                  <v-card-title class="text-subtitle-1">
-                    聊天室消息
-                  </v-card-title>
+                <v-card border color="primary" variant="tonal">
+                  <v-card-title class="text-subtitle-1"> 聊天室消息 </v-card-title>
                   <v-card-text>
                     <v-textarea
                       v-model="chatInput"
@@ -104,11 +75,7 @@
                     />
                     <div class="d-flex">
                       <v-spacer />
-                      <v-btn
-                        :disabled="!canSendChat"
-                        color="primary"
-                        @click="sendChat"
-                      >
+                      <v-btn :disabled="!canSendChat" color="primary" @click="sendChat">
                         发送聊天
                       </v-btn>
                     </div>
@@ -118,13 +85,7 @@
             </v-row>
             <v-row>
               <v-col cols="12">
-                <v-btn
-                  color="secondary"
-                  variant="tonal"
-                  @click="reconnect"
-                >
-                  重新连接
-                </v-btn>
+                <v-btn color="secondary" variant="tonal" @click="reconnect"> 重新连接 </v-btn>
               </v-col>
             </v-row>
           </v-card-text>
@@ -133,82 +94,42 @@
         <v-card border>
           <v-card-title>在线设备</v-card-title>
           <v-card-text>
-            <v-btn
-              class="mb-3"
-              color="primary"
-              @click="fetchOnline"
-            >
-              刷新在线列表
-            </v-btn>
-            <v-list
-              v-if="onlineDevices.length"
-              density="compact"
-            >
-              <v-list-item
-                v-for="dev in onlineDevices"
-                :key="dev.uuid"
-              >
+            <v-btn class="mb-3" color="primary" @click="fetchOnline"> 刷新在线列表 </v-btn>
+            <v-list v-if="onlineDevices.length" density="compact">
+              <v-list-item v-for="dev in onlineDevices" :key="dev.uuid">
                 <template #prepend>
-                  <v-avatar
-                    :color="dev.connections > 0 ? 'success' : 'grey'"
-                    size="24"
-                  />
+                  <v-avatar :color="dev.connections > 0 ? 'success' : 'grey'" size="24" />
                 </template>
                 <v-list-item-title>{{ dev.name || '(未命名)' }}</v-list-item-title>
-                <v-list-item-subtitle>{{ dev.uuid }} · 连接数 {{ dev.connections }}</v-list-item-subtitle>
+                <v-list-item-subtitle
+                  >{{ dev.uuid }} · 连接数 {{ dev.connections }}</v-list-item-subtitle
+                >
                 <template #append>
-                  <v-btn
-                    size="small"
-                    variant="text"
-                    @click="handleSelectDevice(dev)"
-                  >
-                    选择
-                  </v-btn>
+                  <v-btn size="small" variant="text" @click="handleSelectDevice(dev)"> 选择 </v-btn>
                 </template>
               </v-list-item>
             </v-list>
-            <div
-              v-else
-              class="text-grey"
-            >
-              暂无数据
-            </div>
+            <div v-else class="text-grey">暂无数据</div>
           </v-card-text>
         </v-card>
       </v-col>
 
-      <v-col
-        cols="12"
-        md="6"
-      >
+      <v-col cols="12" md="6">
         <v-card border>
           <v-card-title class="d-flex align-center">
             事件日志
             <v-spacer />
-            <v-btn
-              color="error"
-              size="small"
-              variant="text"
-              @click="clearLogs"
-            >
-              清空
-            </v-btn>
+            <v-btn color="error" size="small" variant="text" @click="clearLogs"> 清空 </v-btn>
           </v-card-title>
           <v-card-text>
             <v-list density="compact">
-              <v-list-item
-                v-for="(log, idx) in logs"
-                :key="idx"
-              >
+              <v-list-item v-for="(log, idx) in logs" :key="idx">
                 <v-list-item-title>
                   <span class="text-caption text-grey">{{ log.time }}</span>
                   <span class="ml-2">{{ log.event }}</span>
                 </v-list-item-title>
                 <v-list-item-text>
-                  <pre
-                    class="mb-2"
-                    style="white-space: pre-wrap"
-                  >{{ log.payload }}</pre>
+                  <pre class="mb-2" style="white-space: pre-wrap">{{ log.payload }}</pre>
                 </v-list-item-text>
               </v-list-item>
             </v-list>
@@ -220,17 +141,17 @@
 </template>
 
 <script setup>
-import {ref, onMounted, onBeforeUnmount, computed} from 'vue'
-import {getSetting} from '@/utils/settings'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { getSetting } from '@/utils/settings'
 import {
   getSocket,
   on as socketOn,
   joinToken,
   leaveToken,
   leaveAll,
-  getServerUrl
+  getServerUrl,
 } from '@/utils/socketClient'
-import {sendChatMessage, DeviceEventTypes, formatDeviceInfo} from '@/utils/deviceEvents'
+import { sendChatMessage, DeviceEventTypes, formatDeviceInfo } from '@/utils/deviceEvents'
 
 const currentToken = ref(getSetting('server.kvToken') || '')
 const manualToken = ref('')
@@ -256,7 +177,7 @@ function pushLog(event, payload) {
   logs.value.unshift({
     time,
     event,
-    payload: typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2)
+    payload: typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2),
   })
   if (logs.value.length > 200) logs.value.pop()
 }
@@ -269,17 +190,17 @@ function wireSocketBaseEvents() {
   s.on('connect', () => {
     connected.value = true
     socketId.value = s.id || ''
-    pushLog('connect', {id: s.id})
+    pushLog('connect', { id: s.id })
     // re-join with token if set
     if (joinedToken.value) joinToken(joinedToken.value)
   })
   s.on('disconnect', (reason) => {
     connected.value = false
-    pushLog('disconnect', {reason})
+    pushLog('disconnect', { reason })
   })
-  s.on('connect_error', (err) => pushLog('connect_error', {message: err?.message}))
-  s.on('reconnect_attempt', (n) => pushLog('reconnect_attempt', {attempt: n}))
-  s.on('reconnect', (n) => pushLog('reconnect', {attempt: n}))
+  s.on('connect_error', (err) => pushLog('connect_error', { message: err?.message }))
+  s.on('reconnect_attempt', (n) => pushLog('reconnect_attempt', { attempt: n }))
+  s.on('reconnect', (n) => pushLog('reconnect', { attempt: n }))
 }
 
 function wireBusinessEvents() {
@@ -317,7 +238,7 @@ function handleJoinToken(token) {
     }
     joinToken(token)
     joinedToken.value = token
-    pushLog('join-token', {token})
+    pushLog('join-token', { token })
   } catch (e) {
     pushLog('join-token-error', String(e))
   }
@@ -327,7 +248,7 @@ function handleLeaveToken(token) {
   try {
     leaveToken(token)
     if (joinedToken.value === token) joinedToken.value = ''
-    pushLog('leave-token', {token})
+    pushLog('leave-token', { token })
   } catch (e) {
     pushLog('leave-token-error', String(e))
   }
@@ -363,7 +284,7 @@ function sendChat() {
     if (!text) return
     // 使用新的通用事件接口发送聊天消息
     sendChatMessage(text)
-    pushLog('send-event', {type: DeviceEventTypes.CHAT, content: {text}})
+    pushLog('send-event', { type: DeviceEventTypes.CHAT, content: { text } })
     chatInput.value = ''
   } catch (e) {
     pushLog('chat:error', String(e))
@@ -374,7 +295,7 @@ function handleSelectDevice(dev) {
   // For now, just show a message that we need the token
   pushLog('select-device', {
     message: '请输入该设备对应的 KV Token 以加入频道',
-    device: dev
+    device: dev,
   })
 }
 
@@ -383,7 +304,7 @@ async function fetchOnline() {
     const resp = await fetch(`${serverUrl.value}/devices/online`)
     const data = await resp.json()
     onlineDevices.value = Array.isArray(data?.devices) ? data.devices : []
-    pushLog('fetch-online', {count: onlineDevices.value.length})
+    pushLog('fetch-online', { count: onlineDevices.value.length })
   } catch (e) {
     pushLog('fetch-online-error', String(e))
   }

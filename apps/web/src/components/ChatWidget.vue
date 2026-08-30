@@ -1,64 +1,31 @@
 <template>
   <!-- Floating toggle button -->
-  <div
-    v-if="showToggleButton"
-    :style="toggleStyle"
-    class="chat-toggle"
-  >
-    <v-btn
-      color="primary"
-      icon
-      variant="flat"
-      @click="open()"
-    >
+  <div v-if="showToggleButton" :style="toggleStyle" class="chat-toggle">
+    <v-btn color="primary" icon variant="flat" @click="open()">
       <v-badge
         :content="unreadCount || undefined"
         :model-value="unreadCount > 0"
         color="error"
         overlap
       >
-        <v-icon>
-          mdi-chat
-        </v-icon>
+        <v-icon> mdi-chat </v-icon>
       </v-badge>
     </v-btn>
   </div>
 
   <!-- Chat panel -->
-  <div
-    v-show="visible"
-    :style="panelStyle"
-    class="chat-panel"
-  >
-    <v-card
-      border
-      class="chat-card"
-      elevation="8"
-    >
+  <div v-show="visible" :style="panelStyle" class="chat-panel">
+    <v-card border class="chat-card" elevation="8">
       <v-card-title class="d-flex align-center">
-        <v-icon class="mr-2">
-          mdi-chat-processing
-        </v-icon>
+        <v-icon class="mr-2"> mdi-chat-processing </v-icon>
         <span class="text-subtitle-1">{{ modeTitle }}</span>
         <v-spacer />
         <!-- 模式切换按钮 -->
-        <v-btn-toggle
-          v-model="currentMode"
-          class="mr-2"
-          mandatory
-          size="small"
-          variant="outlined"
-        >
-          <v-btn
-            value="chat"
-            size="small"
-          >
+        <v-btn-toggle v-model="currentMode" class="mr-2" mandatory size="small" variant="outlined">
+          <v-btn value="chat" size="small">
             <v-icon>mdi-chat</v-icon>
           </v-btn>
-          <v-btn
-            value="events"
-            size="small"
-          >
+          <v-btn value="events" size="small">
             <v-icon>mdi-format-list-bulleted</v-icon>
           </v-btn>
         </v-btn-toggle>
@@ -75,11 +42,7 @@
           </template>
           <span>Socket {{ socketId || '-' }}</span>
         </v-tooltip>
-        <v-btn
-          icon
-          variant="text"
-          @click="close()"
-        >
+        <v-btn icon variant="text" @click="close()">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-card-title>
@@ -88,55 +51,30 @@
 
       <v-card-text class="chat-body">
         <!-- 聊天模式 -->
-        <div
-          v-if="currentMode === 'chat'"
-          ref="listRef"
-          class="messages"
-        >
-          <template
-            v-for="msg in decoratedMessages"
-            :key="msg._id"
-          >
-            <div
-              v-if="msg._type === 'divider'"
-              class="divider-row"
-            >
+        <div v-if="currentMode === 'chat'" ref="listRef" class="messages">
+          <template v-for="msg in decoratedMessages" :key="msg._id">
+            <div v-if="msg._type === 'divider'" class="divider-row">
               <v-divider class="my-2" />
-              <div class="divider-text">
-                今天 - 上次访问
-              </div>
+              <div class="divider-text">今天 - 上次访问</div>
               <v-divider class="my-2" />
             </div>
-            <div
-              v-else
-              :class="{ self: msg.self }"
-              class="message-row"
-            >
+            <div v-else :class="{ self: msg.self }" class="message-row">
               <div class="avatar">
-                <v-avatar
-                  :color="msg.self ? 'primary' : 'grey'"
-                  size="24"
-                >
+                <v-avatar :color="msg.self ? 'primary' : 'grey'" size="24">
                   <v-icon size="small">
                     {{ msg.self ? 'mdi-account' : 'mdi-account-outline' }}
                   </v-icon>
                 </v-avatar>
               </div>
               <div class="bubble">
-                <div
-                  v-if="!msg.self && msg.deviceName"
-                  class="sender-name"
-                >
+                <div v-if="!msg.self && msg.deviceName" class="sender-name">
                   {{ msg.deviceName }}
                 </div>
                 <div class="text">
                   {{ msg.text }}
                 </div>
                 <div class="meta">
-                  <span
-                    v-if="msg.self && msg.deviceName"
-                    class="device-name"
-                  >
+                  <span v-if="msg.self && msg.deviceName" class="device-name">
                     {{ msg.deviceName }} •
                   </span>
                   {{ formatTime(msg.at) }}
@@ -147,58 +85,37 @@
         </div>
 
         <!-- 事件模式 -->
-        <div
-          v-else
-          class="events-container"
-        >
+        <div v-else class="events-container">
           <!-- 事件统计 -->
           <div class="event-stats mb-3">
             <v-row dense>
               <v-col cols="4">
-                <v-card
-                  color="success"
-                  dark
-                  size="small"
-                >
+                <v-card color="success" dark size="small">
                   <v-card-text class="text-center pa-2">
                     <div class="text-h6">
                       {{ eventStats.chat }}
                     </div>
-                    <div class="text-caption">
-                      聊天
-                    </div>
+                    <div class="text-caption">聊天</div>
                   </v-card-text>
                 </v-card>
               </v-col>
               <v-col cols="4">
-                <v-card
-                  color="info"
-                  dark
-                  size="small"
-                >
+                <v-card color="info" dark size="small">
                   <v-card-text class="text-center pa-2">
                     <div class="text-h6">
                       {{ eventStats.kvChanged }}
                     </div>
-                    <div class="text-caption">
-                      KV变化
-                    </div>
+                    <div class="text-caption">KV变化</div>
                   </v-card-text>
                 </v-card>
               </v-col>
               <v-col cols="4">
-                <v-card
-                  color="warning"
-                  dark
-                  size="small"
-                >
+                <v-card color="warning" dark size="small">
                   <v-card-text class="text-center pa-2">
                     <div class="text-h6">
                       {{ eventStats.other }}
                     </div>
-                    <div class="text-caption">
-                      其他
-                    </div>
+                    <div class="text-caption">其他</div>
                   </v-card-text>
                 </v-card>
               </v-col>
@@ -207,32 +124,18 @@
 
           <!-- 事件列表 -->
           <div class="events-list">
-            <div
-              v-for="event in paginatedEvents"
-              :key="event._id"
-              class="event-item mb-2"
-            >
-              <v-card
-                :color="getEventColor(event.type)"
-                size="small"
-                variant="outlined"
-              >
+            <div v-for="event in paginatedEvents" :key="event._id" class="event-item mb-2">
+              <v-card :color="getEventColor(event.type)" size="small" variant="outlined">
                 <v-card-text class="pa-2">
                   <div class="d-flex align-center mb-1">
-                    <v-chip
-                      :color="getEventColor(event.type)"
-                      size="x-small"
-                    >
+                    <v-chip :color="getEventColor(event.type)" size="x-small">
                       {{ getEventTypeLabel(event.type) }}
                     </v-chip>
                     <v-spacer />
                     <span class="text-caption">{{ formatTime(event.timestamp || event.at) }}</span>
                   </div>
 
-                  <div
-                    v-if="event.senderInfo"
-                    class="mb-1 text-caption"
-                  >
+                  <div v-if="event.senderInfo" class="mb-1 text-caption">
                     <strong>发送者:</strong> {{ formatDeviceInfo(event.senderInfo) }}
                   </div>
 
@@ -243,26 +146,20 @@
                       </div>
                     </template>
                     <template v-else>
-                      <pre class="text-caption event-data">{{ JSON.stringify(event.content || event, null, 1) }}</pre>
+                      <pre class="text-caption event-data">{{
+                        JSON.stringify(event.content || event, null, 1)
+                      }}</pre>
                     </template>
                   </div>
                 </v-card-text>
               </v-card>
             </div>
 
-            <div
-              v-if="allEvents.length === 0"
-              class="text-center text-grey pa-4"
-            >
-              暂无事件
-            </div>
+            <div v-if="allEvents.length === 0" class="text-center text-grey pa-4">暂无事件</div>
           </div>
 
           <!-- 分页控件 -->
-          <div
-            v-if="totalPages > 1"
-            class="pagination mt-2"
-          >
+          <div v-if="totalPages > 1" class="pagination mt-2">
             <v-pagination
               v-model="currentPage"
               :length="totalPages"
@@ -275,16 +172,8 @@
 
       <v-divider v-if="currentMode === 'chat'" />
 
-      <v-card-actions
-        v-if="currentMode === 'chat'"
-        class="chat-input"
-      >
-        <v-btn
-          class="mr-1"
-          icon
-          variant="text"
-          @click="insertEmoji('😄')"
-        >
+      <v-card-actions v-if="currentMode === 'chat'" class="chat-input">
+        <v-btn class="mr-1" icon variant="text" @click="insertEmoji('😄')">
           <v-icon>mdi-emoticon-outline</v-icon>
         </v-btn>
         <v-textarea
@@ -299,15 +188,8 @@
           @keydown.enter.prevent="handleEnter"
           @keydown.shift.enter.stop
         />
-        <v-btn
-          :disabled="!canSend"
-          class="ml-2"
-          color="primary"
-          @click="send"
-        >
-          <v-icon start>
-            mdi-send
-          </v-icon>
+        <v-btn :disabled="!canSend" class="ml-2" color="primary" @click="send">
+          <v-icon start> mdi-send </v-icon>
           发送
         </v-btn>
       </v-card-actions>
@@ -319,15 +201,15 @@
 </template>
 
 <script>
-import {getSetting} from '@/utils/settings'
-import {getSocket, joinToken, on as socketOn} from '@/utils/socketClient'
-import {sendChatMessage, createDeviceEventHandler, formatDeviceInfo} from '@/utils/deviceEvents'
+import { getSetting } from '@/utils/settings'
+import { getSocket, joinToken, on as socketOn } from '@/utils/socketClient'
+import { sendChatMessage, createDeviceEventHandler, formatDeviceInfo } from '@/utils/deviceEvents'
 import UrgentNotification from '@/components/UrgentNotification.vue'
 
 export default {
   name: 'ChatWidget',
   components: {
-    UrgentNotification
+    UrgentNotification,
   },
   props: {
     modelValue: {
@@ -373,10 +255,10 @@ export default {
       eventStats: {
         chat: 0,
         kvChanged: 0,
-        other: 0
+        other: 0,
       },
       // 事件监听器清理函数
-      cleanupFunctions: []
+      cleanupFunctions: [],
     }
   },
   computed: {
@@ -404,15 +286,13 @@ export default {
     decoratedMessages() {
       // Insert divider between lastVisit and now
       if (!this.lastVisit) return this.messages
-      const idx = this.messages.findIndex(m => m.at && new Date(m.at).getTime() >= new Date(this.lastVisit).getTime())
+      const idx = this.messages.findIndex(
+        (m) => m.at && new Date(m.at).getTime() >= new Date(this.lastVisit).getTime(),
+      )
       if (idx <= 0) return this.messages
       const before = this.messages.slice(0, idx)
       const after = this.messages.slice(idx)
-      return [
-        ...before,
-        {_id: 'divider', _type: 'divider'},
-        ...after,
-      ]
+      return [...before, { _id: 'divider', _type: 'divider' }, ...after]
     },
     // 当前显示的内容（根据模式）
     currentDisplayItems() {
@@ -485,43 +365,49 @@ export default {
     }
 
     // Listen chat messages (旧接口兼容)
-    const offMessage = socketOn('chat:message', createSafeHandler((msg) => {
-      this.pushMessage(msg)
-      this.addEvent({
-        _id: `legacy-chat-${Date.now()}-${Math.random()}`,
-        type: 'chat:message',
-        content: msg,
-        timestamp: msg.at || new Date().toISOString(),
-        senderId: msg.senderId,
-        uuid: msg.uuid,
-        senderInfo: msg.senderInfo
-      })
-    }))
+    const offMessage = socketOn(
+      'chat:message',
+      createSafeHandler((msg) => {
+        this.pushMessage(msg)
+        this.addEvent({
+          _id: `legacy-chat-${Date.now()}-${Math.random()}`,
+          type: 'chat:message',
+          content: msg,
+          timestamp: msg.at || new Date().toISOString(),
+          senderId: msg.senderId,
+          uuid: msg.uuid,
+          senderInfo: msg.senderInfo,
+        })
+      }),
+    )
 
     // Listen direct chat events (新的直接聊天事件)
-    const offDirectChat = socketOn('chat', createSafeHandler((eventData) => {
-      if (eventData && eventData.content && eventData.content.text) {
-        // 处理新格式的直接聊天事件
-        const chatMsg = {
-          text: eventData.content.text,
-          senderId: eventData.senderId,
-          at: eventData.timestamp,
-          uuid: eventData.senderId, // 使用 senderId 作为 uuid
-          senderInfo: eventData.senderInfo
-        }
+    const offDirectChat = socketOn(
+      'chat',
+      createSafeHandler((eventData) => {
+        if (eventData && eventData.content && eventData.content.text) {
+          // 处理新格式的直接聊天事件
+          const chatMsg = {
+            text: eventData.content.text,
+            senderId: eventData.senderId,
+            at: eventData.timestamp,
+            uuid: eventData.senderId, // 使用 senderId 作为 uuid
+            senderInfo: eventData.senderInfo,
+          }
 
-        this.pushMessage(chatMsg)
-        this.addEvent({
-          _id: eventData.eventId || `chat-${Date.now()}-${Math.random()}`,
-          type: 'chat',
-          content: eventData.content,
-          timestamp: eventData.timestamp,
-          eventId: eventData.eventId,
-          senderId: eventData.senderId,
-          senderInfo: eventData.senderInfo
-        })
-      }
-    }))
+          this.pushMessage(chatMsg)
+          this.addEvent({
+            _id: eventData.eventId || `chat-${Date.now()}-${Math.random()}`,
+            type: 'chat',
+            content: eventData.content,
+            timestamp: eventData.timestamp,
+            eventId: eventData.eventId,
+            senderId: eventData.senderId,
+            senderInfo: eventData.senderInfo,
+          })
+        }
+      }),
+    )
 
     // Listen device events (通用事件接口 - 保留兼容)
     this.deviceEventHandler = createDeviceEventHandler({
@@ -552,80 +438,89 @@ export default {
         }
         this.addEvent(eventData)
       }),
-      enableLegacySupport: true
+      enableLegacySupport: true,
     })
     const offDeviceEvent = socketOn('device-event', this.deviceEventHandler)
 
     // 监听 KV 变化事件（支持新旧格式）
-    const offKvChanged = socketOn('kv-key-changed', createSafeHandler((eventData) => {
-      // 新格式：直接事件数据
-      if (eventData.content && eventData.timestamp) {
-        this.addEvent({
-          _id: `kv-${Date.now()}-${Math.random()}`,
-          type: 'kv-key-changed',
-          content: eventData.content,
-          timestamp: eventData.timestamp,
-          eventId: eventData.eventId,
-          senderId: eventData.senderId,
-          senderInfo: eventData.senderInfo
-        })
-      } else {
-        // 旧格式：兼容处理
-        this.addEvent({
-          _id: `legacy-kv-${Date.now()}-${Math.random()}`,
-          type: 'kv-key-changed',
-          content: eventData,
-          timestamp: eventData.updatedAt || new Date().toISOString(),
-          uuid: eventData.uuid
-        })
-      }
-    }))
+    const offKvChanged = socketOn(
+      'kv-key-changed',
+      createSafeHandler((eventData) => {
+        // 新格式：直接事件数据
+        if (eventData.content && eventData.timestamp) {
+          this.addEvent({
+            _id: `kv-${Date.now()}-${Math.random()}`,
+            type: 'kv-key-changed',
+            content: eventData.content,
+            timestamp: eventData.timestamp,
+            eventId: eventData.eventId,
+            senderId: eventData.senderId,
+            senderInfo: eventData.senderInfo,
+          })
+        } else {
+          // 旧格式：兼容处理
+          this.addEvent({
+            _id: `legacy-kv-${Date.now()}-${Math.random()}`,
+            type: 'kv-key-changed',
+            content: eventData,
+            timestamp: eventData.updatedAt || new Date().toISOString(),
+            uuid: eventData.uuid,
+          })
+        }
+      }),
+    )
 
     // 监听紧急通知事件
-    const offUrgentNotice = socketOn('urgent-notice', createSafeHandler((notificationData) => {
-      console.log('收到紧急通知:', notificationData)
+    const offUrgentNotice = socketOn(
+      'urgent-notice',
+      createSafeHandler((notificationData) => {
+        console.log('收到紧急通知:', notificationData)
 
-      // 添加到事件列表
-      this.addEvent({
-        _id: `urgent-${Date.now()}-${Math.random()}`,
-        type: 'urgent-notice',
-        content: notificationData.content || notificationData,
-        timestamp: notificationData.timestamp || new Date().toISOString(),
-        eventId: notificationData.eventId,
-        senderId: notificationData.senderId,
-        senderInfo: notificationData.senderInfo
-      })
+        // 添加到事件列表
+        this.addEvent({
+          _id: `urgent-${Date.now()}-${Math.random()}`,
+          type: 'urgent-notice',
+          content: notificationData.content || notificationData,
+          timestamp: notificationData.timestamp || new Date().toISOString(),
+          eventId: notificationData.eventId,
+          senderId: notificationData.senderId,
+          senderInfo: notificationData.senderInfo,
+        })
 
-      // 立即显示紧急通知弹窗
-      this.showUrgentNotification(notificationData)
-    }))
+        // 立即显示紧急通知弹窗
+        this.showUrgentNotification(notificationData)
+      }),
+    )
 
     // 监听通知事件
-    const offNotification = socketOn('notification', createSafeHandler((notificationData) => {
-      console.log('收到通知事件:', notificationData)
+    const offNotification = socketOn(
+      'notification',
+      createSafeHandler((notificationData) => {
+        console.log('收到通知事件:', notificationData)
 
-      // 添加到事件列表
-      this.addEvent({
-        _id: `notification-${Date.now()}-${Math.random()}`,
-        type: 'notification',
-        content: notificationData.content || notificationData,
-        timestamp: notificationData.timestamp || new Date().toISOString(),
-        eventId: notificationData.eventId,
-        senderId: notificationData.senderId,
-        senderInfo: notificationData.senderInfo || notificationData.content?.senderInfo
-      })
+        // 添加到事件列表
+        this.addEvent({
+          _id: `notification-${Date.now()}-${Math.random()}`,
+          type: 'notification',
+          content: notificationData.content || notificationData,
+          timestamp: notificationData.timestamp || new Date().toISOString(),
+          eventId: notificationData.eventId,
+          senderId: notificationData.senderId,
+          senderInfo: notificationData.senderInfo || notificationData.content?.senderInfo,
+        })
 
-      // 立即显示通知弹窗
-      this.showUrgentNotification(notificationData)
-    }))    // 保存清理函数
+        // 立即显示通知弹窗
+        this.showUrgentNotification(notificationData)
+      }),
+    ) // 保存清理函数
     this.cleanupFunctions = [
       offMessage,
       offDirectChat,
       offUrgentNotice,
       offNotification,
       offDeviceEvent,
-      offKvChanged
-    ]    // If initially visible, run open logic
+      offKvChanged,
+    ] // If initially visible, run open logic
     if (this.visible) this.onOpen()
   },
   beforeUnmount() {
@@ -634,7 +529,7 @@ export default {
 
     // 清理所有事件监听器
     if (this.cleanupFunctions && Array.isArray(this.cleanupFunctions)) {
-      this.cleanupFunctions.forEach(cleanup => {
+      this.cleanupFunctions.forEach((cleanup) => {
         try {
           if (typeof cleanup === 'function') {
             cleanup()
@@ -706,8 +601,8 @@ export default {
         senderInfo: {
           deviceName: '我',
           deviceType: 'client',
-          isReadOnly: false
-        }
+          isReadOnly: false,
+        },
       }
       this.pushMessage(selfMsg)
 
@@ -721,8 +616,8 @@ export default {
         senderInfo: {
           deviceName: '本设备',
           deviceType: 'client',
-          isReadOnly: false
-        }
+          isReadOnly: false,
+        },
       })
 
       // 发送到服务器
@@ -735,12 +630,12 @@ export default {
       try {
         const entry = {
           _id: `${msg.at || Date.now()}-${Math.random()}`,
-          text: typeof msg?.text === 'string' ? msg.text : (msg?.text || ''),
+          text: typeof msg?.text === 'string' ? msg.text : msg?.text || '',
           at: msg.at || new Date().toISOString(),
           senderId: msg.senderId,
           self: !!(msg.senderId && msg.senderId === this.socketId),
           senderInfo: msg.senderInfo || null, // 保存发送者信息
-          deviceName: this.getDeviceName(msg.senderInfo, msg.senderId === this.socketId)
+          deviceName: this.getDeviceName(msg.senderInfo, msg.senderId === this.socketId),
         }
         // ignore empty
         if (!entry.text) return
@@ -858,9 +753,7 @@ export default {
       }
 
       // 使用设备名称或设备类型
-      return senderInfo.deviceName ||
-             senderInfo.deviceType ||
-             '未知设备'
+      return senderInfo.deviceName || senderInfo.deviceType || '未知设备'
     },
     // 显示紧急通知
     showUrgentNotification(notificationData) {
@@ -1002,14 +895,14 @@ export default {
 }
 
 .chat-content {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
   padding: 4px 8px;
   border-radius: 4px;
   word-break: break-word;
 }
 
 .event-data {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
   padding: 4px;
   border-radius: 4px;
   font-size: 10px;

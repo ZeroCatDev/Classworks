@@ -1,16 +1,9 @@
 <template>
-  <div
-    v-if="visible"
-    class="init-overlay"
-  >
+  <div v-if="visible" class="init-overlay">
     <div class="init-container">
       <div class="init-header">
-        <div class="title">
-          欢迎使用 Classworks
-        </div>
-        <div class="subtitle">
-          请选择你的使用方式
-        </div>
+        <div class="title">欢迎使用 Classworks</div>
+        <div class="subtitle">请选择你的使用方式</div>
       </div>
 
       <!-- 主要选择卡片 -->
@@ -24,17 +17,10 @@
           <v-card-item>
             <div class="card-horizontal-layout">
               <div class="card-icon-wrapper">
-                <v-icon
-                  color="primary"
-                  size="48"
-                >
-                  mdi-new-box
-                </v-icon>
+                <v-icon color="primary" size="48"> mdi-new-box </v-icon>
               </div>
               <div class="card-content">
-                <div class="text-h6 font-weight-bold">
-                  初次使用
-                </div>
+                <div class="text-h6 font-weight-bold">初次使用</div>
                 <div class="text-body-2 text-medium-emphasis mt-1">
                   了解 Classworks KV 并开始使用
                 </div>
@@ -52,48 +38,26 @@
           <v-card-item>
             <div class="card-horizontal-layout">
               <div class="card-icon-wrapper">
-                <v-icon
-                  color="success"
-                  size="48"
-                >
-                  mdi-account-check
-                </v-icon>
+                <v-icon color="success" size="48"> mdi-account-check </v-icon>
               </div>
               <div class="card-content">
-                <div class="text-h6 font-weight-bold">
-                  已注册
-                </div>
-                <div class="text-body-2 text-medium-emphasis mt-1">
-                  使用设备 Namespace 登录
-                </div>
+                <div class="text-h6 font-weight-bold">已注册</div>
+                <div class="text-body-2 text-medium-emphasis mt-1">使用设备 Namespace 登录</div>
               </div>
             </div>
           </v-card-item>
         </v-card>
 
         <!-- Classworks KV 控制台 -->
-        <v-card
-          class="main-service-card clickable"
-          elevation="4"
-          @click="openClassworksKV"
-        >
+        <v-card class="main-service-card clickable" elevation="4" @click="openClassworksKV">
           <v-card-item>
             <div class="card-horizontal-layout">
               <div class="card-icon-wrapper">
-                <v-icon
-                  color="info"
-                  size="48"
-                >
-                  mdi-database-cog
-                </v-icon>
+                <v-icon color="info" size="48"> mdi-database-cog </v-icon>
               </div>
               <div class="card-content">
-                <div class="text-h6 font-weight-bold">
-                  Classworks KV
-                </div>
-                <div class="text-body-2 text-medium-emphasis mt-1">
-                  打开云端控制台管理数据
-                </div>
+                <div class="text-h6 font-weight-bold">Classworks KV</div>
+                <div class="text-body-2 text-medium-emphasis mt-1">打开云端控制台管理数据</div>
               </div>
             </div>
           </v-card-item>
@@ -101,28 +65,13 @@
       </div>
 
       <div class="options-buttons">
-        <v-btn
-          prepend-icon="mdi-laptop"
-          size="small"
-          variant="tonal"
-          @click="useLocalMode"
-        >
+        <v-btn prepend-icon="mdi-laptop" size="small" variant="tonal" @click="useLocalMode">
           使用本地模式
         </v-btn>
-        <v-btn
-          prepend-icon="mdi-flash"
-          size="small"
-          variant="tonal"
-          @click="handleAutoAuthorize"
-        >
+        <v-btn prepend-icon="mdi-flash" size="small" variant="tonal" @click="handleAutoAuthorize">
           授权码式授权（弃用）
         </v-btn>
-        <v-btn
-          prepend-icon="mdi-key"
-          size="small"
-          variant="tonal"
-          @click="showTokenDialog = true"
-        >
+        <v-btn prepend-icon="mdi-key" size="small" variant="tonal" @click="showTokenDialog = true">
           输入 Token
         </v-btn>
         <v-btn
@@ -135,27 +84,15 @@
         </v-btn>
       </div>
 
-
-      <div class="footer-hint">
-        完成授权后可使用作业同步、考试看板等在线功能。
-      </div>
+      <div class="footer-hint">完成授权后可使用作业同步、考试看板等在线功能。</div>
     </div>
 
     <!-- 对话框 -->
-    <v-dialog
-      v-model="showGuideDialog"
-      max-width="600"
-    >
-      <FirstTimeGuide
-        @close="showGuideDialog = false"
-        @success="handleGuideSuccess"
-      />
+    <v-dialog v-model="showGuideDialog" max-width="600">
+      <FirstTimeGuide @close="showGuideDialog = false" @success="handleGuideSuccess" />
     </v-dialog>
 
-    <v-dialog
-      v-model="showDeviceAuthDialog"
-      max-width="500"
-    >
+    <v-dialog v-model="showDeviceAuthDialog" max-width="500">
       <DeviceAuthDialog
         ref="deviceAuthDialog"
         :preconfig="deviceAuthPreconfig"
@@ -165,10 +102,7 @@
       />
     </v-dialog>
 
-    <v-dialog
-      v-model="showTokenDialog"
-      max-width="500"
-    >
+    <v-dialog v-model="showTokenDialog" max-width="500">
       <TokenInputDialog
         :show-cancel="true"
         @cancel="showTokenDialog = false"
@@ -176,10 +110,7 @@
       />
     </v-dialog>
 
-    <v-dialog
-      v-model="showAlternativeCodeDialog"
-      max-width="500"
-    >
+    <v-dialog v-model="showAlternativeCodeDialog" max-width="500">
       <AlternativeCodeDialog
         :show-cancel="true"
         @cancel="showAlternativeCodeDialog = false"
@@ -190,8 +121,8 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted, watch} from 'vue'
-import {getSetting, setSetting} from '@/utils/settings'
+import { ref, computed, onMounted, watch } from 'vue'
+import { getSetting, setSetting } from '@/utils/settings'
 import DeviceAuthDialog from './auth/DeviceAuthDialog.vue'
 import TokenInputDialog from './auth/TokenInputDialog.vue'
 import AlternativeCodeDialog from './auth/AlternativeCodeDialog.vue'
@@ -204,9 +135,9 @@ const props = defineProps({
       namespace: null,
       authCode: null,
       autoOpen: false,
-      autoExecute: false
-    })
-  }
+      autoExecute: false,
+    }),
+  },
 })
 
 const emit = defineEmits(['done'])
@@ -224,7 +155,9 @@ const showAlternativeCodeDialog = ref(false)
 const deviceAuthDialog = ref(null)
 
 const provider = computed(() => getSetting('server.provider'))
-const isKvProvider = computed(() => provider.value === 'kv-server' || provider.value === 'classworkscloud')
+const isKvProvider = computed(
+  () => provider.value === 'kv-server' || provider.value === 'classworkscloud',
+)
 const kvToken = computed(() => getSetting('server.kvToken'))
 
 // 设备认证预配置数据
@@ -233,7 +166,7 @@ const deviceAuthPreconfig = computed(() => {
     return {
       namespace: props.preconfig.namespace,
       password: props.preconfig.authCode || '',
-      autoExecute: props.preconfig.autoExecute || false
+      autoExecute: props.preconfig.autoExecute || false,
     }
   }
   return null
@@ -258,7 +191,7 @@ watch(
       }, 500)
     }
   },
-  {immediate: true, deep: true}
+  { immediate: true, deep: true },
 )
 
 onMounted(() => {
@@ -345,7 +278,7 @@ const openClassworksKV = () => {
 
 .init-header .subtitle {
   font-size: 14px;
-  opacity: .75;
+  opacity: 0.75;
   text-align: left;
 }
 
@@ -387,18 +320,18 @@ const openClassworksKV = () => {
 }
 
 .gradient-new {
-  background: linear-gradient(135deg, rgba(33, 150, 243, .12), rgba(103, 80, 164, 0.08) 60%);
-  border: 2px solid rgba(33, 150, 243, .2);
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.12), rgba(103, 80, 164, 0.08) 60%);
+  border: 2px solid rgba(33, 150, 243, 0.2);
 }
 
 .gradient-registered {
-  background: linear-gradient(135deg, rgba(76, 175, 80, .12), rgba(0, 184, 212, 0.08) 60%);
-  border: 2px solid rgba(76, 175, 80, .2);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.12), rgba(0, 184, 212, 0.08) 60%);
+  border: 2px solid rgba(76, 175, 80, 0.2);
 }
 
 .gradient-kv {
-  background: linear-gradient(135deg, rgba(0, 184, 212, .12), rgba(33, 150, 243, 0.08) 60%);
-  border: 2px solid rgba(0, 184, 212, .2);
+  background: linear-gradient(135deg, rgba(0, 184, 212, 0.12), rgba(33, 150, 243, 0.08) 60%);
+  border: 2px solid rgba(0, 184, 212, 0.2);
 }
 
 /* 其他选项 */
@@ -432,7 +365,7 @@ const openClassworksKV = () => {
 .footer-hint {
   margin-top: 24px;
   font-size: 13px;
-  opacity: .7;
+  opacity: 0.7;
   text-align: left;
 }
 

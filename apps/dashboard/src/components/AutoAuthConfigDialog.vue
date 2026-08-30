@@ -1,6 +1,6 @@
 <script setup>
-import {ref, computed, watch} from 'vue'
-import {apiClient} from '@/lib/api'
+import { ref, computed, watch } from 'vue'
+import { apiClient } from '@/lib/api'
 import {
   Dialog,
   DialogContent,
@@ -9,9 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {Button} from '@/components/ui/button'
-import {Input} from '@/components/ui/input'
-import {Label} from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -19,9 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {Checkbox} from '@/components/ui/checkbox'
-import {Loader2} from 'lucide-vue-next'
-import {toast} from 'vue-sonner'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Loader2 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -51,33 +51,36 @@ const dialogTitle = computed(() => {
 
 // 设备类型选项
 const deviceTypeOptions = [
-  {value: 'teacher', label: '教师'},
-  {value: 'student', label: '学生'},
-  {value: 'classroom', label: '班级一体机'},
-  {value: 'parent', label: '家长'},
-  {value: null, label: '未指定'},
+  { value: 'teacher', label: '教师' },
+  { value: 'student', label: '学生' },
+  { value: 'classroom', label: '班级一体机' },
+  { value: 'parent', label: '家长' },
+  { value: null, label: '未指定' },
 ]
 
 // 监听对话框打开状态，重置表单
-watch(() => props.modelValue, (isOpen) => {
-  if (isOpen) {
-    if (isEditMode.value) {
-      // 编辑模式：加载现有配置，显示原密码
-      formData.value = {
-        password: props.config.password || '', // 显示原密码（明文），如果是哈希则为空
-        deviceType: props.config.deviceType,
-        isReadOnly: props.config.isReadOnly ?? false, // 确保有默认值
-      }
-    } else {
-      // 创建模式：重置表单
-      formData.value = {
-        password: '',
-        deviceType: null,
-        isReadOnly: false,
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen) {
+      if (isEditMode.value) {
+        // 编辑模式：加载现有配置，显示原密码
+        formData.value = {
+          password: props.config.password || '', // 显示原密码（明文），如果是哈希则为空
+          deviceType: props.config.deviceType,
+          isReadOnly: props.config.isReadOnly ?? false, // 确保有默认值
+        }
+      } else {
+        // 创建模式：重置表单
+        formData.value = {
+          password: '',
+          deviceType: null,
+          isReadOnly: false,
+        }
       }
     }
-  }
-})
+  },
+)
 
 // 关闭对话框
 const closeDialog = () => {
@@ -104,10 +107,10 @@ const saveConfig = async () => {
       }
 
       await apiClient.updateAutoAuthConfig(
-          props.deviceUuid,
-          props.accountToken,
-          props.config.id,
-          updates
+        props.deviceUuid,
+        props.accountToken,
+        props.config.id,
+        updates,
       )
       toast.success('配置更新成功')
     } else {
@@ -121,11 +124,7 @@ const saveConfig = async () => {
         config.password = formData.value.password
       }
 
-      await apiClient.createAutoAuthConfig(
-          props.deviceUuid,
-          props.accountToken,
-          config
-      )
+      await apiClient.createAutoAuthConfig(props.deviceUuid, props.accountToken, config)
       toast.success('配置创建成功')
     }
 
@@ -154,16 +153,14 @@ const saveConfig = async () => {
         <div class="space-y-2">
           <Label for="password">
             授权密码
-            <span class="text-xs text-muted-foreground ml-2">
-              (可选)
-            </span>
+            <span class="text-xs text-muted-foreground ml-2"> (可选) </span>
           </Label>
           <Input
-              id="password"
-              v-model="formData.password"
-              :placeholder="isEditMode ? '留空表示无密码授权' : '留空表示无密码授权'"
-              autocomplete="new-password"
-              type="text"
+            id="password"
+            v-model="formData.password"
+            :placeholder="isEditMode ? '留空表示无密码授权' : '留空表示无密码授权'"
+            autocomplete="new-password"
+            type="text"
           />
           <p class="text-xs text-muted-foreground">
             {{ isEditMode ? '留空表示设为无密码' : '设备使用此密码可以自动获取访问授权' }}
@@ -175,33 +172,25 @@ const saveConfig = async () => {
           <Label for="deviceType">设备类型</Label>
           <Select v-model="formData.deviceType">
             <SelectTrigger id="deviceType">
-              <SelectValue placeholder="选择设备类型"/>
+              <SelectValue placeholder="选择设备类型" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem
-                  v-for="option in deviceTypeOptions"
-                  :key="option.value"
-                  :value="option.value"
+                v-for="option in deviceTypeOptions"
+                :key="option.value"
+                :value="option.value"
               >
                 {{ option.label }}
               </SelectItem>
             </SelectContent>
           </Select>
-          <p class="text-xs text-muted-foreground">
-            标识使用此配置授权的设备类型
-          </p>
+          <p class="text-xs text-muted-foreground">标识使用此配置授权的设备类型</p>
         </div>
 
         <!-- 只读权限 -->
         <div class="flex items-center space-x-2">
-          <Checkbox
-              id="isReadOnly"
-              v-model="formData.isReadOnly"
-          />
-          <Label
-              class="text-sm font-normal cursor-pointer"
-              for="isReadOnly"
-          >
+          <Checkbox id="isReadOnly" v-model="formData.isReadOnly" />
+          <Label class="text-sm font-normal cursor-pointer" for="isReadOnly">
             只读权限（仅允许读取数据，不能修改）
           </Label>
         </div>
@@ -218,20 +207,11 @@ const saveConfig = async () => {
       </div>
 
       <DialogFooter>
-        <Button
-            :disabled="isLoading"
-            type="button"
-            variant="outline"
-            @click="closeDialog"
-        >
+        <Button :disabled="isLoading" type="button" variant="outline" @click="closeDialog">
           取消
         </Button>
-        <Button
-            :disabled="isLoading"
-            type="button"
-            @click="saveConfig"
-        >
-          <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin"/>
+        <Button :disabled="isLoading" type="button" @click="saveConfig">
+          <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
           {{ isEditMode ? '保存' : '创建' }}
         </Button>
       </DialogFooter>

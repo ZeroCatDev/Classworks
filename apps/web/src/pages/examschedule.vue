@@ -2,22 +2,12 @@
   <v-container class="fill-height">
     <v-row>
       <v-col cols="12">
-        <v-card
-          border
-          class="elevation-12"
-        >
+        <v-card border class="elevation-12">
           <v-card-title class="d-flex align-center primary lighten-1 white--text py-3 px-4">
-            <v-icon
-              class="mr-2"
-              color="white"
-            >
-              mdi-calendar-check
-            </v-icon>
+            <v-icon class="mr-2" color="white"> mdi-calendar-check </v-icon>
             考试看板
           </v-card-title>
-          <v-card-subtitle>
-            不只是考试看板。
-          </v-card-subtitle>
+          <v-card-subtitle> 不只是考试看板。 </v-card-subtitle>
           <v-card-text>
             <!-- 错误提示 -->
             <v-alert
@@ -30,9 +20,7 @@
               @click:close="error = ''"
             >
               <div class="d-flex align-center">
-                <v-icon class="mr-2">
-                  mdi-alert-circle
-                </v-icon>
+                <v-icon class="mr-2"> mdi-alert-circle </v-icon>
                 {{ error }}
               </div>
             </v-alert>
@@ -48,9 +36,7 @@
               @click:close="success = ''"
             >
               <div class="d-flex align-center">
-                <v-icon class="mr-2">
-                  mdi-check-circle
-                </v-icon>
+                <v-icon class="mr-2"> mdi-check-circle </v-icon>
                 {{ success }}
               </div>
             </v-alert>
@@ -104,47 +90,29 @@
             </div>
 
             <!-- 加载状态 -->
-            <v-card
-              v-if="loading"
-              class="my-4"
-              outlined
-            >
+            <v-card v-if="loading" class="my-4" outlined>
               <v-card-text>
-                <v-skeleton-loader
-                  class="mx-auto"
-                  type="list-item-avatar-two-line@3"
-                />
+                <v-skeleton-loader class="mx-auto" type="list-item-avatar-two-line@3" />
               </v-card-text>
             </v-card>
 
             <!-- 配置列表 -->
-            <v-card
-              v-if="!loading && configs.length > 0"
-              class="my-4"
-              elevation="1"
-            >
+            <v-card v-if="!loading && configs.length > 0" class="my-4" elevation="1">
               <v-card-title class="d-flex align-center pa-4 bg-primary-lighten-5">
-                <v-icon class="mr-2">
-                  mdi-format-list-bulleted
-                </v-icon>
+                <v-icon class="mr-2"> mdi-format-list-bulleted </v-icon>
                 <span class="font-weight-bold">配置列表</span>
               </v-card-title>
               <v-list>
                 <v-list-item
-                  v-for="(config) in configs"
+                  v-for="config in configs"
                   :key="config.id"
                   class="border-b"
-                  style="cursor: pointer;"
+                  style="cursor: pointer"
                   @click="showEditDialog(config)"
                 >
                   <template #prepend>
-                    <v-avatar
-                      class="mr-2"
-                      color="primary"
-                    >
-                      <v-icon color="white">
-                        mdi-calendar-text
-                      </v-icon>
+                    <v-avatar class="mr-2" color="primary">
+                      <v-icon color="white"> mdi-calendar-text </v-icon>
                     </v-avatar>
                   </template>
 
@@ -153,21 +121,11 @@
                   </v-list-item-title>
                   <v-list-item-subtitle class="text-caption mt-1">
                     <div class="d-flex align-center">
-                      <v-icon
-                        class="mr-1"
-                        size="small"
-                      >
-                        mdi-information-outline
-                      </v-icon>
+                      <v-icon class="mr-1" size="small"> mdi-information-outline </v-icon>
                       {{ config.message || '无描述' }}
                     </div>
                     <div class="d-flex align-center mt-1">
-                      <v-icon
-                        class="mr-1"
-                        size="small"
-                      >
-                        mdi-book-multiple
-                      </v-icon>
+                      <v-icon class="mr-1" size="small"> mdi-book-multiple </v-icon>
                       {{ config.examInfos ? config.examInfos.length : 0 }} 堂考试
                     </div>
                   </v-list-item-subtitle>
@@ -202,30 +160,14 @@
             </v-card>
 
             <!-- 空状态 -->
-            <v-card
-              v-if="!loading && configs.length === 0"
-              class="my-4"
-              elevation="1"
-            >
+            <v-card v-if="!loading && configs.length === 0" class="my-4" elevation="1">
               <v-card-text class="text-center py-8">
-                <v-icon
-                  class="mb-4"
-                  color="grey-lighten-1"
-                  size="64"
-                >
-                  mdi-calendar-blank
-                </v-icon>
-                <h3 class="text-h6 mb-2 text-grey-darken-1">
-                  暂无配置
-                </h3>
+                <v-icon class="mb-4" color="grey-lighten-1" size="64"> mdi-calendar-blank </v-icon>
+                <h3 class="text-h6 mb-2 text-grey-darken-1">暂无配置</h3>
                 <p class="text-body-2 text-grey-darken-1 mb-4">
                   点击"新建配置"按钮创建您的第一个考试配置
                 </p>
-                <v-btn
-                  color="primary"
-                  prepend-icon="mdi-plus"
-                  @click="createNewConfig"
-                >
+                <v-btn color="primary" prepend-icon="mdi-plus" @click="createNewConfig">
                   新建配置
                 </v-btn>
               </v-card-text>
@@ -236,24 +178,16 @@
     </v-row>
 
     <!-- 重命名对话框 -->
-    <v-dialog
-      v-model="renameDialog"
-      max-width="500"
-    >
+    <v-dialog v-model="renameDialog" max-width="500">
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon
-            class="mr-2"
-            color="primary"
-          >
-            mdi-rename-box
-          </v-icon>
+          <v-icon class="mr-2" color="primary"> mdi-rename-box </v-icon>
           重命名配置
         </v-card-title>
         <v-card-text>
           <v-text-field
             v-model="newConfigName"
-            :rules="[v => !!v || '配置名称不能为空']"
+            :rules="[(v) => !!v || '配置名称不能为空']"
             label="配置名称"
             prepend-inner-icon="mdi-calendar-text"
             variant="outlined"
@@ -262,13 +196,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            color="grey"
-            variant="text"
-            @click="renameDialog = false"
-          >
-            取消
-          </v-btn>
+          <v-btn color="grey" variant="text" @click="renameDialog = false"> 取消 </v-btn>
           <v-btn
             :disabled="!newConfigName"
             :loading="renaming"
@@ -283,44 +211,21 @@
     </v-dialog>
 
     <!-- 编辑配置弹框 -->
-    <v-dialog
-      v-model="editDialog"
-      max-width="1200"
-      persistent
-    >
+    <v-dialog v-model="editDialog" max-width="1200" persistent>
       <v-card>
         <v-card-title class="d-flex align-center primary lighten-1 white--text py-3 px-4">
-          <v-icon
-            class="mr-2"
-            color="white"
-          >
-            mdi-pencil
-          </v-icon>
+          <v-icon class="mr-2" color="white"> mdi-pencil </v-icon>
           编辑考试配置
           <v-spacer />
-          <v-chip
-            v-if="editingConfig"
-            class="mr-2"
-            color="white"
-            size="small"
-            text-color="primary"
-          >
+          <v-chip v-if="editingConfig" class="mr-2" color="white" size="small" text-color="primary">
             ID: {{ editingConfig.id }}
           </v-chip>
 
-          <v-btn
-            color="white"
-            icon="mdi-close"
-            variant="text"
-            @click="closeEditDialog"
-          >
+          <v-btn color="white" icon="mdi-close" variant="text" @click="closeEditDialog">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text
-          class="pa-4"
-          style="max-height: 70vh; overflow-y: auto;"
-        >
+        <v-card-text class="pa-4" style="max-height: 70vh; overflow-y: auto">
           <ExamConfigEditor
             v-if="editingConfig"
             ref="configEditor"
@@ -333,12 +238,7 @@
           />
         </v-card-text>
         <v-card-actions class="pa-4">
-          <v-btn
-            color="grey"
-            prepend-icon="mdi-close"
-            variant="outlined"
-            @click="closeEditDialog"
-          >
+          <v-btn color="grey" prepend-icon="mdi-close" variant="outlined" @click="closeEditDialog">
             关闭
           </v-btn>
           <v-spacer />
@@ -356,27 +256,13 @@
     </v-dialog>
 
     <!-- 导入配置弹框 -->
-    <v-dialog
-      v-model="importDialog"
-      max-width="800"
-      persistent
-    >
+    <v-dialog v-model="importDialog" max-width="800" persistent>
       <v-card>
         <v-card-title class="d-flex align-center primary lighten-1 white--text py-3 px-4">
-          <v-icon
-            class="mr-2"
-            color="white"
-          >
-            mdi-import
-          </v-icon>
+          <v-icon class="mr-2" color="white"> mdi-import </v-icon>
           导入考试配置
           <v-spacer />
-          <v-btn
-            color="white"
-            icon="mdi-close"
-            variant="text"
-            @click="closeImportDialog"
-          >
+          <v-btn color="white" icon="mdi-close" variant="text" @click="closeImportDialog">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
@@ -395,32 +281,26 @@
 
           <v-textarea
             v-model="importJson"
-            :rules="[v => !!v || 'JSON内容不能为空']"
+            :rules="[(v) => !!v || 'JSON内容不能为空']"
             label="请输入JSON配置"
-            placeholder="{
-  &quot;examName&quot;: &quot;期末考试&quot;,
-  &quot;message&quot;: &quot;考试信息&quot;,
-  &quot;room&quot;: &quot;01&quot;,
-  &quot;examInfos&quot;: [
+            placeholder='{
+  "examName": "期末考试",
+  "message": "考试信息",
+  "room": "01",
+  "examInfos": [
     {
-      &quot;name&quot;: &quot;语文&quot;,
-      &quot;start&quot;: &quot;2025/12/14 09:00&quot;,
-      &quot;end&quot;: &quot;2025/12/14 11:00&quot;
+      "name": "语文",
+      "start": "2025/12/14 09:00",
+      "end": "2025/12/14 11:00"
     }
   ]
-}"
+}'
             prepend-inner-icon="mdi-code-json"
             rows="15"
             variant="outlined"
           />
 
-          <v-alert
-            border="start"
-            class="mt-2"
-            density="compact"
-            type="info"
-            variant="tonal"
-          >
+          <v-alert border="start" class="mt-2" density="compact" type="info" variant="tonal">
             <div class="text-caption">
               <strong>提示:</strong>
               <ul class="mt-1">
@@ -457,24 +337,16 @@
     </v-dialog>
 
     <!-- 日期选择弹框 -->
-    <v-dialog
-      v-model="datePickerDialog"
-      max-width="500"
-      persistent
-    >
+    <v-dialog v-model="datePickerDialog" max-width="500" persistent>
       <v-card>
         <v-card-title class="d-flex align-center primary lighten-1 white--text py-3 px-4">
-          <v-icon
-            class="mr-2"
-            color="white"
-          >
-            mdi-calendar
-          </v-icon>
+          <v-icon class="mr-2" color="white"> mdi-calendar </v-icon>
           选择起始日期
         </v-card-title>
         <v-card-text class="pa-4">
           <p class="mb-4 text-body-2">
-            检测到配置中使用了虚拟日期格式 (0000-00-XX)，请选择第一天的日期，系统将自动推算其他日期。
+            检测到配置中使用了虚拟日期格式
+            (0000-00-XX)，请选择第一天的日期，系统将自动推算其他日期。
           </p>
 
           <v-text-field
@@ -499,12 +371,7 @@
           </v-alert>
         </v-card-text>
         <v-card-actions class="pa-4">
-          <v-btn
-            color="grey"
-            prepend-icon="mdi-close"
-            variant="outlined"
-            @click="cancelDatePicker"
-          >
+          <v-btn color="grey" prepend-icon="mdi-close" variant="outlined" @click="cancelDatePicker">
             取消
           </v-btn>
           <v-spacer />
@@ -522,37 +389,18 @@
     </v-dialog>
 
     <!-- AI生成提示词弹框 -->
-    <v-dialog
-      v-model="aiDialog"
-      max-width="900"
-      persistent
-    >
+    <v-dialog v-model="aiDialog" max-width="900" persistent>
       <v-card>
         <v-card-title class="d-flex align-center purple lighten-1 white--text py-3 px-4">
-          <v-icon
-            class="mr-2"
-            color="white"
-          >
-            mdi-brain
-          </v-icon>
+          <v-icon class="mr-2" color="white"> mdi-brain </v-icon>
           AI生成考试配置
           <v-spacer />
-          <v-btn
-            color="white"
-            icon="mdi-close"
-            variant="text"
-            @click="closeAIDialog"
-          >
+          <v-btn color="white" icon="mdi-close" variant="text" @click="closeAIDialog">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
         <v-card-text class="pa-4">
-          <v-alert
-            border="start"
-            class="mb-4"
-            type="info"
-            variant="tonal"
-          >
+          <v-alert border="start" class="mb-4" type="info" variant="tonal">
             <div class="d-flex align-center">
               <div>
                 复制下方提示词到任意AI工具（如ChatGPT、Claude、Copilot等），描述您的考试安排，AI将生成符合格式的JSON配置。生成后复制JSON内容，通过“导入配置”按钮导入即可。
@@ -562,9 +410,7 @@
 
           <div class="mb-3">
             <div class="d-flex justify-space-between align-center mb-2">
-              <h3 class="text-h6">
-                提示词模板
-              </h3>
+              <h3 class="text-h6">提示词模板</h3>
               <v-btn
                 :color="copied ? 'success' : 'primary'"
                 :prepend-icon="copied ? 'mdi-check' : 'mdi-content-copy'"
@@ -576,30 +422,17 @@
               </v-btn>
             </div>
 
-            <v-card
-              class="pa-4"
-              variant="outlined"
-            >
+            <v-card class="pa-4" variant="outlined">
               <pre class="ai-prompt-text">{{ aiPrompt }}</pre>
             </v-card>
           </div>
         </v-card-text>
         <v-card-actions class="pa-4">
-          <v-btn
-            color="grey"
-            prepend-icon="mdi-close"
-            variant="outlined"
-            @click="closeAIDialog"
-          >
+          <v-btn color="grey" prepend-icon="mdi-close" variant="outlined" @click="closeAIDialog">
             关闭
           </v-btn>
           <v-spacer />
-          <v-btn
-            color="success"
-            prepend-icon="mdi-import"
-            variant="outlined"
-            @click="goToImport"
-          >
+          <v-btn color="success" prepend-icon="mdi-import" variant="outlined" @click="goToImport">
             去导入配置
           </v-btn>
         </v-card-actions>
@@ -610,13 +443,13 @@
 
 <script>
 import dataProvider from '@/utils/dataProvider'
-import {getSetting} from '@/utils/settings'
+import { getSetting } from '@/utils/settings'
 import ExamConfigEditor from '@/components/ExamConfigEditor.vue'
 
 export default {
   name: 'ExamScheduleManager',
   components: {
-    ExamConfigEditor
+    ExamConfigEditor,
   },
   data() {
     return {
@@ -643,7 +476,7 @@ export default {
       pendingImportConfig: null,
       // AI生成相关
       aiDialog: false,
-      copied: false
+      copied: false,
     }
   },
   computed: {
@@ -692,7 +525,7 @@ Date and Time Handling:
 * For multiple exams, calculate dates sequentially in order
 
 Now please generate the exam configuration based on the above rules:`
-    }
+    },
   },
   async mounted() {
     await this.loadConfigs()
@@ -712,7 +545,8 @@ Now please generate the exam configuration based on the above rules:`
       // 秋季学期: 9月初-次年1月底 (暑假结束-寒假开始)
 
       let examName = '新考试'
-      let message = '请保持卷面整洁，字迹清晰，遵守考场纪律，诚信应考。\n听到终考铃声时,请立即起立并停止作答。'
+      let message =
+        '请保持卷面整洁，字迹清晰，遵守考场纪律，诚信应考。\n听到终考铃声时,请立即起立并停止作答。'
 
       // 秋季学期 (9-1月)
       if (month >= 9 || month <= 1) {
@@ -734,7 +568,7 @@ Now please generate the exam configuration based on the above rules:`
         } else if (month === 12) {
           // 12月 - 第四次月考
           examName = '第四次月考'
-        } else if (month === 1 ) {
+        } else if (month === 1) {
           // 1月上旬 - 期末考试
           examName = '期末考试'
         }
@@ -778,14 +612,14 @@ Now please generate the exam configuration based on the above rules:`
             {
               name: '数学',
               start: '2025/01/15 09:00',
-              end: '2025/01/15 11:00'
+              end: '2025/01/15 11:00',
             },
             {
               name: '英语',
               start: '2025/01/16 14:00',
-              end: '2025/01/16 16:00'
-            }
-          ]
+              end: '2025/01/16 16:00',
+            },
+          ],
         },
         {
           id: 'exam_example_002',
@@ -795,14 +629,14 @@ Now please generate the exam configuration based on the above rules:`
             {
               name: '物理',
               start: '2025/01/20 10:00',
-              end: '2025/01/20 12:00'
+              end: '2025/01/20 12:00',
             },
             {
               name: '化学',
               start: '2025/01/21 14:00',
-              end: '2025/01/21 16:00'
-            }
-          ]
+              end: '2025/01/21 16:00',
+            },
+          ],
         },
         {
           id: 'exam_example_003',
@@ -812,19 +646,19 @@ Now please generate the exam configuration based on the above rules:`
             {
               name: '语文',
               start: '2025/01/25 09:00',
-              end: '2025/01/25 11:30'
-            }
-          ]
-        }
+              end: '2025/01/25 11:30',
+            },
+          ],
+        },
       ]
 
       // 保存配置列表
-      const configList = exampleConfigs.map(c => ({id: c.id}))
+      const configList = exampleConfigs.map((c) => ({ id: c.id }))
       await dataProvider.saveData('es_list', configList)
 
       // 保存每个配置的详细信息
       for (let config of exampleConfigs) {
-        const configData = {...config}
+        const configData = { ...config }
         delete configData.id
         await dataProvider.saveData(`es_${config.id}`, configData)
       }
@@ -853,7 +687,7 @@ Now please generate the exam configuration based on the above rules:`
               if (detailResponse) {
                 this.configs.push({
                   id: configItem.id,
-                  ...detailResponse
+                  ...detailResponse,
                 })
               }
             } catch (err) {
@@ -908,9 +742,9 @@ Now please generate the exam configuration based on the above rules:`
           {
             name: '语文',
             start: formatTime(tomorrow),
-            end: formatTime(endTime)
-          }
-        ]
+            end: formatTime(endTime),
+          },
+        ],
       }
 
       try {
@@ -923,19 +757,19 @@ Now please generate the exam configuration based on the above rules:`
         // 更新本地配置列表
         this.configs.push({
           id: newId,
-          ...defaultConfig
+          ...defaultConfig,
         })
 
         // 更新存储的配置列表
-        const currentList = this.configs.map(c => ({id: c.id}))
+        const currentList = this.configs.map((c) => ({ id: c.id }))
         const listResponse = await dataProvider.saveData('es_list', currentList)
         if (!listResponse) {
           throw new Error(listResponse.error?.message || '更新列表失败')
         }
 
-this.$message.success('新配置创建成功')
+        this.$message.success('新配置创建成功')
         // 直接打开编辑对话框
-        const newConfig = this.configs.find(c => c.id === newId)
+        const newConfig = this.configs.find((c) => c.id === newId)
         if (newConfig) {
           this.editingConfig = newConfig
           this.editDialog = true
@@ -944,7 +778,6 @@ this.$message.success('新配置创建成功')
         this.$message.error('创建配置失败: ' + err.message)
       }
     },
-
 
     /**
      * 显示重命名对话框
@@ -968,7 +801,7 @@ this.$message.success('新配置创建成功')
         const configData = {
           examName: this.newConfigName,
           message: this.configToRename.message,
-          examInfos: this.configToRename.examInfos
+          examInfos: this.configToRename.examInfos,
         }
 
         const saveResponse = await dataProvider.saveData(`es_${this.configToRename.id}`, configData)
@@ -977,11 +810,10 @@ this.$message.success('新配置创建成功')
         }
 
         // 更新本地配置列表中的对应项
-        const configIndex = this.configs.findIndex(c => c.id === this.configToRename.id)
+        const configIndex = this.configs.findIndex((c) => c.id === this.configToRename.id)
         if (configIndex !== -1) {
           this.configs[configIndex].examName = this.newConfigName
         }
-
 
         this.$message.success('配置重命名成功')
         this.renameDialog = false
@@ -1011,7 +843,6 @@ this.$message.success('新配置创建成功')
       this.saving = false
     },
 
-
     /**
      * 在弹框中保存配置
      */
@@ -1032,35 +863,28 @@ this.$message.success('新配置创建成功')
      * 配置保存成功回调
      */
     onConfigSaved() {
-
-
       this.$message.success('配置保存成功！')
       this.loadConfigs() // 重新加载配置列表
 
-
-          this.$message.success('配置保存成功！')
+      this.$message.success('配置保存成功！')
     },
 
     /**
      * 配置保存错误回调
      */
     onConfigError(error) {
-
       this.$message.error(error || '保存配置时发生错误')
 
-        this.$message.error(error || '保存配置时发生错误')
+      this.$message.error(error || '保存配置时发生错误')
     },
 
     /**
      * 配置打开成功回调
      */
     onConfigOpened() {
-
       this.$message.success('配置已在新窗口中打开')
 
-
-
-        this.$message.success('配置已在新窗口中打开')
+      this.$message.success('配置已在新窗口中打开')
     },
 
     /**
@@ -1068,15 +892,13 @@ this.$message.success('新配置创建成功')
      */
     onConfigDeleted(result) {
       if (result.success) {
-
-        this.$message.success(result.message || "配置删除成功")
+        this.$message.success(result.message || '配置删除成功')
         // 关闭编辑对话框
         this.editDialog = false
         // 刷新配置列表
         this.loadConfigs()
       } else {
-
-        this.$message.error(result.message || "删除失败")
+        this.$message.error(result.message || '删除失败')
       }
     },
 
@@ -1141,7 +963,7 @@ this.$message.success('新配置创建成功')
           count,
           span: maxDay - minDay + 1,
           minDay,
-          maxDay
+          maxDay,
         }
       }
 
@@ -1230,7 +1052,7 @@ this.$message.success('新配置创建成功')
         examName: config.examName || examTypeInfo.examName,
         message: config.message || examTypeInfo.message,
         room: config.room || getSetting('server.classNumber') || '',
-        examInfos: []
+        examInfos: [],
       }
 
       // 验证和补全 examInfos
@@ -1263,7 +1085,7 @@ this.$message.success('新配置创建成功')
           start: exam.start,
           end: exam.end,
           alertTime: exam.alertTime !== undefined ? exam.alertTime : 15,
-          materials: exam.materials || []
+          materials: exam.materials || [],
         })
       }
 
@@ -1383,11 +1205,11 @@ this.$message.success('新配置创建成功')
         // 更新本地配置列表
         this.configs.push({
           id: newId,
-          ...config
+          ...config,
         })
 
         // 更新存储的配置列表
-        const currentList = this.configs.map(c => ({id: c.id}))
+        const currentList = this.configs.map((c) => ({ id: c.id }))
         const listResponse = await dataProvider.saveData('es_list', currentList)
         if (!listResponse) {
           throw new Error(listResponse.error?.message || '更新列表失败')
@@ -1397,7 +1219,7 @@ this.$message.success('新配置创建成功')
         this.closeImportDialog()
 
         // 直接打开编辑对话框
-        const newConfig = this.configs.find(c => c.id === newId)
+        const newConfig = this.configs.find((c) => c.id === newId)
         if (newConfig) {
           this.editingConfig = newConfig
           this.editDialog = true
@@ -1462,8 +1284,8 @@ this.$message.success('新配置创建成功')
     goToImport() {
       this.aiDialog = false
       this.showImportDialog()
-    }
-  }
+    },
+  },
 }
 </script>
 
