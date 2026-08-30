@@ -1,0 +1,9 @@
+node_modules
+.git
+.github
+.claude
+apps/web
+apps/dashboard
+examples
+*.md
+!packages/shared/package.json

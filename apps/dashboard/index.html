@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // 在 CSS 加载前尽早应用系统深色模式，避免首次渲染闪烁
+      (function () {
+        try {
+          var root = document.documentElement;
+          var storageKey = 'theme';
+          var hasLocal = false;
+          try {
+            hasLocal = localStorage.getItem(storageKey) != null;
+          } catch (_) {}
+
+          var prefersDark = false;
+          try {
+            prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          } catch (_) {}
+
+          var initialDark = hasLocal
+            ? localStorage.getItem(storageKey) === 'dark'
+            : prefersDark;
+
+          root.classList.toggle('dark', !!initialDark);
+
+          // 跟随系统主题变化（若未手动设置主题）
+          var mq;
+          try {
+            mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+          } catch (_) {}
+          if (mq) {
+            var onChange = function (e) {
+              var locked = false;
+              try { locked = localStorage.getItem(storageKey) != null; } catch (_) {}
+              if (!locked) root.classList.toggle('dark', e.matches);
+            };
+            if (mq.addEventListener) mq.addEventListener('change', onChange);
+            else if (mq.addListener) mq.addListener(onChange);
+          }
+        } catch (_) {}
+      })();
+    </script>
+    <title>Classworks KV</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

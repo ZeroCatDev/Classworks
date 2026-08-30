@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model KVStore {
+  deviceId  Int
+  key       String
+  value     Json
+  creatorIp String?  @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联关系
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@id([deviceId, key])
+}
+
+model Account {
+  id               String   @id @default(cuid())
+  provider         String   // OAuth提供者 (例如: google, github, gitlab等)
+  providerId       String   // 提供者返回的用户唯一ID
+  email            String?  // 用户邮箱
+  name             String?  // 用户名称
+  avatarUrl        String?  // 用户头像URL
+  providerData     Json?    // OAuth提供者返回的完整信息
+  accessToken      String?  @db.Text // 账户访问令牌
+  refreshToken     String?  @db.Text // 刷新令牌
+  refreshTokenExpiry DateTime? // 刷新令牌过期时间
+  tokenVersion     Int      @default(1) // 令牌版本，用于令牌失效
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // 关联的设备
+  devices          Device[]
+
+  @@unique([provider, providerId]) // 确保同一提供者的用户ID唯一
+}
+
+model Device {
+  id           Int        @id @default(autoincrement())
+  uuid         String     @unique  // 设备的唯一标识符
+  name         String?
+  accountId    String?    // 关联的账户ID
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  password     String?
+  passwordHint String?
+  namespace    String?    @unique // 用户自定义的唯一命名空间
+
+  // 关联关系
+  account      Account?   @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  appInstalls  AppInstall[]
+  kvStore      KVStore[]  // 设备相关的KV存储
+  autoAuths    AutoAuth[] // 自动授权配置
+}
+
+model AppInstall {
+  id               String   @id @default(cuid())
+  deviceId         Int      // 关联的设备ID
+  appId            String   // 应用ID (SHA256 hash)
+  token            String   @unique // 应用安装的唯一访问令牌,拥有完整KV读写权限
+  note             String?  // 安装备注
+  isReadOnly       Boolean  @default(false) // 是否只读
+  deviceType       String?  // 设备类型: teacher(教师), student(学生), classroom(班级一体机), parent(家长)
+  installedAt      DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // 关联关系
+  device      Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+}
+
+model AutoAuth {
+  id               String   @id @default(cuid())
+  deviceId         Int      // 关联的设备ID
+  password         String?  // 配置密码,可以为空
+  deviceType       String?  // 自动设备类型: teacher(教师), student(学生), classroom(班级一体机), parent(家长)
+  isReadOnly       Boolean  @default(false) // 是否只读
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // 关联关系
+  device      Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceId, password]) // 同一设备的密码必须唯一
+}

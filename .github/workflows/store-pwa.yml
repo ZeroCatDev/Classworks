@@ -5,13 +5,15 @@ on:
     branches: ["main"]
     paths:
       - ".github/workflows/store-pwa.yml"
-      - "index.html"
-      - "package.json"
+      - "apps/web/index.html"
+      - "apps/web/package.json"
+      - "apps/web/jsconfig.json"
+      - "apps/web/vite.config.mjs"
+      - "apps/web/public/**"
+      - "apps/web/scripts/**"
+      - "apps/web/src/**"
+      - "packages/**"
       - "pnpm-lock.yaml"
-      - "public/**"
-      - "scripts/**"
-      - "src/**"
-      - "vite.config.mjs"
   workflow_dispatch:
     inputs:
       production_url:
@@ -36,23 +38,13 @@ jobs:
       STORE_PRODUCTION_URL: ${{ inputs.production_url || 'https://cs.houlang.cloud/' }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Use Node.js 24
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
         with:
-          node-version: "24.x"
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          node-version: "24"
 
       - name: Build and validate PWA
-        run: pnpm run build:store
+        run: pnpm --filter @classworks/web run build:store
 
       - name: Create store handoff metadata
         run: |
@@ -69,7 +61,7 @@ jobs:
               productionUrl: url,
               manifestUrl: new URL('manifest.webmanifest', url).toString(),
               packageSource: 'Use PWABuilder or Microsoft Partner Center with the production URL above.',
-              validationArtifact: 'dist/',
+              validationArtifact: 'apps/web/dist/',
               notes: [
                 'Serve the app over HTTPS before packaging.',
                 'Run this workflow after changing manifest, icons, service worker, or public assets.',
@@ -83,7 +75,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: classworks-pwa-dist
-          path: dist
+          path: apps/web/dist
           if-no-files-found: error
 
       - name: Upload Microsoft Store handoff
