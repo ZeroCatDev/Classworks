@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@radix-ui/react-slot": "^1.2.3",
+    "@classworks/shared": "workspace:*",
     "@tailwindcss/vite": "^4.1.13",
     "@tanstack/vue-table": "^8.21.3",
     "@vee-validate/zod": "^4.15.1",
@@ -17,7 +17,6 @@
     "axios": "^1.12.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.544.0",
     "lucide-vue-next": "^0.544.0",
     "marked": "^16.3.0",
     "pinia": "^3.0.3",

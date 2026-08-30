@@ -1,25 +1,45 @@
-FROM node:22-alpine
+FROM node:22-alpine AS base
 
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
-# Set production environment by default
+# --- dependency layer (changes only when package files change) ---
+FROM base AS deps
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/server/package.json apps/server/
+COPY packages/shared/package.json packages/shared/
+
+RUN pnpm install --frozen-lockfile --prod
+
+# --- build layer (prisma generate, etc.) ---
+FROM base AS build
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/server/package.json apps/server/
+COPY packages/shared/package.json packages/shared/
+
+RUN pnpm install --frozen-lockfile
+
+COPY packages/shared/ packages/shared/
+COPY apps/server/ apps/server/
+
+RUN cd apps/server && npx prisma generate
+
+# --- runtime ---
+FROM base
+
 ENV NODE_ENV=production
+WORKDIR /app
 
-COPY . .
-
-# Install dependencies
-RUN npm install
-
-# Copy all application files
-
-
-# Make the management script executable
-RUN chmod +x classworks.js
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/server/node_modules ./apps/server/node_modules
+COPY --from=build /app/packages/shared ./packages/shared
+COPY --from=build /app/apps/server ./apps/server
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 EXPOSE 3000
 
-# Use the management script as entrypoint
+WORKDIR /app/apps/server
 ENTRYPOINT ["node", "classworks.js"]
-
-# Default command (can be overridden)
 CMD []

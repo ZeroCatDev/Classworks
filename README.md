@@ -10,6 +10,17 @@
 
 请打开 [https://cs.houlangs.com](https://cs.houlang.cloud) 立刻使用
 
+## 项目结构
+
+本仓库是 **pnpm monorepo**，包含以下应用和共享包：
+
+| 包名                    | 路径              | 说明                                      |
+| ----------------------- | ----------------- | ----------------------------------------- |
+| `@classworks/web`       | `apps/web`        | 作业板 PWA（Vue 3 + Vuetify 3）           |
+| `@classworks/server`    | `apps/server`     | KV 后端（Express 5 + Prisma + Socket.IO） |
+| `@classworks/dashboard` | `apps/dashboard`  | 管理面板（Vue 3 + Tailwind 4）            |
+| `@classworks/shared`    | `packages/shared` | 共享常量（请求头、服务器地址）            |
+
 ## 交流
 
 QQ：[964979747](https://qm.qq.com/q/4RX45b1Oac)
@@ -18,8 +29,8 @@ QQ：[964979747](https://qm.qq.com/q/4RX45b1Oac)
 
 ### 环境准备
 
-- Node.js 16+
-- pnpm
+- Node.js 20+
+- pnpm 9+
 
 ### 安装步骤
 
@@ -31,13 +42,37 @@ cd Classworks
 # 安装依赖
 pnpm install
 
-# 启动开发服务器
+# 启动所有开发服务器
 pnpm run dev
+
+# 或启动单个应用
+pnpm run dev:web          # 作业板 PWA (localhost:3031)
+pnpm run dev:server       # KV 后端 (localhost:3000)
+pnpm run dev:dashboard    # 管理面板
 
 # 构建生产版本
 pnpm run build
+
+# 代码检查
+pnpm run lint
+pnpm run format:check
 ```
 
+### 后端配置
+
+`apps/server` 需要 PostgreSQL 数据库。复制环境变量模板后配置：
+
+```bash
+cp apps/server/.env.example apps/server/.env
+# 编辑 .env 设置 DATABASE_URL 等
+```
+
+### Docker 部署
+
+```bash
+docker build -f apps/server/Dockerfile -t classworks .
+docker run -p 3000:3000 -e DATABASE_URL=your_db_url classworks
+```
 
 ## 🤝 参与贡献
 
@@ -60,5 +95,4 @@ ZeroCat 的项目 遵循 [Contributor Covenant](http://contributor-covenant.org/
 
 ZeroCat 社区项目遵循 [AGPL-3.0 许可证](LICENSE)。
 
-
-Copyright (C) 2020-2026  Sunwuyuan.
+Copyright (C) 2020-2026 Sunwuyuan.

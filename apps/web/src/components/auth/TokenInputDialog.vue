@@ -11,24 +11,13 @@
         placeholder="粘贴从授权页面获取的 Token"
         variant="outlined"
       />
-      <v-alert
-        v-if="error"
-        class="mt-3"
-        type="error"
-        variant="tonal"
-      >
+      <v-alert v-if="error" class="mt-3" type="error" variant="tonal">
         {{ error }}
       </v-alert>
     </v-card-text>
     <v-card-actions>
       <v-spacer />
-      <v-btn
-        v-if="showCancel"
-        variant="text"
-        @click="$emit('cancel')"
-      >
-        取消
-      </v-btn>
+      <v-btn v-if="showCancel" variant="text" @click="$emit('cancel')"> 取消 </v-btn>
       <v-btn
         :disabled="!token || verifying"
         :loading="verifying"
@@ -42,15 +31,16 @@
 </template>
 
 <script setup>
-import {ref} from 'vue'
-import {getSetting, setSetting} from '@/utils/settings'
+import { ref } from 'vue'
+import { getSetting, setSetting } from '@/utils/settings'
 import axios from '@/axios/axios'
+import { HEADER_APP_TOKEN } from '@classworks/shared'
 
 defineProps({
   showCancel: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const emit = defineEmits(['success', 'cancel'])
@@ -71,14 +61,13 @@ const saveToken = async () => {
     await axios.get(`${serverUrl}/kv/_info`, {
       headers: {
         Accept: 'application/json',
-        'x-app-token': token.value,
+        [HEADER_APP_TOKEN]: token.value,
       },
     })
 
     // 验证通过再保存
     setSetting('server.kvToken', token.value)
     emit('success')
-
   } catch (err) {
     const status = err?.response?.status
     if (status === 401 || status === 403) {
@@ -98,6 +87,6 @@ defineExpose({
   reset: () => {
     token.value = ''
     error.value = ''
-  }
+  },
 })
 </script>

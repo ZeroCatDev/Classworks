@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "nodemon node .bin/www",
+    "dev": "nodemon ./bin/www",
+    "build": "prisma generate",
     "get-token": "node ./cli/get-token.js"
   },
   "dependencies": {
+    "@classworks/shared": "workspace:*",
     "@opentelemetry/auto-instrumentations-node": "^0.59.0",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.205.0",
     "@opentelemetry/resources": "^2.0.1",

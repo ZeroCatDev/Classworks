@@ -20,6 +20,11 @@ updates:
     directory: "/apps/dashboard"
     schedule:
       interval: "weekly"
+  # packages/shared
+  - package-ecosystem: "npm"
+    directory: "/packages/shared"
+    schedule:
+      interval: "weekly"
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"

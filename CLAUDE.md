@@ -4,69 +4,76 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Classworks (作业板) is a homework board widget for classroom large screens. It's a Vue 3 + Vuetify 3 PWA with real-time sync via Socket.IO. The UI is in Chinese.
+Classworks (作业板) is a pnpm monorepo for a homework board platform designed for classroom large screens. The UI is in Chinese.
+
+| App        | Package                 | Path              | Stack                                |
+| ---------- | ----------------------- | ----------------- | ------------------------------------ |
+| 作业板 PWA | `@classworks/web`       | `apps/web`        | Vue 3 + Vuetify 3, Vite 5            |
+| KV 后端    | `@classworks/server`    | `apps/server`     | Express 5 + Prisma 7 + Socket.IO     |
+| 管理面板   | `@classworks/dashboard` | `apps/dashboard`  | Vue 3 + Tailwind 4 + reka-ui, Vite 7 |
+| 共享常量   | `@classworks/shared`    | `packages/shared` | Pure JS (ESM)                        |
 
 ## Commands
 
+All commands run from the repo root.
+
 ```bash
-pnpm install          # Install dependencies
-pnpm run dev          # Dev server at localhost:3031 (network-accessible)
-pnpm run build        # Production build (auto-runs prebuild to regenerate sound list)
-pnpm run preview      # Preview production build
-pnpm run lint         # ESLint with auto-fix
+pnpm install              # Install all workspace dependencies
+
+# All apps
+pnpm run dev              # Dev servers in parallel (web :3031, server :3000, dashboard vite default)
+pnpm run build            # Build all apps
+pnpm run lint             # ESLint with auto-fix
+pnpm run format           # Prettier write
+pnpm run format:check     # Prettier check
+
+# Single app
+pnpm run dev:web
+pnpm run dev:server
+pnpm run dev:dashboard
+pnpm run build:web
+pnpm run build:server     # prisma generate
+pnpm run build:dashboard
+
+# Filter syntax
+pnpm --filter @classworks/web run dev
+pnpm --filter @classworks/server run start
 ```
 
 ## Tech Stack
 
-- **Framework**: Vue 3 (Composition API + Options API mixed), JavaScript (no TypeScript)
-- **UI**: Vuetify 3 (Material Design 3), `@mdi/font` icons, SCSS
-- **State**: Pinia 3
-- **Routing**: Vue Router 4 with file-based routes (`unplugin-vue-router` + `vite-plugin-vue-layouts`)
-- **Build**: Vite 5, pnpm
-- **Real-time**: Socket.IO client (singleton in `src/utils/socketClient.js`)
-- **Data**: Pluggable KV provider abstraction (`src/utils/dataProvider.js`) with IndexedDB local and HTTP server backends
-- **PWA**: `vite-plugin-pwa` with Workbox service worker
+- **Language**: JavaScript (no TypeScript), ESM throughout
+- **apps/web**: Vue 3 (mixed Composition/Options API), Vuetify 3, Pinia, Vue Router 4 (file-based routes), Socket.IO client, PWA (Workbox), SCSS
+- **apps/server**: Express 5, Prisma 7 + PostgreSQL, Socket.IO server, JWT auth, OpenTelemetry, Prometheus metrics
+- **apps/dashboard**: Vue 3 (Composition API), Tailwind CSS 4, reka-ui/radix-vue, Pinia, vee-validate + zod
+- **packages/shared**: Header constants, server URLs — imported by all apps
 
 ## Architecture
 
-### Data Layer
+### Shared Package (`packages/shared`)
 
-`src/utils/dataProvider.js` abstracts data operations. It routes to either:
-- `src/utils/providers/kvLocalProvider.js` — IndexedDB via `idb`
-- `src/utils/providers/kvServerProvider.js` — HTTP API via axios
+`@classworks/shared` exports constants used across all apps: HTTP header names (`HEADER_APP_TOKEN`, `HEADER_SITE_KEY`, `HEADER_DEVICE_UUID`), default server URLs, and the cloud server list. Import from `@classworks/shared` or `@classworks/shared/headers`.
 
-Server failover is handled by `src/utils/serverRotation.js`.
+### Data Layer (apps/web)
+
+`dataProvider.js` routes to either `kvLocalProvider.js` (IndexedDB) or `kvServerProvider.js` (HTTP). Server failover via `serverRotation.js`.
 
 ### Real-time Layer
 
-`src/utils/socketClient.js` — Socket.IO singleton with room-based token join/leave for live updates.
+Client: `apps/web/src/utils/socketClient.js`. Server: `apps/server/utils/socket.js`.
 
-### Settings Layer
+### Settings Layer (apps/web)
 
-`src/utils/settings.js` — Comprehensive localStorage-based settings with typed definitions, defaults, and legacy migration. ~600 lines.
+`settings.js` — localStorage-based settings with typed definitions, defaults, and legacy migration.
 
-### UI Layer
+### UI Layer (apps/web)
 
-File-based routing: each `.vue` in `src/pages/` becomes a route. Layouts in `src/layouts/`. The main dashboard is `src/pages/index.vue` (78KB — the core view composing homework grid, time card, noise monitor, random picker, exam schedule, etc.).
-
-Components are organized by feature:
-- `src/components/home/` — Home page components
-- `src/components/settings/` — Settings cards
-- `src/components/auth/` — Authentication flow
-- `src/components/attendance/` — Attendance management
-- `src/components/common/` — Shared components
-
-### Key Utilities
-
-- `src/axios/axios.js` — Axios instance with auth interceptors and rate limit handling
-- `src/utils/api.js` — API helpers, namespace info, server rotation
-- `src/utils/visitorId.js` — FingerprintJS device identification
-- `src/utils/soundList.js` — Auto-generated from `public/sounds/` by `scripts/generate-sound-list.js` (runs as `prebuild`)
+File-based routing from `src/pages/`. Main view: `src/pages/index.vue` (~78KB). Components organized by feature under `src/components/`.
 
 ## Code Style
 
 - 2-space indent, trim trailing whitespace (`.editorconfig`)
-- Path alias: `@/` maps to `src/` (`jsconfig.json`)
-- ESLint flat config (ESLint 9) with Vue recommended rules (`eslint.config.js`)
-- Mixed Composition API and Options API usage
+- Path alias: `@/` maps to each app's `src/` (`jsconfig.json`)
+- ESLint 9 flat config at root; Prettier at root (`.prettierrc.json`)
+- Mixed Composition API and Options API in Vue apps
 - No TypeScript

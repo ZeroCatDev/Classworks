@@ -6,11 +6,13 @@ on:
     tags: ["v*"]
     paths:
       - "apps/server/**"
+      - "packages/shared/**"
       - ".github/workflows/docker-publish.yml"
   pull_request:
     branches: ["main"]
     paths:
       - "apps/server/**"
+      - "packages/shared/**"
       - ".github/workflows/docker-publish.yml"
   workflow_dispatch:
 
@@ -76,7 +78,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: apps/server
+          context: .
+          file: apps/server/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

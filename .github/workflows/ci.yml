@@ -19,20 +19,8 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Use Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.x"
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
 
       - name: Lint (ESLint)
         run: pnpm run lint
@@ -48,20 +36,8 @@ jobs:
       VITE_DEFAULT_KV_SERVER: https://kv-service.wuyuan.dev
       VITE_DEFAULT_AUTH_SERVER: https://kv.houlang.cloud
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Use Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.x"
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
 
       - name: Build web
         run: pnpm --filter @classworks/web run build
@@ -77,20 +53,8 @@ jobs:
     name: Build dashboard
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Use Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.x"
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
 
       - name: Build dashboard
         run: pnpm --filter @classworks/dashboard run build

@@ -1,0 +1,12 @@
+{
+  "name": "@classworks/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./constants": "./constants.js",
+    "./headers": "./headers.js"
+  },
+  "main": "index.js"
+}

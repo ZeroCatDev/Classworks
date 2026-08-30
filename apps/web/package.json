@@ -15,6 +15,7 @@
     "test:uaf": "node scripts/test-uaf-export.js"
   },
   "dependencies": {
+    "@classworks/shared": "workspace:*",
     "@fingerprintjs/fingerprintjs": "^5.0.1",
     "@mdi/font": "7.4.47",
     "@microsoft/clarity": "^1.0.2",

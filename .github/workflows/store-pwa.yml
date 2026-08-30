@@ -12,6 +12,7 @@ on:
       - "apps/web/public/**"
       - "apps/web/scripts/**"
       - "apps/web/src/**"
+      - "packages/**"
       - "pnpm-lock.yaml"
   workflow_dispatch:
     inputs:
@@ -37,20 +38,10 @@ jobs:
       STORE_PRODUCTION_URL: ${{ inputs.production_url || 'https://cs.houlang.cloud/' }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Use Node.js 24
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
         with:
-          node-version: "24.x"
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          node-version: "24"
 
       - name: Build and validate PWA
         run: pnpm --filter @classworks/web run build:store
